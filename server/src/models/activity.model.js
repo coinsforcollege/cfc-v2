@@ -22,7 +22,8 @@ const activitySchema = new mongoose.Schema({
   // References
   user: {
     type: mongoose.Schema.ObjectId,
-    ref: 'User'
+    ref: 'User', 
+    default: null
   },
   college: {
     type: mongoose.Schema.ObjectId,

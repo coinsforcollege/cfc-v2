@@ -8,48 +8,39 @@ import sendEmail from '../utils/sendEmail.js';
 import sendSMS from '../utils/sendSMS.js';
 import ApiResponse from '../utils/ApiResponse.js';
 
+const getCookieOptions = (days) => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  expires: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+});
+
+const clearCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  expires: new Date(0), // expire immediately
+});
+
 // Generate JWT token and send response
-const sendTokenResponse = (user, statusCode, res, message = null) => {
+const sendTokenResponse = async (user, statusCode, res, message = null) => {
   // Create token
-  const token = user.getSignedJwtToken();
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
 
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
+  const accessOptions = getCookieOptions(process.env.JWT_COOKIE_EXPIRE_ACCESS);
+  const refreshOptions = getCookieOptions(process.env.JWT_COOKIE_EXPIRE_REFRESH);
 
-  if (process.env.NODE_ENV === 'production') {
-    options.secure = true;
-  }
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
 
   // Remove password from output
-  user.password = undefined;
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.refreshToken;
 
   return res.status(statusCode)
-    .cookie('token', token, options)
-    .json(new ApiResponse(
-      statusCode,
-      {
-        token,
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          role: user.role,
-          college: user.college,
-          isEmailVerified: user.isEmailVerified,
-          isPhoneVerified: user.isPhoneVerified,
-          isAdminVerified: user.isAdminVerified,
-          totalTokensMined: user.totalTokensMined,
-          miningStreak: user.miningStreak,
-          referralCode: user.referralCode,
-          canMineAt: user.canMineAt
-        },
-        message
-      }));
+    .cookie('accessToken', accessToken, accessOptions)
+    .cookie('refreshToken', refreshToken, refreshOptions)
+    .json(new ApiResponse(statusCode, { accessToken, user: userObj }, message));
 };
 
 // @desc    Register user (Deprecated - Use multi-step processes)
@@ -71,13 +62,15 @@ const register = async (req, res, next) => {
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log('line 65', email, password);
 
   // Check for user
   const user = await User.findOne({ email })
     .select('+password')
     .populate('college', 'name logo slug');
+  console.log('line 71', user);
 
   if (!user) {
     throw new ApiError(401, 'Invalid credentials');
@@ -85,6 +78,7 @@ const login = async (req, res, next) => {
 
   // Check if password matches
   const isMatch = await user.matchPassword(password);
+  console.log('line 83', isMatch, password);
 
   if (!isMatch) {
     throw new ApiError(401, 'Invalid credentials');
@@ -103,34 +97,35 @@ const login = async (req, res, next) => {
 // @desc    Logout user / clear cookie
 // @route   POST /api/auth/logout
 // @access  Public
-const logout = (req, res, next) => {
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true,
-  });
+const logout = async (req, res) => {
+  const refreshToken = req.cookies?.refreshToken;
 
-  res.status(200).json({
-    success: true,
-    message: 'User logged out successfully'
-  });
+  if (refreshToken) {
+    await User.findOneAndUpdate(
+      { refreshToken },
+      { $unset: { refreshToken: 1 } }
+    );
+  }
+
+  const options = clearCookieOptions();
+
+  return res
+    .clearCookie('accessToken', options)
+    .clearCookie('refreshToken', options)
+    .status(200)
+    .json(new ApiResponse(200, null, 'User logged out successfully'));
 };
 
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
 // @access  Private
-const getMe = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id)
-      .populate('college', 'name logo slug stats adminStatus token')
-      .populate('referredBy', 'firstName lastName');
+const getMe = async (req, res) => {
+  console.log('line 123 getMe controller', req.user);
+  const user = await User.findById(req.user.id)
+    .populate('college', 'name logo slug stats adminStatus token')
+    .populate('referredBy', 'firstName lastName');
 
-    res.status(200).json({
-      success: true,
-      data: user
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(200).json(new ApiResponse(200, user, 'User fetched successfully'));
 };
 
 // @desc    Forgot password
@@ -347,25 +342,21 @@ const resendVerification = async (req, res, next) => {
 // @route   POST /api/auth/refresh-token
 // @access  Public
 const refreshToken = async (req, res, next) => {
-  try {
-    const { token } = req.body;
+  const { token } = req.body;
 
-    if (!token) {
-      throw new ApiError(400, 'Token is required');
-    }
-
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).populate('college', 'name logo slug');
-
-    if (!user) {
-      return next(new ErrorResponse('Invalid token', 401));
-    }
-
-    sendTokenResponse(user, 200, res, 'Token refreshed successfully');
-  } catch (error) {
-    next(new ErrorResponse('Invalid token', 401));
+  if (!token) {
+    throw new ApiError(400, 'Token is required');
   }
+
+  // Verify the token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS);
+  const user = await User.findById(decoded.id).populate('college', 'name logo slug');
+
+  if (!user) {
+    return next(new ApiError(401, 'Invalid token'));
+  }
+
+  sendTokenResponse(user, 200, res, 'Token refreshed successfully');
 };
 
 // Helper function to send verification email

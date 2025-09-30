@@ -5,7 +5,7 @@ import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 
 // @desc    Get colleges with search and filters
-// @route   GET /api/colleges
+// @route   GET /colleges
 // @access  Public
 export const getColleges = async (req, res) => {
   const {
@@ -19,7 +19,7 @@ export const getColleges = async (req, res) => {
   } = req.query;
 
   // Build query
-  let query = { status: 'active' };
+  let query = {};
 
   if (q) {
     query.name = { $regex: q, $options: 'i' };
@@ -79,11 +79,11 @@ export const getColleges = async (req, res) => {
 };
 
 // @desc    Search colleges
-// @route   GET /api/colleges/search
+// @route   GET /colleges/search
 // @access  Public
 export const searchColleges = async (req, res) => {
   const { q } = req.query;
-
+  console.log(q)
   if (!q || q.length < 2) {
     return res.status(200).json({
       success: true,
@@ -96,7 +96,6 @@ export const searchColleges = async (req, res) => {
       { name: { $regex: q, $options: 'i' } },
       { shortName: { $regex: q, $options: 'i' } }
     ],
-    status: 'active'
   })
     .select('name shortName logo address stats')
     .sort({ 'stats.totalStudents': -1 })
@@ -253,7 +252,7 @@ export const addCollege = async (req, res) => {
     city,
     state,
     zipCode,
-    country = 'United States',
+    country,
     type,
     website,
     email
@@ -286,12 +285,14 @@ export const addCollege = async (req, res) => {
   // Create activity
   await Activity.createActivity({
     type: 'college_added',
-    user: req.user._id,
-    college: college._id,
     title: 'New college added',
-    data: {
-      collegeName: name,
-      addedBy: req.user.role
+    user: req.user ? req.user._id : null,
+    college: college._id,
+    metadata: {
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent'),
+      source: 'platform',
+      campaign: 'new_college_added'
     }
   });
 

@@ -13,9 +13,11 @@ const protect = async (req, res, next) => {
     token = req.headers.authorization.split(' ')[1];
   }
   // Check for token in cookies (if using cookies)
-  else if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
+  else if (req.cookies && req.cookies.accessToken) {
+    token = req.cookies.accessToken;
   }
+
+  console.log('line 20 protect middleware', token);
 
   // Make sure token exists
   if (!token) {
@@ -24,10 +26,12 @@ const protect = async (req, res, next) => {
 
   try {
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS);
+    console.log('line 30 protect middleware', decoded);
 
     // Get user from token
     const user = await User.findById(decoded.id).populate('college', 'name logo slug');
+    console.log('line 34 protect middleware', user);
 
     if (!user) {
       throw new ApiError(401, 'No user found with this token');
@@ -49,6 +53,41 @@ const protect = async (req, res, next) => {
   } catch (error) {
     console.error('Token verification error:', error);
     throw new ApiError(401, 'Not authorized to access this route');
+  }
+};
+
+const optionalProtect = async (req, _res, next) => {
+  let token;
+
+  // Check for token in headers
+  if (req.headers.authorization?.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies?.accessToken) {
+    token = req.cookies.accessToken;
+  }
+
+  // If no token, continue as anonymous user
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS);
+
+    // Find user and populate college info
+    const user = await User.findById(decoded?.id)
+      .populate('college', 'name logo slug');
+
+    // Set user to request object only if valid and active
+    req.user = (user && user.isActive && !user.isSuspended) ? user : null;
+
+    next();
+  } catch (error) {
+    console.error('Token verification error:', error.message);
+    req.user = null; // If token is invalid, set user to null
+    next();
   }
 };
 
@@ -234,7 +273,7 @@ const validateCollegeEmail = async (req, res, next) => {
         const collegeUrl = new URL(college.website);
         const collegeDomain = collegeUrl.hostname.replace('www.', '');
         const collegeBaseName = collegeDomain.split('.')[0];
-        
+
         // Check if the edu domain contains the college name
         if (!emailDomain.toLowerCase().includes(collegeBaseName.toLowerCase())) {
           console.warn(`Email domain ${emailDomain} may not match college ${college.name}`);
@@ -300,5 +339,6 @@ export {
   checkMiningEligibility,
   logActivity,
   validateCollegeEmail,
-  checkCollegeAccess
+  checkCollegeAccess,
+  optionalProtect
 };

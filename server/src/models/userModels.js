@@ -34,14 +34,14 @@ const userSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
-  
+
   // Role
   role: {
     type: String,
     enum: ['student', 'college_admin', 'platform_admin'],
     required: true
   },
-  
+
   // Verification Status
   isEmailVerified: {
     type: Boolean,
@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema({
   },
   emailVerificationToken: String,
   phoneVerificationToken: String,
-  
+
   // Student-specific fields
   college: {
     type: mongoose.Schema.ObjectId,
@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema({
     min: 2024,
     max: 2030
   },
-  
+
   // College Admin specific fields
   position: {
     type: String,
@@ -90,7 +90,7 @@ const userSchema = new mongoose.Schema({
   adminVerificationDate: Date,
   adminVerificationSubmittedAt: Date,
   adminVerificationDocuments: [String],
-  
+
   // Mining Data
   totalTokensMined: {
     type: Number,
@@ -102,7 +102,7 @@ const userSchema = new mongoose.Schema({
     default: 0
   },
   canMineAt: Date,
-  
+
   // Referral System
   referralCode: {
     type: String,
@@ -121,7 +121,7 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  
+
   // Account Status
   isActive: {
     type: Boolean,
@@ -132,7 +132,7 @@ const userSchema = new mongoose.Schema({
     default: false
   },
   suspensionReason: String,
-  
+
   // Notification Preferences
   notifications: {
     miningReminders: {
@@ -152,7 +152,7 @@ const userSchema = new mongoose.Schema({
       default: true
     }
   },
-  
+
   // Security
   passwordResetToken: String,
   passwordResetExpire: Date,
@@ -161,7 +161,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  
+
   // Activity Tracking
   lastLogin: Date,
   loginCount: {
@@ -170,7 +170,7 @@ const userSchema = new mongoose.Schema({
   },
   ipAddress: String,
   userAgent: String,
-  
+  refreshToken: String,
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
@@ -185,17 +185,17 @@ userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
 
 // Virtual for full name
-userSchema.virtual('fullName').get(function() {
+userSchema.virtual('fullName').get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
 // Virtual for display name (for leaderboards)
-userSchema.virtual('displayName').get(function() {
+userSchema.virtual('displayName').get(function () {
   return `${this.firstName} ${this.lastName.charAt(0)}.`;
 });
 
 // Generate referral code
-userSchema.methods.generateReferralCode = function() {
+userSchema.methods.generateReferralCode = function () {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
   for (let i = 0; i < 8; i++) {
@@ -206,49 +206,66 @@ userSchema.methods.generateReferralCode = function() {
 };
 
 // Check if user can mine
-userSchema.methods.canMine = function() {
+userSchema.methods.canMine = function () {
   if (!this.canMineAt) return true;
   return new Date() >= this.canMineAt;
 };
 
 // Set next mining time
-userSchema.methods.setNextMiningTime = function() {
+userSchema.methods.setNextMiningTime = function () {
   const hours = parseInt(process.env.MINING_INTERVAL_HOURS) || 24;
   this.canMineAt = new Date(Date.now() + (hours * 60 * 60 * 1000));
 };
 
 // Encrypt password using bcrypt
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
-  
+  if (!this.password) {
+    return next();
+  }
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Generate referral code on save if student and doesn't have one
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   if (this.role === 'student' && !this.referralCode) {
     this.generateReferralCode();
   }
   next();
 });
 
+// Generate access token
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      id: this._id,
+      role: this.role,
+    },
+    process.env.JWT_SECRET_ACCESS,
+    { expiresIn: process.env.JWT_ACCESS_EXPIRE }
+  );
+};
+
 // Sign JWT and return
-userSchema.methods.getSignedJwtToken = function() {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
-  });
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    { id: this._id },
+    process.env.JWT_SECRET_REFRESH,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRE }
+  );
 };
 
 // Match user entered password to hashed password in database
-userSchema.methods.matchPassword = async function(enteredPassword) {
+userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 // Generate and hash password token
-userSchema.methods.getResetPasswordToken = function() {
+userSchema.methods.getResetPasswordToken = function () {
   // Generate token
   const resetToken = crypto.randomBytes(20).toString('hex');
 

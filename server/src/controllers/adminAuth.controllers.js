@@ -350,24 +350,9 @@ const completeAdminRegistration = async (req, res) => {
   college.status = 'active';
   await college.save();
 
-  // Generate JWT token
-  const token = user.getSignedJwtToken();
-
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
-
-  if (process.env.NODE_ENV === 'production') {
-    options.secure = true;
-  }
-
   user.password = undefined;
 
   const responseData = {
-    token,
     user: {
       id: user._id,
       firstName: user.firstName,
@@ -389,7 +374,6 @@ const completeAdminRegistration = async (req, res) => {
   };
 
   res.status(200)
-    .cookie('token', token, options)
     .json(new ApiResponse(
       200, 
       responseData, 

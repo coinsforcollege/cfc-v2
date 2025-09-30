@@ -55,7 +55,7 @@ const collegeSchema = new mongoose.Schema({
     zipCode: String,
     country: {
       type: String,
-      default: 'United States'
+      required: [true, 'Country is required']
     }
   },
   

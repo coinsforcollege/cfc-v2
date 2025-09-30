@@ -8,7 +8,7 @@ import {
   getCollegeStats,
   searchColleges
 } from '../controllers/colleges.controller.js';
-import { protect } from '../middlewares/auth.middlewares.js';
+import { optionalProtect, protect } from '../middlewares/auth.middlewares.js';
 import validate from '../middlewares/validation.js';
 
 const router = express.Router();
@@ -35,6 +35,10 @@ const addCollegeValidation = [
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('State is required'),
+  body('country')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Country is required'),
   body('type')
     .isIn(['public', 'private', 'community', 'technical', 'other'])
     .withMessage('Please select a valid college type'),
@@ -51,7 +55,7 @@ router.get('/:id', getCollegeById);
 router.get('/:id/stats', getCollegeStats);
 router.get('/:id/activities', getCollegeActivities);
 
-// Protected routes
-router.post('/', protect, addCollegeValidation, validate, addCollege);
+// Optional protected routes
+router.post('/', optionalProtect, addCollegeValidation, validate, addCollege);
 
 export default router;
