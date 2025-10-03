@@ -18,6 +18,7 @@ import HowItWorksColleges from './pages/public/HowItWorksColleges';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import StudentDashboard from './pages/student/Dashboard';
+import BuildOnCollegen from './pages/student/BuildOnCollegen';
   
 const darkTheme = createTheme({
   palette: {
@@ -45,6 +46,7 @@ function App() {
           <Route path="register/admin" element={<AdminRegistration />} />
         </Route>
         <Route path="student" element={<StudentDashboard />} />
+        <Route path="student/build-on-collegen" element={<BuildOnCollegen />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </>
