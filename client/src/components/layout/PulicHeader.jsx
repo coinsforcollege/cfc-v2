@@ -98,7 +98,7 @@ const PublicHeader = () => {
   };
 
   const navigationItems = [
-    { label: 'Browse Colleges', path: '/browse-colleges' },
+    { label: 'Browse Colleges', path: '/colleges' },
     { label: 'Statistics', path: '/stats' }
   ];
 
@@ -152,10 +152,11 @@ const PublicHeader = () => {
             anchorEl={howItWorksAnchor}
             open={howItWorksMenuOpen}
             onClose={handleHowItWorksClose}
-            className='mt-2'
+            className='mt-2 shadow-md'
             slotProps={{
               paper: {
-                sx: { minWidth: 220 }
+                sx: { minWidth: 220 },
+                elevation: 3
               }
             }}
           >
@@ -210,7 +211,8 @@ const PublicHeader = () => {
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 slotProps={{
                   paper: {
-                    sx: { minWidth: 220 }
+                    sx: { minWidth: 220 }, 
+                    elevation: 3
                   }
                 }}
               >
@@ -220,7 +222,7 @@ const PublicHeader = () => {
                 <MenuItem>
                   <PersonIcon sx={{ mr: 1.5 }} /> Profile
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/student/settings')}>
                   <SettingsIcon sx={{ mr: 1.5 }} /> Settings
                 </MenuItem>
                 <Divider />

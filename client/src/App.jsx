@@ -15,9 +15,13 @@ import AdminRegistration from './pages/auth/AdminRegistration';
 import Home from './pages/public/Home';
 import HowItWorksStudents from './pages/public/HowItWorksStudents';
 import HowItWorksColleges from './pages/public/HowItWorksColleges';
+import BrowseColleges from './pages/public/BrowseColleges';
+import CollegePage from './pages/public/CollegePage';
+import Statistics from './pages/public/Statistics';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import StudentDashboard from './pages/student/Dashboard';
+import StudentProfileSettings from './pages/student/ProfileSettings';
   
 const darkTheme = createTheme({
   palette: {
@@ -35,6 +39,9 @@ function App() {
         <Route index element={<Home />} />
         <Route path="how-it-works/students" element={<HowItWorksStudents />} />
         <Route path="how-it-works/colleges" element={<HowItWorksColleges />} />
+        <Route path="colleges" element={<BrowseColleges />} />
+        <Route path="colleges/:id" element={<CollegePage />} />
+        <Route path="stats" element={<Statistics />} />
         <Route
           path="auth"
           element={<AuthLayout />}
@@ -45,6 +52,7 @@ function App() {
           <Route path="register/admin" element={<AdminRegistration />} />
         </Route>
         <Route path="student" element={<StudentDashboard />} />
+        <Route path="student/settings" element={<StudentProfileSettings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </>

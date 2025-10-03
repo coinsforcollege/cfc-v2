@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { User } from './userModels.js';
+import aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 const collegeSchema = new mongoose.Schema({
   // Basic Information
@@ -19,7 +20,12 @@ const collegeSchema = new mongoose.Schema({
     unique: true,
     lowercase: true
   },
-  
+  shortDescription: {
+    type: String,
+    trim: true,
+    maxlength: [500, 'Short description cannot be more than 500 characters']
+  },
+
   // Contact Information
   website: {
     type: String,
@@ -40,7 +46,7 @@ const collegeSchema = new mongoose.Schema({
     type: String,
     match: [/^\+?[\d\s\-\(\)]+$/, 'Please add a valid phone number']
   },
-  
+
   // Location
   address: {
     street: String,
@@ -58,7 +64,7 @@ const collegeSchema = new mongoose.Schema({
       required: [true, 'Country is required']
     }
   },
-  
+
   // Geographic coordinates for map display
   location: {
     type: {
@@ -70,11 +76,11 @@ const collegeSchema = new mongoose.Schema({
       index: '2dsphere'
     }
   },
-  
+
   // College Details
   type: {
     type: String,
-    enum: ['public', 'private', 'community', 'technical', 'other'],
+    enum: ["Ivy League", "tier1", "tier2", "tier3"],
     required: true
   },
   establishedYear: Number,
@@ -83,7 +89,7 @@ const collegeSchema = new mongoose.Schema({
     undergraduate: Number,
     graduate: Number
   },
-  
+
   // Visual Assets
   logo: {
     type: String,
@@ -94,7 +100,7 @@ const collegeSchema = new mongoose.Schema({
     primary: String,
     secondary: String
   },
-  
+
   // Social Media
   socialMedia: {
     facebook: String,
@@ -103,7 +109,7 @@ const collegeSchema = new mongoose.Schema({
     linkedin: String,
     youtube: String
   },
-  
+
   // Admin Information
   admin: {
     type: mongoose.Schema.ObjectId,
@@ -114,7 +120,7 @@ const collegeSchema = new mongoose.Schema({
     default: false
   },
   adminJoinedDate: Date,
-  
+
   // Token Configuration
   token: {
     name: {
@@ -136,7 +142,7 @@ const collegeSchema = new mongoose.Schema({
     },
     icon: String,
     colorScheme: String,
-    
+
     // Use Cases
     earnMethods: [{
       type: String,
@@ -148,7 +154,7 @@ const collegeSchema = new mongoose.Schema({
     }],
     customEarnMethods: [String],
     customSpendMethods: [String],
-    
+
     // Launch Information
     launchTimeline: {
       type: String,
@@ -160,7 +166,7 @@ const collegeSchema = new mongoose.Schema({
     },
     configuredDate: Date
   },
-  
+
   // Statistics
   stats: {
     totalStudents: {
@@ -193,12 +199,16 @@ const collegeSchema = new mongoose.Schema({
       default: Date.now
     }
   },
-  
+
   // Status and Verification
   status: {
     type: String,
     enum: ['pending', 'active', 'suspended', 'archived'],
     default: 'pending'
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false
   },
   isVerified: {
     type: Boolean,
@@ -209,18 +219,18 @@ const collegeSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User'
   },
-  
+
   // Features and Badges
   badges: [{
     type: String,
     enum: ['hot', 'new', 'growing', 'verified', 'popular', 'rising']
   }],
-  
+
   // Content
   description: {
     type: String,
-    maxlength: [1000, 'Description cannot be more than 1000 characters']
   },
+  courses: [{ type: String }],
   announcements: [{
     title: String,
     content: String,
@@ -233,7 +243,7 @@ const collegeSchema = new mongoose.Schema({
       default: true
     }
   }],
-  
+
   // Analytics Data
   analytics: {
     views: {
@@ -249,7 +259,7 @@ const collegeSchema = new mongoose.Schema({
       default: 0
     }
   }
-  
+
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
@@ -265,13 +275,13 @@ collegeSchema.index({ 'stats.ranking': 1 });
 collegeSchema.index({ location: '2dsphere' });
 
 // Virtual for full address
-collegeSchema.virtual('fullAddress').get(function() {
+collegeSchema.virtual('fullAddress').get(function () {
   const addr = this.address;
   return `${addr.city}, ${addr.state} ${addr.zipCode || ''}`.trim();
 });
 
 // Virtual for admin status display
-collegeSchema.virtual('adminStatus').get(function() {
+collegeSchema.virtual('adminStatus').get(function () {
   if (!this.admin) return 'no_admin';
   if (!this.hasVerifiedAdmin) return 'admin_joined';
   if (!this.token.isConfigured) return 'admin_verified';
@@ -279,7 +289,7 @@ collegeSchema.virtual('adminStatus').get(function() {
 });
 
 // Generate slug from name
-collegeSchema.pre('save', function(next) {
+collegeSchema.pre('save', function (next) {
   if (this.isModified('name') || !this.slug) {
     this.slug = this.name
       .toLowerCase()
@@ -291,57 +301,59 @@ collegeSchema.pre('save', function(next) {
 });
 
 // Update badges based on stats
-collegeSchema.methods.updateBadges = function() {
+collegeSchema.methods.updateBadges = function () {
   this.badges = [];
-  
+
   // New badge - joined in last 7 days
   if (this.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) {
     this.badges.push('new');
   }
-  
+
   // Growing badge - 50%+ growth in last week
   if (this.stats.weeklyGrowthRate >= 50) {
     this.badges.push('growing');
   }
-  
+
   // Hot badge - verified admin and configured token
   if (this.hasVerifiedAdmin && this.token.isConfigured) {
     this.badges.push('hot');
   }
-  
+
   // Popular badge - top 20% by student count
   // This would be set by a cron job that calculates percentiles
-  
+
   return this.badges;
 };
 
 // Method to calculate growth rates
-collegeSchema.methods.calculateGrowthRates = async function() {
+collegeSchema.methods.calculateGrowthRates = async function () {
   // This would typically involve querying historical data
   // For now, we'll implement basic logic
   const now = new Date();
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  
+
   const dailyNewStudents = await User.countDocuments({
     college: this._id,
     createdAt: { $gte: oneDayAgo }
   });
-  
+
   const weeklyNewStudents = await User.countDocuments({
     college: this._id,
     createdAt: { $gte: oneWeekAgo }
   });
-  
-  this.stats.dailyGrowthRate = this.stats.totalStudents > 0 
-    ? (dailyNewStudents / this.stats.totalStudents) * 100 
+
+  this.stats.dailyGrowthRate = this.stats.totalStudents > 0
+    ? (dailyNewStudents / this.stats.totalStudents) * 100
     : 0;
-    
-  this.stats.weeklyGrowthRate = this.stats.totalStudents > 0 
-    ? (weeklyNewStudents / this.stats.totalStudents) * 100 
+
+  this.stats.weeklyGrowthRate = this.stats.totalStudents > 0
+    ? (weeklyNewStudents / this.stats.totalStudents) * 100
     : 0;
-    
+
   this.stats.lastUpdated = new Date();
 };
+
+collegeSchema.plugin(aggregatePaginate);
 
 export const College = mongoose.model('College', collegeSchema);

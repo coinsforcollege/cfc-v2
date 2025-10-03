@@ -24,7 +24,7 @@ function CallToAction({ theme }) {
           <Button component={Link} to="/auth/register/student" variant="contained" size="large" sx={{ bgcolor: 'white', color: 'primary.dark', py: 1.5, px: 4, fontSize: '1.1rem', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: alpha('#ffffff', 0.9) } }}>
             Start Mining Tokens
           </Button>
-          <Button component={Link} to="/browse-colleges" variant="outlined" size="large" sx={{ borderColor: 'white', color: 'white', py: 1.5, px: 4, fontSize: '1.1rem', textTransform: 'none', fontWeight: 600, '&:hover': { borderColor: 'white', bgcolor: alpha('#ffffff', 0.1) } }}>
+          <Button component={Link} to="/colleges" variant="outlined" size="large" sx={{ borderColor: 'white', color: 'white', py: 1.5, px: 4, fontSize: '1.1rem', textTransform: 'none', fontWeight: 600, '&:hover': { borderColor: 'white', bgcolor: alpha('#ffffff', 0.1) } }}>
             Browse Colleges
           </Button>
         </Stack>

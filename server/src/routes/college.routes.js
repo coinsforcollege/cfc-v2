@@ -8,7 +8,7 @@ import {
   getCollegeStats,
   searchColleges
 } from '../controllers/colleges.controller.js';
-import { optionalProtect, protect } from '../middlewares/auth.middlewares.js';
+import { optionalProtect } from '../middlewares/auth.middlewares.js';
 import validate from '../middlewares/validation.js';
 
 const router = express.Router();
@@ -17,7 +17,9 @@ const router = express.Router();
 const searchValidation = [
   query('q').optional().trim().isLength({ min: 2 }).withMessage('Search query must be at least 2 characters'),
   query('state').optional().trim(),
-  query('type').optional().isIn(['public', 'private', 'community', 'technical', 'other']),
+  query('city').optional().trim(),
+  query('country').optional().trim(),
+  query('type').optional().isIn(["Ivy League", "tier1", "tier2", "tier3"]),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer')
 ];
@@ -40,7 +42,7 @@ const addCollegeValidation = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Country is required'),
   body('type')
-    .isIn(['public', 'private', 'community', 'technical', 'other'])
+    .isIn(["Ivy League", "tier1", "tier2", "tier3"])
     .withMessage('Please select a valid college type'),
   body('website')
     .optional()

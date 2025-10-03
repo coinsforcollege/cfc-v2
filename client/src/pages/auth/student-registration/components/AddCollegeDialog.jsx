@@ -102,11 +102,10 @@ function AddCollegeDialog({ open, onClose }) {
               helperText={errors.type?.message}
               defaultValue=''
             >
-              <MenuItem value="public">Public</MenuItem>
-              <MenuItem value="private">Private</MenuItem>
-              <MenuItem value="community">Community College</MenuItem>
-              <MenuItem value="technical">Technical School</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
+              <MenuItem value="Ivy League">Ivy League</MenuItem>
+              <MenuItem value="tier1">Tier 1</MenuItem>
+              <MenuItem value="tier2">Tier 2</MenuItem>
+              <MenuItem value="tier3">Tier 3</MenuItem>
             </TextField>
           </Stack>
         </DialogContent>
@@ -118,8 +117,6 @@ function AddCollegeDialog({ open, onClose }) {
             type='submit'
             disabled={!isValid}
             loading={addCollegeMutation.isPending}
-          // onClick={handleAddCollegeSubmit}
-          // disabled={!newCollegeData.name || !newCollegeData.city || !newCollegeData.state}
           >
             Add College
           </Button>

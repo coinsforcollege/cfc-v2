@@ -90,7 +90,7 @@ const Login = () => {
         }}
       >
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography variant="h4" fontWeight={600} component="h1" gutterBottom>
             Welcome Back
           </Typography>
           <Typography variant="body2" color="text.secondary">

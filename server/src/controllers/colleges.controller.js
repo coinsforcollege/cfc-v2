@@ -10,72 +10,77 @@ import ApiResponse from '../utils/ApiResponse.js';
 export const getColleges = async (req, res) => {
   const {
     q,
-    state,
     type,
-    sort = 'totalStudents',
-    order = 'desc',
+    sort = 'name',
+    order = 'asc',
     page = 1,
     limit = 20
   } = req.query;
 
-  // Build query
-  let query = {};
+  const pipeline = [];
 
+  // Filters
+  const matchStage = {};
   if (q) {
-    query.name = { $regex: q, $options: 'i' };
+    matchStage.$or = [
+      { name: { $regex: q, $options: 'i' } },
+      { shortName: { $regex: q, $options: 'i' } },
+      { shortDescription: { $regex: q, $options: 'i' } },
+      { 'address.city': { $regex: q, $options: 'i' } },
+      { 'address.state': { $regex: q, $options: 'i' } },
+      { 'address.country': { $regex: q, $options: 'i' } },
+    ];
+  }
+  if (type) matchStage.type = type;
+
+  if (Object.keys(matchStage).length > 0) {
+    pipeline.push({ $match: matchStage });
   }
 
-  if (state) {
-    query['address.state'] = state;
-  }
+  pipeline.push({
+    $project: {
+      name: 1,
+      shortName: 1,
+      shortDescription: 1,
+      logo: 1,
+      address: 1,
+      banner: 1,
+      type: 1,
+      stats: 1,
+      badges: 1,
+      adminStatus: 1,
+      'token.isConfigured': 1,
+      hasVerifiedAdmin: 1,
+      isFeatured: 1
+    }
+  });
 
-  if (type) {
-    query.type = type;
-  }
+  const sortObj = { [sort]: order === 'desc' ? -1 : 1 };
 
-  // Build sort object
-  let sortObj = {};
-  switch (sort) {
-    case 'name':
-      sortObj.name = order === 'desc' ? -1 : 1;
-      break;
-    case 'totalStudents':
-      sortObj['stats.totalStudents'] = order === 'desc' ? -1 : 1;
-      break;
-    case 'ranking':
-      sortObj['stats.ranking'] = order === 'desc' ? -1 : 1;
-      break;
-    case 'newest':
-      sortObj.createdAt = -1;
-      break;
-    default:
-      sortObj['stats.totalStudents'] = -1;
-  }
+  const options = {
+    page: parseInt(page),
+    limit: parseInt(limit),
+    sort: sortObj
+  };
 
-  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const result = await College.aggregatePaginate(
+    College.aggregate(pipeline),
+    options
+  );
 
-  const colleges = await College.find(query)
-    .sort(sortObj)
-    .skip(skip)
-    .limit(parseInt(limit))
-    .select('name shortName logo address type stats badges adminStatus token.isConfigured hasVerifiedAdmin');
+  const { docs, ...pagination } = result;
 
-  const total = await College.countDocuments(query);
-
-  res.status(200)
-    .json(new ApiResponse(
-      200,
-      {
-        colleges,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(total / parseInt(limit)),
-          totalItems: total,
-          itemsPerPage: parseInt(limit)
-        }
-      },
-      'Colleges fetched successfully'
-    ));
+  res.status(200).json(new ApiResponse(
+    200,
+    {
+      colleges: docs,
+      pagination: {
+        ...pagination,
+        sortOptions: sortObj
+      }
+    },
+    'Colleges fetched successfully'
+  ));
 };
 
 // @desc    Search colleges
