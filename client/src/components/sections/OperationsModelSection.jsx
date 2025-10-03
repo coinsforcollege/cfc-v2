@@ -26,7 +26,7 @@ const OperationsModelSection = () => {
         'Your IT team manages everything',
         'Maximum customization options'
       ],
-      image: '/src/assets/blockchain-development-dark-purple-bg-vector.jpg'
+      image: '/images/blockchain-development-dark-purple-bg-vector.jpg'
     },
     {
       icon: Support,
@@ -40,7 +40,7 @@ const OperationsModelSection = () => {
         'Architecture mapping and guidance',
         'You execute with our support'
       ],
-      image: '/src/assets/hero-digital-economy.jpg'
+      image: '/images/hero-digital-economy.jpg'
     },
     {
       icon: CloudDone,
@@ -54,7 +54,7 @@ const OperationsModelSection = () => {
         'Automatic scaling and updates',
         'Fixed annual contract pricing'
       ],
-      image: '/src/assets/large-modern-office-building.jpg'
+      image: '/images/large-modern-office-building.jpg'
     }
   ];
 
@@ -486,7 +486,7 @@ const OperationsModelSection = () => {
                   width: '100%',
                   height: { xs: '300px', lg: '400px' },
                   borderRadius: '20px',
-                  backgroundImage: 'url(/src/assets/students-working-study-group.jpg)',
+                  backgroundImage: 'url(/images/students-working-study-group.jpg)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   position: 'relative',

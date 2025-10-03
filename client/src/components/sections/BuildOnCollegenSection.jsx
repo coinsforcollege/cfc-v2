@@ -26,7 +26,7 @@ const BuildOnCollegenSection = () => {
       description: 'Students get access to our blockchain infrastructure with negligible gas costs. Build, test, and launch decentralized applications without financial barriers.',
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
-      image: '/src/assets/blockchain-development-dark-purple-bg-vector.jpg'
+      image: '/images/blockchain-development-dark-purple-bg-vector.jpg'
     },
     {
       icon: AttachMoney,
@@ -34,7 +34,7 @@ const BuildOnCollegenSection = () => {
       description: 'We sponsor transaction fees for standout projects. Demonstrate innovation and impact; we cover your deployment costs.',
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
-      image: '/src/assets/hero-digital-economy.jpg'
+      image: '/images/hero-digital-economy.jpg'
     },
     {
       icon: School,
@@ -42,7 +42,7 @@ const BuildOnCollegenSection = () => {
       description: 'Complete SDK, documentation, code templates, and integration guides. Regular campus hackathons with prize pools.',
       color: '#06b6d4',
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-      image: '/src/assets/students-working-study-group.jpg'
+      image: '/images/students-working-study-group.jpg'
     }
   ];
 

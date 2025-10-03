@@ -372,7 +372,7 @@ const Footer = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box
                     component="img"
-                    src="/src/assets/collegen-icon.svg"
+                    src="/images/collegen-icon.svg"
                     sx={{ width: 24, height: 24 }}
                   />
                   <Typography

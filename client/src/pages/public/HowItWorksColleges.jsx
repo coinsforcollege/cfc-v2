@@ -62,7 +62,7 @@ const signupSteps = [
     details: 'Use your official college email address (@collegename.edu) to verify your affiliation with the institution.',
     color: '#ff6b6b',
     gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
-    image: '/src/assets/students-working-study-group.jpg'
+    image: '/images/students-working-study-group.jpg'
   },
   {
     icon: Verified,
@@ -71,7 +71,7 @@ const signupSteps = [
     details: 'We verify your role at the college to ensure legitimate administration access. This process typically takes 24-48 hours.',
     color: '#4ecdc4',
     gradient: 'linear-gradient(135deg, #4ecdc4 0%, #6ee7b7 100%)',
-    image: '/src/assets/large-modern-office-building.jpg'
+    image: '/images/large-modern-office-building.jpg'
   },
   {
     icon: Settings,
@@ -80,7 +80,7 @@ const signupSteps = [
     details: 'Add your college logo, website, address, and other essential details that students will see on your profile page.',
     color: '#45b7d1',
     gradient: 'linear-gradient(135deg, #45b7d1 0%, #7dd3fc 100%)',
-    image: '/src/assets/large-modern-office-building.jpg'
+    image: '/images/large-modern-office-building.jpg'
   },
   {
     icon: Token,
@@ -89,7 +89,7 @@ const signupSteps = [
     details: 'Configure your token name, ticker symbol, supply, and explain how students can earn and spend tokens on campus.',
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
-    image: '/src/assets/ethereum-cryptocurrency-pixel-art-illustration-600nw-2077265023.webp'
+    image: '/images/ethereum-cryptocurrency-pixel-art-illustration-600nw-2077265023.webp'
   },
 ];
 
@@ -101,7 +101,7 @@ const benefits = [
     metric: '2,847 avg students per college',
     color: '#ff6b6b',
     gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
-    image: '/src/assets/students-working-study-group.jpg'
+    image: '/images/students-working-study-group.jpg'
   },
   {
     icon: TrendingUp,
@@ -119,7 +119,7 @@ const benefits = [
     metric: '50+ data points tracked',
     color: '#45b7d1',
     gradient: 'linear-gradient(135deg, #45b7d1 0%, #7dd3fc 100%)',
-    image: '/src/assets/akiro-art-nft-square.jpg'
+    image: '/images/akiro-art-nft-square.jpg'
   },
   {
     icon: Security,
@@ -128,7 +128,7 @@ const benefits = [
     metric: 'Bank-level encryption',
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
-    image: '/src/assets/pixel-art-mining-cart-with-gold-icon-for-8bit-game-on-white-background-vector.jpg'
+    image: '/images/pixel-art-mining-cart-with-gold-icon-for-8bit-game-on-white-background-vector.jpg'
   },
 ];
 
@@ -623,7 +623,7 @@ function HowItWorksColleges() {
                       {/* Visual Image Element */}
                       <Box
                         component="img"
-                        src="/src/assets/animated-pixel-art-programmer.gif"
+                        src="/images/animated-pixel-art-programmer.gif"
                         sx={{
                           width: '100%',
                           height: '200px',
@@ -764,7 +764,7 @@ function HowItWorksColleges() {
                   metrics: ['Active students', 'Daily mining rate', 'Engagement trends', 'Referral activity'],
                   color: '#ff6b6b',
                   gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
-                  image: '/src/assets/hero-digital-economy.jpg'
+                  image: '/images/hero-digital-economy.jpg'
                 },
                 {
                   icon: Assessment,
@@ -1081,7 +1081,7 @@ function HowItWorksColleges() {
                       {/* Visual Image Element */}
                       <Box
                         component="img"
-                        src="/src/assets/join-offwhite-bg.jpg"
+                        src="/images/join-offwhite-bg.jpg"
                         sx={{
                           width: '100%',
                           height: '200px',

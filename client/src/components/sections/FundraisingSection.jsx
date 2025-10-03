@@ -27,7 +27,7 @@ const FundraisingSection = () => {
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
       stats: { amount: '$2.4M', donors: '1,247', projects: '23' },
-      image: '/src/assets/blockchain-development-dark-purple-bg-vector.jpg'
+      image: '/images/blockchain-development-dark-purple-bg-vector.jpg'
     },
     {
       icon: Layers,
@@ -36,7 +36,7 @@ const FundraisingSection = () => {
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
       stats: { nfts: '156', value: '$890K', collectors: '89' },
-      image: '/src/assets/hero-digital-economy.jpg'
+      image: '/images/hero-digital-economy.jpg'
     },
     {
       icon: AccountBalance,
@@ -45,7 +45,7 @@ const FundraisingSection = () => {
       color: '#06b6d4',
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
       stats: { volume: '$1.2M', trades: '3,456', liquidity: '98%' },
-      image: '/src/assets/students-working-study-group.jpg'
+      image: '/images/students-working-study-group.jpg'
     }
   ];
 
@@ -323,7 +323,7 @@ const FundraisingSection = () => {
                 icon: Security,
                 color: '#8b5cf6',
                 gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
-                image: '/src/assets/blockchain-development-dark-purple-bg-vector.jpg',
+                image: '/images/blockchain-development-dark-purple-bg-vector.jpg',
               },
               {
                 step: '02',
@@ -332,7 +332,7 @@ const FundraisingSection = () => {
                 icon: Timeline,
                 color: '#ec4899',
                 gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
-                image: '/src/assets/hero-digital-economy.jpg',
+                image: '/images/hero-digital-economy.jpg',
               },
               {
                 step: '03',
@@ -341,7 +341,7 @@ const FundraisingSection = () => {
                 icon: People,
                 color: '#06b6d4',
                 gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-                image: '/src/assets/students-working-study-group.jpg',
+                image: '/images/students-working-study-group.jpg',
               }
             ].map((step, index) => (
               <motion.div

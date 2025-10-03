@@ -22,7 +22,7 @@ const CampusDigitalEconomySection = () => {
       description: 'White-label wallet for students, faculty, and alumni. Send, receive, store tokens and digital credentials in one interface.',
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
-      image: '/src/assets/blockchain-development-dark-purple-bg-vector.jpg'
+      image: '/images/blockchain-development-dark-purple-bg-vector.jpg'
     },
     {
       icon: Event,
@@ -30,7 +30,7 @@ const CampusDigitalEconomySection = () => {
       description: 'On-chain ticketing for campus events and sports. Secure, transparent, and fraud-proof ticket management.',
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
-      image: '/src/assets/students-working-study-group.jpg'
+      image: '/images/students-working-study-group.jpg'
     },
     {
       icon: ShoppingCart,
@@ -38,7 +38,7 @@ const CampusDigitalEconomySection = () => {
       description: 'Merchandise purchases with token discounts. Support for student-run businesses accepting campus currency.',
       color: '#06b6d4',
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-      image: '/src/assets/hero-digital-economy.jpg'
+      image: '/images/hero-digital-economy.jpg'
     },
     {
       icon: Payment,
@@ -46,7 +46,7 @@ const CampusDigitalEconomySection = () => {
       description: 'Accept stablecoins or convert fiat to tokens. Reduce transaction costs and settlement delays.',
       color: '#10b981',
       gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      image: '/src/assets/large-modern-office-building.jpg'
+      image: '/images/large-modern-office-building.jpg'
     }
   ];
 
@@ -290,7 +290,7 @@ const CampusDigitalEconomySection = () => {
                   width: '100%',
                   height: { xs: '300px', lg: '400px' },
                   borderRadius: '20px',
-                  backgroundImage: 'url(/src/assets/large-modern-office-building.jpg)',
+                  backgroundImage: 'url(/images/large-modern-office-building.jpg)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   position: 'relative',

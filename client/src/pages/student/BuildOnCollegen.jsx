@@ -403,7 +403,7 @@ const BuildOnCollegen = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
                     <Box
                       component="img"
-                      src="/src/assets/ethereum-cryptocurrency-pixel-art-illustration-600nw-2077265023.webp"
+                      src="/images/ethereum-cryptocurrency-pixel-art-illustration-600nw-2077265023.webp"
                       sx={{ width: 24, height: 24 }}
                     />
                     <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: '#ff6b6b' }}>
@@ -458,7 +458,7 @@ const BuildOnCollegen = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
                       <Box
                         component="img"
-                        src="/src/assets/collegen-icon.svg"
+                        src="/images/collegen-icon.svg"
                         sx={{ width: 24, height: 24 }}
                       />
                       <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: '#2d3748' }}>
@@ -513,7 +513,7 @@ const BuildOnCollegen = () => {
                   >
                     <Box
                       component="img"
-                      src="/src/assets/immutable-place-game-screen-pixel-art.jpeg"
+                      src="/images/immutable-place-game-screen-pixel-art.jpeg"
                       sx={{
                         width: 'auto',
                         height: '200px',
@@ -766,7 +766,7 @@ const BuildOnCollegen = () => {
                     <Box sx={{ flex: 1, pl: 6 }}>
                       <Box
                         component="img"
-                        src="/src/assets/students-working-study-group.jpg"
+                        src="/images/students-working-study-group.jpg"
                         sx={{
                           width: '100%',
                           height: '200px',
@@ -783,7 +783,7 @@ const BuildOnCollegen = () => {
                     <Box sx={{ flex: 1, pr: 6 }}>
                       <Box
                         component="img"
-                        src="/src/assets/collegen-icon.svg"
+                        src="/images/collegen-icon.svg"
                         sx={{
                           width: '100%',
                           height: '200px',
@@ -1450,7 +1450,7 @@ const BuildOnCollegen = () => {
                         {/* Pixel Art Decoration */}
                         <Box
                           component="img"
-                          src="/src/assets/pixel-art-mining-cart-with-gold-icon-for-8bit-game-on-white-background-vector.jpg"
+                          src="/images/pixel-art-mining-cart-with-gold-icon-for-8bit-game-on-white-background-vector.jpg"
                           sx={{
                             position: 'absolute',
                             top: 20,
@@ -1649,7 +1649,7 @@ const BuildOnCollegen = () => {
                 {/* Background Pixel Art */}
                 <Box
                   component="img"
-                  src="/src/assets/pixel-art-isometric-landscape-trees-bridge-lake-mine-mining-pixel-art-isometric-landscape-trees-bridge-lake-mine-mining-238827112.webp"
+                  src="/images/pixel-art-isometric-landscape-trees-bridge-lake-mine-mining-pixel-art-isometric-landscape-trees-bridge-lake-mine-mining-238827112.webp"
                   sx={{
                     position: 'absolute',
                     top: 40,
@@ -1662,7 +1662,7 @@ const BuildOnCollegen = () => {
                 />
                 <Box
                   component="img"
-                  src="/src/assets/college-ambassador-vector-transparent-bg.svg"
+                  src="/images/college-ambassador-vector-transparent-bg.svg"
                   sx={{
                     position: 'absolute',
                     bottom: 40,
