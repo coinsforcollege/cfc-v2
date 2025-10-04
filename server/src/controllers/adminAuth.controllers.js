@@ -6,14 +6,53 @@ import ApiError from '../utils/ApiError.js';
 import sendEmail from '../utils/sendEmail.js';
 import ApiResponse from '../utils/ApiResponse.js';
 
+// @desc    Register Admin
+// @route   POST /api/auth/admin/register
+// @access  Public
+const registerAdmin = async (req, res) => {
+  const { firstName, lastName, password, college, workAtCollege, position, phone, email } = req.body;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new ApiError(400, 'Email is already registered');
+  }
+
+  const existingPhone = await User.findOne({ phone });
+  if (existingPhone) {
+    throw new ApiError(400, 'User already exists with this phone number');
+  }
+
+  const user = await User.create({
+    firstName,
+    lastName,
+    email,
+    phone,
+    password,
+    role: 'college_admin',
+    workAtCollege,
+    position,
+    college,
+    adminVerificationSubmittedAt: new Date()
+  })
+
+  const userData = user.toObject();
+  delete userData.password;
+
+  res.status(201).json(new ApiResponse(
+    201,
+    userData,
+    'Admin registered successfully'
+  ));
+}
+
 // @desc    Admin Registration Step 1 - College Verification
 // @route   POST /api/auth/admin/register/step1
 // @access  Public
 const adminRegisterStep1 = async (req, res) => {
   const { collegeId, workEmail, position, createNewCollege, newCollegeData } = req.body;
-  
+
   let college;
-  
+
   // Handle new college creation if needed
   if (createNewCollege && newCollegeData) {
     // Check if college already exists
@@ -54,13 +93,13 @@ const adminRegisterStep1 = async (req, res) => {
   }
 
   // Check if work email is already registered
-  const existingUser = await User.findOne({ 
+  const existingUser = await User.findOne({
     $or: [
       { email: workEmail },
       { workEmail: workEmail }
     ]
   });
-  
+
   if (existingUser) {
     throw new ApiError(400, 'User already exists with this email');
   }
@@ -68,7 +107,7 @@ const adminRegisterStep1 = async (req, res) => {
   // Store step 1 data in session/temporary storage
   // In a real app, you might use Redis or database temporary storage
   const tempToken = crypto.randomBytes(32).toString('hex');
-  
+
   // For now, we'll return the data to be sent back in step 2
   const step1Data = {
     tempToken,
@@ -89,7 +128,7 @@ const adminRegisterStep1 = async (req, res) => {
 // @route   POST /api/auth/admin/register/step2
 // @access  Public
 const adminRegisterStep2 = async (req, res) => {
-  const { 
+  const {
     tempToken,
     collegeId,
     workEmail,
@@ -173,7 +212,7 @@ const adminRegisterStep2 = async (req, res) => {
 // @route   POST /api/auth/admin/register/step3
 // @access  Private (requires email verification)
 const adminRegisterStep3 = async (req, res) => {
-  const { 
+  const {
     tempToken,
     collegeId,
     logo,
@@ -323,8 +362,8 @@ const adminRegisterStep4 = async (req, res) => {
       status: college.status,
       hasToken: college.token.isConfigured
     },
-    message: skipTokenConfig 
-      ? 'Registration completed successfully!' 
+    message: skipTokenConfig
+      ? 'Registration completed successfully!'
       : 'Registration completed successfully with token configuration!'
   };
 
@@ -338,7 +377,7 @@ const adminRegisterStep4 = async (req, res) => {
 // @access  Private
 const completeAdminRegistration = async (req, res) => {
   const { tempToken, collegeId } = req.body;
-  
+
   const user = req.user;
   const college = await College.findById(collegeId);
 
@@ -375,8 +414,8 @@ const completeAdminRegistration = async (req, res) => {
 
   res.status(200)
     .json(new ApiResponse(
-      200, 
-      responseData, 
+      200,
+      responseData,
       'Registration completed successfully!'
     ));
 };
@@ -414,5 +453,6 @@ export {
   adminRegisterStep2,
   adminRegisterStep3,
   adminRegisterStep4,
-  completeAdminRegistration
+  completeAdminRegistration,
+  registerAdmin
 };

@@ -66,6 +66,10 @@ const userSchema = new mongoose.Schema({
   },
 
   // College Admin specific fields
+  workAtCollege: {
+    type: Boolean,
+    default: false
+  },
   position: {
     type: String,
     maxlength: [100, 'Position cannot be more than 100 characters']

@@ -22,7 +22,8 @@ import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import StudentDashboard from './pages/student/Dashboard';
 import StudentProfileSettings from './pages/student/ProfileSettings';
-  
+import CollegeAdminDashboard from './pages/admin/college/Dashboard';
+
 const darkTheme = createTheme({
   palette: {
     mode: "light"
@@ -53,6 +54,7 @@ function App() {
         </Route>
         <Route path="student" element={<StudentDashboard />} />
         <Route path="student/settings" element={<StudentProfileSettings />} />
+        <Route path="college-admin" element={<CollegeAdminDashboard />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </>

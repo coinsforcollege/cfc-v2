@@ -2,17 +2,12 @@ import { ArrowBack } from '@mui/icons-material';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
-  Step,
-  StepLabel,
-  Stepper,
-  Typography,
+  Typography
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import AdminStep1 from './admin-registration/AdminStep1';
 import { useAuth } from '../../contexts/AuthContext';
+import AdminStep1 from './admin-registration/AdminStep1';
 import AdminStep3 from './admin-registration/AdminStep3';
 import AdminStep4 from './admin-registration/AdminStep4';
 
@@ -34,7 +29,7 @@ const AdminRegistration = () => {
     createNewCollege: false,
     newCollegeData: null,
     tempToken: null,
-    
+
     // Step 2 data
     firstName: '',
     lastName: '',
@@ -42,7 +37,7 @@ const AdminRegistration = () => {
     password: '',
     confirmPassword: '',
     emailVerified: false,
-    
+
     // Step 3 data
     collegeLogo: null,
     collegeInfo: {
@@ -60,7 +55,7 @@ const AdminRegistration = () => {
       enrollment: '',
       description: ''
     },
-    
+
     // Step 4 data
     tokenConfig: {
       name: '',
@@ -148,61 +143,39 @@ const AdminRegistration = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        py: 3,
+        py: 6,
+        px: 2,
       }}
     >
-      <Box sx={{ maxWidth: 900, mx: 'auto', px: 2 }}>
+      <Box sx={{ maxWidth: 800, mx: 'auto', px: 2 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-           <Button
-             startIcon={<ArrowBack />}
-             onClick={() => navigate('/auth/login')}
-             sx={{ 
-               textTransform: 'none',
-               color: 'text.secondary',
-               mb: 2
-             }}
-           >
-             Back to Login
-           </Button>
-          
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate('/auth/login')}
+            sx={{
+              textTransform: 'none',
+              color: 'text.secondary',
+              mb: 2
+            }}
+          >
+            Back to Login
+          </Button>
+
+          <Typography variant="h5" fontWeight={600} component="h1" gutterBottom>
             Join as College Admin
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             Set up your college's token program and connect with students
           </Typography>
         </Box>
 
-        {/* Progress Stepper */}
-        <Card sx={{ mb: 4 }}>
-          <CardContent>
-            <Stepper activeStep={activeStep} alternativeLabel>
-              {steps.map((label, index) => (
-                <Step key={label}>
-                  <StepLabel
-                    sx={{
-                      '& .MuiStepLabel-label': {
-                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                      },
-                    }}
-                  >
-                    {label}
-                  </StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </CardContent>
-        </Card>
-
         {/* Step Content */}
-        <Card>
-          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-            {renderStepContent(activeStep)}
-          </CardContent>
-        </Card>
+        <Box>
+          {renderStepContent(activeStep)}
+        </Box>
       </Box>
-    </Box>
+    </Box >
   );
 };
 

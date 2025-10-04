@@ -16,9 +16,7 @@ const protect = async (req, res, next) => {
   else if (req.cookies && req.cookies.accessToken) {
     token = req.cookies.accessToken;
   }
-
-  console.log('line 20 protect middleware', token);
-
+  
   // Make sure token exists
   if (!token) {
     throw new ApiError(401, 'Not authorized to access this route');
@@ -27,14 +25,16 @@ const protect = async (req, res, next) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS);
-    console.log('line 30 protect middleware', decoded);
 
     // Get user from token
     const user = await User.findById(decoded.id).populate('college', 'name logo slug');
-    console.log('line 34 protect middleware', user);
 
     if (!user) {
       throw new ApiError(401, 'No user found with this token');
+    }
+
+    if (!user.isEmailVerified) {
+      throw new ApiError(401, 'Please verify your email address first');
     }
 
     // Check if user is active

@@ -2,6 +2,15 @@ import { useMutation } from '@tanstack/react-query';
 import { adminApi } from './admin.api';
 import { authApi } from '../auth/auth.api';
 
+export const useAdminRegister = () => {
+  return useMutation({
+    mutationFn: adminApi.adminRegister,
+    onError: (error) => {
+      console.error('Admin registration failed:', error);
+    },
+  });
+};
+
 // Admin registration step mutations
 export const useAdminRegisterStep1 = () => {
   return useMutation({

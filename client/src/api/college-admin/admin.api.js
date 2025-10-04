@@ -4,6 +4,7 @@ const AUTH_BASE_URL = '/auth/admin';
 
 export const adminApi = {
   // Multi-step registration
+  adminRegister: (data) => apiClient.post(`${AUTH_BASE_URL}/register`, data),
   adminRegisterStep1: (data) => apiClient.post(`${AUTH_BASE_URL}/register/step1`, data),
   adminRegisterStep2: (data) => apiClient.post(`${AUTH_BASE_URL}/register/step2`, data),
   adminRegisterStep3: (data) => apiClient.post(`${AUTH_BASE_URL}/register/step3`, data),

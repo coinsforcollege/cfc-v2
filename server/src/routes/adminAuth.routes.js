@@ -5,12 +5,61 @@ import {
   adminRegisterStep2,
   adminRegisterStep3,
   adminRegisterStep4,
-  completeAdminRegistration
+  completeAdminRegistration,
+  registerAdmin
 } from '../controllers/adminAuth.controllers.js';
 import { protect, requireVerification, validateCollegeEmail } from '../middlewares/auth.middlewares.js';
 import validate from '../middlewares/validation.js';
 
 const router = Router();
+
+// Register Admin Validation
+const registerAdminValidation = [
+  body('firstName')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('First name must be between 2 and 50 characters'),
+
+  body('lastName')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Last name must be between 2 and 50 characters'),
+
+  body('phone')
+    .matches(/^\+?[\d\s\-\(\)]+$/)
+    .withMessage('Please provide a valid work phone number'),
+
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
+
+  body('confirmPassword')
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Password confirmation does not match password');
+      }
+      return true;
+    }),
+
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid work email'),
+
+  body('position')
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Position must be between 2 and 100 characters'),
+
+  body('college')
+    .isMongoId()
+    .withMessage('Please select a valid college'),
+
+  body('workAtCollege')
+    .optional()
+    .isBoolean()
+    .withMessage('workAtCollege must be a boolean'),
+];
 
 // Step 1 Validation - College Verification
 const step1Validation = [
@@ -30,7 +79,7 @@ const step1Validation = [
     .optional()
     .isBoolean()
     .withMessage('createNewCollege must be a boolean'),
-  
+
   // New college validation (only if creating new college)
   body('newCollegeData.name')
     .if(body('createNewCollege').equals(true))
@@ -93,7 +142,7 @@ const step2Validation = [
     .trim()
     .isLength({ max: 100 })
     .withMessage('Department cannot be more than 100 characters'),
-  
+
   // Add role for email validation middleware
   body('role')
     .default('college_admin')
@@ -148,7 +197,7 @@ const step4Validation = [
     .optional()
     .isBoolean()
     .withMessage('skipTokenConfig must be a boolean'),
-  
+
   // Token configuration validation (only if not skipping)
   body('tokenName')
     .if(body('skipTokenConfig').not().equals(true))
@@ -199,6 +248,7 @@ const completeValidation = [
 ];
 
 // Admin Registration Routes
+router.post('/register', registerAdminValidation, validate, registerAdmin);
 router.post('/register/step1', step1Validation, validate, validateCollegeEmail, adminRegisterStep1);
 router.post('/register/step2', step2Validation, validate, validateCollegeEmail, adminRegisterStep2);
 router.post('/register/step3', protect, requireVerification, step3Validation, validate, adminRegisterStep3);

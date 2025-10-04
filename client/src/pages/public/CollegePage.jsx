@@ -24,7 +24,7 @@ const StyledBadge = styled(Box)(({ theme }) => ({
 }))
 
 function CollegeDetails() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { id } = useParams()
   const { data, isLoading, error, isError, refetch } = useGetCollegeById(id)
   const college = data?.data?.college
@@ -83,7 +83,7 @@ function CollegeDetails() {
   }
 
   const handleJoinMining = () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && user?.role === 'student') {
       navigate('/auth/register/student')
     } else {
       navigate(`/student`)
@@ -167,7 +167,7 @@ function CollegeDetails() {
               </Box>
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
-              <Button
+              {user?.role === 'student' && <Button
                 fullWidth
                 variant="contained"
                 size="large"
@@ -177,7 +177,7 @@ function CollegeDetails() {
                 }}
               >
                 {!isAuthenticated ? 'Join Mining' : 'Switch to This College'}
-              </Button>
+              </Button>}
             </Grid>
 
           </Grid>

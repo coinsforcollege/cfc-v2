@@ -64,24 +64,32 @@ const register = async (req, res, next) => {
 // @access  Public
 const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log('line 65', email, password);
 
   // Check for user
   const user = await User.findOne({ email })
     .select('+password')
     .populate('college', 'name logo slug');
-  console.log('line 71', user);
 
   if (!user) {
-    throw new ApiError(401, 'Invalid credentials');
+    throw new ApiError(401, 'Invalid email or password');
   }
-
   // Check if password matches
   const isMatch = await user.matchPassword(password);
-  console.log('line 83', isMatch, password);
 
   if (!isMatch) {
-    throw new ApiError(401, 'Invalid credentials');
+    throw new ApiError(401, 'Invalid email or password');
+  }
+
+  if (!user.isEmailVerified) {
+    throw new ApiError(401, 'Please verify your email address. Check your inbox for the verification link.');
+  }
+
+  if (!user.isActive) {
+    throw new ApiError(401, 'Your account is inactive. Please contact support.');
+  }
+
+  if (user.isSuspended) {
+    throw new ApiError(401, 'Your account has been suspended. Please contact support');
   }
 
   // Update login info
