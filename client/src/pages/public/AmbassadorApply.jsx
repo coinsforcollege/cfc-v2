@@ -338,9 +338,9 @@ const AmbassadorApply = () => {
                   
                   <Stack spacing={2}>
                     {[
-                      { label: 'Active Ambassadors', value: '250+' },
-                      { label: 'Colleges Represented', value: '50+' },
-                      { label: 'Events Organized', value: '500+' }
+                      { label: 'Active Ambassadors', value: '250' },
+                      { label: 'Colleges Represented', value: '73' },
+                      { label: 'Events Organized', value: '500' }
                     ].map((stat, index) => (
                       <Box key={index} sx={{ textAlign: 'center', p: 2, background: '#f7fafc', borderRadius: 2 }}>
                         <Typography variant="h4" sx={{ fontWeight: 700, color: '#8b5cf6' }}>

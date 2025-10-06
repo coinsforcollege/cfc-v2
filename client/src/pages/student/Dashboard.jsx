@@ -50,9 +50,9 @@ const mockDashboardData = {
     status: 'Token Configured'
   },
   mining: {
-    canMine: true,
+    canMine: false, // Set to false to see blockchain terminal
     nextMineTime: null,
-    lastMined: new Date(Date.now() - 25 * 60 * 60 * 1000)
+    lastMined: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago = countdown active
   },
   referrals: {
     code: 'JOHN2024MIT',
@@ -80,11 +80,25 @@ const mockDashboardData = {
   ]
 };
 
+const blockchainLogs = [
+  '⛏️  BLOCK_VERIFY: 0x7f3a9b2c...hash validated | consensus: PoW',
+  '🔐 ENCRYPT_WALLET: AES-256 cipher active | ledger sync: 98%',
+  '⚡ TOKEN_MINT: +0.25 TCN | txn: 0x4e8f2d1a | gas optimized',
+  '🔗 CHAIN_SYNC: distributed ledger replicated | nodes: 847',
+  '🛡️  MERKLE_ROOT: 0xae91b6f4...integrity verified | depth: 12',
+  '💎 NONCE_COMPUTE: difficulty adjusted | hashrate: 2.3 TH/s',
+  '📊 MEMPOOL_BROADCAST: pending txns queued | network latency: 42ms',
+  '🔒 SIGNATURE_VERIFY: ECDSA validation passed | pubkey confirmed',
+  '⛓️  UTXO_UPDATE: balance reconciled | confirmations: 6/6',
+  '🚀 SMART_CONTRACT: execute() → success | gas used: 21000 wei'
+];
+
 function StudentDashboard() {
   const theme = useTheme();
   const { user } = useAuth();
   const [timeUntilMine, setTimeUntilMine] = useState(0);
   const [copying, setCopying] = useState(false);
+  const [currentLogIndex, setCurrentLogIndex] = useState(0);
 
   useEffect(() => {
     if (!mockDashboardData.mining.canMine && mockDashboardData.mining.lastMined) {
@@ -100,6 +114,14 @@ function StudentDashboard() {
       const interval = setInterval(updateCountdown, 1000);
       return () => clearInterval(interval);
     }
+  }, []);
+
+  // Rotate blockchain logs continuously
+  useEffect(() => {
+    const logInterval = setInterval(() => {
+      setCurrentLogIndex((prev) => (prev + 1) % blockchainLogs.length);
+    }, 2500); // Change log every 2.5 seconds
+    return () => clearInterval(logInterval);
   }, []);
 
   const formatCountdown = (ms) => {
@@ -141,9 +163,72 @@ function StudentDashboard() {
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 6 }}>
       <Container maxWidth="lg">
+        {/* Blockchain Activity Terminal - FULL WIDTH AT TOP */}
+        <Paper 
+          elevation={0}
+          sx={{ 
+            bgcolor: '#0a0e27',
+            borderRadius: 2,
+            p: 1.5,
+            mb: 3,
+            border: '1px solid',
+            borderColor: alpha(theme.palette.primary.main, 0.3),
+            boxShadow: `0 0 20px ${alpha(theme.palette.primary.main, 0.15)}`
+          }}
+        >
+          <Box sx={{ 
+            fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+            fontSize: '0.75rem',
+            color: '#00ff41',
+            lineHeight: 1.6,
+            overflow: 'hidden'
+          }}>
+            <Box 
+              sx={{ 
+                opacity: 0.7,
+                mb: 0.5,
+                animation: 'fadeIn 0.5s ease-in',
+                '@keyframes fadeIn': {
+                  from: { opacity: 0 },
+                  to: { opacity: 0.7 }
+                }
+              }}
+            >
+              {blockchainLogs[(currentLogIndex + blockchainLogs.length - 1) % blockchainLogs.length]}
+            </Box>
+            <Box 
+              sx={{ 
+                opacity: 1,
+                animation: 'slideIn 0.5s ease-out',
+                '@keyframes slideIn': {
+                  from: { transform: 'translateX(-10px)', opacity: 0 },
+                  to: { transform: 'translateX(0)', opacity: 1 }
+                }
+              }}
+            >
+              {blockchainLogs[currentLogIndex]}
+              <Box 
+                component="span" 
+                sx={{ 
+                  display: 'inline-block',
+                  width: '6px',
+                  height: '12px',
+                  bgcolor: '#00ff41',
+                  ml: 0.5,
+                  animation: 'blink 1s step-end infinite',
+                  '@keyframes blink': {
+                    '0%, 50%': { opacity: 1 },
+                    '51%, 100%': { opacity: 0 }
+                  }
+                }} 
+              />
+            </Box>
+          </Box>
+        </Paper>
+
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" fontWeight={700} gutterBottom>
-            Welcome back, {`${user?.firstName} ${user?.lastName}` || 'User'}! 👋
+            Welcome back, {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'User'}! 👋
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Keep up your mining streak and climb the leaderboard

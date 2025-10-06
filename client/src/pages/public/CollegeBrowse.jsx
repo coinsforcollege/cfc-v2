@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import {
   Box,
   Typography,
@@ -36,24 +36,106 @@ import apiClient from '../../api/apiClient';
 
 const CollegeBrowse = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const [colleges, setColleges] = useState([]);
+  const [allCountries, setAllCountries] = useState([]);
+  const [allTypes, setAllTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [countryFilter, setCountryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // all, active, waitlist
-  const [typeFilter, setTypeFilter] = useState([]);
-  const [studentRange, setStudentRange] = useState([0, 100000]);
-  const [sortBy, setSortBy] = useState('miners');
+  const [pagination, setPagination] = useState({
+    totalCount: 0,
+    totalPages: 0,
+    currentPage: 1,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const [globalStats, setGlobalStats] = useState({
+    totalColleges: 0,
+    totalMiners: 0,
+    totalTokensMined: 0
+  });
+  const collegesPerPage = 20;
+
+  // Read from URL params
+  const currentPage = parseInt(searchParams.get('page') || '1');
+  const searchTerm = searchParams.get('search') || '';
+  const countryFilter = searchParams.get('country') || '';
+  const statusFilter = searchParams.get('status') || 'all';
+  const typeFilter = searchParams.get('type') || '';
+  const sortBy = searchParams.get('sort') || 'tokens';
+
+  // Update URL params
+  const updateFilters = (updates) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value && value !== 'all' && value !== '') {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
+    // Reset to page 1 when filters change (unless page is being updated)
+    if (!('page' in updates)) {
+      newParams.set('page', '1');
+    }
+    setSearchParams(newParams);
+  };
 
   useEffect(() => {
     fetchColleges();
+  }, [searchParams]);
+
+  useEffect(() => {
+    // Fetch metadata for filters
+    fetchFilterOptions();
   }, []);
+
+  const fetchFilterOptions = async () => {
+    try {
+      // Fetch ONLY metadata (countries and types) - no college data
+      const response = await apiClient.get('/colleges/metadata');
+      if (response.success && response.data) {
+        setAllCountries(response.data.countries);
+        setAllTypes(response.data.types);
+      }
+    } catch (error) {
+      console.error('Error fetching filter options:', error);
+    }
+  };
 
   const fetchColleges = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/colleges');
-      setColleges(response || []);
+      
+      // Build query params
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: collegesPerPage,
+        sortBy: sortBy
+      });
+
+      if (searchTerm) params.append('search', searchTerm);
+      if (countryFilter && countryFilter !== 'all') params.append('country', countryFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
+      if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
+
+      const response = await apiClient.get(`/colleges?${params.toString()}`);
+      
+      console.log('📡 API Response:', {
+        url: `/colleges?${params.toString()}`,
+        collegesCount: response.colleges?.length || response?.length,
+        totalCount: response.pagination?.totalCount,
+        globalMiners: response.globalStats?.totalMiners
+      });
+      
+      if (response.colleges) {
+        setColleges(response.colleges);
+        setPagination(response.pagination);
+        setGlobalStats(response.globalStats);
+      } else {
+        // Fallback for old API format
+        setColleges(response || []);
+      }
     } catch (error) {
       console.error('Error fetching colleges:', error);
     } finally {
@@ -61,41 +143,8 @@ const CollegeBrowse = () => {
     }
   };
 
-  const countries = [...new Set(colleges.map(c => c.country))].filter(Boolean).sort();
-  const types = [...new Set(colleges.map(c => c.type))].filter(Boolean).sort();
-
-  let filteredColleges = colleges.filter(college => {
-    // Search filter
-    const matchesSearch = college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      college.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (college.city && college.city.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    // Country filter
-    const matchesCountry = !countryFilter || college.country === countryFilter;
-    
-    // Status filter
-    const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'active' && college.isActive) ||
-      (statusFilter === 'waitlist' && !college.isActive);
-    
-    // Type filter
-    const matchesType = typeFilter.length === 0 || typeFilter.includes(college.type);
-    
-    // Student range filter
-    const totalStudents = college.studentLife?.totalStudents || 0;
-    const matchesStudentRange = totalStudents >= studentRange[0] && totalStudents <= studentRange[1];
-    
-    return matchesSearch && matchesCountry && matchesStatus && matchesType && matchesStudentRange;
-  });
-
-  // Sort colleges
-  if (sortBy === 'miners') {
-    filteredColleges = filteredColleges.sort((a, b) => (b.stats?.totalMiners || 0) - (a.stats?.totalMiners || 0));
-  } else if (sortBy === 'tokens') {
-    filteredColleges = filteredColleges.sort((a, b) => (b.stats?.totalTokensMined || 0) - (a.stats?.totalTokensMined || 0));
-  } else if (sortBy === 'name') {
-    filteredColleges = filteredColleges.sort((a, b) => a.name.localeCompare(b.name));
-  }
+  // Backend handles filtering, sorting, and pagination
+  // No frontend filtering needed!
 
   if (loading) {
     return (
@@ -149,22 +198,22 @@ const CollegeBrowse = () => {
         }}>
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
-              {colleges.length}+
+              {globalStats.totalColleges || 0}
             </Typography>
             <Typography variant="body2" color="text.secondary">Colleges</Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
-              {colleges.reduce((sum, c) => sum + (c.stats?.totalMiners || 0), 0)}+
+              {globalStats.totalMiners || 0}
             </Typography>
             <Typography variant="body2" color="text.secondary">Active Miners</Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
               {(() => {
-                const total = colleges.reduce((sum, c) => sum + (c.stats?.totalTokensMined || 0), 0);
+                const total = globalStats.totalTokensMined || 0;
                 return total < 1 ? total.toFixed(2) : total.toFixed(0);
-              })()}+
+              })()}
             </Typography>
             <Typography variant="body2" color="text.secondary">Tokens Mined</Typography>
           </Box>
@@ -197,7 +246,7 @@ const CollegeBrowse = () => {
                   fullWidth
                   placeholder="Search by name, city..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => updateFilters({ search: e.target.value })}
                   size="small"
                   sx={{ 
                     mb: 3,
@@ -226,7 +275,7 @@ const CollegeBrowse = () => {
                   <ToggleButtonGroup
                     value={statusFilter}
                     exclusive
-                    onChange={(e, newValue) => newValue && setStatusFilter(newValue)}
+                    onChange={(e, newValue) => newValue && updateFilters({ status: newValue })}
                     fullWidth
                     size="small"
                     sx={{
@@ -261,7 +310,7 @@ const CollegeBrowse = () => {
                   <FormControl fullWidth size="small">
                     <Select
                       value={countryFilter}
-                      onChange={(e) => setCountryFilter(e.target.value)}
+                      onChange={(e) => updateFilters({ country: e.target.value })}
                       displayEmpty
                       sx={{ 
                         borderRadius: 2,
@@ -272,9 +321,9 @@ const CollegeBrowse = () => {
                       }}
                     >
                       <MenuItem value="">
-                        <em>All Countries ({countries.length})</em>
+                        <em>All Countries</em>
                       </MenuItem>
-                      {countries.map(country => (
+                      {allCountries.map(country => (
                         <MenuItem key={country} value={country}>
                           {country}
                         </MenuItem>
@@ -292,21 +341,17 @@ const CollegeBrowse = () => {
                     Institution Type
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {types.map(type => (
+                    {allTypes.map(type => (
                       <Chip
                         key={type}
                         label={type}
                         onClick={() => {
-                          if (typeFilter.includes(type)) {
-                            setTypeFilter(typeFilter.filter(t => t !== type));
-                          } else {
-                            setTypeFilter([...typeFilter, type]);
-                          }
+                          updateFilters({ type: typeFilter === type ? '' : type });
                         }}
                         sx={{
                           cursor: 'pointer',
                           fontWeight: 500,
-                          ...(typeFilter.includes(type) ? {
+                          ...(typeFilter === type ? {
                             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             color: 'white',
                             '&:hover': {
@@ -326,44 +371,6 @@ const CollegeBrowse = () => {
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 2.5 }} />
-
-                {/* Student Population Range */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Groups sx={{ fontSize: 18, color: '#667eea' }} />
-                    Student Population
-                  </Typography>
-                  <Box sx={{ px: 1 }}>
-                    <Slider
-                      value={studentRange}
-                      onChange={(e, newValue) => setStudentRange(newValue)}
-                      valueLabelDisplay="auto"
-                      min={0}
-                      max={100000}
-                      step={5000}
-                      valueLabelFormat={(value) => value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value}
-                      sx={{
-                        color: '#667eea',
-                        '& .MuiSlider-thumb': {
-                          '&:hover, &.Mui-focusVisible': {
-                            boxShadow: '0 0 0 8px rgba(102, 126, 234, 0.16)',
-                          },
-                        },
-                      }}
-                    />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        {studentRange[0] >= 1000 ? `${(studentRange[0] / 1000).toFixed(0)}k` : studentRange[0]}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {studentRange[1] >= 1000 ? `${(studentRange[1] / 1000).toFixed(0)}k` : studentRange[1]}+
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-
-                <Divider sx={{ my: 2.5 }} />
 
                 {/* Sort By */}
                 <Box sx={{ mb: 2 }}>
@@ -374,7 +381,7 @@ const CollegeBrowse = () => {
                   <FormControl fullWidth size="small">
                     <Select
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
+                      onChange={(e) => updateFilters({ sort: e.target.value })}
                       sx={{ 
                         borderRadius: 2,
                         background: 'white',
@@ -406,16 +413,12 @@ const CollegeBrowse = () => {
                 </Box>
 
                 {/* Clear Filters */}
-                {(searchTerm || countryFilter || statusFilter !== 'all' || typeFilter.length > 0 || studentRange[0] !== 0 || studentRange[1] !== 100000) && (
+                {(searchTerm || countryFilter || statusFilter !== 'all' || typeFilter) && (
                   <Button
                     fullWidth
                     variant="contained"
                     onClick={() => {
-                      setSearchTerm('');
-                      setCountryFilter('');
-                      setStatusFilter('all');
-                      setTypeFilter([]);
-                      setStudentRange([0, 100000]);
+                      setSearchParams({});
                     }}
                     sx={{ 
                       mt: 2, 
@@ -437,8 +440,15 @@ const CollegeBrowse = () => {
           {/* College List */}
           <Box sx={{ flex: 1 }}>
 
+            {/* Results Summary */}
+            {colleges.length > 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Showing {((pagination.currentPage - 1) * collegesPerPage) + 1}-{Math.min(pagination.currentPage * collegesPerPage, pagination.totalCount)} of {pagination.totalCount} colleges
+              </Typography>
+            )}
+
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {filteredColleges.map((college) => (
+              {colleges.map((college) => (
                 <Card 
                   key={college._id}
                   sx={{ 
@@ -557,8 +567,33 @@ const CollegeBrowse = () => {
               ))}
             </Box>
 
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 4, gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  disabled={!pagination.hasPrevPage}
+                  onClick={() => updateFilters({ page: currentPage - 1 })}
+                  sx={{ minWidth: 100 }}
+                >
+                  Previous
+                </Button>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+                  Page {pagination.currentPage} of {pagination.totalPages}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  disabled={!pagination.hasNextPage}
+                  onClick={() => updateFilters({ page: currentPage + 1 })}
+                  sx={{ minWidth: 100 }}
+                >
+                  Next
+                </Button>
+              </Box>
+            )}
+
             {/* No Results */}
-            {filteredColleges.length === 0 && (
+            {!loading && colleges.length === 0 && (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <School sx={{ fontSize: 80, color: '#e2e8f0', mb: 2 }} />
                 <Typography variant="h6" color="text.secondary">
