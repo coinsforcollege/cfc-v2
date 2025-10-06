@@ -1,0 +1,857 @@
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useNavigate, Link } from 'react-router';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  CircularProgress,
+  Alert,
+  LinearProgress,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Autocomplete,
+  IconButton
+} from '@mui/material';
+import {
+  AccountBalanceWallet,
+  School,
+  TrendingUp,
+  PlayArrow,
+  Stop,
+  Add,
+  Refresh,
+  ContentCopy,
+  CheckCircle
+} from '@mui/icons-material';
+import { useAuth } from '../../contexts/AuthContext';
+import { studentApi } from '../../api/student.api';
+import { miningApi } from '../../api/mining.api';
+import { collegesApi } from '../../api/colleges.api';
+
+const StudentDashboard = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [miningStatus, setMiningStatus] = useState({});
+  const [showAddCollegeDialog, setShowAddCollegeDialog] = useState(false);
+  const [colleges, setColleges] = useState([]);
+  const [selectedCollege, setSelectedCollege] = useState(null);
+  const [newCollege, setNewCollege] = useState({ name: '', country: '', logo: '' });
+  const [showNewCollegeForm, setShowNewCollegeForm] = useState(false);
+  const [actionLoading, setActionLoading] = useState('');
+  const [justSetPrimary, setJustSetPrimary] = useState(null);
+  const [copiedReferral, setCopiedReferral] = useState(false);
+  const isInitialLoadRef = useRef(true);
+
+  const fetchDashboard = useCallback(async () => {
+    try {
+      // Only show loading spinner on initial load, not on background refreshes
+      if (isInitialLoadRef.current) {
+        setLoading(true);
+      }
+      const response = await studentApi.getDashboard();
+      if (response.success) {
+        setDashboard(response.data);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load dashboard');
+    } finally {
+      if (isInitialLoadRef.current) {
+        setLoading(false);
+        isInitialLoadRef.current = false;
+      }
+    }
+  }, []);
+
+  const fetchMiningStatus = useCallback(async () => {
+    try {
+      const response = await miningApi.getMiningStatus();
+      if (response.success) {
+        const statusMap = {};
+        response.data.activeSessions.forEach(session => {
+          if (session.college) {
+            statusMap[session.college._id] = session;
+          }
+        });
+        setMiningStatus(statusMap);
+      }
+    } catch (err) {
+      console.error('Failed to fetch mining status:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user || user.role !== 'student') {
+      navigate('/auth/login');
+      return;
+    }
+    
+    // Initial fetch
+    fetchDashboard();
+    fetchMiningStatus();
+    
+    // Update mining status every 5 seconds
+    const miningInterval = setInterval(() => {
+      fetchMiningStatus();
+    }, 5000);
+    
+    // Update dashboard data (balances, summary) every 10 seconds
+    const dashboardInterval = setInterval(() => {
+      fetchDashboard();
+    }, 10000);
+    
+    return () => {
+      clearInterval(miningInterval);
+      clearInterval(dashboardInterval);
+    };
+  }, [user, navigate, fetchDashboard, fetchMiningStatus]);
+
+  const handleStartMining = async (collegeId) => {
+    try {
+      setActionLoading(`start-${collegeId}`);
+      const response = await miningApi.startMining(collegeId);
+      if (response.success) {
+        fetchDashboard();
+        fetchMiningStatus();
+      }
+    } catch (err) {
+      console.error('Failed to start mining:', err);
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleStopMining = async (collegeId) => {
+    try {
+      setActionLoading(`stop-${collegeId}`);
+      const response = await miningApi.stopMining(collegeId);
+      if (response.success) {
+        fetchDashboard();
+        fetchMiningStatus();
+      }
+    } catch (err) {
+      console.error('Failed to stop mining:', err);
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleSetPrimaryCollege = async (collegeId) => {
+    try {
+      setActionLoading(`primary-${collegeId}`);
+      const response = await studentApi.setPrimaryCollege(collegeId);
+      if (response.success) {
+        fetchDashboard();
+        setJustSetPrimary(collegeId);
+        setTimeout(() => setJustSetPrimary(null), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to set primary college:', err);
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleCollegeSearch = async (searchTerm) => {
+    if (searchTerm.length < 2) return;
+    try {
+      const response = await collegesApi.search(searchTerm);
+      if (response.success) {
+        setColleges(response.data);
+      }
+    } catch (err) {
+      console.error('College search error:', err);
+    }
+  };
+
+  const handleAddCollege = async () => {
+    try {
+      setActionLoading('add-college');
+      const data = selectedCollege 
+        ? { collegeId: selectedCollege._id }
+        : { newCollege };
+
+      const response = await studentApi.addCollege(data);
+      if (response.success) {
+        setShowAddCollegeDialog(false);
+        setSelectedCollege(null);
+        setNewCollege({ name: '', country: '', logo: '' });
+        setShowNewCollegeForm(false);
+        fetchDashboard();
+      }
+    } catch (err) {
+      console.error('Failed to add college:', err);
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const copyReferralCode = useCallback(() => {
+    if (dashboard?.student?.referralCode) {
+      navigator.clipboard.writeText(dashboard.student.referralCode);
+      setCopiedReferral(true);
+      setTimeout(() => setCopiedReferral(false), 2000);
+    }
+  }, [dashboard?.student?.referralCode]);
+
+  // Memoize calculated values to prevent unnecessary re-renders
+  const totalMiningTokens = useMemo(() => {
+    return Object.values(miningStatus).reduce((sum, session) => 
+      sum + (session.isActive && session.remainingHours > 0 ? session.currentTokens : 0), 0
+    );
+  }, [miningStatus]);
+
+  const totalBalance = useMemo(() => {
+    return (dashboard?.summary.totalBalance || 0) + totalMiningTokens;
+  }, [dashboard?.summary.totalBalance, totalMiningTokens]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ 
+      minHeight: '100vh', 
+      background: '#f8fafc',
+      pt: { xs: 10, md: 12 } // Padding top to avoid header overlap
+    }}>
+      {/* Container with max width */}
+      <Box sx={{ 
+        maxWidth: '1200px', 
+        width: '100%',
+        mx: 'auto', 
+        px: { xs: 2, md: 3 },
+        py: 0
+      }}>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
+            Welcome, {dashboard?.student.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {dashboard?.student.college?.name || 'No college assigned'}
+          </Typography>
+        </Box>
+
+      {/* Summary Cards */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexWrap: 'wrap',
+        gap: 2,
+        mb: 3
+      }}>
+        <Card sx={{ 
+          flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)'
+        }}>
+          <CardContent>
+            <AccountBalanceWallet sx={{ color: 'white', fontSize: 24, mb: 1 }} />
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
+              Total Balance
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {totalBalance.toFixed(4)}
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ 
+          flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
+          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          color: 'white',
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(240, 147, 251, 0.3)'
+        }}>
+          <CardContent>
+            <TrendingUp sx={{ color: 'white', fontSize: 24, mb: 1 }} />
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
+              Mining Now
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {totalMiningTokens.toFixed(4)}
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ 
+          flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
+          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+          color: 'white',
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(79, 172, 254, 0.3)'
+        }}>
+          <CardContent>
+            <School sx={{ color: 'white', fontSize: 24, mb: 1 }} />
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
+              Colleges
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {dashboard?.miningColleges.filter(mc => mc.college).length} / 10
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ 
+          flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
+          background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+          color: 'white',
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(250, 112, 154, 0.3)'
+        }}>
+          <CardContent>
+            <Refresh sx={{ color: 'white', fontSize: 24, mb: 1 }} />
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
+              Rate
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {dashboard?.summary.earningRate.total.toFixed(2)}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Image and Referral Row */}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+        <Box sx={{ flex: { xs: '100%', md: 'calc(50% - 8px)' } }}>
+          <Box 
+            sx={{ 
+              position: 'relative',
+              height: 250,
+              width: '100%'
+            }}
+          >
+            <Box
+              component="img"
+              src="/images/animated-pixel-art-programmer.gif"
+              alt="Mining Activity"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: 3,
+                border: '3px solid rgba(251, 191, 36, 0.3)',
+                boxShadow: '0 4px 20px rgba(251, 191, 36, 0.3)'
+              }}
+            />
+            
+            {/* Become Ambassador Button with Border Beam Animation */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 2
+              }}
+            >
+              <Button
+                component={Link}
+                to="/ambassador/apply"
+                sx={{
+                  position: 'relative',
+                  background: 'rgba(0, 0, 0, 0.7)',
+                  backdropFilter: 'blur(10px)',
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  px: 2.5,
+                  py: 1,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  border: '2px solid transparent',
+                  '&:hover': {
+                    background: 'rgba(0, 0, 0, 0.8)',
+                  },
+                  transition: 'all 0.3s ease',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    inset: -2,
+                    borderRadius: 2,
+                    padding: '2px',
+                    background: 'linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0, #ff0080)',
+                    backgroundSize: '300%',
+                    WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                    WebkitMaskComposite: 'xor',
+                    maskComposite: 'exclude',
+                    animation: 'borderBeam 3s linear infinite',
+                  },
+                  '@keyframes borderBeam': {
+                    '0%': { backgroundPosition: '0% 50%' },
+                    '50%': { backgroundPosition: '100% 50%' },
+                    '100%': { backgroundPosition: '0% 50%' }
+                  }
+                }}
+              >
+                Become An Ambassador
+              </Button>
+            </Box>
+            <Box sx={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              background: 'rgba(0, 0, 0, 0.8)',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 1.5,
+              border: '2px solid rgba(16, 185, 129, 0.6)'
+            }}>
+              <Box sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: '#10b981',
+                animation: 'blink 1.5s infinite',
+                '@keyframes blink': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.3 }
+                }
+              }} />
+              <Typography variant="caption" sx={{ color: 'white', fontWeight: 700, fontSize: '0.7rem' }}>
+                LIVE
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        <Box sx={{ flex: { xs: '100%', md: 'calc(50% - 8px)' } }}>
+          <Card sx={{ 
+            height: 250,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+            color: 'white',
+            borderRadius: 3,
+            boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)'
+          }}>
+            <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', p: 2.5 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                Invite & Earn More
+              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                mb: 2, 
+                p: 1.5, 
+                background: 'rgba(255,255,255,0.15)', 
+                borderRadius: 2
+              }}>
+                <Typography variant="body1" sx={{ flex: 1, fontWeight: 600 }}>
+                  {dashboard?.student.referralCode}
+                </Typography>
+                <IconButton 
+                  size="small" 
+                  onClick={copyReferralCode} 
+                  sx={{ 
+                    color: 'white',
+                    background: copiedReferral ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.2)',
+                    '&:hover': { background: copiedReferral ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255,255,255,0.3)' }
+                  }}
+                >
+                  {copiedReferral ? <CheckCircle fontSize="small" /> : <ContentCopy fontSize="small" />}
+                </IconButton>
+              </Box>
+              <Typography variant="body2" sx={{ opacity: 0.95, mb: 0.5 }}>
+                Referrals: <strong>{dashboard?.student.totalReferrals}</strong>
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.95 }}>
+                Bonus: <strong>+{(dashboard?.summary.earningRate.referralBonus).toFixed(1)}/hr</strong>
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+
+      {/* My Colleges */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          My Colleges
+        </Typography>
+        {dashboard?.miningColleges.filter(mc => mc.college).length < 10 && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setShowAddCollegeDialog(true)}
+            sx={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2,
+              boxShadow: '0 2px 12px rgba(102, 126, 234, 0.4)',
+              fontWeight: 600,
+              px: 2,
+              py: 1,
+              fontSize: '0.875rem',
+              transition: 'all 0.2s',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 16px rgba(102, 126, 234, 0.5)'
+              }
+            }}
+          >
+            Add College
+          </Button>
+        )}
+      </Box>
+
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        {dashboard?.miningColleges.filter(mc => mc.college).map((mc) => {
+          const session = miningStatus[mc.college._id];
+          const wallet = dashboard.wallets.find(w => w.college && w.college._id === mc.college._id);
+          const isActive = session && session.isActive && session.remainingHours > 0;
+
+          return (
+            <Box key={mc.college._id} sx={{ flex: { xs: '100%', md: 'calc(50% - 8px)' } }}>
+              <Card sx={{
+                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                borderRadius: 3,
+                position: 'relative',
+                overflow: 'hidden',
+                minHeight: 380,
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                },
+                ...(isActive && {
+                  background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, rgba(0, 242, 254, 0.05) 100%)',
+                  border: '1px solid rgba(79, 172, 254, 0.2)',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.1), transparent)',
+                    animation: 'shimmer 3s infinite',
+                  },
+                  '@keyframes shimmer': {
+                    '0%': { left: '-100%' },
+                    '100%': { left: '100%' }
+                  }
+                })
+              }}>
+                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {mc.college.name}
+                        </Typography>
+                        {dashboard?.student.college?._id === mc.college._id ? (
+                          <Chip 
+                            label="Primary" 
+                            size="small"
+                            icon={justSetPrimary === mc.college._id ? <CheckCircle sx={{ fontSize: '0.9rem' }} /> : undefined}
+                            sx={{
+                              height: 20,
+                              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                              color: 'white',
+                              fontWeight: 600,
+                              fontSize: '0.7rem',
+                              '& .MuiChip-label': { px: 1 },
+                              '& .MuiChip-icon': { 
+                                color: 'white',
+                                marginLeft: '4px',
+                                marginRight: '-4px'
+                              }
+                            }}
+                          />
+                        ) : (
+                          <Chip 
+                            label="Set Primary" 
+                            size="small"
+                            onClick={() => handleSetPrimaryCollege(mc.college._id)}
+                            disabled={actionLoading === `primary-${mc.college._id}`}
+                            sx={{
+                              height: 20,
+                              borderColor: '#667eea',
+                              color: '#667eea',
+                              fontWeight: 500,
+                              fontSize: '0.7rem',
+                              cursor: 'pointer',
+                              '& .MuiChip-label': { px: 1 },
+                              '&:hover': {
+                                borderColor: '#764ba2',
+                                background: 'rgba(102, 126, 234, 0.08)'
+                              }
+                            }}
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
+                      <Typography variant="body2" color="text.secondary">
+                        {mc.college.country}
+                      </Typography>
+                    </Box>
+                    {isActive && (
+                      <Chip 
+                        label="Mining" 
+                        size="small"
+                        sx={{
+                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                          color: 'white',
+                          fontWeight: 600,
+                          animation: 'pulse 2s infinite',
+                          '@keyframes pulse': {
+                            '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                            '50%': { opacity: 0.8, transform: 'scale(0.98)' }
+                          }
+                        }}
+                      />
+                    )}
+                  </Box>
+
+                  {isActive && (
+                    <Box sx={{ 
+                      mb: 2, 
+                      p: 2, 
+                      borderRadius: 2,
+                      background: 'rgba(79, 172, 254, 0.08)',
+                      border: '1px solid rgba(79, 172, 254, 0.15)'
+                    }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            background: '#4facfe',
+                            animation: 'blink 1.5s infinite',
+                            '@keyframes blink': {
+                              '0%, 100%': { opacity: 1 },
+                              '50%': { opacity: 0.3 }
+                            }
+                          }} />
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#4facfe' }}>
+                            Mining: {session.currentTokens.toFixed(4)} tokens
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+                          {session.remainingHours.toFixed(1)}h left
+                        </Typography>
+                      </Box>
+                      <Box sx={{ position: 'relative', width: '100%' }}>
+                        <Box sx={{
+                          height: 12,
+                          borderRadius: 6,
+                          background: '#e2e8f0',
+                          border: '1px solid #cbd5e1',
+                          overflow: 'hidden',
+                          position: 'relative'
+                        }}>
+                          <Box sx={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            height: '100%',
+                            width: `${Math.max(((24 - session.remainingHours) / 24) * 100, 3)}%`,
+                            minWidth: '30px',
+                            background: 'linear-gradient(90deg, #f97316 0%, #fb923c 50%, #fbbf24 100%)',
+                            borderRadius: 6,
+                            boxShadow: '0 0 16px rgba(249, 115, 22, 0.8)',
+                            transition: 'width 0.3s ease',
+                            '&::after': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: '50%',
+                              background: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%)'
+                            }
+                          }} />
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', mt: 0.5, display: 'block', textAlign: 'center' }}>
+                        {((24 - session.remainingHours) / 24 * 100).toFixed(1)}% Complete
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Box sx={{ mb: 2 }}>
+                    {/* Wallet Balance */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      mb: 1,
+                      p: 1.5,
+                      borderRadius: 2,
+                      background: 'rgba(102, 126, 234, 0.05)',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <Typography variant="body2" sx={{ color: '#64748b' }}>
+                        Wallet Balance
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#667eea' }}>
+                        {wallet?.balance.toFixed(4) || '0.0000'} <Typography component="span" variant="caption">tokens</Typography>
+                      </Typography>
+                    </Box>
+                    
+                    {/* Total (Wallet + Current Mining) */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      p: 1.5,
+                      borderRadius: 2,
+                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+                      border: '2px solid rgba(102, 126, 234, 0.2)'
+                    }}>
+                      <Box>
+                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+                          Total Value
+                        </Typography>
+                        {isActive && (
+                          <Typography variant="caption" sx={{ color: '#4facfe', display: 'block' }}>
+                            (includes mining)
+                          </Typography>
+                        )}
+                      </Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#667eea' }}>
+                        {((wallet?.balance || 0) + (isActive ? session.currentTokens : 0)).toFixed(4)} <Typography component="span" variant="caption">tokens</Typography>
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ mt: 'auto' }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={isActive ? <Stop /> : <PlayArrow />}
+                      onClick={() => isActive ? handleStopMining(mc.college._id) : handleStartMining(mc.college._id)}
+                      disabled={actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`}
+                      sx={isActive ? {
+                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                        borderRadius: 3,
+                        boxShadow: '0 4px 16px rgba(240, 147, 251, 0.4)',
+                        fontWeight: 600,
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
+                          boxShadow: '0 6px 20px rgba(240, 147, 251, 0.5)'
+                        }
+                      } : {
+                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                        borderRadius: 3,
+                        boxShadow: '0 4px 16px rgba(79, 172, 254, 0.4)',
+                        fontWeight: 600,
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
+                          boxShadow: '0 6px 20px rgba(79, 172, 254, 0.5)'
+                        }
+                      }}
+                    >
+                      {actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}` 
+                        ? <CircularProgress size={20} sx={{ color: 'white' }} />
+                        : isActive ? 'Stop Mining' : 'Start Mining'
+                      }
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+          );
+        })}
+      </Box>
+
+      {/* Add College Dialog */}
+      <Dialog open={showAddCollegeDialog} onClose={() => setShowAddCollegeDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add College to Mining List</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {!showNewCollegeForm ? (
+            <>
+              <Autocomplete
+                options={colleges}
+                getOptionLabel={(option) => `${option.name} - ${option.country}`}
+                onInputChange={(e, value) => handleCollegeSearch(value)}
+                onChange={(e, value) => setSelectedCollege(value)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Search College" placeholder="Start typing..." />
+                )}
+              />
+              <Button
+                size="small"
+                onClick={() => setShowNewCollegeForm(true)}
+                sx={{ mt: 2, color: '#8b5cf6', textTransform: 'none' }}
+              >
+                + College not found? Add new
+              </Button>
+            </>
+          ) : (
+            <>
+              <TextField
+                fullWidth
+                label="College Name"
+                value={newCollege.name}
+                onChange={(e) => setNewCollege({ ...newCollege, name: e.target.value })}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Country"
+                value={newCollege.country}
+                onChange={(e) => setNewCollege({ ...newCollege, country: e.target.value })}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Logo URL (Optional)"
+                value={newCollege.logo}
+                onChange={(e) => setNewCollege({ ...newCollege, logo: e.target.value })}
+              />
+              <Button
+                size="small"
+                onClick={() => setShowNewCollegeForm(false)}
+                sx={{ mt: 2, color: '#8b5cf6', textTransform: 'none' }}
+              >
+                ← Back to search
+              </Button>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowAddCollegeDialog(false)}>Cancel</Button>
+          <Button
+            onClick={handleAddCollege}
+            disabled={(!selectedCollege && !newCollege.name) || actionLoading === 'add-college'}
+            variant="contained"
+          >
+            {actionLoading === 'add-college' ? <CircularProgress size={20} /> : 'Add College'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      </Box>
+    </Box>
+  );
+};
+
+export default StudentDashboard;
+

@@ -1,75 +1,52 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  Visibility,
-  VisibilityOff
-} from '@mui/icons-material';
-import { Alert, Box, Button, Divider, IconButton, InputAdornment, Stack, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router';
-import { z } from 'zod';
-import { useLogin } from '../../api/student/student.mutations';
+import { useNavigate, Link } from 'react-router';
+import { Box, TextField, Button, Typography, Alert, CircularProgress } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address')
-    .toLowerCase()
-    .trim(),
-
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters')
-    .max(100, 'Password is too long')
-})
+import { authApi } from '../../api/auth.api';
 
 const Login = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  })
-
-  const [showPassword, setShowPassword] = useState(false);
-
   const navigate = useNavigate();
-  const { login: loginUser } = useAuth();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const loginMutation = useLogin();
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError('');
+  };
 
-  const onSubmit = async (data) => {
-    loginMutation.mutate(data, {
-      onSuccess: (response) => {
-        if (response.data && response.data.accessToken && response.data.user) {
-          // Use auth context to login
-          loginUser(response.data.user, response.data.accessToken);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-          // Redirect based on user role
-          const { role } = response.data.user;
-          switch (role) {
-            case 'student':
-              navigate('/student');
-              break;
-            case 'college_admin':
-              navigate('/college-admin');
-              break;
-            case 'platform_admin':
-              navigate('/admin');
-              break;
-            default:
-              navigate('/dashboard');
-          }
+    try {
+      const response = await authApi.login(formData);
+      
+      if (response.success) {
+        login(response.data, response.token);
+        
+        // Redirect based on role
+        if (response.data.role === 'student') {
+          navigate('/student/dashboard');
+        } else if (response.data.role === 'college_admin') {
+          navigate('/college-admin/dashboard');
+        } else if (response.data.role === 'platform_admin') {
+          navigate('/platform-admin/dashboard');
         }
-      },
-      onError: (error) => {
-        console.error('Login failed:', error);
       }
-    })
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,126 +56,126 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        py: 3,
+        background: 'linear-gradient(135deg, rgba(155, 184, 224, 0.4) 0%, rgba(179, 154, 232, 0.3) 50%, rgba(230, 155, 184, 0.3) 100%)',
+        px: 2
       }}
     >
       <Box
         sx={{
-          maxWidth: 400,
+          maxWidth: '450px',
           width: '100%',
-          mx: 2,
+          background: 'rgba(255, 255, 255, 0.95)',
+          borderRadius: '16px',
+          padding: '40px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Welcome Back
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Sign in to your account to continue
-          </Typography>
-        </Box>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 1,
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, #9bb8e0 0%, #b39ae8 50%, #e69bb8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Welcome Back
+        </Typography>
+        
+        <Typography
+          sx={{
+            textAlign: 'center',
+            color: '#718096',
+            mb: 4
+          }}
+        >
+          Login to your account
+        </Typography>
 
-        {loginMutation.isError && (
-          <Alert severity="error" className='mb-6'>
-            {loginMutation.error.message || 'Login failed. Please try again.'}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
           </Alert>
         )}
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-          <Stack spacing={3}>
-            <TextField
-              fullWidth
-              name="email"
-              label="Email Address"
-              type="email"
-              {...register('email')}
-              error={!!errors.email?.message}
-              helperText={errors.email?.message}
-              margin="normal"
-              autoComplete="email"
-            />
 
-            <Stack spacing={0.5}>
-              <TextField
-                fullWidth
-                name="password"
-                label="Password"
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
-                error={!!errors.password?.message}
-                helperText={errors.password?.message}
-                margin="normal"
-                autoComplete="current-password"
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
+        <form onSubmit={handleSubmit}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            sx={{ mb: 3 }}
+          />
 
-              <Box sx={{ textAlign: 'right' }}>
-                <Button
-                  component={Link}
-                  to="/auth/forgot-password"
-                  variant="text"
-                  size="small"
-                  sx={{ textTransform: 'none' }}
-                >
-                  Forgot password?
-                </Button>
-              </Box>
-            </Stack>
+          <TextField
+            fullWidth
+            label="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            sx={{ mb: 3 }}
+          />
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              loading={loginMutation.isPending}
-            >
-              Sign In
-            </Button>
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            disabled={loading}
+            sx={{
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+              color: '#ffffff',
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: '8px',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
+              },
+              mb: 2
+            }}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+          </Button>
 
-            <Divider>
-              <Typography variant="body2" color="text.secondary">
-                Don't have an account?
-              </Typography>
-            </Divider>
-
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                component={Link}
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Don't have an account?{' '}
+              <Link
                 to="/auth/register/student"
-                variant="outlined"
-                fullWidth
-                sx={{ textTransform: 'none' }}
+                style={{
+                  color: '#8b5cf6',
+                  textDecoration: 'none',
+                  fontWeight: 600
+                }}
               >
-                Join as Student
-              </Button>
-              <Button
-                component={Link}
-                to="/auth/register/admin"
-                variant="outlined"
-                fullWidth
-                sx={{ textTransform: 'none' }}
+                Register as Student
+              </Link>
+              {' or '}
+              <Link
+                to="/auth/register/college"
+                style={{
+                  color: '#8b5cf6',
+                  textDecoration: 'none',
+                  fontWeight: 600
+                }}
               >
-                Join as College
-              </Button>
-            </Box>
-          </Stack>
-        </Box>
+                College
+              </Link>
+            </Typography>
+          </Box>
+        </form>
       </Box>
-    </Box >
+    </Box>
   );
 };
 
 export default Login;
+

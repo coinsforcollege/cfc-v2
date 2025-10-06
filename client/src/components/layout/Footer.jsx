@@ -25,7 +25,7 @@ const Footer = () => {
     ],
     resources: [
       { name: 'Documentation', href: '/docs' },
-      { name: 'Campus Ambassador Portal', href: '/ambassador' },
+      { name: 'Campus Ambassador Portal', href: '/ambassador/apply' },
       { name: 'Community Forum', href: '/community' },
       { name: 'GitHub Repository', href: '/github' }
     ],

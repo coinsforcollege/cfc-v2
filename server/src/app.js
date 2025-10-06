@@ -1,67 +1,90 @@
-import compression from 'compression';
-import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
-import rateLimit from 'express-rate-limit';
+import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import globalErrorHandler from './middlewares/error.middlewares.js';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
 
-// Load environment variables
+// Load env vars
 dotenv.config();
 
-// Create Express app
+// Import routes
+import authRoutes from './routes/auth.routes.js';
+import collegeRoutes from './routes/college.routes.js';
+import miningRoutes from './routes/mining.routes.js';
+import studentRoutes from './routes/student.routes.js';
+import collegeAdminRoutes from './routes/collegeAdmin.routes.js';
+import platformAdminRoutes from './routes/platformAdmin.routes.js';
+import ambassadorRoutes from './routes/ambassador.routes.js';
+
+// Import middleware
+import errorHandler from './middlewares/errorHandler.js';
+import { requestLogger } from './utils/logger.js';
+
 const app = express();
 
-// Middleware =====
+// Body parser (MUST be FIRST)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Security middleware
-app.use(helmet());
-
-// CORS configuration
+// CORS
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: (process.env.RATE_LIMIT_WINDOW || 15) * 60 * 1000, // 15 minutes
-  max: process.env.RATE_LIMIT_MAX_REQUESTS || 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-});
-app.use('/api/', limiter);
+// Security middleware (after body parser)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 
-// Body parser middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Compression middleware
+// Compression
 app.use(compression());
 
+// Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
+  app.use(requestLogger); // Custom request logger for debugging
 }
 
-// Routes
-import authRoutes from './routes/auth.routes.js';
-import studentAuthRoutes from './routes/studentAuth.routes.js';
-import adminAuthRoutes from './routes/adminAuth.routes.js';
-import adminVerificationRoutes from './routes/adminVerification.routes.js';
-import collegeRoutes from './routes/college.routes.js';
-
-app.use('/api/v1/health', (req, res) => {
-  res.status(200).json({ message: 'Server is running' });
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later'
 });
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/auth/student', studentAuthRoutes);
-app.use('/api/v1/auth/admin', adminAuthRoutes);
-app.use('/api/v1/admin', adminVerificationRoutes);
-app.use('/api/v1/colleges', collegeRoutes);
+app.use('/api', limiter);
 
-// Error handling middleware (must be last)
-app.use(globalErrorHandler);
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Mount routes
+app.use('/api/auth', authRoutes);
+app.use('/api/colleges', collegeRoutes);
+app.use('/api/mining', miningRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/college-admin', collegeAdminRoutes);
+app.use('/api/platform-admin', platformAdminRoutes);
+app.use('/api/ambassador', ambassadorRoutes);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// Error handler (must be last)
+app.use(errorHandler);
 
 export default app;
+

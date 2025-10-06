@@ -239,7 +239,7 @@ const HeroSection = () => {
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     component={Link}
-                    to="/auth/register/admin"
+                    to="/auth/register/college"
                     variant="outlined"
                     size="large"
                     sx={{

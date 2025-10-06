@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { AppBar, Button, Box, Dialog, DialogTitle, DialogContent, IconButton, Typography, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
 import { Close as CloseIcon, Menu as MenuIcon, School as SchoolIcon, Business as BusinessIcon } from '@mui/icons-material';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Header = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [popupOpen, setPopupOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,6 +43,19 @@ const Header = () => {
     setTimeout(() => {
       window.location.href = path;
     }, 500);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
+  const getDashboardPath = () => {
+    if (!user) return '/';
+    if (user.role === 'student') return '/student/dashboard';
+    if (user.role === 'college_admin') return '/college-admin/dashboard';
+    if (user.role === 'platform_admin') return '/platform-admin/dashboard';
+    return '/';
   };
 
   return (
@@ -122,7 +138,20 @@ const Header = () => {
                 onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
                 onMouseLeave={(e) => e.target.style.color = '#111827'}
               >
-                For Colleges
+                How it Works
+              </Link>
+              <Link 
+                to="/colleges" 
+                style={{ 
+                  textDecoration: 'none', 
+                  color: '#111827', 
+                  fontSize: '0.95rem',
+                  transition: 'color 0.3s ease',
+                }}
+                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
+                onMouseLeave={(e) => e.target.style.color = '#111827'}
+              >
+                Colleges
               </Link>
               <Link 
                 to="/#network-map" 
@@ -143,44 +172,87 @@ const Header = () => {
           {/* Desktop Auth Buttons */}
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: '12px' }}>
-              <Button
-                variant="outlined"
-                component={Link}
-                to="/auth/login"
-                sx={{ 
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  color: '#ffffff',
-                  background: 'rgba(14, 165, 233, 0.8)',
-                  backdropFilter: 'blur(10px)',
-                  '&:hover': {
-                    borderColor: '#ffffff',
-                    background: 'rgba(2, 132, 199, 0.9)',
-                  },
-                }}
-              >
-                Login
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleGetStartedClick}
-                sx={{ 
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 15px rgba(14, 165, 233, 0.4)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #0284C7 0%, #7C3AED 100%)',
-                    boxShadow: '0 6px 20px rgba(14, 165, 233, 0.6)',
-                    transform: 'translateY(-2px)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                Get Started
-              </Button>
+              {user ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    component={Link}
+                    to={getDashboardPath()}
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      borderColor: 'rgba(14, 165, 233, 0.5)',
+                      color: '#0EA5E9',
+                      '&:hover': {
+                        borderColor: '#0EA5E9',
+                        background: 'rgba(14, 165, 233, 0.05)',
+                      },
+                    }}
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleLogout}
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
+                      color: '#ffffff',
+                      boxShadow: '0 4px 15px rgba(14, 165, 233, 0.4)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #0284C7 0%, #7C3AED 100%)',
+                        boxShadow: '0 6px 20px rgba(14, 165, 233, 0.6)',
+                        transform: 'translateY(-2px)',
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outlined"
+                    component={Link}
+                    to="/auth/login"
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                      color: '#ffffff',
+                      background: 'rgba(14, 165, 233, 0.8)',
+                      backdropFilter: 'blur(10px)',
+                      '&:hover': {
+                        borderColor: '#ffffff',
+                        background: 'rgba(2, 132, 199, 0.9)',
+                      },
+                    }}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleGetStartedClick}
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
+                      color: '#ffffff',
+                      boxShadow: '0 4px 15px rgba(14, 165, 233, 0.4)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #0284C7 0%, #7C3AED 100%)',
+                        boxShadow: '0 6px 20px rgba(14, 165, 233, 0.6)',
+                        transform: 'translateY(-2px)',
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
             </Box>
           )}
 
@@ -247,7 +319,14 @@ const Header = () => {
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
               >
-                For Colleges
+                How it Works
+              </Link>
+              <Link 
+                to="/colleges" 
+                style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
+                onClick={toggleMobileMenu}
+              >
+                Colleges
               </Link>
               <Link 
                 to="/#network-map" 
@@ -259,37 +338,75 @@ const Header = () => {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: 'auto' }}>
-              <Button
-                variant="outlined"
-                component={Link}
-                to="/auth/login"
-                fullWidth
-                sx={{ 
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  color: '#374151',
-                }}
-                onClick={toggleMobileMenu}
-              >
-                Login
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  handleGetStartedClick();
-                  toggleMobileMenu();
-                }}
-                fullWidth
-                sx={{ 
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
-                  color: '#ffffff',
-                }}
-              >
-                Get Started
-              </Button>
+              {user ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    component={Link}
+                    to={getDashboardPath()}
+                    fullWidth
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      borderColor: '#0EA5E9',
+                      color: '#0EA5E9',
+                    }}
+                    onClick={toggleMobileMenu}
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      handleLogout();
+                      toggleMobileMenu();
+                    }}
+                    fullWidth
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
+                      color: '#ffffff',
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outlined"
+                    component={Link}
+                    to="/auth/login"
+                    fullWidth
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                      color: '#374151',
+                    }}
+                    onClick={toggleMobileMenu}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      handleGetStartedClick();
+                      toggleMobileMenu();
+                    }}
+                    fullWidth
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
+                      color: '#ffffff',
+                    }}
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
             </Box>
           </Box>
         </Box>
@@ -345,7 +462,7 @@ const Header = () => {
                   border: '1px solid rgba(14, 165, 233, 0.4)',
                 }
               }}
-              onClick={() => handleNavigation('/auth/register/admin')}
+              onClick={() => handleNavigation('/auth/register/college')}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
                 <Box sx={{ 
