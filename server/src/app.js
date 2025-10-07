@@ -33,6 +33,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const allowed = new Set([
   'https://coinsforcollege.org',
   'https://www.coinsforcollege.org',
+  'https://cfc-v2.onrender.com',
   'http://localhost:5173',
   'http://localhost:3000'
 ]);
