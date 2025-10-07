@@ -7,7 +7,9 @@ export default [
     name: 'strapi::cors',
     config: {
       enabled: true,
-      origin: ['http://localhost:3000', 'http://localhost:5173', process.env.CLIENT_URL].filter(Boolean),
+      origin: ['http://localhost:3000', 'http://localhost:5173', 'https://coinsforcollege.org',
+        'https://www.coinsforcollege.org',
+        'https://cfc-v2.onrender.com',process.env.CLIENT_URL].filter(Boolean),
       headers: '*',
     },
   },
