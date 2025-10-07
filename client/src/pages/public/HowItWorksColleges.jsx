@@ -110,7 +110,7 @@ const benefits = [
     metric: '15-20% monthly growth',
     color: '#4ecdc4',
     gradient: 'linear-gradient(135deg, #4ecdc4 0%, #6ee7b7 100%)',
-    image: '/src/assets/pixel-art-cherry-blossom-day-gif.gif'
+    image: '/images/pixel-art-cherry-blossom-day-gif.gif'
   },
   {
     icon: BarChart,
@@ -772,7 +772,7 @@ function HowItWorksColleges() {
                   metrics: ['Student demographics', 'Graduation year breakdown', 'Geographic distribution', 'Activity heatmaps'],
                   color: '#4ecdc4',
                   gradient: 'linear-gradient(135deg, #4ecdc4 0%, #6ee7b7 100%)',
-                  image: '/src/assets/pixel-art-game-arcade-pink.gif'
+                  image: '/images/pixel-art-game-arcade-pink.gif'
                 },
                 {
                   icon: BarChart,
@@ -780,7 +780,7 @@ function HowItWorksColleges() {
                   metrics: ['Week-over-week growth', 'Retention rates', 'Peak activity times', 'Viral coefficient'],
                   color: '#45b7d1',
                   gradient: 'linear-gradient(135deg, #45b7d1 0%, #7dd3fc 100%)',
-                  image: '/src/assets/immutable-place-game-screen-pixel-art.jpeg'
+                  image: '/images/immutable-place-game-screen-pixel-art.jpeg'
                 },
               ].map((item, index) => (
                 <Grid size={{ xs: 12, md: 4 }} key={index}>
