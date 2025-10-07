@@ -25,17 +25,36 @@ import { requestLogger } from './utils/logger.js';
 
 const app = express();
 
-// Body parser (MUST be FIRST)
+// Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// CORS
+// ---------- CORS FIX ----------
+const allowed = new Set([
+  'https://coinsforcollege.org',
+  'https://www.coinsforcollege.org',
+  'http://localhost:5173',
+  'http://localhost:3000'
+]);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);         // allow same-origin / server-side
+    return cb(null, allowed.has(origin));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization','Origin','Accept']
 }));
 
-// Security middleware (after body parser)
+// Make sure caches don’t mix by origin
+app.use((req, res, next) => {
+  res.setHeader('Vary', 'Origin');
+  next();
+});
+// ---------- END CORS FIX ----------
+
+// Security middleware
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
@@ -47,18 +66,18 @@ app.use(compression());
 // Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-  app.use(requestLogger); // Custom request logger for debugging
+  app.use(requestLogger);
 }
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Too many requests from this IP, please try again later'
 });
 app.use('/api', limiter);
 
-// Health check route
+// Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -67,7 +86,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount routes
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/colleges', collegeRoutes);
 app.use('/api/mining', miningRoutes);
@@ -77,16 +96,12 @@ app.use('/api/platform-admin', platformAdminRoutes);
 app.use('/api/ambassador', ambassadorRoutes);
 app.use('/api/blog', blogRoutes);
 
-// 404 handler
+// 404
 app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
+  res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Error handler (must be last)
+// Error handler
 app.use(errorHandler);
 
 export default app;
-
