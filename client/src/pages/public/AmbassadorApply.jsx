@@ -82,27 +82,19 @@ const AmbassadorApply = () => {
   });
 
   useEffect(() => {
-    // Check if user is logged in as student
-    if (!user) {
-      navigate('/auth/login/student');
-      return;
-    }
-    if (user.role !== 'student') {
-      navigate('/');
-      return;
-    }
+    // Pre-fill user data if logged in as student
+    if (user && user.role === 'student') {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || ''
+      }));
 
-    // Pre-fill user data
-    setFormData(prev => ({
-      ...prev,
-      name: user.name || '',
-      email: user.email || '',
-      phone: user.phone || ''
-    }));
-
-    // Check if student already has an application
-    checkExistingApplication();
-  }, [user, navigate]);
+      // Check if student already has an application
+      checkExistingApplication();
+    }
+  }, [user]);
 
   const checkExistingApplication = async () => {
     try {
@@ -171,7 +163,11 @@ const AmbassadorApply = () => {
       window.scrollTo(0, 0);
       
       setTimeout(() => {
-        navigate('/student/dashboard');
+        if (user && user.role === 'student') {
+          navigate('/student/dashboard');
+        } else {
+          navigate('/');
+        }
       }, 3000);
     } catch (error) {
       setError(error.message || 'Failed to submit application');
@@ -181,8 +177,8 @@ const AmbassadorApply = () => {
     }
   };
 
-  // If already has an active application
-  if (existingApplication && ['pending', 'under_review', 'approved'].includes(existingApplication.status)) {
+  // If logged in as student and already has an active application
+  if (user && user.role === 'student' && existingApplication && ['pending', 'under_review', 'approved'].includes(existingApplication.status)) {
     return (
       <Box sx={{ minHeight: '100vh', background: 'white', pt: { xs: 12, md: 14 }, pb: 8 }}>
         <Container maxWidth="md">
@@ -391,7 +387,8 @@ const AmbassadorApply = () => {
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            disabled
+                            disabled={user && user.role === 'student'}
+                            helperText={user && user.role === 'student' ? 'Pre-filled from your account' : ''}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -403,7 +400,8 @@ const AmbassadorApply = () => {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            disabled
+                            disabled={user && user.role === 'student'}
+                            helperText={user && user.role === 'student' ? 'Pre-filled from your account' : ''}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -414,7 +412,8 @@ const AmbassadorApply = () => {
                             value={formData.phone}
                             onChange={handleChange}
                             required
-                            disabled
+                            disabled={user && user.role === 'student'}
+                            helperText={user && user.role === 'student' ? 'Pre-filled from your account' : ''}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>

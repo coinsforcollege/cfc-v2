@@ -1,0 +1,29 @@
+{
+  "collectionName": "components_content_images",
+  "info": {
+    "displayName": "Image",
+    "icon": "picture",
+    "description": "Single image with caption"
+  },
+  "options": {},
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "caption": {
+      "type": "string"
+    },
+    "alternativeText": {
+      "type": "string"
+    },
+    "width": {
+      "type": "enumeration",
+      "enum": ["full", "large", "medium", "small"],
+      "default": "full"
+    }
+  }
+}
+

@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_content_editor_blocks",
+  "info": {
+    "displayName": "Text Block",
+    "icon": "align-left",
+    "description": "Text content with visual editor"
+  },
+  "options": {},
+  "attributes": {
+    "body": {
+      "type": "blocks",
+      "required": true
+    }
+  }
+}
+

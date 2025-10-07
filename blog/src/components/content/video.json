@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_content_videos",
+  "info": {
+    "displayName": "Video",
+    "icon": "play-circle",
+    "description": "YouTube or Vimeo video embed"
+  },
+  "options": {},
+  "attributes": {
+    "videoUrl": {
+      "type": "string",
+      "required": true,
+      "regex": "^(https?:\\/\\/)?(www\\.)?(youtube\\.com|youtu\\.be|vimeo\\.com)\\/.*$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "aspectRatio": {
+      "type": "enumeration",
+      "enum": ["16:9", "4:3", "1:1"],
+      "default": "16:9"
+    }
+  }
+}
+

@@ -1,0 +1,31 @@
+{
+  "collectionName": "components_seo_meta_tags",
+  "info": {
+    "displayName": "Meta Tags",
+    "icon": "search",
+    "description": "SEO meta tags"
+  },
+  "options": {},
+  "attributes": {
+    "metaTitle": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "metaDescription": {
+      "type": "text",
+      "maxLength": 160
+    },
+    "keywords": {
+      "type": "string"
+    },
+    "canonicalURL": {
+      "type": "string"
+    },
+    "ogImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}
+

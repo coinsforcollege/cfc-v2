@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_content_image_sliders",
+  "info": {
+    "displayName": "Image Slider",
+    "icon": "images",
+    "description": "Multiple images in a slider/carousel"
+  },
+  "options": {},
+  "attributes": {
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "autoplay": {
+      "type": "boolean",
+      "default": false
+    },
+    "interval": {
+      "type": "integer",
+      "default": 3000
+    }
+  }
+}
+

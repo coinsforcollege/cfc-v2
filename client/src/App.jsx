@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 import AuthLayout from './layouts/AuthLayout';
 import RootLayout from './layouts/RootLayout';
 import Login from './pages/auth/Login';
@@ -17,6 +18,8 @@ import HowItWorksColleges from './pages/public/HowItWorksColleges';
 import CollegeBrowse from './pages/public/CollegeBrowse';
 import CollegeView from './pages/public/CollegeView';
 import AmbassadorApply from './pages/public/AmbassadorApply';
+import BlogList from './pages/public/BlogList';
+import BlogPost from './pages/public/BlogPost';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -42,6 +45,8 @@ function App() {
         <Route path="how-it-works/colleges" element={<HowItWorksColleges />} />
         <Route path="colleges" element={<CollegeBrowse />} />
         <Route path="colleges/:id" element={<CollegeView />} />
+        <Route path="blog" element={<BlogList />} />
+        <Route path="blog/:slug" element={<BlogPost />} />
         <Route path="ambassador/apply" element={<AmbassadorApply />} />
         <Route
           path="auth"
@@ -66,10 +71,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
-        <AuthProvider>
-          <RouterProvider router={router} />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <RouterProvider router={router} />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </AuthProvider>
+        </ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

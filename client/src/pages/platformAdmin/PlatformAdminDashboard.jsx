@@ -53,6 +53,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { platformAdminApi } from '../../api/platformAdmin.api';
 import { ambassadorApi } from '../../api/ambassador.api';
+import apiClient from '../../api/apiClient';
 
 const SIDEBAR_WIDTH = 260;
 
@@ -65,6 +66,7 @@ const PlatformAdminDashboard = () => {
   const [colleges, setColleges] = useState([]);
   const [applications, setApplications] = useState([]);
   const [applicationStats, setApplicationStats] = useState(null);
+  const [subscribers, setSubscribers] = useState([]);
   const [activeSection, setActiveSection] = useState('overview');
   const [studentSearch, setStudentSearch] = useState('');
   const [collegeSearch, setCollegeSearch] = useState('');
@@ -120,13 +122,19 @@ const PlatformAdminDashboard = () => {
     fetchData();
   }, [user, navigate]);
 
+  useEffect(() => {
+    if (activeSection === 'subscribers') {
+      fetchSubscribers();
+    }
+  }, [activeSection]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
       const [statsRes, studentsRes, collegesRes, applicationsRes] = await Promise.all([
         platformAdminApi.getStats(),
-        platformAdminApi.getAllStudents(),
-        platformAdminApi.getAllColleges(),
+        platformAdminApi.getAllStudents({ limit: 1000 }),
+        platformAdminApi.getAllColleges({ limit: 1000 }),
         ambassadorApi.getAllApplications()
       ]);
       setStats(statsRes.data.stats);
@@ -140,6 +148,17 @@ const PlatformAdminDashboard = () => {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubscribers = async () => {
+    try {
+      const response = await apiClient.get('/blog/subscribers');
+      if (response.success) {
+        setSubscribers(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
     }
   };
 
@@ -1229,6 +1248,129 @@ const PlatformAdminDashboard = () => {
     );
   };
 
+  const renderSubscribers = () => {
+    const handleExportCSV = () => {
+      const csv = subscribers.map(s => 
+        `${s.email},${s.name || ''},${s.active ? 'Active' : 'Unsubscribed'},${new Date(s.createdAt).toLocaleDateString()}`
+      ).join('\n');
+      const blob = new Blob(['Email,Name,Status,Subscribed Date\n' + csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `subscribers_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    };
+
+    const handleDeleteSubscriber = async (id) => {
+      if (!confirm('Are you sure you want to delete this subscriber?')) return;
+      
+      try {
+        const response = await apiClient.delete(`/blog/subscribers/${id}`);
+        if (response.success) {
+          fetchSubscribers();
+        }
+      } catch (error) {
+        console.error('Error deleting subscriber:', error);
+        alert('Failed to delete subscriber');
+      }
+    };
+
+    return (
+      <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Newsletter Subscribers ({subscribers.length})
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleExportCSV}
+              disabled={subscribers.length === 0}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                px: 3,
+                fontWeight: 600,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                }
+              }}
+            >
+              Export to CSV
+            </Button>
+          </Box>
+
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ background: '#f8fafc' }}>
+                  <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Subscribed Date</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {subscribers.map((subscriber) => (
+                  <TableRow 
+                    key={subscriber.id}
+                    sx={{ '&:hover': { background: '#f9fafb' } }}
+                  >
+                    <TableCell>{subscriber.email}</TableCell>
+                    <TableCell>{subscriber.name || '-'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={subscriber.active ? 'Active' : 'Unsubscribed'}
+                        size="small"
+                        sx={{
+                          background: subscriber.active 
+                            ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                            : '#e5e7eb',
+                          color: subscriber.active ? 'white' : '#6b7280',
+                          fontWeight: 600
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {new Date(subscriber.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteSubscriber(subscriber.id)}
+                        sx={{ 
+                          color: '#ef4444',
+                          '&:hover': {
+                            background: '#fee2e2'
+                          }
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {subscribers.length === 0 && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="body2" color="text.secondary">
+                No subscribers yet
+              </Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case 'overview':
@@ -1239,6 +1381,8 @@ const PlatformAdminDashboard = () => {
         return renderColleges();
       case 'submissions':
         return renderSubmissions();
+      case 'subscribers':
+        return renderSubscribers();
       default:
         return renderOverview();
     }
@@ -1400,6 +1544,41 @@ const PlatformAdminDashboard = () => {
                 ml: 1,
                 background: activeSection === 'submissions' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
                 color: activeSection === 'submissions' ? 'white' : '#64748b',
+                fontWeight: 600
+              }} 
+            />
+          </ListItemButton>
+
+          <ListItemButton
+            selected={activeSection === 'subscribers'}
+            onClick={() => {
+              setActiveSection('subscribers');
+              setShowCollegeForm(false);
+            }}
+            sx={{
+              borderRadius: 2,
+              mb: 1,
+              '&.Mui-selected': {
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                },
+                '& .MuiListItemIcon-root': { color: 'white' }
+              }
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <Email />
+            </ListItemIcon>
+            <ListItemText primary="Subscribers" />
+            <Chip 
+              label={subscribers.length} 
+              size="small" 
+              sx={{ 
+                ml: 1,
+                background: activeSection === 'subscribers' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+                color: activeSection === 'subscribers' ? 'white' : '#64748b',
                 fontWeight: 600
               }} 
             />

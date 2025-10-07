@@ -166,6 +166,19 @@ const Header = () => {
               >
                 Network Map
               </Link>
+              <Link 
+                to="/blog" 
+                style={{ 
+                  textDecoration: 'none', 
+                  color: '#111827', 
+                  fontSize: '0.95rem',
+                  transition: 'color 0.3s ease',
+                }}
+                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
+                onMouseLeave={(e) => e.target.style.color = '#111827'}
+              >
+                Updates
+              </Link>
             </Box>
           )}
 
@@ -334,6 +347,13 @@ const Header = () => {
                 onClick={toggleMobileMenu}
               >
                 Network Map
+              </Link>
+              <Link 
+                to="/blog" 
+                style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
+                onClick={toggleMobileMenu}
+              >
+                Updates
               </Link>
             </Box>
 

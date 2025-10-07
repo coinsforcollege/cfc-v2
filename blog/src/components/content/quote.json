@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_content_quotes",
+  "info": {
+    "displayName": "Quote",
+    "icon": "quote-right",
+    "description": "Blockquote with author attribution"
+  },
+  "options": {},
+  "attributes": {
+    "text": {
+      "type": "text",
+      "required": true
+    },
+    "author": {
+      "type": "string"
+    },
+    "authorTitle": {
+      "type": "string"
+    }
+  }
+}
+
