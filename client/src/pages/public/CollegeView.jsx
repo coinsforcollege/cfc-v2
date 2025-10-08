@@ -34,6 +34,8 @@ import {
   AccessTime
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
+import { useToast } from '../../contexts/ToastContext';
 import apiClient from '../../api/apiClient';
 import { studentApi } from '../../api/student.api';
 import { miningApi } from '../../api/mining.api';
@@ -42,6 +44,8 @@ const CollegeView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
+  const { miningStatus: wsMiningStatus } = useMiningWebSocket();
   const [college, setCollege] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inMiningList, setInMiningList] = useState(false);
@@ -53,15 +57,23 @@ const CollegeView = () => {
     fetchCollege();
     if (user && user.role === 'student') {
       checkMiningStatus();
-      
-      // Update mining status every 5 seconds while on the page
-      const interval = setInterval(() => {
-        checkMiningStatus();
-      }, 5000);
-      
-      return () => clearInterval(interval);
     }
   }, [id, user]);
+
+  // Update mining status from WebSocket
+  useEffect(() => {
+    if (wsMiningStatus) {
+      const miningColleges = wsMiningStatus.miningColleges || [];
+      const inList = miningColleges.some(mc => mc.college && (mc.college._id === id || mc.college === id));
+      setInMiningList(inList);
+      
+      // Check if actively mining
+      const activeSessions = wsMiningStatus.activeSessions || [];
+      const activeSession = activeSessions.find(s => s.college && (s.college._id === id || s.college === id));
+      setIsActivelyMining(!!activeSession && activeSession.isActive);
+      setMiningStatus(activeSession || null);
+    }
+  }, [wsMiningStatus, id]);
 
   const fetchCollege = async () => {
     try {
@@ -98,9 +110,11 @@ const CollegeView = () => {
     try {
       setActionLoading(true);
       await studentApi.addCollege({ collegeId: id });
+      showToast('College added to mining list!', 'success');
       await checkMiningStatus();
     } catch (error) {
       console.error('Error adding to mining list:', error);
+      showToast(error.message || 'Failed to add college to mining list', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -115,9 +129,11 @@ const CollegeView = () => {
       }
       // Then start mining
       await miningApi.startMining(id);
+      showToast('Mining started successfully!', 'success');
       await checkMiningStatus();
     } catch (error) {
       console.error('Error starting mining:', error);
+      showToast(error.message || 'Failed to start mining', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -127,9 +143,11 @@ const CollegeView = () => {
     try {
       setActionLoading(true);
       await miningApi.stopMining(id);
+      showToast('Mining stopped successfully!', 'success');
       await checkMiningStatus();
     } catch (error) {
       console.error('Error stopping mining:', error);
+      showToast(error.message || 'Failed to stop mining', 'error');
     } finally {
       setActionLoading(false);
     }

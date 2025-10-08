@@ -34,6 +34,8 @@ import {
   CheckCircle
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
+import { useToast } from '../../contexts/ToastContext';
 import { studentApi } from '../../api/student.api';
 import { miningApi } from '../../api/mining.api';
 import { collegesApi } from '../../api/colleges.api';
@@ -55,6 +57,8 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
+  const { miningStatus: wsMiningStatus, isConnected: wsConnected, error: wsError } = useMiningWebSocket();
   const [dashboard, setDashboard] = useState(null);
   const [currentLogIndex, setCurrentLogIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -90,22 +94,41 @@ const StudentDashboard = () => {
     }
   }, []);
 
-  const fetchMiningStatus = useCallback(async () => {
-    try {
-      const response = await miningApi.getMiningStatus();
-      if (response.success) {
-        const statusMap = {};
-        response.data.activeSessions.forEach(session => {
-          if (session.college) {
-            statusMap[session.college._id] = session;
-          }
-        });
-        setMiningStatus(statusMap);
-      }
-    } catch (err) {
-      console.error('Failed to fetch mining status:', err);
+  // Update mining status from WebSocket
+  useEffect(() => {
+    if (wsMiningStatus) {
+      const statusMap = {};
+      wsMiningStatus.activeSessions?.forEach(session => {
+        if (session.college) {
+          statusMap[session.college._id] = session;
+        }
+      });
+      setMiningStatus(statusMap);
+      
+      // Update dashboard with WebSocket data, preserving existing summary data
+      setDashboard(prev => ({
+        ...prev,
+        miningColleges: wsMiningStatus.miningColleges,
+        activeSessions: wsMiningStatus.activeSessions,
+        wallets: wsMiningStatus.wallets,
+        earningRate: wsMiningStatus.earningRate
+      }));
+      
+      // Log token updates for debugging
+      wsMiningStatus.activeSessions?.forEach(session => {
+        if (session.college && session.isActive && session.remainingHours > 0) {
+          console.log(`💰 ${session.college.name}: ${session.currentTokens.toFixed(4)} tokens (${session.remainingHours.toFixed(1)}h remaining)`);
+        }
+      });
     }
-  }, []);
+  }, [wsMiningStatus]);
+
+  // Show WebSocket connection status
+  useEffect(() => {
+    if (wsError) {
+      showToast(`WebSocket Error: ${wsError}`, 'error');
+    }
+  }, [wsError, showToast]);
 
   useEffect(() => {
     if (!user || user.role !== 'student') {
@@ -115,23 +138,16 @@ const StudentDashboard = () => {
     
     // Initial fetch
     fetchDashboard();
-    fetchMiningStatus();
     
-    // Update mining status every 5 seconds
-    const miningInterval = setInterval(() => {
-      fetchMiningStatus();
-    }, 5000);
-    
-    // Update dashboard data (balances, summary) every 10 seconds
+    // Update dashboard data every 30 seconds (less frequent since WebSocket handles mining updates)
     const dashboardInterval = setInterval(() => {
       fetchDashboard();
-    }, 10000);
+    }, 30000);
     
     return () => {
-      clearInterval(miningInterval);
       clearInterval(dashboardInterval);
     };
-  }, [user, navigate, fetchDashboard, fetchMiningStatus]);
+  }, [user, navigate, fetchDashboard]);
 
   // Rotate blockchain logs continuously
   useEffect(() => {
@@ -146,11 +162,12 @@ const StudentDashboard = () => {
       setActionLoading(`start-${collegeId}`);
       const response = await miningApi.startMining(collegeId);
       if (response.success) {
+        showToast('Mining started successfully!', 'success');
         fetchDashboard();
-        fetchMiningStatus();
       }
     } catch (err) {
       console.error('Failed to start mining:', err);
+      showToast(err.message || 'Failed to start mining', 'error');
     } finally {
       setActionLoading('');
     }
@@ -161,11 +178,12 @@ const StudentDashboard = () => {
       setActionLoading(`stop-${collegeId}`);
       const response = await miningApi.stopMining(collegeId);
       if (response.success) {
+        showToast('Mining stopped successfully!', 'success');
         fetchDashboard();
-        fetchMiningStatus();
       }
     } catch (err) {
       console.error('Failed to stop mining:', err);
+      showToast(err.message || 'Failed to stop mining', 'error');
     } finally {
       setActionLoading('');
     }
@@ -237,8 +255,8 @@ const StudentDashboard = () => {
   }, [miningStatus]);
 
   const totalBalance = useMemo(() => {
-    return (dashboard?.summary.totalBalance || 0) + totalMiningTokens;
-  }, [dashboard?.summary.totalBalance, totalMiningTokens]);
+    return (dashboard?.summary?.totalBalance || 0) + totalMiningTokens;
+  }, [dashboard?.summary?.totalBalance, totalMiningTokens]);
 
   if (loading) {
     return (
@@ -384,7 +402,7 @@ const StudentDashboard = () => {
               Rate
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              {dashboard?.summary.earningRate.total.toFixed(2)}
+              {dashboard?.summary?.earningRate?.total?.toFixed(2) || '0.00'}
             </Typography>
           </CardContent>
         </Card>
@@ -537,7 +555,7 @@ const StudentDashboard = () => {
                 Referrals: <strong>{dashboard?.student.totalReferrals}</strong>
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.95 }}>
-                Bonus: <strong>+{(dashboard?.summary.earningRate.referralBonus).toFixed(1)}/hr</strong>
+                Bonus: <strong>+{(dashboard?.summary?.earningRate?.referralBonus || 0).toFixed(1)}/hr</strong>
               </Typography>
             </CardContent>
           </Card>
@@ -577,7 +595,7 @@ const StudentDashboard = () => {
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
         {dashboard?.miningColleges.filter(mc => mc.college).map((mc) => {
           const session = miningStatus[mc.college._id];
-          const wallet = dashboard.wallets.find(w => w.college && w.college._id === mc.college._id);
+          const wallet = dashboard?.wallets?.find(w => w.college && w.college._id === mc.college._id);
           const isActive = session && session.isActive && session.remainingHours > 0;
 
           return (

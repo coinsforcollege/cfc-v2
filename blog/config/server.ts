@@ -5,5 +5,5 @@ export default ({ env }) => ({
     keys: env.array('APP_KEYS'),
   },
   proxy: { koa: true },
-  url: 'https://cfc-v2-blog.onrender.com',
+  url: env('PUBLIC_URL', 'http://localhost:1337'),
 });

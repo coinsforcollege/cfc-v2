@@ -2,6 +2,7 @@ import MiningSession from '../models/Mining.js';
 import Wallet from '../models/Wallet.js';
 import User from '../models/User.js';
 import College from '../models/College.js';
+import { broadcastMiningUpdate } from '../websocket/miningSocket.js';
 
 // @desc    Start mining for a college
 // @route   POST /api/mining/start/:collegeId
@@ -10,6 +11,44 @@ export const startMining = async (req, res, next) => {
   try {
     const { collegeId } = req.params;
     const studentId = req.user.id;
+
+    // First, auto-stop any expired sessions for this student
+    const now = new Date();
+    const expiredSessions = await MiningSession.find({
+      student: studentId,
+      isActive: true,
+      endTime: { $lte: now }
+    });
+
+    // Stop expired sessions
+    for (const session of expiredSessions) {
+      const miningDuration = (session.endTime - session.startTime) / (1000 * 60 * 60);
+      const tokensEarned = miningDuration * session.earningRate;
+
+      session.isActive = false;
+      session.tokensEarned = tokensEarned;
+      await session.save();
+
+      // Update wallet
+      await Wallet.findOneAndUpdate(
+        { student: session.student, college: session.college },
+        {
+          $inc: {
+            balance: tokensEarned,
+            totalMined: tokensEarned
+          },
+          lastUpdated: now
+        }
+      );
+
+      // Update college stats
+      await College.findByIdAndUpdate(session.college, {
+        $inc: {
+          'stats.activeMiners': -1,
+          'stats.totalTokensMined': tokensEarned
+        }
+      });
+    }
 
     // Check if college exists
     const college = await College.findById(collegeId);
@@ -94,6 +133,9 @@ export const startMining = async (req, res, next) => {
         wallet
       }
     });
+
+    // Broadcast mining update via WebSocket
+    await broadcastMiningUpdate(studentId);
   } catch (error) {
     next(error);
   }
@@ -161,6 +203,9 @@ export const stopMining = async (req, res, next) => {
         wallet
       }
     });
+
+    // Broadcast mining update via WebSocket
+    await broadcastMiningUpdate(studentId);
   } catch (error) {
     next(error);
   }
