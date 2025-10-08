@@ -7,6 +7,9 @@ import User from '../models/User.js';
 const userConnections = new Map();
 // Track users with active mining sessions
 const usersWithActiveMining = new Set();
+// Cache mining sessions data to avoid repeated DB queries
+// Structure: Map<userId, { sessions: Array, wallets: Array, miningColleges: Array, earningRate: Object, lastFetched: Date }>
+const userMiningCache = new Map();
 
 // Authenticate WebSocket connection
 const authenticateSocket = async (socket, next) => {
@@ -46,6 +49,17 @@ export const setupWebSocketHandlers = (io) => {
       try {
         const miningStatus = await getMiningStatusForUser(socket.userId);
         socket.emit('miningStatus', miningStatus);
+        
+        // Add/remove user from active mining tracking based on active sessions
+        const hasActiveSessions = miningStatus.activeSessions?.some(session => 
+          session.isActive && session.remainingHours > 0
+        );
+        
+        if (hasActiveSessions) {
+          usersWithActiveMining.add(socket.userId);
+        } else {
+          usersWithActiveMining.delete(socket.userId);
+        }
       } catch (error) {
         socket.emit('error', { message: 'Failed to fetch mining status' });
       }
@@ -55,37 +69,98 @@ export const setupWebSocketHandlers = (io) => {
     socket.on('disconnect', () => {
       console.log(`🔌 User ${socket.userId} disconnected from mining WebSocket`);
       userConnections.delete(socket.userId);
+      usersWithActiveMining.delete(socket.userId);
     });
   });
 
   // Send periodic updates every 5 seconds to users with active mining sessions
   setInterval(async () => {
-    // Only send updates to users who have active mining sessions
+    const now = Date.now();
+    
+    // Batch process all users in parallel for better performance
+    const updatePromises = [];
+    
     for (const userId of usersWithActiveMining) {
       const socket = userConnections.get(userId);
       if (socket) {
-        try {
-          const miningStatus = await getMiningStatusForUser(userId);
-          socket.emit('miningStatus', miningStatus);
-          
-          // Check if user still has active sessions
-          const hasActiveSessions = miningStatus.activeSessions?.some(session => 
-            session.isActive && session.remainingHours > 0
-          );
-          
-          if (!hasActiveSessions) {
-            usersWithActiveMining.delete(userId);
+        // Use cached data to calculate current tokens without DB query
+        const updatePromise = (async () => {
+          try {
+            const miningStatus = await getMiningStatusForUserOptimized(userId, now);
+            socket.emit('miningStatus', miningStatus);
+            
+            // Check if user still has active sessions
+            const hasActiveSessions = miningStatus.activeSessions?.some(session => 
+              session.isActive && session.remainingHours > 0
+            );
+            
+            if (!hasActiveSessions) {
+              usersWithActiveMining.delete(userId);
+              userMiningCache.delete(userId); // Clear cache when mining stops
+            }
+          } catch (error) {
+            console.error(`Error sending periodic update to user ${userId}:`, error);
           }
-        } catch (error) {
-          console.error(`Error sending periodic update to user ${userId}:`, error);
-        }
+        })();
+        
+        updatePromises.push(updatePromise);
+      } else {
+        // Clean up tracking for disconnected users
+        usersWithActiveMining.delete(userId);
+        userMiningCache.delete(userId);
       }
     }
+    
+    // Wait for all updates to complete in parallel
+    await Promise.all(updatePromises);
   }, 5000); // Update every 5 seconds
 };
 
+// Optimized function that uses cached data for periodic updates
+const getMiningStatusForUserOptimized = async (userId, currentTime) => {
+  try {
+    const cached = userMiningCache.get(userId);
+    
+    // If cache is missing or stale (>30 seconds), refresh from DB
+    if (!cached || (Date.now() - cached.lastFetched) > 30000) {
+      return await getMiningStatusForUser(userId, true);
+    }
+    
+    // Use cached session data, only recalculate time-based values
+    const now = new Date(currentTime);
+    const sessionsWithCurrentTokens = cached.sessions.map(session => {
+      const miningDuration = (now - new Date(session.startTime)) / (1000 * 60 * 60);
+      const currentTokens = miningDuration * session.earningRate;
+      const remainingTime = new Date(session.endTime) - now;
+      const remainingHours = Math.max(0, remainingTime / (1000 * 60 * 60));
+
+      return {
+        college: session.college,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        earningRate: session.earningRate,
+        currentTokens: Math.max(0, currentTokens),
+        remainingHours: remainingHours,
+        isActive: remainingHours > 0,
+        sessionId: session.sessionId
+      };
+    });
+
+    return {
+      miningColleges: cached.miningColleges,
+      activeSessions: sessionsWithCurrentTokens,
+      wallets: cached.wallets,
+      earningRate: cached.earningRate
+    };
+  } catch (error) {
+    console.error('Error in optimized mining status:', error);
+    // Fall back to full DB query on error
+    return await getMiningStatusForUser(userId, true);
+  }
+};
+
 // Get mining status for a specific user
-const getMiningStatusForUser = async (userId) => {
+const getMiningStatusForUser = async (userId, updateCache = true) => {
   try {
     // Get student info
     const student = await User.findById(userId)
@@ -121,7 +196,7 @@ const getMiningStatusForUser = async (userId) => {
       };
     });
 
-    return {
+    const result = {
       miningColleges: student.studentProfile.miningColleges,
       activeSessions: sessionsWithCurrentTokens,
       wallets,
@@ -131,6 +206,25 @@ const getMiningStatusForUser = async (userId) => {
         total: student.studentProfile.baseEarningRate + student.studentProfile.referralBonus
       }
     };
+
+    // Update cache if requested
+    if (updateCache) {
+      userMiningCache.set(userId, {
+        sessions: activeSessions.map(session => ({
+          college: session.college,
+          startTime: session.startTime,
+          endTime: session.endTime,
+          earningRate: session.earningRate,
+          sessionId: session._id
+        })),
+        wallets: result.wallets,
+        miningColleges: result.miningColleges,
+        earningRate: result.earningRate,
+        lastFetched: Date.now()
+      });
+    }
+
+    return result;
   } catch (error) {
     console.error('Error getting mining status for user:', error);
     throw error;
@@ -140,9 +234,12 @@ const getMiningStatusForUser = async (userId) => {
 // Broadcast mining status update to a specific user
 export const broadcastMiningUpdate = async (userId) => {
   try {
+    // Clear cache to force fresh DB query (mining state changed)
+    userMiningCache.delete(userId);
+    
     const socket = userConnections.get(userId);
     if (socket) {
-      const miningStatus = await getMiningStatusForUser(userId);
+      const miningStatus = await getMiningStatusForUser(userId, true);
       socket.emit('miningStatus', miningStatus);
       
       // Update tracking of users with active mining
