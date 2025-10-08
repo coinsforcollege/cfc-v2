@@ -3,13 +3,16 @@ import MiningSession from '../models/Mining.js';
 import Wallet from '../models/Wallet.js';
 import User from '../models/User.js';
 
-// Store active connections by user ID
+// Store active connections by user ID (supports multiple devices per user)
+// Structure: Map<userId, Set<socketId>>
 const userConnections = new Map();
 // Track users with active mining sessions
 const usersWithActiveMining = new Set();
 // Cache mining sessions data to avoid repeated DB queries
 // Structure: Map<userId, { sessions: Array, wallets: Array, miningColleges: Array, earningRate: Object, lastFetched: Date }>
 const userMiningCache = new Map();
+// Store socket.io instance for room-based broadcasting
+let ioInstance = null;
 
 // Authenticate WebSocket connection
 const authenticateSocket = async (socket, next) => {
@@ -32,14 +35,20 @@ const authenticateSocket = async (socket, next) => {
 
 // Setup WebSocket handlers
 export const setupWebSocketHandlers = (io) => {
+  // Store io instance for room-based broadcasting
+  ioInstance = io;
+  
   // Apply authentication middleware
   io.use(authenticateSocket);
 
   io.on('connection', (socket) => {
-    console.log(`🔌 User ${socket.userId} connected to mining WebSocket`);
+    console.log(`🔌 User ${socket.userId} connected to mining WebSocket (socket: ${socket.id})`);
     
-    // Store user connection
-    userConnections.set(socket.userId, socket);
+    // Store user connection (support multiple devices)
+    if (!userConnections.has(socket.userId)) {
+      userConnections.set(socket.userId, new Set());
+    }
+    userConnections.get(socket.userId).add(socket.id);
     
     // Join user to their personal room for targeted updates
     socket.join(`user:${socket.userId}`);
@@ -67,9 +76,20 @@ export const setupWebSocketHandlers = (io) => {
     
     // Handle disconnect
     socket.on('disconnect', () => {
-      console.log(`🔌 User ${socket.userId} disconnected from mining WebSocket`);
-      userConnections.delete(socket.userId);
-      usersWithActiveMining.delete(socket.userId);
+      console.log(`🔌 User ${socket.userId} disconnected from mining WebSocket (socket: ${socket.id})`);
+      
+      // Remove this specific socket from user's connections
+      const userSockets = userConnections.get(socket.userId);
+      if (userSockets) {
+        userSockets.delete(socket.id);
+        
+        // If user has no more connections, clean up completely
+        if (userSockets.size === 0) {
+          userConnections.delete(socket.userId);
+          usersWithActiveMining.delete(socket.userId);
+          userMiningCache.delete(socket.userId);
+        }
+      }
     });
   });
 
@@ -81,13 +101,15 @@ export const setupWebSocketHandlers = (io) => {
     const updatePromises = [];
     
     for (const userId of usersWithActiveMining) {
-      const socket = userConnections.get(userId);
-      if (socket) {
+      const userSockets = userConnections.get(userId);
+      if (userSockets && userSockets.size > 0) {
         // Use cached data to calculate current tokens without DB query
         const updatePromise = (async () => {
           try {
             const miningStatus = await getMiningStatusForUserOptimized(userId, now);
-            socket.emit('miningStatus', miningStatus);
+            
+            // Broadcast to all devices of this user using room
+            ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
             
             // Check if user still has active sessions
             const hasActiveSessions = miningStatus.activeSessions?.some(session => 
@@ -231,16 +253,18 @@ const getMiningStatusForUser = async (userId, updateCache = true) => {
   }
 };
 
-// Broadcast mining status update to a specific user
+// Broadcast mining status update to a specific user (all their devices)
 export const broadcastMiningUpdate = async (userId) => {
   try {
     // Clear cache to force fresh DB query (mining state changed)
     userMiningCache.delete(userId);
     
-    const socket = userConnections.get(userId);
-    if (socket) {
+    const userSockets = userConnections.get(userId);
+    if (userSockets && userSockets.size > 0) {
       const miningStatus = await getMiningStatusForUser(userId, true);
-      socket.emit('miningStatus', miningStatus);
+      
+      // Broadcast to all devices of this user using room
+      ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
       
       // Update tracking of users with active mining
       const hasActiveSessions = miningStatus.activeSessions?.some(session => 
@@ -258,12 +282,15 @@ export const broadcastMiningUpdate = async (userId) => {
   }
 };
 
-// Broadcast mining status update to all connected users
+// Broadcast mining status update to all connected users (all devices)
 export const broadcastMiningUpdateToAll = async () => {
   try {
-    for (const [userId, socket] of userConnections) {
-      const miningStatus = await getMiningStatusForUser(userId);
-      socket.emit('miningStatus', miningStatus);
+    for (const [userId, userSockets] of userConnections) {
+      if (userSockets && userSockets.size > 0) {
+        const miningStatus = await getMiningStatusForUser(userId, false);
+        // Broadcast to all devices of this user using room
+        ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
+      }
     }
   } catch (error) {
     console.error('Error broadcasting mining update to all:', error);
