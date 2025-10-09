@@ -30,10 +30,8 @@ export const getAllColleges = async (req, res, next) => {
     }
 
     // Filter by status
-    if (status === 'active') {
-      query.isActive = true;
-    } else if (status === 'waitlist') {
-      query.isActive = false;
+    if (status && status !== 'all') {
+      query.status = status; // 'Unaffiliated', 'Waitlist', 'Building', 'Live'
     }
 
     // Get total count for pagination (before pagination)
@@ -57,7 +55,7 @@ export const getAllColleges = async (req, res, next) => {
 
     // Execute query
     const colleges = await College.find(query)
-      .select('name country city logo coverImage description tagline stats isActive type studentLife')
+      .select('name country city logo coverImage description tagline stats status admin type studentLife')
       .sort(sortOrder)
       .limit(parseInt(limit))
       .skip(skip);

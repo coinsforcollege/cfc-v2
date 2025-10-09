@@ -1,0 +1,7 @@
+things-to-fix
+
+# Uploaded files (user-generated content)
+server/public/images/logo/*
+!server/public/images/logo/.gitkeep
+server/public/images/cover/*
+!server/public/images/cover/.gitkeep

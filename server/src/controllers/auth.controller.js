@@ -7,7 +7,7 @@ import { generateToken } from '../utils/jwt.js';
 // @access  Public
 export const registerStudent = async (req, res, next) => {
   try {
-    const { name, email, phone, password, collegeId, newCollege, referralCode } = req.body;
+    const { name, email, phone, password, referralCode } = req.body;
 
     // Validation
     if (!name || !email || !phone || !password) {
@@ -26,53 +26,6 @@ export const registerStudent = async (req, res, next) => {
       });
     }
 
-    let college;
-
-    // Handle college selection/creation
-    if (collegeId) {
-      // Student selected existing college
-      college = await College.findById(collegeId);
-      if (!college) {
-        return res.status(404).json({
-          success: false,
-          message: 'College not found'
-        });
-      }
-    } else if (newCollege) {
-      // Student is creating a new college
-      const { name: collegeName, country, logo } = newCollege;
-      
-      if (!collegeName || !country) {
-        return res.status(400).json({
-          success: false,
-          message: 'College name and country are required'
-        });
-      }
-
-      // Check if college already exists
-      const existingCollege = await College.findOne({ 
-        name: { $regex: new RegExp(`^${collegeName}$`, 'i') },
-        country: country 
-      });
-
-      if (existingCollege) {
-        college = existingCollege;
-      } else {
-        // Create new college (student created, no admin yet)
-        college = await College.create({
-          name: collegeName,
-          country,
-          logo: logo || null,
-          createdBy: null // Will be set after user is created
-        });
-      }
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Please select or create a college'
-      });
-    }
-
     // Handle referral code if provided
     let referredByUser = null;
     if (referralCode) {
@@ -82,31 +35,21 @@ export const registerStudent = async (req, res, next) => {
       });
     }
 
-    // Create student user
+    // Create student user WITHOUT college initially
     const user = await User.create({
       name,
       email,
       phone,
       password,
       role: 'student',
-      college: college._id,
+      college: null, // No college yet
       studentProfile: {
-        miningColleges: [{
-          college: college._id,
-          addedAt: new Date()
-        }],
+        miningColleges: [], // Empty initially
         referredBy: referredByUser ? referredByUser._id : null,
         baseEarningRate: 0.25,
         referralBonus: 0
       }
     });
-
-    // Update college createdBy if it was just created by this student
-    if (!collegeId && newCollege) {
-      await College.findByIdAndUpdate(college._id, {
-        createdBy: user._id
-      });
-    }
 
     // Update referrer's referral count and bonus if applicable
     if (referredByUser) {
@@ -128,7 +71,7 @@ export const registerStudent = async (req, res, next) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      college: college,
+      college: null,
       studentProfile: user.studentProfile
     };
 
@@ -167,9 +110,9 @@ export const registerCollegeAdmin = async (req, res, next) => {
       });
     }
 
-    let college;
+    let college = null;
 
-    // Handle college selection/creation
+    // Handle college selection/creation (optional during registration)
     if (collegeId) {
       // Admin selected existing college
       college = await College.findById(collegeId);
@@ -189,7 +132,8 @@ export const registerCollegeAdmin = async (req, res, next) => {
       }
     } else if (newCollege) {
       // Admin is creating a new college
-      const { name: collegeName, country, logo } = newCollege;
+      const collegeData = JSON.parse(newCollege);
+      const { name: collegeName, country, logo } = collegeData;
       
       if (!collegeName || !country) {
         return res.status(400).json({
@@ -214,35 +158,50 @@ export const registerCollegeAdmin = async (req, res, next) => {
         }
         college = existingCollege;
       } else {
+        // Determine logo path
+        let logoPath = null;
+        
+        if (req.file) {
+          // File was uploaded
+          logoPath = `/images/logo/${req.file.filename}`;
+        } else if (logo) {
+          // URL was provided
+          logoPath = logo;
+        }
+
         // Create new college
         college = await College.create({
           name: collegeName,
           country,
-          logo: logo || null,
-          isOnWaitlist: true
+          logo: logoPath,
+          status: 'Unaffiliated'
         });
       }
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Please select or create a college'
-      });
     }
 
-    // Create college admin user
-    const user = await User.create({
+    // Create college admin user (with or without college)
+    const userPayload = {
       name,
       email,
       phone,
       password,
-      role: 'college_admin',
-      managedCollege: college._id
-    });
+      role: 'college_admin'
+    };
 
-    // Update college with admin reference
-    await College.findByIdAndUpdate(college._id, {
-      admin: user._id
-    });
+    // Add managedCollege only if college was selected/created
+    if (college) {
+      userPayload.managedCollege = college._id;
+    }
+
+    const user = await User.create(userPayload);
+
+    // Update college with admin reference and status if college was selected/created
+    if (college) {
+      await College.findByIdAndUpdate(college._id, {
+        admin: user._id,
+        status: 'Waitlist' // Move to Waitlist when admin joins
+      });
+    }
 
     // Generate JWT token
     const token = generateToken(user._id, user.role);
@@ -434,4 +393,3 @@ export const logout = async (req, res, next) => {
     next(error);
   }
 };
-

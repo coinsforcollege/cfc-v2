@@ -39,6 +39,38 @@ import { useToast } from '../../contexts/ToastContext';
 import apiClient from '../../api/apiClient';
 import { studentApi } from '../../api/student.api';
 import { miningApi } from '../../api/mining.api';
+import { getImageUrl } from '../../utils/imageUtils';
+
+// Helper function to get chip style based on status
+const getStatusChipStyle = (status) => {
+  switch(status) {
+    case 'Unaffiliated':
+      return {
+        background: 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+        color: 'white'
+      };
+    case 'Waitlist':
+      return {
+        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        color: 'white'
+      };
+    case 'Building':
+      return {
+        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+        color: 'white'
+      };
+    case 'Live':
+      return {
+        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        color: 'white'
+      };
+    default:
+      return {
+        background: '#e5e7eb',
+        color: '#6b7280'
+      };
+  }
+};
 
 const CollegeView = () => {
   const { id } = useParams();
@@ -182,7 +214,7 @@ const CollegeView = () => {
         <Box sx={{ 
           height: { xs: 250, md: 350 },
           background: college.coverImage 
-            ? `linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%), url(${college.coverImage})`
+            ? `linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%), url(${getImageUrl(college.coverImage)})`
             : `linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%), url(/images/college-banner-placeholder.jpeg)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -196,7 +228,7 @@ const CollegeView = () => {
         }}>
           {/* Logo on top left */}
           <Avatar
-            src={college.logo || '/images/college-logo-placeholder.png'}
+            src={getImageUrl(college.logo) || '/images/college-logo-placeholder.png'}
             sx={{ 
               width: 100,
               height: 100,
@@ -225,10 +257,9 @@ const CollegeView = () => {
           <Box sx={{ flex: 1, minWidth: '300px' }}>
             <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
               <Chip 
-                label={college.isActive ? 'Active' : 'Waitlist'}
+                label={college.status || 'Unaffiliated'}
                 sx={{ 
-                  background: college.isActive ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                  color: 'white',
+                  ...getStatusChipStyle(college.status),
                   fontWeight: 600
                 }}
               />

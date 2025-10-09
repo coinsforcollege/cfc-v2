@@ -20,7 +20,10 @@ import {
   IconButton,
   Paper,
   alpha,
-  useTheme
+  useTheme,
+  ToggleButtonGroup,
+  ToggleButton,
+  Avatar
 } from '@mui/material';
 import {
   AccountBalanceWallet,
@@ -31,7 +34,10 @@ import {
   Add,
   Refresh,
   ContentCopy,
-  CheckCircle
+  CheckCircle,
+  Close,
+  CloudUpload,
+  Link as LinkIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
@@ -69,6 +75,9 @@ const StudentDashboard = () => {
   const [selectedCollege, setSelectedCollege] = useState(null);
   const [newCollege, setNewCollege] = useState({ name: '', country: '', logo: '' });
   const [showNewCollegeForm, setShowNewCollegeForm] = useState(false);
+  const [logoInputType, setLogoInputType] = useState('url');
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
   const [actionLoading, setActionLoading] = useState('');
   const [justSetPrimary, setJustSetPrimary] = useState(null);
   const [copiedReferral, setCopiedReferral] = useState(false);
@@ -217,26 +226,93 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleLogoFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file', 'error');
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('File size should be less than 5MB', 'error');
+        return;
+      }
+
+      setLogoFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogoUrlChange = (url) => {
+    setNewCollege({ ...newCollege, logo: url });
+    setLogoPreview(url);
+  };
+
   const handleAddCollege = async () => {
     try {
       setActionLoading('add-college');
-      const data = selectedCollege 
-        ? { collegeId: selectedCollege._id }
-        : { newCollege };
+      
+      const formData = new FormData();
+      
+      if (selectedCollege) {
+        formData.append('collegeId', selectedCollege._id);
+      } else {
+        // Prepare new college data
+        const collegeData = {
+          name: newCollege.name,
+          country: newCollege.country
+        };
 
-      const response = await studentApi.addCollege(data);
+        // Add logo URL if provided (not file upload)
+        if (logoInputType === 'url' && newCollege.logo) {
+          collegeData.logo = newCollege.logo;
+        }
+
+        formData.append('newCollege', JSON.stringify(collegeData));
+
+        // Add file if uploaded
+        if (logoInputType === 'file' && logoFile) {
+          formData.append('logoFile', logoFile);
+        }
+      }
+
+      const response = await studentApi.addCollege(formData);
       if (response.success) {
         setShowAddCollegeDialog(false);
         setSelectedCollege(null);
         setNewCollege({ name: '', country: '', logo: '' });
         setShowNewCollegeForm(false);
+        setLogoFile(null);
+        setLogoPreview('');
+        setLogoInputType('url');
         fetchDashboard();
+        showToast('College added successfully!', 'success');
       }
     } catch (err) {
       console.error('Failed to add college:', err);
+      showToast(err.message || 'Failed to add college', 'error');
     } finally {
       setActionLoading('');
     }
+  };
+
+  const handleCloseAddCollegeDialog = () => {
+    setShowAddCollegeDialog(false);
+    setSelectedCollege(null);
+    setNewCollege({ name: '', country: '', logo: '' });
+    setShowNewCollegeForm(false);
+    setLogoFile(null);
+    setLogoPreview('');
+    setLogoInputType('url');
   };
 
   const copyReferralCode = useCallback(() => {
@@ -857,9 +933,39 @@ const StudentDashboard = () => {
       </Box>
 
       {/* Add College Dialog */}
-      <Dialog open={showAddCollegeDialog} onClose={() => setShowAddCollegeDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add College to Mining List</DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
+      <Dialog 
+        open={showAddCollegeDialog} 
+        onClose={handleCloseAddCollegeDialog} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
+          }
+        }}
+      >
+        {/* Header */}
+        <DialogTitle
+          sx={{
+            borderBottom: '1px solid #e2e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            py: 2.5,
+            px: 3
+          }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#2d3748' }}>
+            Add College to Mining List
+          </Typography>
+          <IconButton onClick={handleCloseAddCollegeDialog} size="small">
+            <Close />
+          </IconButton>
+        </DialogTitle>
+
+        {/* Content */}
+        <DialogContent sx={{ py: 4, px: 3 }}>
           {!showNewCollegeForm ? (
             <>
               <Autocomplete
@@ -868,15 +974,31 @@ const StudentDashboard = () => {
                 onInputChange={(e, value) => handleCollegeSearch(value)}
                 onChange={(e, value) => setSelectedCollege(value)}
                 renderInput={(params) => (
-                  <TextField {...params} label="Search College" placeholder="Start typing..." />
+                  <TextField 
+                    {...params} 
+                    label="Search College" 
+                    placeholder="Start typing college name..." 
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2
+                      }
+                    }}
+                  />
                 )}
+                sx={{ mb: 2 }}
               />
               <Button
-                size="small"
                 onClick={() => setShowNewCollegeForm(true)}
-                sx={{ mt: 2, color: '#8b5cf6', textTransform: 'none' }}
+                sx={{ 
+                  color: '#8b5cf6', 
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: 'rgba(139, 92, 246, 0.04)'
+                  }
+                }}
               >
-                + College not found? Add new
+                + College not found? Add new college
               </Button>
             </>
           ) : (
@@ -886,39 +1008,210 @@ const StudentDashboard = () => {
                 label="College Name"
                 value={newCollege.name}
                 onChange={(e) => setNewCollege({ ...newCollege, name: e.target.value })}
-                sx={{ mb: 2 }}
+                required
+                sx={{ 
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2
+                  }
+                }}
               />
               <TextField
                 fullWidth
                 label="Country"
                 value={newCollege.country}
                 onChange={(e) => setNewCollege({ ...newCollege, country: e.target.value })}
-                sx={{ mb: 2 }}
+                required
+                sx={{ 
+                  mb: 4,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2
+                  }
+                }}
               />
-              <TextField
-                fullWidth
-                label="Logo URL (Optional)"
-                value={newCollege.logo}
-                onChange={(e) => setNewCollege({ ...newCollege, logo: e.target.value })}
-              />
+
+              {/* Logo Upload Section */}
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#2d3748' }}>
+                  College Logo (Optional)
+                </Typography>
+
+                {/* Toggle between File and URL */}
+                <ToggleButtonGroup
+                  value={logoInputType}
+                  exclusive
+                  onChange={(e, value) => {
+                    if (value) {
+                      setLogoInputType(value);
+                      setLogoPreview('');
+                      setLogoFile(null);
+                      setNewCollege({ ...newCollege, logo: '' });
+                    }
+                  }}
+                  sx={{ mb: 3 }}
+                >
+                  <ToggleButton 
+                    value="file"
+                    sx={{
+                      textTransform: 'none',
+                      px: 2,
+                      py: 1
+                    }}
+                  >
+                    <CloudUpload sx={{ mr: 1, fontSize: 20 }} />
+                    Upload File
+                  </ToggleButton>
+                  <ToggleButton 
+                    value="url"
+                    sx={{
+                      textTransform: 'none',
+                      px: 2,
+                      py: 1
+                    }}
+                  >
+                    <LinkIcon sx={{ mr: 1, fontSize: 20 }} />
+                    Enter URL
+                  </ToggleButton>
+                </ToggleButtonGroup>
+
+                {/* File Upload */}
+                {logoInputType === 'file' && (
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      startIcon={<CloudUpload />}
+                      sx={{ 
+                        mb: 2,
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        borderColor: '#8b5cf6',
+                        color: '#8b5cf6',
+                        '&:hover': {
+                          borderColor: '#7c3aed',
+                          backgroundColor: 'rgba(139, 92, 246, 0.04)'
+                        }
+                      }}
+                    >
+                      Choose Image
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/*"
+                        onChange={handleLogoFileChange}
+                      />
+                    </Button>
+                    {logoFile && (
+                      <Typography variant="body2" color="text.secondary">
+                        Selected: {logoFile.name}
+                      </Typography>
+                    )}
+                  </Box>
+                )}
+
+                {/* URL Input */}
+                {logoInputType === 'url' && (
+                  <TextField
+                    fullWidth
+                    label="Logo URL"
+                    value={newCollege.logo}
+                    onChange={(e) => handleLogoUrlChange(e.target.value)}
+                    placeholder="https://example.com/logo.png"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Logo Preview */}
+                {logoPreview && (
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: '#2d3748' }}>
+                      Preview:
+                    </Typography>
+                    <Avatar
+                      src={logoPreview}
+                      sx={{
+                        width: 120,
+                        height: 120,
+                        border: '3px solid #e2e8f0',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <School sx={{ fontSize: 50 }} />
+                    </Avatar>
+                  </Box>
+                )}
+              </Box>
+
               <Button
-                size="small"
-                onClick={() => setShowNewCollegeForm(false)}
-                sx={{ mt: 2, color: '#8b5cf6', textTransform: 'none' }}
+                onClick={() => {
+                  setShowNewCollegeForm(false);
+                  setLogoFile(null);
+                  setLogoPreview('');
+                  setLogoInputType('url');
+                }}
+                sx={{ 
+                  color: '#8b5cf6', 
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: 'rgba(139, 92, 246, 0.04)'
+                  }
+                }}
               >
                 ← Back to search
               </Button>
             </>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowAddCollegeDialog(false)}>Cancel</Button>
+
+        {/* Actions */}
+        <DialogActions
+          sx={{
+            borderTop: '1px solid #e2e8f0',
+            px: 3,
+            py: 2.5,
+            gap: 1
+          }}
+        >
+          <Button 
+            onClick={handleCloseAddCollegeDialog}
+            size="large"
+            sx={{
+              textTransform: 'none',
+              color: '#64748b',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: 'rgba(100, 116, 139, 0.04)'
+              }
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleAddCollege}
-            disabled={(!selectedCollege && !newCollege.name) || actionLoading === 'add-college'}
+            disabled={(!selectedCollege && (!newCollege.name || !newCollege.country)) || actionLoading === 'add-college'}
             variant="contained"
+            size="large"
+            sx={{
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+              px: 4,
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: 2,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)'
+              },
+              '&:disabled': {
+                background: '#e2e8f0',
+                color: '#94a3b8'
+              }
+            }}
           >
-            {actionLoading === 'add-college' ? <CircularProgress size={20} /> : 'Add College'}
+            {actionLoading === 'add-college' ? <CircularProgress size={20} color="inherit" /> : 'Add College'}
           </Button>
         </DialogActions>
       </Dialog>

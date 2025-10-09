@@ -33,6 +33,38 @@ import {
   Sort
 } from '@mui/icons-material';
 import apiClient from '../../api/apiClient';
+import { getImageUrl } from '../../utils/imageUtils';
+
+// Helper function to get chip style based on status
+const getStatusChipStyle = (status) => {
+  switch(status) {
+    case 'Unaffiliated':
+      return {
+        background: 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+        color: 'white'
+      };
+    case 'Waitlist':
+      return {
+        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        color: 'white'
+      };
+    case 'Building':
+      return {
+        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+        color: 'white'
+      };
+    case 'Live':
+      return {
+        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        color: 'white'
+      };
+    default:
+      return {
+        background: '#e5e7eb',
+        color: '#6b7280'
+      };
+  }
+};
 
 const CollegeBrowse = () => {
   const navigate = useNavigate();
@@ -63,6 +95,9 @@ const CollegeBrowse = () => {
   const statusFilter = searchParams.get('status') || 'all';
   const typeFilter = searchParams.get('type') || '';
   const sortBy = searchParams.get('sort') || 'tokens';
+  
+  // Local state for search input (to prevent focus loss)
+  const [searchInput, setSearchInput] = useState(searchTerm);
 
   // Update URL params
   const updateFilters = (updates) => {
@@ -80,6 +115,22 @@ const CollegeBrowse = () => {
     }
     setSearchParams(newParams);
   };
+
+  // Sync searchInput with URL searchTerm
+  useEffect(() => {
+    setSearchInput(searchTerm);
+  }, [searchTerm]);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== searchTerm) {
+        updateFilters({ search: searchInput });
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   useEffect(() => {
     fetchColleges();
@@ -245,8 +296,8 @@ const CollegeBrowse = () => {
                 <TextField
                   fullWidth
                   placeholder="Search by name, city..."
-                  value={searchTerm}
-                  onChange={(e) => updateFilters({ search: e.target.value })}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   size="small"
                   sx={{ 
                     mb: 3,
@@ -276,6 +327,7 @@ const CollegeBrowse = () => {
                     value={statusFilter}
                     exclusive
                     onChange={(e, newValue) => newValue && updateFilters({ status: newValue })}
+                    orientation="vertical"
                     fullWidth
                     size="small"
                     sx={{
@@ -294,8 +346,10 @@ const CollegeBrowse = () => {
                     }}
                   >
                     <ToggleButton value="all">All</ToggleButton>
-                    <ToggleButton value="active">Active</ToggleButton>
-                    <ToggleButton value="waitlist">Waitlist</ToggleButton>
+                    <ToggleButton value="Unaffiliated">Unaffiliated</ToggleButton>
+                    <ToggleButton value="Waitlist">Waitlist</ToggleButton>
+                    <ToggleButton value="Building">Building</ToggleButton>
+                    <ToggleButton value="Live">Live</ToggleButton>
                   </ToggleButtonGroup>
                 </Box>
 
@@ -413,7 +467,7 @@ const CollegeBrowse = () => {
                 </Box>
 
                 {/* Clear Filters */}
-                {(searchTerm || countryFilter || statusFilter !== 'all' || typeFilter) && (
+                {(searchInput || countryFilter || statusFilter !== 'all' || typeFilter) && (
                   <Button
                     fullWidth
                     variant="contained"
@@ -467,7 +521,7 @@ const CollegeBrowse = () => {
                     <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
                       {/* Logo */}
                       <Avatar
-                        src={college.logo || '/images/college-logo-placeholder.png'}
+                        src={getImageUrl(college.logo) || '/images/college-logo-placeholder.png'}
                         sx={{ 
                           width: 80,
                           height: 80,
@@ -485,13 +539,10 @@ const CollegeBrowse = () => {
                             {college.name}
                           </Typography>
                           <Chip 
-                            label={college.isActive ? 'Active' : 'Waitlist'}
+                            label={college.status || 'Unaffiliated'}
                             size="small"
                             sx={{ 
-                              background: college.isActive 
-                                ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                                : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                              color: 'white',
+                              ...getStatusChipStyle(college.status),
                               fontWeight: 600,
                               fontSize: '0.7rem'
                             }}

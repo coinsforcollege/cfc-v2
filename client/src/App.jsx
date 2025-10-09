@@ -12,6 +12,8 @@ import RootLayout from './layouts/RootLayout';
 import Login from './pages/auth/Login';
 import StudentRegistration from './pages/auth/StudentRegistration';
 import CollegeRegistration from './pages/auth/CollegeRegistration';
+import CollegeSelection from './pages/auth/CollegeSelection';
+import CollegeAdminSelection from './pages/auth/CollegeAdminSelection';
 import Home from './pages/public/Home';
 import HowItWorksStudents from './pages/public/HowItWorksStudents';
 import HowItWorksColleges from './pages/public/HowItWorksColleges';
@@ -55,6 +57,8 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="register/student" element={<StudentRegistration />} />
           <Route path="register/college" element={<CollegeRegistration />} />
+          <Route path="college-selection" element={<CollegeSelection />} />
+          <Route path="college-admin-selection" element={<CollegeAdminSelection />} />
         </Route>
         <Route path="student/dashboard" element={<StudentDashboard />} />
         <Route path="student/build-on-collegen" element={<BuildOnCollegen />} />

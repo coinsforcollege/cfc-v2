@@ -7,6 +7,7 @@ import {
   setPrimaryCollege
 } from '../controllers/student.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
+import upload from '../middlewares/upload.js';
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.use(protect, authorize('student'));
 
 router.get('/dashboard', getDashboard);
 router.get('/wallet', getWallet);
-router.post('/colleges/add', addCollegeToMiningList);
+router.post('/colleges/add', upload.single('logoFile'), addCollegeToMiningList);
 router.post('/colleges/set-primary', setPrimaryCollege);
 router.delete('/colleges/:collegeId', removeCollegeFromMiningList);
 

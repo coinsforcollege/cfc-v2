@@ -50,7 +50,37 @@ export const getAllStudents = async (req, res, next) => {
 // @access  Private (Platform Admin only)
 export const createCollege = async (req, res, next) => {
   try {
-    const collegeData = req.body;
+    const collegeData = { ...req.body };
+    
+    // Parse JSON fields if they are strings (from FormData)
+    const jsonFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
+    jsonFields.forEach(field => {
+      if (typeof collegeData[field] === 'string') {
+        try {
+          collegeData[field] = JSON.parse(collegeData[field]);
+        } catch (e) {
+          delete collegeData[field];
+        }
+      }
+    });
+    
+    // Handle file uploads (req.files contains logoFile and/or coverFile)
+    if (req.files) {
+      if (req.files.logoFile && req.files.logoFile[0]) {
+        collegeData.logo = `/images/logo/${req.files.logoFile[0].filename}`;
+      }
+      if (req.files.coverFile && req.files.coverFile[0]) {
+        collegeData.coverImage = `/images/cover/${req.files.coverFile[0].filename}`;
+      }
+    }
+    
+    // Remove empty values for logo/coverImage
+    if (!collegeData.logo || collegeData.logo === '') {
+      delete collegeData.logo;
+    }
+    if (!collegeData.coverImage || collegeData.coverImage === '') {
+      delete collegeData.coverImage;
+    }
     
     // Check if college already exists
     const existingCollege = await College.findOne({
@@ -208,13 +238,47 @@ export const getCollegeDetails = async (req, res, next) => {
 export const updateCollege = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData = { ...req.body };
+
+    // Parse JSON fields if they are strings (from FormData)
+    const jsonFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
+    jsonFields.forEach(field => {
+      if (typeof updateData[field] === 'string') {
+        try {
+          updateData[field] = JSON.parse(updateData[field]);
+        } catch (e) {
+          // ignore parse error, leave as is
+        }
+      }
+    });
 
     // Remove fields that shouldn't be updated directly
     delete updateData._id;
     delete updateData.createdAt;
     delete updateData.updatedAt;
     delete updateData.__v;
+    delete updateData.createdBy;
+    delete updateData.admin;
+    delete updateData.stats;
+    delete updateData.rank;
+
+    // Handle file uploads (req.files contains logoFile and/or coverFile)
+    if (req.files) {
+      if (req.files.logoFile && req.files.logoFile[0]) {
+        updateData.logo = `/images/logo/${req.files.logoFile[0].filename}`;
+      }
+      if (req.files.coverFile && req.files.coverFile[0]) {
+        updateData.coverImage = `/images/cover/${req.files.coverFile[0].filename}`;
+      }
+    }
+    
+    // Remove empty logo/coverImage to preserve existing values
+    if (updateData.logo === '' || updateData.logo === null || updateData.logo === undefined) {
+      delete updateData.logo;
+    }
+    if (updateData.coverImage === '' || updateData.coverImage === null || updateData.coverImage === undefined) {
+      delete updateData.coverImage;
+    }
 
     const college = await College.findByIdAndUpdate(
       id,

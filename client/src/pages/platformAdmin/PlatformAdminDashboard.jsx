@@ -24,7 +24,9 @@ import {
   ListItemText,
   Divider,
   Grid,
-  MenuItem
+  MenuItem,
+  ToggleButtonGroup,
+  ToggleButton
 } from '@mui/material';
 import { 
   School, 
@@ -47,12 +49,15 @@ import {
   CheckCircle,
   Cancel,
   HourglassEmpty,
-  Visibility
+  Visibility,
+  CloudUpload,
+  Link as LinkIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { platformAdminApi } from '../../api/platformAdmin.api';
 import { ambassadorApi } from '../../api/ambassador.api';
+import { getImageUrl } from '../../utils/imageUtils';
 import apiClient from '../../api/apiClient';
 
 const SIDEBAR_WIDTH = 260;
@@ -75,6 +80,12 @@ const PlatformAdminDashboard = () => {
   const [showCollegeForm, setShowCollegeForm] = useState(false);
   const [editingCollege, setEditingCollege] = useState(null);
   const [tempInput, setTempInput] = useState('');
+  const [logoInputType, setLogoInputType] = useState('url');
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
+  const [coverInputType, setCoverInputType] = useState('url');
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState('');
   
   const [collegeFormData, setCollegeFormData] = useState({
     name: '',
@@ -237,20 +248,100 @@ const PlatformAdminDashboard = () => {
       departments: college.departments || [],
       campusSize: college.campusSize || { value: '', unit: 'acres' }
     });
+    
+    // Set existing image previews
+    if (college.logo) {
+      setLogoPreview(getImageUrl(college.logo));
+      setLogoInputType('url');
+    } else {
+      setLogoPreview('');
+      setLogoInputType('url');
+    }
+    
+    if (college.coverImage) {
+      setCoverPreview(getImageUrl(college.coverImage));
+      setCoverInputType('url');
+    } else {
+      setCoverPreview('');
+      setCoverInputType('url');
+    }
+    
     setShowCollegeForm(true);
+  };
+
+  const handleLogoFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size should be less than 5MB');
+        return;
+      }
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCoverFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size should be less than 5MB');
+        return;
+      }
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSaveCollege = async () => {
     try {
       setLoading(true);
-      if (editingCollege) {
-        await platformAdminApi.updateCollege(editingCollege._id, collegeFormData);
-      } else {
-        await platformAdminApi.createCollege(collegeFormData);
+      
+      const formData = new FormData();
+      
+      // Add all text fields
+      const objectFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
+      Object.keys(collegeFormData).forEach(key => {
+        if (objectFields.includes(key)) {
+          formData.append(key, JSON.stringify(collegeFormData[key]));
+        } else if (collegeFormData[key] !== '' && collegeFormData[key] !== null) {
+          formData.append(key, collegeFormData[key]);
+        }
+      });
+      
+      // Add files if uploaded
+      if (logoInputType === 'file' && logoFile) {
+        formData.append('logoFile', logoFile);
       }
+      if (coverInputType === 'file' && coverFile) {
+        formData.append('coverFile', coverFile);
+      }
+      
+      if (editingCollege) {
+        await platformAdminApi.updateCollege(editingCollege._id, formData);
+      } else {
+        await platformAdminApi.createCollege(formData);
+      }
+      
       await fetchData();
       setShowCollegeForm(false);
       setEditingCollege(null);
+      setLogoFile(null);
+      setLogoPreview('');
+      setCoverFile(null);
+      setCoverPreview('');
     } catch (error) {
       console.error('Error saving college:', error);
     } finally {
@@ -665,35 +756,87 @@ const PlatformAdminDashboard = () => {
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#667eea' }}>
                   Media & Branding
                 </Typography>
-                <Grid container spacing={2.5}>
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      label="Logo URL"
-                      fullWidth
-                      value={collegeFormData.logo}
-                      onChange={(e) => handleCollegeFormChange('logo', e.target.value)}
-                      placeholder="https://..."
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      label="Cover Image URL"
-                      fullWidth
-                      value={collegeFormData.coverImage}
-                      onChange={(e) => handleCollegeFormChange('coverImage', e.target.value)}
-                      placeholder="https://..."
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      label="Video URL"
-                      fullWidth
-                      value={collegeFormData.videoUrl}
-                      onChange={(e) => handleCollegeFormChange('videoUrl', e.target.value)}
-                      placeholder="YouTube/Vimeo"
-                    />
-                  </Grid>
-                </Grid>
+                
+                {/* LOGO */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>Logo</Typography>
+                  <ToggleButtonGroup
+                    value={logoInputType}
+                    exclusive
+                    onChange={(e, val) => val && setLogoInputType(val)}
+                    sx={{ mb: 2 }}
+                  >
+                    <ToggleButton value="file"><CloudUpload sx={{ mr: 1, fontSize: 18 }} />Upload</ToggleButton>
+                    <ToggleButton value="url"><LinkIcon sx={{ mr: 1, fontSize: 18 }} />URL</ToggleButton>
+                  </ToggleButtonGroup>
+                  
+                  {logoInputType === 'file' ? (
+                    <Box>
+                      <Button variant="outlined" component="label" startIcon={<CloudUpload />}>
+                        Choose Image
+                        <input type="file" hidden accept="image/*" onChange={handleLogoFileChange} />
+                      </Button>
+                      {logoFile && <Typography variant="body2" sx={{ mt: 1 }}>{logoFile.name}</Typography>}
+                      {logoPreview && <Avatar src={logoPreview} sx={{ width: 80, height: 80, mt: 2 }} />}
+                    </Box>
+                  ) : (
+                    <Box>
+                      <TextField
+                        fullWidth
+                        placeholder="https://..."
+                        value={collegeFormData.logo || ''}
+                        onChange={(e) => handleCollegeFormChange('logo', e.target.value)}
+                      />
+                      {logoPreview && <Avatar src={logoPreview} sx={{ width: 80, height: 80, mt: 2 }} />}
+                    </Box>
+                  )}
+                </Box>
+
+                {/* COVER IMAGE */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>Cover Image</Typography>
+                  <ToggleButtonGroup
+                    value={coverInputType}
+                    exclusive
+                    onChange={(e, val) => val && setCoverInputType(val)}
+                    sx={{ mb: 2 }}
+                  >
+                    <ToggleButton value="file"><CloudUpload sx={{ mr: 1, fontSize: 18 }} />Upload</ToggleButton>
+                    <ToggleButton value="url"><LinkIcon sx={{ mr: 1, fontSize: 18 }} />URL</ToggleButton>
+                  </ToggleButtonGroup>
+                  
+                  {coverInputType === 'file' ? (
+                    <Box>
+                      <Button variant="outlined" component="label" startIcon={<CloudUpload />}>
+                        Choose Image
+                        <input type="file" hidden accept="image/*" onChange={handleCoverFileChange} />
+                      </Button>
+                      {coverFile && <Typography variant="body2" sx={{ mt: 1 }}>{coverFile.name}</Typography>}
+                      {coverPreview && <Box component="img" src={coverPreview} sx={{ width: '100%', maxWidth: 300, height: 150, objectFit: 'cover', mt: 2, borderRadius: 1 }} />}
+                    </Box>
+                  ) : (
+                    <Box>
+                      <TextField
+                        fullWidth
+                        placeholder="https://..."
+                        value={collegeFormData.coverImage || ''}
+                        onChange={(e) => handleCollegeFormChange('coverImage', e.target.value)}
+                      />
+                      {coverPreview && <Box component="img" src={coverPreview} sx={{ width: '100%', maxWidth: 300, height: 150, objectFit: 'cover', mt: 2, borderRadius: 1 }} />}
+                    </Box>
+                  )}
+                </Box>
+
+                {/* VIDEO URL */}
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>Video URL</Typography>
+                  <TextField
+                    fullWidth
+                    value={collegeFormData.videoUrl}
+                    onChange={(e) => handleCollegeFormChange('videoUrl', e.target.value)}
+                    placeholder="YouTube/Vimeo"
+                  />
+                </Box>
               </CardContent>
             </Card>
 

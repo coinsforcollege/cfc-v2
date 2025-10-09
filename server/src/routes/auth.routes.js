@@ -7,12 +7,13 @@ import {
   logout
 } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.js';
+import upload from '../middlewares/upload.js';
 
 const router = express.Router();
 
 // Public routes
 router.post('/register/student', registerStudent);
-router.post('/register/college', registerCollegeAdmin);
+router.post('/register/college', upload.single('logoFile'), registerCollegeAdmin);
 router.post('/login', login);
 
 // Protected routes

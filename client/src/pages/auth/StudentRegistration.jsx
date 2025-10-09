@@ -6,16 +6,10 @@ import {
   Button,
   Typography,
   Alert,
-  CircularProgress,
-  Autocomplete,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
+  CircularProgress
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
-import { collegesApi } from '../../api/colleges.api';
 
 const StudentRegistration = () => {
   const navigate = useNavigate();
@@ -26,19 +20,10 @@ const StudentRegistration = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    collegeId: null,
     referralCode: ''
   });
-  const [colleges, setColleges] = useState([]);
-  const [collegeSearchLoading, setCollegeSearchLoading] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showAddCollegeDialog, setShowAddCollegeDialog] = useState(false);
-  const [newCollege, setNewCollege] = useState({
-    name: '',
-    country: '',
-    logo: ''
-  });
 
   const handleChange = (e) => {
     setFormData({
@@ -48,38 +33,12 @@ const StudentRegistration = () => {
     setError('');
   };
 
-  const handleCollegeSearch = async (searchTerm) => {
-    if (searchTerm.length < 2) return;
-    
-    setCollegeSearchLoading(true);
-    try {
-      const response = await collegesApi.search(searchTerm);
-      if (response.success) {
-        setColleges(response.data);
-      }
-    } catch (err) {
-      console.error('College search error:', err);
-    } finally {
-      setCollegeSearchLoading(false);
-    }
-  };
-
-  const handleAddCollege = () => {
-    setShowAddCollegeDialog(false);
-    // newCollege will be sent with registration
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      return;
-    }
-
-    if (!formData.collegeId && !newCollege.name) {
-      setError('Please select or add a college');
       return;
     }
 
@@ -94,21 +53,14 @@ const StudentRegistration = () => {
         referralCode: formData.referralCode || undefined
       };
 
-      if (formData.collegeId) {
-        registrationData.collegeId = formData.collegeId;
-      } else if (newCollege.name) {
-        registrationData.newCollege = {
-          name: newCollege.name,
-          country: newCollege.country,
-          logo: newCollege.logo || undefined
-        };
-      }
-
       const response = await authApi.registerStudent(registrationData);
       
       if (response.success) {
+        // Auto-login
         login(response.data, response.token);
-        navigate('/student/dashboard');
+        
+        // Redirect to college selection
+        navigate('/auth/college-selection');
       }
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -126,238 +78,241 @@ const StudentRegistration = () => {
         justifyContent: 'center',
         background: 'linear-gradient(135deg, rgba(155, 184, 224, 0.4) 0%, rgba(179, 154, 232, 0.3) 50%, rgba(230, 155, 184, 0.3) 100%)',
         px: 2,
-        py: { xs: 12, md: 8 }, // More padding top on mobile for header
-        mt: { xs: 8, md: 0 } // Add margin top on mobile
+        py: 4
       }}
     >
       <Box
         sx={{
-          maxWidth: { xs: '500px', md: '900px' },
+          maxWidth: '1200px',
           width: '100%',
           background: 'rgba(255, 255, 255, 0.95)',
           borderRadius: '16px',
-          padding: { xs: '30px 20px', md: '40px' },
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          minHeight: { sm: '600px' }
         }}
       >
-        {/* Header section - always on top */}
-        <Box sx={{ mb: 4, textAlign: { xs: 'center', md: 'left' } }}>
+        {/* Left Column - Content */}
+        <Box
+          sx={{
+            flex: { xs: 'none', sm: '0 0 50%' },
+            p: { xs: 4, md: 6 },
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
+            order: { xs: 2, sm: 1 }
+          }}
+        >
+          <Box sx={{ width: '80%', maxWidth: '400px' }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 800,
+                mb: 3,
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              Join the Future of College Tokens
+            </Typography>
+
+            <Typography variant="body1" sx={{ mb: 3, color: '#4a5568', lineHeight: 1.7 }}>
+              Start mining tokens for your college and be part of a revolutionary digital economy built by students, for students.
+            </Typography>
+
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#2d3748' }}>
+                Why Join?
+              </Typography>
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
+                    🎓 Mine College Tokens
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Earn tokens for your college community and build digital value together.
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
+                    🚀 Early Adopter Benefits
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Be among the first miners and earn higher rewards as an early participant.
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
+                    🤝 Build Your Network
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Connect with students across colleges and grow the decentralized education economy.
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
+                    💰 Referral Rewards
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Invite friends and earn bonus mining rates for every successful referral.
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Right Column - Form */}
+        <Box
+          sx={{
+            flex: { xs: 'none', sm: '0 0 50%' },
+            p: { xs: 4, md: 6 },
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            order: { xs: 1, sm: 2 }
+          }}
+        >
           <Typography
-            variant="h4"
+            variant="h5"
             sx={{
               fontWeight: 700,
               mb: 1,
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: '#2d3748'
             }}
           >
-            Student Registration
+            Create Your Account
           </Typography>
           
           <Typography
+            variant="body2"
             sx={{
               color: '#718096',
+              mb: 3
             }}
           >
-            Start mining your college tokens
+            Start mining tokens in just 2 minutes
           </Typography>
-        </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          {/* Two column layout on desktop */}
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-              gap: 2,
-              mb: 2
-            }}
-          >
-              <TextField
-                fullWidth
-                label="Full Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
-
-              <TextField
-                fullWidth
-                label="Password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-
-              <TextField
-                fullWidth
-                label="Confirm Password"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-
-              <TextField
-                fullWidth
-                label="Referral Code (Optional)"
-                name="referralCode"
-                value={formData.referralCode}
-                onChange={handleChange}
-              />
-          </Box>
-
-          {/* College selection - full width */}
-          {!newCollege.name ? (
-            <Box sx={{ mb: 2 }}>
-              <Autocomplete
-                options={colleges}
-                getOptionLabel={(option) => `${option.name} - ${option.country}`}
-                loading={collegeSearchLoading}
-                onInputChange={(e, value) => handleCollegeSearch(value)}
-                onChange={(e, value) => setFormData({ ...formData, collegeId: value?._id || null })}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Find Your College"
-                    placeholder="Start typing..."
-                    required={!newCollege.name}
-                  />
-                )}
-              />
-              <Button
-                size="small"
-                onClick={() => setShowAddCollegeDialog(true)}
-                sx={{
-                  mt: 1,
-                  color: '#8b5cf6',
-                  textTransform: 'none'
-                }}
-              >
-                + College not found? Add new
-              </Button>
-            </Box>
-          ) : (
-            <Alert
-              severity="info"
-              sx={{ mb: 2 }}
-              onClose={() => setNewCollege({ name: '', country: '', logo: '' })}
-            >
-              Adding new college: {newCollege.name} ({newCollege.country})
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
             </Alert>
           )}
 
-          <Button
-            fullWidth
-            type="submit"
-            variant="contained"
-            disabled={loading}
-            sx={{
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-              color: '#ffffff',
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 600,
-              textTransform: 'none',
-              borderRadius: '8px',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
-              },
-              mb: 2
-            }}
-          >
-            {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
-          </Button>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Full Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
 
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Already have an account?{' '}
-              <Link
-                to="/auth/login"
-                style={{
-                  color: '#8b5cf6',
-                  textDecoration: 'none',
-                  fontWeight: 600
-                }}
-              >
-                Login
-              </Link>
-            </Typography>
-          </Box>
-        </form>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Referral Code (Optional)"
+              name="referralCode"
+              value={formData.referralCode}
+              onChange={handleChange}
+              sx={{ mb: 3 }}
+            />
+
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                color: '#ffffff',
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: '8px',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
+                },
+                mb: 2
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+            </Button>
+
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Already have an account?{' '}
+                <Link
+                  to="/auth/login"
+                  style={{
+                    color: '#8b5cf6',
+                    textDecoration: 'none',
+                    fontWeight: 600
+                  }}
+                >
+                  Login
+                </Link>
+              </Typography>
+            </Box>
+          </form>
+        </Box>
       </Box>
-
-      {/* Add College Dialog */}
-      <Dialog open={showAddCollegeDialog} onClose={() => setShowAddCollegeDialog(false)}>
-        <DialogTitle>Add New College</DialogTitle>
-        <DialogContent sx={{ pt: 2, minWidth: '400px' }}>
-          <TextField
-            fullWidth
-            label="College Name"
-            value={newCollege.name}
-            onChange={(e) => setNewCollege({ ...newCollege, name: e.target.value })}
-            required
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Country"
-            value={newCollege.country}
-            onChange={(e) => setNewCollege({ ...newCollege, country: e.target.value })}
-            required
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Logo URL (Optional)"
-            value={newCollege.logo}
-            onChange={(e) => setNewCollege({ ...newCollege, logo: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowAddCollegeDialog(false)}>Cancel</Button>
-          <Button
-            onClick={handleAddCollege}
-            disabled={!newCollege.name || !newCollege.country}
-            variant="contained"
-          >
-            Add College
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
 
 export default StudentRegistration;
-

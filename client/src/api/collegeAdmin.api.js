@@ -4,6 +4,9 @@ export const collegeAdminApi = {
   // Dashboard
   getDashboard: () => apiClient.get('/college-admin/dashboard'),
   
+  // College selection
+  selectCollege: (formData) => apiClient.post('/college-admin/select-college', formData),
+  
   // College management
   updateCollegeDetails: (data) => apiClient.put('/college-admin/college/details', data),
   updateTokenPreferences: (data) => apiClient.put('/college-admin/college/token-preferences', data),

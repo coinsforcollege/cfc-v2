@@ -2,6 +2,119 @@ import College from '../models/College.js';
 import User from '../models/User.js';
 import Wallet from '../models/Wallet.js';
 import MiningSession from '../models/Mining.js';
+import path from 'path';
+
+// @desc    Select or create college for admin
+// @route   POST /api/college-admin/select-college
+// @access  Private (College Admin only)
+export const selectCollege = async (req, res, next) => {
+  try {
+    const admin = await User.findById(req.user.id);
+
+    // Check if admin already has a college
+    if (admin.managedCollege) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already selected a college'
+      });
+    }
+
+    const { collegeId, newCollege } = req.body;
+    let college;
+
+    // Handle college selection/creation
+    if (collegeId) {
+      // Admin selected existing college
+      college = await College.findById(collegeId);
+      if (!college) {
+        return res.status(404).json({
+          success: false,
+          message: 'College not found'
+        });
+      }
+
+      // Check if college already has an admin
+      if (college.admin) {
+        return res.status(400).json({
+          success: false,
+          message: 'This college already has an admin. Only one admin per college is allowed.'
+        });
+      }
+    } else if (newCollege) {
+      // Admin is creating a new college
+      const collegeData = JSON.parse(newCollege);
+      const { name: collegeName, country, logo } = collegeData;
+      
+      if (!collegeName || !country) {
+        return res.status(400).json({
+          success: false,
+          message: 'College name and country are required'
+        });
+      }
+
+      // Check if college already exists
+      const existingCollege = await College.findOne({ 
+        name: { $regex: new RegExp(`^${collegeName}$`, 'i') },
+        country: country 
+      });
+
+      if (existingCollege) {
+        // College exists, check if it has admin
+        if (existingCollege.admin) {
+          return res.status(400).json({
+            success: false,
+            message: 'This college already has an admin. Only one admin per college is allowed.'
+          });
+        }
+        college = existingCollege;
+      } else {
+        // Determine logo path
+        let logoPath = null;
+        
+        if (req.file) {
+          // File was uploaded
+          logoPath = `/images/logo/${req.file.filename}`;
+        } else if (logo) {
+          // URL was provided
+          logoPath = logo;
+        }
+
+        // Create new college
+        college = await College.create({
+          name: collegeName,
+          country,
+          logo: logoPath,
+          status: 'Unaffiliated'
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Please select or create a college'
+      });
+    }
+
+    // Update admin with college reference
+    admin.managedCollege = college._id;
+    await admin.save();
+
+    // Update college with admin reference and status
+    await College.findByIdAndUpdate(college._id, {
+      admin: admin._id,
+      status: 'Waitlist' // Move to Waitlist when admin joins
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'College selected successfully',
+      data: {
+        college: college
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Get college admin dashboard
 // @route   GET /api/college-admin/dashboard
@@ -77,16 +190,49 @@ export const getDashboard = async (req, res, next) => {
 export const updateCollegeDetails = async (req, res, next) => {
   try {
     const admin = await User.findById(req.user.id);
-    const { name, country, logo, description, website, establishedYear, additionalInfo } = req.body;
+    const { name, country, logo, coverImage, description, website, establishedYear, additionalInfo } = req.body;
 
     const updateData = {};
     if (name) updateData.name = name;
     if (country) updateData.country = country;
-    if (logo !== undefined) updateData.logo = logo;
     if (description !== undefined) updateData.description = description;
     if (website !== undefined) updateData.website = website;
     if (establishedYear !== undefined) updateData.establishedYear = establishedYear;
     if (additionalInfo !== undefined) updateData.additionalInfo = additionalInfo;
+
+    // Parse JSON fields if they are strings (from FormData)
+    const jsonFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
+    jsonFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        if (typeof req.body[field] === 'string') {
+          try {
+            updateData[field] = JSON.parse(req.body[field]);
+          } catch (e) {
+            // ignore parse error
+          }
+        } else {
+          updateData[field] = req.body[field];
+        }
+      }
+    });
+
+    // Handle file uploads (req.files contains logoFile and/or coverFile)
+    if (req.files) {
+      if (req.files.logoFile && req.files.logoFile[0]) {
+        updateData.logo = `/images/logo/${req.files.logoFile[0].filename}`;
+      }
+      if (req.files.coverFile && req.files.coverFile[0]) {
+        updateData.coverImage = `/images/cover/${req.files.coverFile[0].filename}`;
+      }
+    }
+
+    // Handle URL inputs (ONLY if non-empty string provided and no file was uploaded)
+    if (!updateData.logo && logo && logo.trim() !== '') {
+      updateData.logo = logo;
+    }
+    if (!updateData.coverImage && coverImage && coverImage.trim() !== '') {
+      updateData.coverImage = coverImage;
+    }
 
     const college = await College.findByIdAndUpdate(
       admin.managedCollege,

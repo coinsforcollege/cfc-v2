@@ -8,8 +8,21 @@ import MiningSession from '../models/Mining.js';
 // @access  Private (Student only)
 export const addCollegeToMiningList = async (req, res, next) => {
   try {
-    const { collegeId, newCollege } = req.body;
+    const { collegeId } = req.body;
     const studentId = req.user.id;
+
+    // Parse newCollege if it's a JSON string (from FormData)
+    let newCollege = req.body.newCollege;
+    if (typeof newCollege === 'string') {
+      try {
+        newCollege = JSON.parse(newCollege);
+      } catch (e) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid newCollege data format'
+        });
+      }
+    }
 
     const student = await User.findById(studentId);
 
@@ -51,12 +64,23 @@ export const addCollegeToMiningList = async (req, res, next) => {
       if (existingCollege) {
         college = existingCollege;
       } else {
+        // Determine logo path
+        let logoPath = null;
+        if (req.file) {
+          // File was uploaded
+          logoPath = `/images/logo/${req.file.filename}`;
+        } else if (logo) {
+          // URL was provided
+          logoPath = logo;
+        }
+
         // Create new college
         college = await College.create({
           name,
           country,
-          logo: logo || null,
-          createdBy: studentId
+          logo: logoPath,
+          createdBy: studentId,
+          status: 'Unaffiliated'
         });
       }
     } else {

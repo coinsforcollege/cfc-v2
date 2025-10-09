@@ -271,7 +271,13 @@ const collegeSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  // Waitlist status
+  // College Status
+  status: {
+    type: String,
+    enum: ['Unaffiliated', 'Waitlist', 'Building', 'Live'],
+    default: 'Unaffiliated'
+  },
+  // Legacy fields (deprecated - kept for backward compatibility)
   isOnWaitlist: {
     type: Boolean,
     default: true
