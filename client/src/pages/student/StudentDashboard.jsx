@@ -45,6 +45,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { studentApi } from '../../api/student.api';
 import { miningApi } from '../../api/mining.api';
 import { collegesApi } from '../../api/colleges.api';
+import { BorderBeam } from '@/components/ui/border-beam';
 
 const blockchainLogs = [
   'BLOCK_VERIFY: 0x7f3a9b2c...hash validated | consensus: PoW',
@@ -434,12 +435,21 @@ const StudentDashboard = () => {
           background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
           color: 'white',
           borderRadius: 3,
-          boxShadow: '0 4px 20px rgba(240, 147, 251, 0.3)'
+          boxShadow: '0 4px 20px rgba(240, 147, 251, 0.3)',
+          position: 'relative'
         }}>
-          <CardContent>
+          <BorderBeam 
+            size={80}
+            duration={7.5}
+            delay={0}
+            colorFrom="#ffffff"
+            colorTo="#f0f0f0"
+            borderWidth={3}
+          />
+          <CardContent sx={{ position: 'relative', zIndex: 1 }}>
             <TrendingUp sx={{ color: 'white', fontSize: 24, mb: 1 }} />
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-              Mining Now
+              Miner Running
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
               {totalMiningTokens.toFixed(4)}
