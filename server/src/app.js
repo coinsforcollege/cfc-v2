@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Load env variables
+// Load env var
 dotenv.config();
 
 // Get __dirname equivalent in ES modules
