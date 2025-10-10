@@ -486,10 +486,126 @@ export const logout = async (req, res, next) => {
   try {
     // In JWT-based auth, logout is handled client-side by removing token
     // But we can still track it server-side if needed
-    
+
     res.status(200).json({
       success: true,
       message: 'Logged out successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, phone } = req.body;
+    const userId = req.user.id;
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if phone is being changed and if it's already taken
+    if (phone && phone !== user.phone) {
+      const existingUser = await User.findOne({ phone, _id: { $ne: userId } });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number already in use'
+        });
+      }
+    }
+
+    // Update fields
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+
+    await user.save();
+
+    // Prepare response based on role
+    let userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role
+    };
+
+    if (user.role === 'student') {
+      await user.populate('college', 'name country logo');
+      userData.college = user.college;
+      userData.studentProfile = {
+        referralCode: user.studentProfile.referralCode,
+        totalReferrals: user.studentProfile.totalReferrals
+      };
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: userData
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Change password
+// @route   PUT /api/auth/change-password
+// @access  Private
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide current password and new password'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters'
+      });
+    }
+
+    // Find user with password
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordMatch = await user.comparePassword(currentPassword);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
     });
   } catch (error) {
     next(error);

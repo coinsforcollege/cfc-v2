@@ -5,7 +5,8 @@ import {
   updateCollegeDetails,
   updateTokenPreferences,
   addCollegeImages,
-  viewCommunity
+  viewCommunity,
+  getLeaderboard
 } from '../controllers/collegeAdmin.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -24,6 +25,7 @@ router.put('/college/details', upload.fields([
 router.put('/college/token-preferences', updateTokenPreferences);
 router.post('/college/images', addCollegeImages);
 router.get('/community', viewCommunity);
+router.get('/leaderboard', getLeaderboard);
 
 export default router;
 

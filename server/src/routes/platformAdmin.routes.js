@@ -9,7 +9,11 @@ import {
   deleteCollege,
   getPlatformStats,
   updateCollegeRates,
-  updateDefaultRates
+  updateDefaultRates,
+  updateStudent,
+  deleteStudent,
+  resetStudentPassword,
+  addStudentBalance
 } from '../controllers/platformAdmin.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -21,8 +25,16 @@ router.use(protect, authorize('platform_admin'));
 
 router.get('/stats', getPlatformStats);
 router.put('/default-rates', updateDefaultRates);
+
+// Student routes
 router.get('/students', getAllStudents);
 router.get('/students/:id', getStudentDetails);
+router.put('/students/:id', updateStudent);
+router.delete('/students/:id', deleteStudent);
+router.put('/students/:id/reset-password', resetStudentPassword);
+router.post('/students/:id/add-balance', addStudentBalance);
+
+// College routes
 router.get('/colleges', getAllColleges);
 router.post('/colleges', upload.fields([
   { name: 'logoFile', maxCount: 1 },

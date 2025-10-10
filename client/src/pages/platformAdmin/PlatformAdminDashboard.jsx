@@ -17,12 +17,6 @@ import {
   IconButton,
   LinearProgress,
   Button,
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
   Grid,
   MenuItem,
   ToggleButtonGroup,
@@ -44,7 +38,6 @@ import {
   CalendarToday,
   Add,
   Edit,
-  Dashboard as DashboardIcon,
   Settings,
   Delete,
   ArrowBack,
@@ -64,8 +57,7 @@ import { platformAdminApi } from '../../api/platformAdmin.api';
 import { ambassadorApi } from '../../api/ambassador.api';
 import { getImageUrl } from '../../utils/imageUtils';
 import apiClient from '../../api/apiClient';
-
-const SIDEBAR_WIDTH = 260;
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 const PlatformAdminDashboard = () => {
   const { user } = useAuth();
@@ -1644,228 +1636,27 @@ const PlatformAdminDashboard = () => {
     }
   };
 
+  // Calculate stats for sidebar badges
+  const sidebarStats = {
+    studentsCount: students.length,
+    collegesCount: colleges.length,
+    ambassadorsCount: applications.length,
+    subscribersCount: subscribers.length,
+  };
+
   return (
     <>
-      <Box sx={{
-        minHeight: '100vh',
-        background: '#f8fafc',
-        pt: { xs: 12, md: 14 },
-        pb: 4,
-        px: { xs: 2, md: 3 }
-      }}>
-        <Box sx={{
-          maxWidth: '1200px',
-          mx: 'auto',
-          display: 'flex',
-          gap: 3,
-          minHeight: 'calc(100vh - 200px)'
-        }}>
-        {/* Sidebar */}
-        <Box
-          sx={{
-            width: SIDEBAR_WIDTH,
-            flexShrink: 0,
-            background: 'white',
-            borderRadius: 3,
-            border: '1px solid #e2e8f0',
-            height: 'fit-content',
-            position: 'sticky',
-            top: '100px'
-          }}
-        >
-          <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>Platform Admin</Typography>
-            <Typography variant="caption" color="text.secondary">{user?.email}</Typography>
-          </Box>
-        
-        <List sx={{ px: 2, py: 2 }}>
-          <ListItemButton
-            selected={activeSection === 'overview'}
-            onClick={() => setActiveSection('overview')}
-            sx={{
-              borderRadius: 2,
-              mb: 1,
-              '&.Mui-selected': {
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                },
-                '& .MuiListItemIcon-root': { color: 'white' }
-              }
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Overview" />
-          </ListItemButton>
-
-          <ListItemButton
-            selected={activeSection === 'students'}
-            onClick={() => {
-              setActiveSection('students');
-              setShowCollegeForm(false);
-            }}
-            sx={{
-              borderRadius: 2,
-              mb: 1,
-              '&.Mui-selected': {
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                },
-                '& .MuiListItemIcon-root': { color: 'white' }
-              }
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <People />
-            </ListItemIcon>
-            <ListItemText primary="Students" />
-            <Chip 
-              label={students.length} 
-              size="small" 
-              sx={{ 
-                ml: 1,
-                background: activeSection === 'students' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: activeSection === 'students' ? 'white' : '#64748b',
-                fontWeight: 600
-              }} 
-            />
-          </ListItemButton>
-
-          <ListItemButton
-            selected={activeSection === 'colleges'}
-            onClick={() => {
-              setActiveSection('colleges');
-              setShowCollegeForm(false);
-            }}
-            sx={{
-              borderRadius: 2,
-              mb: 1,
-              '&.Mui-selected': {
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                },
-                '& .MuiListItemIcon-root': { color: 'white' }
-              }
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <School />
-            </ListItemIcon>
-            <ListItemText primary="Colleges" />
-            <Chip 
-              label={colleges.length} 
-              size="small" 
-              sx={{ 
-                ml: 1,
-                background: activeSection === 'colleges' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: activeSection === 'colleges' ? 'white' : '#64748b',
-                fontWeight: 600
-              }} 
-            />
-          </ListItemButton>
-
-          <ListItemButton
-            selected={activeSection === 'submissions'}
-            onClick={() => {
-              setActiveSection('submissions');
-              setShowCollegeForm(false);
-            }}
-            sx={{
-              borderRadius: 2,
-              mb: 1,
-              '&.Mui-selected': {
-                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                color: 'white',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                },
-                '& .MuiListItemIcon-root': { color: 'white' }
-              }
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <Campaign />
-            </ListItemIcon>
-            <ListItemText primary="Submissions" />
-            <Chip 
-              label={applications.length} 
-              size="small" 
-              sx={{ 
-                ml: 1,
-                background: activeSection === 'submissions' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: activeSection === 'submissions' ? 'white' : '#64748b',
-                fontWeight: 600
-              }} 
-            />
-          </ListItemButton>
-
-          <ListItemButton
-            selected={activeSection === 'subscribers'}
-            onClick={() => {
-              setActiveSection('subscribers');
-              setShowCollegeForm(false);
-            }}
-            sx={{
-              borderRadius: 2,
-              mb: 1,
-              '&.Mui-selected': {
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                },
-                '& .MuiListItemIcon-root': { color: 'white' }
-              }
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <Email />
-            </ListItemIcon>
-            <ListItemText primary="Subscribers" />
-            <Chip 
-              label={subscribers.length} 
-              size="small" 
-              sx={{ 
-                ml: 1,
-                background: activeSection === 'subscribers' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: activeSection === 'subscribers' ? 'white' : '#64748b',
-                fontWeight: 600
-              }} 
-            />
-          </ListItemButton>
-
-          <Divider sx={{ my: 2 }} />
-
-          <ListItemButton
-            sx={{
-              borderRadius: 2,
-              mb: 1,
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <Settings />
-            </ListItemIcon>
-            <ListItemText primary="Settings" />
-          </ListItemButton>
-        </List>
-        </Box>
-
-          {/* Main Content */}
-          <Box sx={{
-            flexGrow: 1,
-            minWidth: 0
-          }}>
-            {renderContent()}
-          </Box>
-        </Box>
-      </Box>
+      <DashboardLayout
+        activeSection={activeSection}
+        onSectionChange={(section) => {
+          setActiveSection(section);
+          setShowCollegeForm(false);
+        }}
+        stats={sidebarStats}
+        searchPlaceholder="Search platform..."
+      >
+        {renderContent()}
+      </DashboardLayout>
 
       {/* Edit College Rates Modal */}
       <Dialog

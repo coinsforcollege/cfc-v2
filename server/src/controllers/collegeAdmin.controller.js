@@ -190,7 +190,10 @@ export const getDashboard = async (req, res, next) => {
 export const updateCollegeDetails = async (req, res, next) => {
   try {
     const admin = await User.findById(req.user.id);
-    const { name, country, logo, coverImage, description, website, establishedYear, additionalInfo } = req.body;
+    const {
+      name, country, logo, coverImage, description, website, establishedYear, additionalInfo,
+      shortName, tagline, type, state, city, address, zipCode, videoUrl, about, mission, vision, email, phone
+    } = req.body;
 
     const updateData = {};
     if (name) updateData.name = name;
@@ -199,6 +202,19 @@ export const updateCollegeDetails = async (req, res, next) => {
     if (website !== undefined) updateData.website = website;
     if (establishedYear !== undefined) updateData.establishedYear = establishedYear;
     if (additionalInfo !== undefined) updateData.additionalInfo = additionalInfo;
+    if (shortName !== undefined) updateData.shortName = shortName;
+    if (tagline !== undefined) updateData.tagline = tagline;
+    if (type !== undefined) updateData.type = type;
+    if (state !== undefined) updateData.state = state;
+    if (city !== undefined) updateData.city = city;
+    if (address !== undefined) updateData.address = address;
+    if (zipCode !== undefined) updateData.zipCode = zipCode;
+    if (videoUrl !== undefined) updateData.videoUrl = videoUrl;
+    if (about !== undefined) updateData.about = about;
+    if (mission !== undefined) updateData.mission = mission;
+    if (vision !== undefined) updateData.vision = vision;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
 
     // Parse JSON fields if they are strings (from FormData)
     const jsonFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
@@ -450,6 +466,93 @@ export const viewCommunity = async (req, res, next) => {
         totalMiners: miners.length,
         totalTokensMined: college.stats.totalTokensMined
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get college leaderboard
+// @route   GET /api/college-admin/leaderboard
+// @access  Private (College Admin only)
+export const getLeaderboard = async (req, res, next) => {
+  try {
+    const admin = await User.findById(req.user.id);
+    const collegeId = admin.managedCollege;
+    const { search } = req.query;
+
+    // Get ALL colleges sorted by total tokens mined (for global ranking)
+    const allColleges = await College.find()
+      .select('name country state city description logo stats baseRate')
+      .sort({ 'stats.totalTokensMined': -1 })
+      .lean();
+
+    // Assign global ranks and get active sessions for each college
+    const collegesWithData = await Promise.all(
+      allColleges.map(async (college, index) => {
+        const activeSessions = await MiningSession.countDocuments({
+          college: college._id,
+          isActive: true
+        });
+
+        return {
+          rank: index + 1,
+          id: college._id,
+          name: college.name,
+          location: `${college.city || ''}${college.city && college.state ? ', ' : ''}${college.state || ''}${(college.city || college.state) && college.country ? ', ' : ''}${college.country || ''}`.trim() || 'Location not set',
+          logo: college.logo,
+          totalStudents: college.stats?.totalMiners || 0,
+          activeMiningSessions: activeSessions,
+          totalTokensMined: college.stats?.totalTokensMined || 0,
+          miningRate: college.baseRate || 0,
+          country: college.country,
+          state: college.state,
+          city: college.city,
+          description: college.description
+        };
+      })
+    );
+
+    // Apply search filter AFTER ranks are assigned
+    let filteredColleges = collegesWithData;
+    if (search && search.trim() !== '') {
+      const searchLower = search.toLowerCase();
+      filteredColleges = collegesWithData.filter(college =>
+        college.name.toLowerCase().includes(searchLower) ||
+        college.country?.toLowerCase().includes(searchLower) ||
+        college.state?.toLowerCase().includes(searchLower) ||
+        college.city?.toLowerCase().includes(searchLower) ||
+        college.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Find current college in GLOBAL ranking
+    const currentCollegeIndex = collegesWithData.findIndex(c => c.id.toString() === collegeId.toString());
+    const currentCollege = collegesWithData[currentCollegeIndex];
+
+    // Get top 10 from filtered results
+    const top10 = filteredColleges.slice(0, 10);
+
+    // Determine what to return
+    let result = {
+      top10,
+      currentCollege: null,
+      context: []
+    };
+
+    // If current college is not in top 10 of GLOBAL ranking, add it with context
+    if (currentCollegeIndex >= 10) {
+      result.currentCollege = currentCollege;
+
+      // Get 2 colleges above and 2 below current college from GLOBAL ranking
+      const contextStart = Math.max(10, currentCollegeIndex - 2);
+      const contextEnd = Math.min(collegesWithData.length, currentCollegeIndex + 3);
+      result.context = collegesWithData.slice(contextStart, contextEnd);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: result
     });
   } catch (error) {
     next(error);

@@ -60,6 +60,14 @@ const Button = ({
 
   const getSizeStyles = () => {
     switch (size) {
+      case 'icon':
+        return {
+          padding: '8px',
+          minWidth: '40px',
+          minHeight: '40px',
+          fontSize: typography.fontSize.base,
+          borderRadius: borderRadius.md,
+        };
       case 'sm':
         return {
           padding: '8px 16px',

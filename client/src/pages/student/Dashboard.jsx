@@ -10,7 +10,9 @@ import {
   Share,
   Twitter,
   Verified,
-  WhatsApp
+  WhatsApp,
+  PlayArrow,
+  Stop
 } from '@mui/icons-material';
 import {
   Avatar,
@@ -26,6 +28,12 @@ import {
   IconButton,
   Paper,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tooltip,
   Typography,
   alpha,
@@ -77,6 +85,16 @@ const mockDashboardData = {
     { rank: 8, name: 'Ryan T.', tokens: 2750 },
     { rank: 9, name: 'Lisa W.', tokens: 2650 },
     { rank: 10, name: 'Chris B.', tokens: 2580 }
+  ],
+  balances: [
+    { college: 'MIT', country: 'United States', balance: 1250.50, percentage: 51 },
+    { college: 'Stanford', country: 'United States', balance: 820.25, percentage: 33 },
+    { college: 'Oxford', country: 'United Kingdom', balance: 379.25, percentage: 16 }
+  ],
+  activeMiners: [
+    { college: 'MIT', country: 'United States', status: 'mining', startTime: '2024-03-15 09:30 AM', progress: 75 },
+    { college: 'Stanford', country: 'United States', status: 'mining', startTime: '2024-03-15 09:30 AM', progress: 75 },
+    { college: 'Oxford', country: 'United Kingdom', status: 'idle', startTime: null, progress: 0 }
   ]
 };
 
@@ -615,105 +633,165 @@ function StudentDashboard() {
             </Card>
           </Grid>
 
-          {/* <Grid size={12}>
-            <Card elevation={3}>
-              <CardContent sx={{ p: 4 }}>
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  sx={{ mb: 3 }}
-                >
-                  <Stack direction="row" alignItems="center" gap={2}>
-                    <EmojiEvents sx={{ fontSize: 32, color: 'warning.main' }} />
-                    <Typography variant="h5" fontWeight={700}>
-                      College Leaderboard (Top 10)
-                    </Typography>
-                  </Stack>
-                  <Button
-                    component={Link}
-                    to="/leaderboard"
-                    variant="outlined"
-                    size="small"
-                    endIcon={<ArrowForward />}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    View Full Leaderboard
-                  </Button>
-                </Stack>
+          {/* Balance Breakdown Table */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card elevation={2}>
+              <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+                <Typography variant="h5" fontWeight={700} gutterBottom>
+                  Balance Breakdown
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Your token balance across all colleges
+                </Typography>
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
-                        <TableCell>
-                          <strong>Rank</strong>
-                        </TableCell>
-                        <TableCell>
-                          <strong>Student</strong>
-                        </TableCell>
-                        <TableCell align="right">
-                          <strong>Tokens Mined</strong>
-                        </TableCell>
+                        <TableCell><strong>College</strong></TableCell>
+                        <TableCell align="right"><strong>Balance</strong></TableCell>
+                        <TableCell align="right"><strong>%</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {mockDashboardData.leaderboard.map((student) => (
+                      {mockDashboardData.balances.map((item, index) => (
                         <TableRow
-                          key={student.rank}
+                          key={index}
                           sx={{
-                            bgcolor:
-                              student.rank === mockDashboardData.user.rank
-                                ? alpha(theme.palette.primary.main, 0.08)
-                                : 'transparent',
                             '&:hover': {
-                              bgcolor: alpha(theme.palette.primary.main, 0.05)
+                              bgcolor: alpha(theme.palette.primary.main, 0.02)
                             }
                           }}
                         >
                           <TableCell>
-                            <Chip
-                              label={`#${student.rank}`}
-                              size="small"
-                              sx={{
-                                fontWeight: 700,
-                                bgcolor:
-                                  student.rank <= 3 ? 'warning.main' : 'default',
-                                color:
-                                  student.rank <= 3
-                                    ? 'warning.contrastText'
-                                    : 'text.primary'
-                              }}
-                            />
+                            <Box>
+                              <Typography variant="body2" fontWeight={600}>
+                                {item.college}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {item.country}
+                              </Typography>
+                            </Box>
                           </TableCell>
-                          <TableCell>
-                            <Typography
-                              fontWeight={
-                                student.rank === mockDashboardData.user.rank ? 700 : 400
-                              }
-                            >
-                              {student.name}
-                              {student.rank === mockDashboardData.user.rank && (
-                                <Chip
-                                  label="You"
-                                  size="small"
-                                  color="primary"
-                                  sx={{ ml: 1 }}
-                                />
-                              )}
+                          <TableCell align="right">
+                            <Typography variant="body2" fontWeight={600} color="primary.main">
+                              {item.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </Typography>
                           </TableCell>
                           <TableCell align="right">
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              justifyContent="flex-end"
-                              spacing={1}
-                            >
-                              <TrendingUp fontSize="small" color="success" />
-                              <Typography fontWeight={600}>
-                                {student.tokens.toLocaleString()}
+                            <Chip
+                              label={`${item.percentage}%`}
+                              size="small"
+                              sx={{
+                                fontWeight: 600,
+                                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                color: 'primary.main'
+                              }}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.08) }}>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={700}>
+                            Total
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography variant="body2" fontWeight={700} color="primary.main">
+                            {mockDashboardData.balances.reduce((sum, item) => sum + item.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Chip
+                            label="100%"
+                            size="small"
+                            sx={{
+                              fontWeight: 700,
+                              bgcolor: 'primary.main',
+                              color: 'white'
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Active Miners Table */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card elevation={2}>
+              <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+                <Typography variant="h5" fontWeight={700} gutterBottom>
+                  Active Miners
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Mining status for all your colleges
+                </Typography>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
+                        <TableCell><strong>College</strong></TableCell>
+                        <TableCell align="center"><strong>Status</strong></TableCell>
+                        <TableCell align="right"><strong>Progress</strong></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {mockDashboardData.activeMiners.map((miner, index) => (
+                        <TableRow
+                          key={index}
+                          sx={{
+                            '&:hover': {
+                              bgcolor: alpha(theme.palette.primary.main, 0.02)
+                            }
+                          }}
+                        >
+                          <TableCell>
+                            <Box>
+                              <Typography variant="body2" fontWeight={600}>
+                                {miner.college}
                               </Typography>
-                            </Stack>
+                              <Typography variant="caption" color="text.secondary">
+                                {miner.status === 'mining' ? miner.startTime : 'Not mining'}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              icon={miner.status === 'mining' ? <PlayArrow fontSize="small" /> : <Stop fontSize="small" />}
+                              label={miner.status === 'mining' ? 'Mining' : 'Idle'}
+                              size="small"
+                              color={miner.status === 'mining' ? 'success' : 'default'}
+                              sx={{ fontWeight: 600 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 60,
+                                  height: 6,
+                                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                  borderRadius: 1,
+                                  overflow: 'hidden'
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    width: `${miner.progress}%`,
+                                    height: '100%',
+                                    bgcolor: miner.status === 'mining' ? 'success.main' : 'grey.400',
+                                    transition: 'width 0.3s ease'
+                                  }}
+                                />
+                              </Box>
+                              <Typography variant="caption" fontWeight={600} sx={{ minWidth: 35 }}>
+                                {miner.progress}%
+                              </Typography>
+                            </Box>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -722,7 +800,7 @@ function StudentDashboard() {
                 </TableContainer>
               </CardContent>
             </Card>
-          </Grid> */}
+          </Grid>
         </Grid>
       </Container>
     </Box>

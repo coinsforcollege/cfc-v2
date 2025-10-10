@@ -25,9 +25,26 @@ import BlogPost from './pages/public/BlogPost';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import StudentDashboard from './pages/student/StudentDashboard';
+import Overview from './pages/student/Overview';
+import MyColleges from './pages/student/MyColleges';
+import Leaderboard from './pages/student/Leaderboard';
+import Referrals from './pages/student/Referrals';
+import Ambassador from './pages/student/Ambassador';
+import StudentSettings from './pages/student/Settings';
 import BuildOnCollegen from './pages/student/BuildOnCollegen';
 import CollegeAdminDashboard from './pages/collegeAdmin/CollegeAdminDashboard';
+import CollegeAdminOverview from './pages/collegeAdmin/Overview';
+import CollegeAdminCommunity from './pages/collegeAdmin/Community';
+import CollegeAdminCollegeProfile from './pages/collegeAdmin/CollegeProfile';
+import CollegeAdminTokenPreferences from './pages/collegeAdmin/TokenPreferences';
+import CollegeAdminLeaderboard from './pages/collegeAdmin/Leaderboard';
+import CollegeAdminSettings from './pages/collegeAdmin/Settings';
 import PlatformAdminDashboard from './pages/platformAdmin/PlatformAdminDashboard';
+import PlatformAdminStudents from './pages/platformAdmin/Students';
+import PlatformAdminColleges from './pages/platformAdmin/Colleges';
+import PlatformAdminCollegeEdit from './pages/platformAdmin/CollegeEdit';
+import PlatformAdminAmbassadors from './pages/platformAdmin/Ambassadors';
+import PlatformAdminSubscribers from './pages/platformAdmin/Subscribers';
   
 const darkTheme = createTheme({
   palette: {
@@ -60,11 +77,29 @@ function App() {
           <Route path="college-selection" element={<CollegeSelection />} />
           <Route path="college-admin-selection" element={<CollegeAdminSelection />} />
         </Route>
-        <Route path="student/dashboard" element={<StudentDashboard />} />
-        <Route path="student/build-on-collegen" element={<BuildOnCollegen />} />
-        <Route path="college-admin/dashboard" element={<CollegeAdminDashboard />} />
-        <Route path="platform-admin/dashboard" element={<PlatformAdminDashboard />} />
       </Route>
+      {/* Dashboard routes - no RootLayout (they have their own DashboardLayout) */}
+      <Route path="student/dashboard" element={<Overview />} />
+      <Route path="student/overview" element={<Overview />} />
+      <Route path="student/colleges" element={<MyColleges />} />
+      <Route path="student/leaderboard" element={<Leaderboard />} />
+      <Route path="student/referrals" element={<Referrals />} />
+      <Route path="student/ambassador" element={<Ambassador />} />
+      <Route path="student/settings" element={<StudentSettings />} />
+      <Route path="student/build-on-collegen" element={<BuildOnCollegen />} />
+      <Route path="college-admin/dashboard" element={<CollegeAdminOverview />} />
+      <Route path="college-admin/overview" element={<CollegeAdminOverview />} />
+      <Route path="college-admin/community" element={<CollegeAdminCommunity />} />
+      <Route path="college-admin/college" element={<CollegeAdminCollegeProfile />} />
+      <Route path="college-admin/token" element={<CollegeAdminTokenPreferences />} />
+      <Route path="college-admin/leaderboard" element={<CollegeAdminLeaderboard />} />
+      <Route path="college-admin/settings" element={<CollegeAdminSettings />} />
+      <Route path="platform-admin/dashboard" element={<PlatformAdminDashboard />} />
+      <Route path="platform-admin/students" element={<PlatformAdminStudents />} />
+      <Route path="platform-admin/colleges" element={<PlatformAdminColleges />} />
+      <Route path="platform-admin/colleges/:id/edit" element={<PlatformAdminCollegeEdit />} />
+      <Route path="platform-admin/ambassadors" element={<PlatformAdminAmbassadors />} />
+      <Route path="platform-admin/subscribers" element={<PlatformAdminSubscribers />} />
       <Route path="*" element={<NotFound />} />
     </>
   );

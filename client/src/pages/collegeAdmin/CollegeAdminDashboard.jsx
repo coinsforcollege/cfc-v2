@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
   Button,
   TextField,
   Chip,
@@ -15,23 +15,17 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
   Grid,
   MenuItem,
   ToggleButtonGroup,
   ToggleButton
 } from '@mui/material';
-import { 
-  School, 
-  People, 
-  TrendingUp, 
+import {
+  School,
+  People,
+  TrendingUp,
   EmojiEvents,
   Edit,
-  Dashboard as DashboardIcon,
   Settings,
   Add,
   Delete,
@@ -57,6 +51,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { collegeAdminApi } from '../../api/collegeAdmin.api';
 import { getImageUrl } from '../../utils/imageUtils';
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 // Helper function to get chip style based on status
 const getStatusChipStyle = (status) => {
@@ -88,8 +83,6 @@ const getStatusChipStyle = (status) => {
       };
   }
 };
-
-const SIDEBAR_WIDTH = 260;
 
 const CollegeAdminDashboard = () => {
   const { user } = useAuth();
@@ -1363,197 +1356,24 @@ const CollegeAdminDashboard = () => {
     }
   };
 
+  // Calculate stats for sidebar badges
+  const sidebarStats = {
+    communityCount: community.length,
+  };
+
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      background: '#f8fafc', 
-      pt: { xs: 12, md: 14 },
-      pb: 4,
-      px: { xs: 2, md: 3 }
-    }}>
-      <Box sx={{ 
-        maxWidth: '1200px',
-        mx: 'auto',
-        display: 'flex',
-        gap: 3,
-        minHeight: 'calc(100vh - 200px)'
-      }}>
-        {/* Sidebar */}
-        <Box
-          sx={{
-            width: SIDEBAR_WIDTH,
-            flexShrink: 0,
-            background: 'white',
-            borderRadius: 3,
-            border: '1px solid #e2e8f0',
-            height: 'fit-content',
-            position: 'sticky',
-            top: '100px'
-          }}
-        >
-          <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>College Admin</Typography>
-            <Typography variant="caption" color="text.secondary">{college.name}</Typography>
-          </Box>
-          
-          <List sx={{ px: 2, py: 2 }}>
-            <ListItemButton
-              selected={activeSection === 'overview'}
-              onClick={() => {
-                setActiveSection('overview');
-                setShowCollegeForm(false);
-              }}
-              sx={{
-                borderRadius: 2,
-                mb: 1,
-                '&.Mui-selected': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  },
-                  '& .MuiListItemIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Overview" />
-            </ListItemButton>
-
-            <ListItemButton
-              selected={activeSection === 'college'}
-              onClick={() => {
-                setActiveSection('college');
-                setShowCollegeForm(false);
-              }}
-              sx={{
-                borderRadius: 2,
-                mb: 1,
-                '&.Mui-selected': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  },
-                  '& .MuiListItemIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <School />
-              </ListItemIcon>
-              <ListItemText primary="College Profile" />
-            </ListItemButton>
-
-            <ListItemButton
-              selected={activeSection === 'token'}
-              onClick={() => {
-                setActiveSection('token');
-                setShowCollegeForm(false);
-                setShowTokenForm(false);
-              }}
-              sx={{
-                borderRadius: 2,
-                mb: 1,
-                '&.Mui-selected': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  },
-                  '& .MuiListItemIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <TokenIcon />
-              </ListItemIcon>
-              <ListItemText primary="Token Preferences" />
-            </ListItemButton>
-
-            <ListItemButton
-              selected={activeSection === 'community'}
-              onClick={() => {
-                setActiveSection('community');
-                setShowCollegeForm(false);
-                setShowTokenForm(false);
-              }}
-              sx={{
-                borderRadius: 2,
-                mb: 1,
-                '&.Mui-selected': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  },
-                  '& .MuiListItemIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <People />
-              </ListItemIcon>
-              <ListItemText primary="Community" />
-              <Chip 
-                label={community.length} 
-                size="small" 
-                sx={{ 
-                  ml: 1,
-                  background: activeSection === 'community' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                  color: activeSection === 'community' ? 'white' : '#64748b',
-                  fontWeight: 600
-                }} 
-              />
-            </ListItemButton>
-
-            <ListItemButton
-              onClick={() => {
-                setActiveSection('overview');
-                setShowCollegeForm(false);
-                setShowTokenForm(false);
-                setTimeout(() => {
-                  document.getElementById('leaderboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-              }}
-              sx={{
-                borderRadius: 2,
-                mb: 1,
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <EmojiEvents />
-              </ListItemIcon>
-              <ListItemText primary="Leaderboard" />
-            </ListItemButton>
-
-            <Divider sx={{ my: 2 }} />
-
-            <ListItemButton
-              sx={{
-                borderRadius: 2,
-                mb: 1,
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <Settings />
-              </ListItemIcon>
-              <ListItemText primary="Settings" />
-            </ListItemButton>
-          </List>
-        </Box>
-
-        {/* Main Content */}
-        <Box sx={{ 
-          flexGrow: 1,
-          minWidth: 0
-        }}>
-          {renderContent()}
-        </Box>
-      </Box>
-    </Box>
+    <DashboardLayout
+      activeSection={activeSection}
+      onSectionChange={(section) => {
+        setActiveSection(section);
+        setShowCollegeForm(false);
+        setShowTokenForm(false);
+      }}
+      stats={sidebarStats}
+      searchPlaceholder="Search students..."
+    >
+      {renderContent()}
+    </DashboardLayout>
   );
 };
 

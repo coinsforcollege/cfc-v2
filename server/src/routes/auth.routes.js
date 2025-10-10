@@ -4,7 +4,9 @@ import {
   registerCollegeAdmin,
   login,
   getMe,
-  logout
+  logout,
+  updateProfile,
+  changePassword
 } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -19,6 +21,8 @@ router.post('/login', login);
 // Protected routes
 router.get('/me', protect, getMe);
 router.post('/logout', protect, logout);
+router.put('/profile', protect, updateProfile);
+router.put('/change-password', protect, changePassword);
 
 export default router;
 

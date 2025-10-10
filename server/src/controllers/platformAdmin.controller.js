@@ -439,6 +439,190 @@ export const updateDefaultRates = async (req, res, next) => {
   }
 };
 
+// @desc    Update student details
+// @route   PUT /api/platform-admin/students/:id
+// @access  Private (Platform Admin only)
+export const updateStudent = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone } = req.body;
+
+    const student = await User.findById(id);
+
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (email && email !== student.email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: id } });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already in use'
+        });
+      }
+      student.email = email;
+    }
+
+    // Check if phone is being changed and if it's already taken
+    if (phone && phone !== student.phone) {
+      const existingUser = await User.findOne({ phone, _id: { $ne: id } });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number already in use'
+        });
+      }
+      student.phone = phone;
+    }
+
+    if (name) student.name = name;
+
+    await student.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Student updated successfully',
+      data: student
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete student
+// @route   DELETE /api/platform-admin/students/:id
+// @access  Private (Platform Admin only)
+export const deleteStudent = async (req, res, next) => {
+  try {
+    const student = await User.findById(req.params.id);
+
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    // Delete associated data
+    await Wallet.deleteMany({ student: student._id });
+    await MiningSession.deleteMany({ student: student._id });
+
+    await student.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Student deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Reset student password
+// @route   PUT /api/platform-admin/students/:id/reset-password
+// @access  Private (Platform Admin only)
+export const resetStudentPassword = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    const student = await User.findById(id);
+
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    student.password = newPassword;
+    await student.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add balance to student wallet
+// @route   POST /api/platform-admin/students/:id/add-balance
+// @access  Private (Platform Admin only)
+export const addStudentBalance = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { collegeId, amount } = req.body;
+
+    if (!collegeId || !amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide valid collegeId and amount'
+      });
+    }
+
+    const student = await User.findById(id);
+
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    const college = await College.findById(collegeId);
+
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: 'College not found'
+      });
+    }
+
+    // Find or create wallet
+    let wallet = await Wallet.findOne({ student: id, college: collegeId });
+
+    if (!wallet) {
+      wallet = await Wallet.create({
+        student: id,
+        college: collegeId,
+        balance: amount
+      });
+    } else {
+      wallet.balance += amount;
+      await wallet.save();
+    }
+
+    // Update college stats
+    await College.findByIdAndUpdate(collegeId, {
+      $inc: { 'stats.totalTokensMined': amount }
+    });
+
+    await wallet.populate('college', 'name country');
+
+    res.status(200).json({
+      success: true,
+      message: `Added ${amount} tokens to ${student.name}'s wallet for ${college.name}`,
+      data: wallet
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get platform statistics
 // @route   GET /api/platform-admin/stats
 // @access  Private (Platform Admin only)
@@ -452,7 +636,7 @@ export const getPlatformStats = async (req, res, next) => {
     // Get total tokens mined across all colleges (wallet balance + active mining)
     const wallets = await Wallet.find();
     const walletBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
-    
+
     // Add tokens from all active mining sessions
     const activeSessions = await MiningSession.find({ isActive: true });
     const now = new Date();
@@ -461,7 +645,7 @@ export const getPlatformStats = async (req, res, next) => {
       const currentTokens = miningDuration * session.earningRate;
       return sum + currentTokens;
     }, 0);
-    
+
     const totalTokensMined = walletBalance + activeSessionTokens;
 
     // Recent activity

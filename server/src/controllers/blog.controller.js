@@ -379,16 +379,33 @@ export const getSubscribers = async (req, res) => {
         'sort': 'createdAt:desc'
       }
     });
-    
+
+    console.log('Strapi subscribers response:', JSON.stringify(response.data, null, 2));
+
+    // Strapi v4+ returns data in response.data.data format
+    // Each item has { id, attributes: { email, name, active, createdAt, ... } }
+    const rawData = response.data.data || [];
+
+    // Transform to flat structure expected by frontend
+    const subscribers = rawData.map(item => ({
+      id: item.id,
+      email: item.attributes?.email || item.email,
+      name: item.attributes?.name || item.name,
+      active: item.attributes?.active !== undefined ? item.attributes.active : (item.active !== undefined ? item.active : true),
+      createdAt: item.attributes?.createdAt || item.createdAt
+    }));
+
     res.json({
       success: true,
-      data: response.data.results || response.data.data || []
+      data: subscribers
     });
   } catch (error) {
     console.error('Error fetching subscribers:', error.message);
+    console.error('Full error:', error.response?.data || error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch subscribers'
+      message: 'Failed to fetch subscribers',
+      error: error.message
     });
   }
 };
@@ -397,18 +414,20 @@ export const getSubscribers = async (req, res) => {
 export const deleteSubscriber = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     await strapiClient.delete(`/subscribers/${id}`);
-    
+
     res.json({
       success: true,
       message: 'Subscriber deleted successfully'
     });
   } catch (error) {
     console.error('Error deleting subscriber:', error.message);
+    console.error('Full error:', error.response?.data || error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete subscriber'
+      message: 'Failed to delete subscriber',
+      error: error.message
     });
   }
 };

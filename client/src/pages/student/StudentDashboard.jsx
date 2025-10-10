@@ -48,6 +48,7 @@ import { studentApi } from '../../api/student.api';
 import { miningApi } from '../../api/mining.api';
 import { collegesApi } from '../../api/colleges.api';
 import { BorderBeam } from '@/components/ui/border-beam';
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 const blockchainLogs = [
   'BLOCK_VERIFY: 0x7f3a9b2c...hash validated | consensus: PoW',
@@ -85,6 +86,7 @@ const StudentDashboard = () => {
   const [justSetPrimary, setJustSetPrimary] = useState(null);
   const [copiedReferral, setCopiedReferral] = useState(false);
   const [copiedCollegeReferral, setCopiedCollegeReferral] = useState(null);
+  const [activeSection, setActiveSection] = useState('dashboard');
   const isInitialLoadRef = useRef(true);
 
   const fetchDashboard = useCallback(async () => {
@@ -383,19 +385,23 @@ const StudentDashboard = () => {
     );
   }
 
+  // Calculate stats for sidebar badges
+  const sidebarStats = {
+    collegesCount: dashboard?.miningColleges?.filter(mc => mc.college).length || 0,
+    referralsCount: dashboard?.student?.totalReferrals || 0,
+  };
+
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      background: '#f8fafc',
-      pt: { xs: 10, md: 12 } // Padding top to avoid header overlap
-    }}>
-      {/* Container with max width */}
-      <Box sx={{ 
-        maxWidth: '1200px', 
+    <DashboardLayout
+      activeSection={activeSection}
+      onSectionChange={setActiveSection}
+      stats={sidebarStats}
+      searchPlaceholder="Search colleges..."
+    >
+      <Box sx={{
+        maxWidth: '1200px',
         width: '100%',
-        mx: 'auto', 
-        px: { xs: 2, md: 3 },
-        py: 0
+        mx: 'auto'
       }}>
         {/* Header with Terminal */}
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 3 }}>
@@ -1418,7 +1424,7 @@ const StudentDashboard = () => {
         </DialogActions>
       </Dialog>
       </Box>
-    </Box>
+    </DashboardLayout>
   );
 };
 

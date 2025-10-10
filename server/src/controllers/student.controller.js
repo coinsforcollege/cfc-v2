@@ -249,7 +249,8 @@ export const getDashboard = async (req, res, next) => {
     // Get student with populated data
     const student = await User.findById(studentId)
       .populate('college', 'name country logo baseRate referralBonusRate')
-      .populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+      .populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate')
+      .populate('studentProfile.miningColleges.referredStudents.student', 'name email');
 
     // Get active mining sessions
     const activeSessions = await MiningSession.find({
@@ -290,6 +291,70 @@ export const getDashboard = async (req, res, next) => {
     const validMiningColleges = student.studentProfile.miningColleges.filter(mc => mc.college !== null);
     const validWallets = wallets.filter(w => w.college !== null);
 
+    // Get enhanced data for referred students (mining status and total tokens)
+    const allReferredStudentIds = new Set();
+    validMiningColleges.forEach(mc => {
+      mc.referredStudents?.forEach(ref => {
+        if (ref.student && ref.student._id) {
+          allReferredStudentIds.add(ref.student._id.toString());
+        }
+      });
+    });
+
+    const referredStudentsData = {};
+    if (allReferredStudentIds.size > 0) {
+      const studentIds = Array.from(allReferredStudentIds);
+
+      // Get active mining sessions for referred students
+      const referredActiveSessions = await MiningSession.find({
+        student: { $in: studentIds },
+        isActive: true
+      });
+
+      // Get wallets for referred students
+      const referredWallets = await Wallet.find({
+        student: { $in: studentIds }
+      });
+
+      // Aggregate data per student
+      studentIds.forEach(studentId => {
+        const activeSessionsCount = referredActiveSessions.filter(
+          s => s.student.toString() === studentId
+        ).length;
+
+        const studentWallets = referredWallets.filter(
+          w => w.student.toString() === studentId
+        );
+
+        const totalTokens = studentWallets.reduce((sum, w) => sum + w.balance, 0);
+
+        referredStudentsData[studentId] = {
+          activeMiningCount: activeSessionsCount,
+          totalTokens: totalTokens
+        };
+      });
+    }
+
+    // Enhance miningColleges with referred students data
+    const enhancedMiningColleges = validMiningColleges.map(mc => {
+      const enhancedReferredStudents = mc.referredStudents?.map(ref => {
+        if (ref.student && ref.student._id) {
+          const studentId = ref.student._id.toString();
+          return {
+            ...ref.toObject(),
+            activeMiningCount: referredStudentsData[studentId]?.activeMiningCount || 0,
+            totalTokens: referredStudentsData[studentId]?.totalTokens || 0
+          };
+        }
+        return ref;
+      }) || [];
+
+      return {
+        ...mc.toObject(),
+        referredStudents: enhancedReferredStudents
+      };
+    });
+
     res.status(200).json({
       success: true,
       data: {
@@ -301,7 +366,7 @@ export const getDashboard = async (req, res, next) => {
           referralCode: student.studentProfile.referralCode,
           totalReferrals: student.studentProfile.totalReferrals
         },
-        miningColleges: validMiningColleges,
+        miningColleges: enhancedMiningColleges,
         activeSessions: sessionsWithCurrentTokens,
         wallets: validWallets,
         summary: {
