@@ -92,14 +92,6 @@ const Overview = () => {
     }
 
     fetchDashboard();
-
-    const dashboardInterval = setInterval(() => {
-      fetchDashboard();
-    }, 30000);
-
-    return () => {
-      clearInterval(dashboardInterval);
-    };
   }, [user, navigate]);
 
   const totalMiningTokens = useMemo(() => {

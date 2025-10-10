@@ -107,14 +107,6 @@ const MyColleges = () => {
     }
 
     fetchDashboard();
-
-    const dashboardInterval = setInterval(() => {
-      fetchDashboard();
-    }, 30000);
-
-    return () => {
-      clearInterval(dashboardInterval);
-    };
   }, [user, navigate]);
 
   const handleStartMining = async (collegeId) => {
