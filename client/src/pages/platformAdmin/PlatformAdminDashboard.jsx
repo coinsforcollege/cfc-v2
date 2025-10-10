@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
+import {
+  Box,
+  Typography,
+  Card,
   CardContent,
   Table,
   TableBody,
@@ -26,12 +26,16 @@ import {
   Grid,
   MenuItem,
   ToggleButtonGroup,
-  ToggleButton
+  ToggleButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
-import { 
-  School, 
-  People, 
-  TrendingUp, 
+import {
+  School,
+  People,
+  TrendingUp,
   AccountBalance,
   Search,
   Verified,
@@ -51,7 +55,8 @@ import {
   HourglassEmpty,
   Visibility,
   CloudUpload,
-  Link as LinkIcon
+  Link as LinkIcon,
+  AttachMoney
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
@@ -86,7 +91,12 @@ const PlatformAdminDashboard = () => {
   const [coverInputType, setCoverInputType] = useState('url');
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState('');
-  
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [editingRatesCollege, setEditingRatesCollege] = useState(null);
+  const [showDefaultRateModal, setShowDefaultRateModal] = useState(false);
+  const [rateFormData, setRateFormData] = useState({ baseRate: '', referralBonusRate: '' });
+  const [rateLoading, setRateLoading] = useState(false);
+
   const [collegeFormData, setCollegeFormData] = useState({
     name: '',
     shortName: '',
@@ -360,6 +370,69 @@ const PlatformAdminDashboard = () => {
       await fetchData();
     } catch (error) {
       console.error('Error updating application status:', error);
+    }
+  };
+
+  const handleOpenRateModal = (college) => {
+    setEditingRatesCollege(college);
+    setRateFormData({
+      baseRate: college.baseRate || 0.25,
+      referralBonusRate: college.referralBonusRate || 0.1
+    });
+    setShowRateModal(true);
+  };
+
+  const handleCloseRateModal = () => {
+    setShowRateModal(false);
+    setEditingRatesCollege(null);
+    setRateFormData({ baseRate: '', referralBonusRate: '' });
+  };
+
+  const handleSaveRates = async () => {
+    try {
+      setRateLoading(true);
+      const data = {
+        baseRate: parseFloat(rateFormData.baseRate),
+        referralBonusRate: parseFloat(rateFormData.referralBonusRate)
+      };
+
+      await platformAdminApi.updateCollegeRates(editingRatesCollege._id, data);
+      await fetchData();
+      handleCloseRateModal();
+    } catch (error) {
+      console.error('Error updating college rates:', error);
+      alert('Failed to update rates. Please try again.');
+    } finally {
+      setRateLoading(false);
+    }
+  };
+
+  const handleOpenDefaultRateModal = () => {
+    setRateFormData({ baseRate: 0.25, referralBonusRate: 0.1 });
+    setShowDefaultRateModal(true);
+  };
+
+  const handleCloseDefaultRateModal = () => {
+    setShowDefaultRateModal(false);
+    setRateFormData({ baseRate: '', referralBonusRate: '' });
+  };
+
+  const handleSaveDefaultRates = async () => {
+    try {
+      setRateLoading(true);
+      const data = {
+        baseRate: parseFloat(rateFormData.baseRate),
+        referralBonusRate: parseFloat(rateFormData.referralBonusRate)
+      };
+
+      await platformAdminApi.updateDefaultRates(data);
+      await fetchData();
+      handleCloseDefaultRateModal();
+    } catch (error) {
+      console.error('Error updating default rates:', error);
+      alert('Failed to update default rates. Please try again.');
+    } finally {
+      setRateLoading(false);
     }
   };
 
@@ -1060,16 +1133,33 @@ const PlatformAdminDashboard = () => {
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>Colleges ({colleges.length})</Typography>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={handleAddCollege}
-              sx={{ 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-              }}
-            >
-              Add College
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<AttachMoney />}
+                onClick={handleOpenDefaultRateModal}
+                sx={{
+                  borderColor: '#10b981',
+                  color: '#10b981',
+                  '&:hover': {
+                    borderColor: '#059669',
+                    background: 'rgba(16, 185, 129, 0.04)'
+                  }
+                }}
+              >
+                Set Default Rates
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={handleAddCollege}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                }}
+              >
+                Add College
+              </Button>
+            </Box>
           </Box>
           
           <TextField
@@ -1093,6 +1183,8 @@ const PlatformAdminDashboard = () => {
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700 }}>College</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Admin</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="right">Base Rate</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="right">Referral Bonus</TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="right">Total Miners</TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="right">Active Miners</TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="right">Tokens Mined</TableCell>
@@ -1128,6 +1220,16 @@ const PlatformAdminDashboard = () => {
                       )}
                     </TableCell>
                     <TableCell align="right">
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#10b981' }}>
+                        {college.baseRate || 0.25} t/h
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#3b82f6' }}>
+                        {college.referralBonusRate || 0.1} t/h
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
                       <Typography variant="body2">{college.stats?.totalMiners || 0}</Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -1139,26 +1241,37 @@ const PlatformAdminDashboard = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Chip 
+                      <Chip
                         label={college.isActive ? 'Active' : 'Inactive'}
                         size="small"
-                        sx={{ 
-                          background: college.isActive 
+                        sx={{
+                          background: college.isActive
                             ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                             : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                           color: 'white',
-                          fontWeight: 600 
+                          fontWeight: 600
                         }}
                       />
                     </TableCell>
                     <TableCell>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditCollege(college)}
-                        sx={{ color: '#667eea' }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenRateModal(college)}
+                          sx={{ color: '#10b981' }}
+                          title="Edit Rates"
+                        >
+                          <AttachMoney fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEditCollege(college)}
+                          sx={{ color: '#667eea' }}
+                          title="Edit College"
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1532,20 +1645,21 @@ const PlatformAdminDashboard = () => {
   };
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      background: '#f8fafc', 
-      pt: { xs: 12, md: 14 },
-      pb: 4,
-      px: { xs: 2, md: 3 }
-    }}>
-      <Box sx={{ 
-        maxWidth: '1200px',
-        mx: 'auto',
-        display: 'flex',
-        gap: 3,
-        minHeight: 'calc(100vh - 200px)'
+    <>
+      <Box sx={{
+        minHeight: '100vh',
+        background: '#f8fafc',
+        pt: { xs: 12, md: 14 },
+        pb: 4,
+        px: { xs: 2, md: 3 }
       }}>
+        <Box sx={{
+          maxWidth: '1200px',
+          mx: 'auto',
+          display: 'flex',
+          gap: 3,
+          minHeight: 'calc(100vh - 200px)'
+        }}>
         {/* Sidebar */}
         <Box
           sx={{
@@ -1743,15 +1857,135 @@ const PlatformAdminDashboard = () => {
         </List>
         </Box>
 
-        {/* Main Content */}
-        <Box sx={{ 
-          flexGrow: 1,
-          minWidth: 0
-        }}>
-          {renderContent()}
+          {/* Main Content */}
+          <Box sx={{
+            flexGrow: 1,
+            minWidth: 0
+          }}>
+            {renderContent()}
+          </Box>
         </Box>
       </Box>
-    </Box>
+
+      {/* Edit College Rates Modal */}
+      <Dialog
+        open={showRateModal}
+        onClose={handleCloseRateModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Edit Rates - {editingRatesCollege?.name}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <TextField
+              label="Base Rate (tokens/hour)"
+              type="number"
+              fullWidth
+              value={rateFormData.baseRate}
+              onChange={(e) => setRateFormData({ ...rateFormData, baseRate: e.target.value })}
+              inputProps={{ step: 0.01, min: 0 }}
+              helperText="Earning rate for regular mining"
+            />
+            <TextField
+              label="Referral Bonus Rate (tokens/hour)"
+              type="number"
+              fullWidth
+              value={rateFormData.referralBonusRate}
+              onChange={(e) => setRateFormData({ ...rateFormData, referralBonusRate: e.target.value })}
+              inputProps={{ step: 0.01, min: 0 }}
+              helperText="Additional rate per referral when mining"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 2 }}>
+          <Button
+            onClick={handleCloseRateModal}
+            variant="outlined"
+            disabled={rateLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveRates}
+            variant="contained"
+            disabled={rateLoading || !rateFormData.baseRate || !rateFormData.referralBonusRate}
+            sx={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+              }
+            }}
+          >
+            {rateLoading ? 'Saving...' : 'Save Rates'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Set Default Rates Modal */}
+      <Dialog
+        open={showDefaultRateModal}
+        onClose={handleCloseDefaultRateModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Set Default Rates for All Colleges
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              This will update the earning rates for all colleges in the platform.
+            </Typography>
+            <TextField
+              label="Base Rate (tokens/hour)"
+              type="number"
+              fullWidth
+              value={rateFormData.baseRate}
+              onChange={(e) => setRateFormData({ ...rateFormData, baseRate: e.target.value })}
+              inputProps={{ step: 0.01, min: 0 }}
+              helperText="Default earning rate for regular mining"
+            />
+            <TextField
+              label="Referral Bonus Rate (tokens/hour)"
+              type="number"
+              fullWidth
+              value={rateFormData.referralBonusRate}
+              onChange={(e) => setRateFormData({ ...rateFormData, referralBonusRate: e.target.value })}
+              inputProps={{ step: 0.01, min: 0 }}
+              helperText="Default additional rate per referral when mining"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 2 }}>
+          <Button
+            onClick={handleCloseDefaultRateModal}
+            variant="outlined"
+            disabled={rateLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveDefaultRates}
+            variant="contained"
+            disabled={rateLoading || !rateFormData.baseRate || !rateFormData.referralBonusRate}
+            sx={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+              }
+            }}
+          >
+            {rateLoading ? 'Updating...' : 'Update All Colleges'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

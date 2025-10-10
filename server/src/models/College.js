@@ -277,6 +277,17 @@ const collegeSchema = new mongoose.Schema({
     enum: ['Unaffiliated', 'Waitlist', 'Building', 'Live'],
     default: 'Unaffiliated'
   },
+  // Earning Rates (per college)
+  baseRate: {
+    type: Number,
+    default: 0.25, // tokens per hour
+    min: 0
+  },
+  referralBonusRate: {
+    type: Number,
+    default: 0.1, // tokens per hour per referral
+    min: 0
+  },
   // Legacy fields (deprecated - kept for backward compatibility)
   isOnWaitlist: {
     type: Boolean,

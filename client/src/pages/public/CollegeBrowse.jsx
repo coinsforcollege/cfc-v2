@@ -573,7 +573,7 @@ const CollegeBrowse = () => {
                         )}
 
                         {/* Stats */}
-                        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <People sx={{ fontSize: 18, color: '#667eea' }} />
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -583,12 +583,36 @@ const CollegeBrowse = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <TrendingUp sx={{ fontSize: 18, color: '#10b981' }} />
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {college.stats?.totalTokensMined ? 
-                                (college.stats.totalTokensMined < 1 ? 
-                                  college.stats.totalTokensMined.toFixed(2) : 
-                                  college.stats.totalTokensMined.toFixed(0)) 
+                              {college.stats?.totalTokensMined ?
+                                (college.stats.totalTokensMined < 1 ?
+                                  college.stats.totalTokensMined.toFixed(2) :
+                                  college.stats.totalTokensMined.toFixed(0))
                                 : 0} tokens
                             </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Chip
+                              label={`${college.baseRate || 0.25} t/h`}
+                              size="small"
+                              sx={{
+                                background: 'rgba(16, 185, 129, 0.1)',
+                                color: '#059669',
+                                fontWeight: 600,
+                                fontSize: '0.7rem'
+                              }}
+                            />
+                            {college.referralBonusRate && (
+                              <Chip
+                                label={`+${college.referralBonusRate} t/h/ref`}
+                                size="small"
+                                sx={{
+                                  background: 'rgba(59, 130, 246, 0.1)',
+                                  color: '#2563eb',
+                                  fontWeight: 600,
+                                  fontSize: '0.7rem'
+                                }}
+                              />
+                            )}
                           </Box>
                         </Box>
                       </Box>

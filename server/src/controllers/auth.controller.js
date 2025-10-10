@@ -45,18 +45,15 @@ export const registerStudent = async (req, res, next) => {
       college: null, // No college yet
       studentProfile: {
         miningColleges: [], // Empty initially
-        referredBy: referredByUser ? referredByUser._id : null,
-        baseEarningRate: 0.25,
-        referralBonus: 0
+        referredBy: referredByUser ? referredByUser._id : null
       }
     });
 
-    // Update referrer's referral count and bonus if applicable
+    // Update referrer's referral count if applicable (will be per-college later)
     if (referredByUser) {
       await User.findByIdAndUpdate(referredByUser._id, {
         $inc: {
-          'studentProfile.totalReferrals': 1,
-          'studentProfile.referralBonus': 0.1
+          'studentProfile.totalReferrals': 1
         }
       });
     }
@@ -314,10 +311,19 @@ export const login = async (req, res, next) => {
 
     // Populate college/managed college data
     if (user.role === 'student') {
-      await user.populate('college', 'name country logo stats');
-      await user.populate('studentProfile.miningColleges.college', 'name country logo stats');
+      await user.populate('college', 'name country logo stats baseRate referralBonusRate');
+      await user.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+
+      // Filter out null colleges (deleted colleges)
+      const validMiningColleges = user.studentProfile.miningColleges.filter(mc => mc.college !== null);
+
       userData.college = user.college;
-      userData.studentProfile = user.studentProfile;
+      userData.studentProfile = {
+        miningColleges: validMiningColleges,
+        referredBy: user.studentProfile.referredBy,
+        totalReferrals: user.studentProfile.totalReferrals,
+        referralCode: user.studentProfile.referralCode
+      };
     } else if (user.role === 'college_admin') {
       await user.populate('managedCollege');
       userData.managedCollege = user.managedCollege;
@@ -359,10 +365,19 @@ export const getMe = async (req, res, next) => {
 
     // Populate college/managed college data
     if (user.role === 'student') {
-      await user.populate('college', 'name country logo stats');
-      await user.populate('studentProfile.miningColleges.college', 'name country logo stats');
+      await user.populate('college', 'name country logo stats baseRate referralBonusRate');
+      await user.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+
+      // Filter out null colleges (deleted colleges)
+      const validMiningColleges = user.studentProfile.miningColleges.filter(mc => mc.college !== null);
+
       userData.college = user.college;
-      userData.studentProfile = user.studentProfile;
+      userData.studentProfile = {
+        miningColleges: validMiningColleges,
+        referredBy: user.studentProfile.referredBy,
+        totalReferrals: user.studentProfile.totalReferrals,
+        referralCode: user.studentProfile.referralCode
+      };
     } else if (user.role === 'college_admin') {
       await user.populate('managedCollege');
       userData.managedCollege = user.managedCollege;

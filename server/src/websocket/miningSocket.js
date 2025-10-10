@@ -156,6 +156,12 @@ const getMiningStatusForUserOptimized = async (userId, currentTime) => {
       const remainingTime = new Date(session.endTime) - now;
       const remainingHours = Math.max(0, remainingTime / (1000 * 60 * 60));
 
+      // Periodic logging (only log every 30 seconds to avoid spam)
+      const shouldLog = Math.floor(Date.now() / 30000) !== Math.floor((Date.now() - 5000) / 30000);
+      if (shouldLog && remainingHours > 0) {
+        console.log(`[WS Real-time] College: ${session.college?._id || session.college}, Duration: ${miningDuration.toFixed(8)}h, Tokens: ${currentTokens.toFixed(8)}`);
+      }
+
       return {
         college: session.college,
         startTime: session.startTime,
@@ -171,8 +177,8 @@ const getMiningStatusForUserOptimized = async (userId, currentTime) => {
     return {
       miningColleges: cached.miningColleges,
       activeSessions: sessionsWithCurrentTokens,
-      wallets: cached.wallets,
-      earningRate: cached.earningRate
+      wallets: cached.wallets
+      // Note: Earning rates are now per-college, available in each session's earningRate field
     };
   } catch (error) {
     console.error('Error in optimized mining status:', error);
@@ -186,17 +192,17 @@ const getMiningStatusForUser = async (userId, updateCache = true) => {
   try {
     // Get student info
     const student = await User.findById(userId)
-      .populate('studentProfile.miningColleges.college', 'name country logo');
+      .populate('studentProfile.miningColleges.college', 'name country logo baseRate referralBonusRate');
 
     // Get all active mining sessions
     const activeSessions = await MiningSession.find({
       student: userId,
       isActive: true
-    }).populate('college', 'name country logo');
+    }).populate('college', 'name country logo baseRate referralBonusRate');
 
     // Get all wallets
     const wallets = await Wallet.find({ student: userId })
-      .populate('college', 'name country logo');
+      .populate('college', 'name country logo baseRate referralBonusRate');
 
     // Calculate current tokens for each active session
     const now = new Date();
@@ -218,15 +224,15 @@ const getMiningStatusForUser = async (userId, updateCache = true) => {
       };
     });
 
+    // Filter out null colleges (deleted colleges)
+    const validMiningColleges = student.studentProfile.miningColleges.filter(mc => mc.college !== null);
+    const validWallets = wallets.filter(w => w.college !== null);
+
     const result = {
-      miningColleges: student.studentProfile.miningColleges,
+      miningColleges: validMiningColleges,
       activeSessions: sessionsWithCurrentTokens,
-      wallets,
-      earningRate: {
-        base: student.studentProfile.baseEarningRate,
-        referralBonus: student.studentProfile.referralBonus,
-        total: student.studentProfile.baseEarningRate + student.studentProfile.referralBonus
-      }
+      wallets: validWallets
+      // Note: Earning rates are now per-college, available in each session's earningRate field
     };
 
     // Update cache if requested
@@ -241,7 +247,6 @@ const getMiningStatusForUser = async (userId, updateCache = true) => {
         })),
         wallets: result.wallets,
         miningColleges: result.miningColleges,
-        earningRate: result.earningRate,
         lastFetched: Date.now()
       });
     }

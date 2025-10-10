@@ -341,6 +341,104 @@ export const deleteCollege = async (req, res, next) => {
   }
 };
 
+// @desc    Update college earning rates
+// @route   PUT /api/platform-admin/colleges/:id/rates
+// @access  Private (Platform Admin only)
+export const updateCollegeRates = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { baseRate, referralBonusRate } = req.body;
+
+    // Validation
+    if (baseRate === undefined && referralBonusRate === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide baseRate and/or referralBonusRate'
+      });
+    }
+
+    if ((baseRate !== undefined && baseRate < 0) || (referralBonusRate !== undefined && referralBonusRate < 0)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rates cannot be negative'
+      });
+    }
+
+    const updateData = {};
+    if (baseRate !== undefined) updateData.baseRate = baseRate;
+    if (referralBonusRate !== undefined) updateData.referralBonusRate = referralBonusRate;
+
+    const college = await College.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: 'College not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'College rates updated successfully',
+      data: {
+        id: college._id,
+        name: college.name,
+        baseRate: college.baseRate,
+        referralBonusRate: college.referralBonusRate
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update default earning rates for all colleges
+// @route   PUT /api/platform-admin/default-rates
+// @access  Private (Platform Admin only)
+export const updateDefaultRates = async (req, res, next) => {
+  try {
+    const { baseRate, referralBonusRate } = req.body;
+
+    // Validation
+    if (baseRate === undefined && referralBonusRate === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide baseRate and/or referralBonusRate'
+      });
+    }
+
+    if ((baseRate !== undefined && baseRate < 0) || (referralBonusRate !== undefined && referralBonusRate < 0)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rates cannot be negative'
+      });
+    }
+
+    const updateData = {};
+    if (baseRate !== undefined) updateData.baseRate = baseRate;
+    if (referralBonusRate !== undefined) updateData.referralBonusRate = referralBonusRate;
+
+    // Update all colleges
+    const result = await College.updateMany({}, updateData);
+
+    res.status(200).json({
+      success: true,
+      message: `Default rates updated successfully for ${result.modifiedCount} colleges`,
+      data: {
+        baseRate: baseRate !== undefined ? baseRate : 'unchanged',
+        referralBonusRate: referralBonusRate !== undefined ? referralBonusRate : 'unchanged',
+        collegesUpdated: result.modifiedCount
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get platform statistics
 // @route   GET /api/platform-admin/stats
 // @access  Private (Platform Admin only)

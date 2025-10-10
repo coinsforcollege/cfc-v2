@@ -313,6 +313,39 @@ const CollegeView = () => {
                 <Typography variant="body2" color="text.secondary">Global Rank</Typography>
               </div>
             </Box>
+
+            {/* Earning Rates */}
+            <Box sx={{ mt: 3, p: 2.5, borderRadius: 2, background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, color: '#059669' }}>
+                Earning Rates
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Chip
+                  label={`${college.baseRate || 0.25} t/h`}
+                  size="medium"
+                  sx={{
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#059669',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    px: 1
+                  }}
+                />
+                {college.referralBonusRate && (
+                  <Chip
+                    label={`+${college.referralBonusRate} t/h per referral`}
+                    size="medium"
+                    sx={{
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      color: '#2563eb',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      px: 1
+                    }}
+                  />
+                )}
+              </Box>
+            </Box>
           </Box>
 
           {/* Action Buttons */}

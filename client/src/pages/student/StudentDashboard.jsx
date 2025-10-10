@@ -23,7 +23,8 @@ import {
   useTheme,
   ToggleButtonGroup,
   ToggleButton,
-  Avatar
+  Avatar,
+  Tooltip
 } from '@mui/material';
 import {
   AccountBalanceWallet,
@@ -120,8 +121,7 @@ const StudentDashboard = () => {
         ...prev,
         miningColleges: wsMiningStatus.miningColleges,
         activeSessions: wsMiningStatus.activeSessions,
-        wallets: wsMiningStatus.wallets,
-        earningRate: wsMiningStatus.earningRate
+        wallets: wsMiningStatus.wallets
       }));
       
       // Log token updates for debugging
@@ -326,7 +326,7 @@ const StudentDashboard = () => {
 
   // Memoize calculated values to prevent unnecessary re-renders
   const totalMiningTokens = useMemo(() => {
-    return Object.values(miningStatus).reduce((sum, session) => 
+    return Object.values(miningStatus).reduce((sum, session) =>
       sum + (session.isActive && session.remainingHours > 0 ? session.currentTokens : 0), 0
     );
   }, [miningStatus]);
@@ -334,6 +334,26 @@ const StudentDashboard = () => {
   const totalBalance = useMemo(() => {
     return (dashboard?.summary?.totalBalance || 0) + totalMiningTokens;
   }, [dashboard?.summary?.totalBalance, totalMiningTokens]);
+
+  // Calculate current earning rate from active sessions
+  const currentEarningRate = useMemo(() => {
+    return Object.values(miningStatus).reduce((sum, session) =>
+      sum + (session.isActive && session.remainingHours > 0 ? session.earningRate : 0), 0
+    );
+  }, [miningStatus]);
+
+  // Calculate total referral bonus across all mining colleges
+  const totalReferralBonus = useMemo(() => {
+    if (!dashboard?.miningColleges || !dashboard?.student?.totalReferrals) return 0;
+    // Sum up referral bonus rates from all mining colleges
+    const totalBonus = dashboard.miningColleges.reduce((sum, mc) => {
+      if (mc.college && mc.college.referralBonusRate) {
+        return sum + (mc.college.referralBonusRate * dashboard.student.totalReferrals);
+      }
+      return sum;
+    }, 0);
+    return totalBonus;
+  }, [dashboard?.miningColleges, dashboard?.student?.totalReferrals]);
 
   if (loading) {
     return (
@@ -475,7 +495,7 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card sx={{ 
+        <Card sx={{
           flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
           background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
           color: 'white',
@@ -485,10 +505,10 @@ const StudentDashboard = () => {
           <CardContent>
             <Refresh sx={{ color: 'white', fontSize: 24, mb: 1 }} />
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-              Rate
+              Current Rate
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              {dashboard?.summary?.earningRate?.total?.toFixed(2) || '0.00'}
+              {currentEarningRate.toFixed(2)} /hr
             </Typography>
           </CardContent>
         </Card>
@@ -638,10 +658,10 @@ const StudentDashboard = () => {
                 </IconButton>
               </Box>
               <Typography variant="body2" sx={{ opacity: 0.95, mb: 0.5 }}>
-                Referrals: <strong>{dashboard?.student.totalReferrals}</strong>
+                Referrals: <strong>{dashboard?.student.totalReferrals || 0}</strong>
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.95 }}>
-                Bonus: <strong>+{(dashboard?.summary?.earningRate?.referralBonus || 0).toFixed(1)}/hr</strong>
+                Potential Bonus: <strong>+{totalReferralBonus.toFixed(2)}/hr</strong>
               </Typography>
             </CardContent>
           </Card>
@@ -678,266 +698,360 @@ const StudentDashboard = () => {
         )}
       </Box>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 2 }}>
         {dashboard?.miningColleges.filter(mc => mc.college).map((mc) => {
           const session = miningStatus[mc.college._id];
           const wallet = dashboard?.wallets?.find(w => w.college && w.college._id === mc.college._id);
           const isActive = session && session.isActive && session.remainingHours > 0;
+          const progress = isActive ? ((24 - session.remainingHours) / 24) * 100 : 0;
 
           return (
-            <Box key={mc.college._id} sx={{ flex: { xs: '100%', md: 'calc(50% - 8px)' } }}>
-              <Card sx={{
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                borderRadius: 3,
+            <Card
+              key={mc.college._id}
+              sx={{
+                height: 420,
+                background: isActive
+                  ? 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)'
+                  : 'linear-gradient(145deg, #1e293b 0%, #334155 100%)',
+                borderRadius: 2,
                 position: 'relative',
                 overflow: 'hidden',
-                minHeight: 380,
+                border: isActive ? '1px solid rgba(34, 211, 238, 0.3)' : '1px solid rgba(71, 85, 105, 0.3)',
+                transition: 'all 0.3s ease',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'transform 0.2s, box-shadow 0.2s',
                 '&:hover': {
                   transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                  boxShadow: isActive
+                    ? '0 20px 40px rgba(34, 211, 238, 0.3)'
+                    : '0 20px 40px rgba(0, 0, 0, 0.5)',
+                  border: isActive ? '1px solid rgba(34, 211, 238, 0.5)' : '1px solid rgba(71, 85, 105, 0.5)'
                 },
                 ...(isActive && {
-                  background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, rgba(0, 242, 254, 0.05) 100%)',
-                  border: '1px solid rgba(79, 172, 254, 0.2)',
                   '&::before': {
                     content: '""',
                     position: 'absolute',
                     top: 0,
                     left: '-100%',
-                    width: '100%',
+                    width: '200%',
                     height: '100%',
-                    background: 'linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.1), transparent)',
-                    animation: 'shimmer 3s infinite',
+                    background: 'linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.1), transparent)',
+                    animation: 'scan 3s linear infinite',
                   },
-                  '@keyframes shimmer': {
+                  '@keyframes scan': {
                     '0%': { left: '-100%' },
                     '100%': { left: '100%' }
                   }
                 })
+              }}
+            >
+              {/* Header Section - Fixed Height */}
+              <Box sx={{
+                p: 2,
+                borderBottom: '1px solid rgba(71, 85, 105, 0.3)',
+                position: 'relative',
+                zIndex: 1,
+                minHeight: 100
               }}>
-                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {mc.college.name}
-                        </Typography>
-                        {dashboard?.student.college?._id === mc.college._id ? (
-                          <Chip 
-                            label="Primary" 
-                            size="small"
-                            icon={justSetPrimary === mc.college._id ? <CheckCircle sx={{ fontSize: '0.9rem' }} /> : undefined}
-                            sx={{
-                              height: 20,
-                              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                              color: 'white',
-                              fontWeight: 600,
-                              fontSize: '0.7rem',
-                              '& .MuiChip-label': { px: 1 },
-                              '& .MuiChip-icon': { 
-                                color: 'white',
-                                marginLeft: '4px',
-                                marginRight: '-4px'
-                              }
-                            }}
-                          />
-                        ) : (
-                          <Chip 
-                            label="Set Primary" 
-                            size="small"
-                            onClick={() => handleSetPrimaryCollege(mc.college._id)}
-                            disabled={actionLoading === `primary-${mc.college._id}`}
-                            sx={{
-                              height: 20,
-                              borderColor: '#667eea',
-                              color: '#667eea',
-                              fontWeight: 500,
-                              fontSize: '0.7rem',
-                              cursor: 'pointer',
-                              '& .MuiChip-label': { px: 1 },
-                              '&:hover': {
-                                borderColor: '#764ba2',
-                                background: 'rgba(102, 126, 234, 0.08)'
-                              }
-                            }}
-                            variant="outlined"
-                          />
-                        )}
-                      </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {mc.college.country}
-                      </Typography>
-                    </Box>
-                    {isActive && (
-                      <Chip 
-                        label="Mining" 
-                        size="small"
-                        sx={{
-                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                          color: 'white',
-                          fontWeight: 600,
-                          animation: 'pulse 2s infinite',
-                          '@keyframes pulse': {
-                            '0%, 100%': { opacity: 1, transform: 'scale(1)' },
-                            '50%': { opacity: 0.8, transform: 'scale(0.98)' }
-                          }
-                        }}
-                      />
-                    )}
-                  </Box>
-
-                  {isActive && (
-                    <Box sx={{ 
-                      mb: 2, 
-                      p: 2, 
-                      borderRadius: 2,
-                      background: 'rgba(79, 172, 254, 0.08)',
-                      border: '1px solid rgba(79, 172, 254, 0.15)'
-                    }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, alignItems: 'center' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            background: '#4facfe',
-                            animation: 'blink 1.5s infinite',
-                            '@keyframes blink': {
-                              '0%, 100%': { opacity: 1 },
-                              '50%': { opacity: 0.3 }
-                            }
-                          }} />
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#4facfe' }}>
-                            Mining: {session.currentTokens.toFixed(4)} tokens
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
-                          {session.remainingHours.toFixed(1)}h left
-                        </Typography>
-                      </Box>
-                      <Box sx={{ position: 'relative', width: '100%' }}>
-                        <Box sx={{
-                          height: 12,
-                          borderRadius: 6,
-                          background: '#e2e8f0',
-                          border: '1px solid #cbd5e1',
-                          overflow: 'hidden',
-                          position: 'relative'
-                        }}>
-                          <Box sx={{
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            height: '100%',
-                            width: `${Math.max(((24 - session.remainingHours) / 24) * 100, 3)}%`,
-                            minWidth: '30px',
-                            background: 'linear-gradient(90deg, #f97316 0%, #fb923c 50%, #fbbf24 100%)',
-                            borderRadius: 6,
-                            boxShadow: '0 0 16px rgba(249, 115, 22, 0.8)',
-                            transition: 'width 0.3s ease',
-                            '&::after': {
-                              content: '""',
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              height: '50%',
-                              background: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%)'
-                            }
-                          }} />
-                        </Box>
-                      </Box>
-                      <Typography variant="caption" sx={{ color: '#64748b', mt: 0.5, display: 'block', textAlign: 'center' }}>
-                        {((24 - session.remainingHours) / 24 * 100).toFixed(1)}% Complete
-                      </Typography>
-                    </Box>
-                  )}
-
-                  <Box sx={{ mb: 2 }}>
-                    {/* Wallet Balance */}
-                    <Box sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      mb: 1,
-                      p: 1.5,
-                      borderRadius: 2,
-                      background: 'rgba(102, 126, 234, 0.05)',
-                      border: '1px solid rgba(102, 126, 234, 0.1)'
-                    }}>
-                      <Typography variant="body2" sx={{ color: '#64748b' }}>
-                        Wallet Balance
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#667eea' }}>
-                        {wallet?.balance.toFixed(4) || '0.0000'} <Typography component="span" variant="caption">tokens</Typography>
-                      </Typography>
-                    </Box>
-                    
-                    {/* Total (Wallet + Current Mining) */}
-                    <Box sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center',
-                      p: 1.5,
-                      borderRadius: 2,
-                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
-                      border: '2px solid rgba(102, 126, 234, 0.2)'
-                    }}>
-                      <Box>
-                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
-                          Total Value
-                        </Typography>
-                        {isActive && (
-                          <Typography variant="caption" sx={{ color: '#4facfe', display: 'block' }}>
-                            (includes mining)
-                          </Typography>
-                        )}
-                      </Box>
-                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#667eea' }}>
-                        {((wallet?.balance || 0) + (isActive ? session.currentTokens : 0)).toFixed(4)} <Typography component="span" variant="caption">tokens</Typography>
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ mt: 'auto' }}>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      startIcon={isActive ? <Stop /> : <PlayArrow />}
-                      onClick={() => isActive ? handleStopMining(mc.college._id) : handleStartMining(mc.college._id)}
-                      disabled={actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`}
-                      sx={isActive ? {
-                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                        borderRadius: 3,
-                        boxShadow: '0 4px 16px rgba(240, 147, 251, 0.4)',
-                        fontWeight: 600,
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
-                          boxShadow: '0 6px 20px rgba(240, 147, 251, 0.5)'
-                        }
-                      } : {
-                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                        borderRadius: 3,
-                        boxShadow: '0 4px 16px rgba(79, 172, 254, 0.4)',
-                        fontWeight: 600,
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
-                          boxShadow: '0 6px 20px rgba(79, 172, 254, 0.5)'
-                        }
+                {/* Status Indicator */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: isActive ? '#22d3ee' : '#64748b',
+                      boxShadow: isActive ? '0 0 10px #22d3ee' : 'none',
+                      animation: isActive ? 'pulse 2s infinite' : 'none',
+                      '@keyframes pulse': {
+                        '0%, 100%': { opacity: 1 },
+                        '50%': { opacity: 0.5 }
+                      }
+                    }} />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: isActive ? '#22d3ee' : '#64748b',
+                        fontWeight: 700,
+                        fontSize: '0.65rem',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        fontFamily: 'Monaco, monospace'
                       }}
                     >
-                      {actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}` 
-                        ? <CircularProgress size={20} sx={{ color: 'white' }} />
-                        : isActive ? 'Stop Mining' : 'Start Mining'
-                      }
-                    </Button>
+                      {isActive ? 'MINING' : 'OFFLINE'}
+                    </Typography>
                   </Box>
-                </CardContent>
-              </Card>
-            </Box>
+                  {dashboard?.student.college?._id === mc.college._id ? (
+                    <Chip
+                      label="PRIMARY"
+                      size="small"
+                      sx={{
+                        height: 18,
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        border: '1px solid rgba(34, 197, 94, 0.5)',
+                        color: '#22c55e',
+                        fontSize: '0.6rem',
+                        fontWeight: 700,
+                        '& .MuiChip-label': { px: 0.75 }
+                      }}
+                    />
+                  ) : (
+                    <Chip
+                      label="SET PRIMARY"
+                      size="small"
+                      onClick={() => handleSetPrimaryCollege(mc.college._id)}
+                      disabled={actionLoading === `primary-${mc.college._id}`}
+                      sx={{
+                        height: 18,
+                        background: 'rgba(100, 116, 139, 0.2)',
+                        border: '1px solid rgba(100, 116, 139, 0.4)',
+                        color: '#94a3b8',
+                        fontSize: '0.6rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        '& .MuiChip-label': { px: 0.75 },
+                        '&:hover': {
+                          background: 'rgba(148, 163, 184, 0.3)',
+                          border: '1px solid rgba(148, 163, 184, 0.6)',
+                          color: '#cbd5e1'
+                        },
+                        '&.Mui-disabled': {
+                          opacity: 0.5,
+                          cursor: 'not-allowed'
+                        }
+                      }}
+                    />
+                  )}
+                </Box>
+
+                {/* College Name - Truncated */}
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    color: '#f1f5f9',
+                    fontSize: '0.95rem',
+                    mb: 0.5,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {mc.college.name}
+                </Typography>
+
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: '#94a3b8',
+                    fontSize: '0.7rem',
+                    display: 'block',
+                    mb: 1
+                  }}
+                >
+                  {mc.college.country}
+                </Typography>
+
+                {/* Rates */}
+                <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                  <Tooltip title="Base mining rate - tokens earned per hour" arrow placement="top">
+                    <Chip
+                      label={`${mc.college.baseRate || 0.25} T/H`}
+                      size="small"
+                      sx={{
+                        height: 18,
+                        background: 'rgba(52, 211, 153, 0.15)',
+                        border: '1px solid rgba(52, 211, 153, 0.3)',
+                        color: '#34d399',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        '& .MuiChip-label': { px: 0.75 },
+                        cursor: 'help'
+                      }}
+                    />
+                  </Tooltip>
+                  {mc.college.referralBonusRate && (
+                    <Tooltip title="Referral bonus - additional tokens per hour per referral" arrow placement="top">
+                      <Chip
+                        label={`+${mc.college.referralBonusRate} REF`}
+                        size="small"
+                        sx={{
+                          height: 18,
+                          background: 'rgba(96, 165, 250, 0.15)',
+                          border: '1px solid rgba(96, 165, 250, 0.3)',
+                          color: '#60a5fa',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          '& .MuiChip-label': { px: 0.75 },
+                          cursor: 'help'
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Mining Progress Section - Fixed Height */}
+              <Box sx={{
+                p: 2,
+                borderBottom: '1px solid rgba(71, 85, 105, 0.3)',
+                height: 120,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                position: 'relative',
+                zIndex: 1
+              }}>
+                {isActive ? (
+                  <>
+                    {/* Current Mining Tokens */}
+                    <Box sx={{ mb: 1.5, mt: 0.5 }}>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem', mb: 0.75, display: 'block' }}>
+                        CURRENT YIELD
+                      </Typography>
+                      <Typography variant="h5" sx={{
+                        color: '#22d3ee',
+                        fontWeight: 700,
+                        fontFamily: 'Monaco, monospace',
+                        fontSize: '1.5rem'
+                      }}>
+                        {session.currentTokens.toFixed(4)}
+                      </Typography>
+                    </Box>
+
+                    {/* Progress Bar */}
+                    <Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem' }}>
+                          PROGRESS
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#22d3ee', fontSize: '0.65rem', fontWeight: 700 }}>
+                          {session.remainingHours.toFixed(1)}H LEFT
+                        </Typography>
+                      </Box>
+                      <Box sx={{
+                        height: 6,
+                        background: 'rgba(15, 23, 42, 0.8)',
+                        border: '1px solid rgba(34, 211, 238, 0.2)',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}>
+                        <Box sx={{
+                          height: '100%',
+                          width: `${progress}%`,
+                          background: 'linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4)',
+                          backgroundSize: '200% 100%',
+                          animation: 'gradient 2s ease infinite',
+                          boxShadow: '0 0 10px rgba(34, 211, 238, 0.5)',
+                          '@keyframes gradient': {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' }
+                          }
+                        }} />
+                      </Box>
+                    </Box>
+                  </>
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 2 }}>
+                    <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem' }}>
+                      MINING OFFLINE
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#475569', mt: 1, fontSize: '0.7rem' }}>
+                      Start mining to earn tokens
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+
+              {/* Balance Section - Fixed Height */}
+              <Box sx={{
+                p: 2,
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                position: 'relative',
+                zIndex: 1
+              }}>
+                {/* Balance Display */}
+                <Box sx={{
+                  background: isActive
+                    ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(34, 211, 238, 0.15) 100%)'
+                    : 'rgba(15, 23, 42, 0.5)',
+                  border: isActive ? '1px solid rgba(34, 211, 238, 0.3)' : '1px solid rgba(71, 85, 105, 0.3)',
+                  borderRadius: 1.5,
+                  p: 1.5,
+                  mb: 1.5
+                }}>
+                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
+                    {isActive ? 'TOTAL VALUE' : 'WALLET BALANCE'}
+                  </Typography>
+                  <Typography variant="h6" sx={{
+                    color: isActive ? '#22d3ee' : '#f1f5f9',
+                    fontWeight: 700,
+                    fontFamily: 'Monaco, monospace',
+                    fontSize: '1.1rem'
+                  }}>
+                    {isActive
+                      ? ((wallet?.balance || 0) + session.currentTokens).toFixed(4)
+                      : (wallet?.balance.toFixed(4) || '0.0000')
+                    }
+                  </Typography>
+                  {isActive && (
+                    <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.6rem', display: 'block', mt: 0.5 }}>
+                      Wallet: {wallet?.balance.toFixed(4) || '0.0000'} + Mining: {session.currentTokens.toFixed(4)}
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Action Button */}
+                <Button
+                  fullWidth
+                  variant="contained"
+                  startIcon={isActive ? <Stop /> : <PlayArrow />}
+                  onClick={() => isActive ? handleStopMining(mc.college._id) : handleStartMining(mc.college._id)}
+                  disabled={actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`}
+                  sx={{
+                    background: isActive
+                      ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
+                      : 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    py: 1.25,
+                    borderRadius: 1.5,
+                    border: isActive
+                      ? '1px solid rgba(239, 68, 68, 0.5)'
+                      : '1px solid rgba(34, 211, 238, 0.5)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    boxShadow: isActive
+                      ? '0 4px 20px rgba(239, 68, 68, 0.4)'
+                      : '0 4px 20px rgba(34, 211, 238, 0.4)',
+                    '&:hover': {
+                      background: isActive
+                        ? 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)'
+                        : 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
+                      boxShadow: isActive
+                        ? '0 6px 25px rgba(239, 68, 68, 0.5)'
+                        : '0 6px 25px rgba(34, 211, 238, 0.5)',
+                    },
+                    '&:disabled': {
+                      background: 'rgba(71, 85, 105, 0.3)',
+                      color: '#64748b'
+                    }
+                  }}
+                >
+                  {actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`
+                    ? <CircularProgress size={20} sx={{ color: 'white' }} />
+                    : isActive ? 'STOP MINING' : 'START MINING'
+                  }
+                </Button>
+              </Box>
+            </Card>
           );
         })}
       </Box>

@@ -86,8 +86,8 @@ export const startMining = async (req, res, next) => {
       });
     }
 
-    // Calculate earning rate (base + referral bonus)
-    const earningRate = student.studentProfile.baseEarningRate + student.studentProfile.referralBonus;
+    // Calculate earning rate from college rates (base rate only for now, referral bonus will be per-college in Problem 1)
+    const earningRate = college.baseRate || 0.25;
 
     // Create new mining session (24 hours)
     const startTime = new Date();
@@ -168,6 +168,18 @@ export const stopMining = async (req, res, next) => {
     const miningDuration = (now - session.startTime) / (1000 * 60 * 60); // in hours
     const tokensEarned = miningDuration * session.earningRate;
 
+    // Log calculation details for debugging
+    console.log(`\n=== STOP MINING CALCULATION ===`);
+    console.log(`Student: ${studentId}`);
+    console.log(`College: ${collegeId}`);
+    console.log(`Start Time: ${session.startTime.toISOString()}`);
+    console.log(`Stop Time (now): ${now.toISOString()}`);
+    console.log(`Mining Duration: ${miningDuration.toFixed(8)} hours`);
+    console.log(`Earning Rate: ${session.earningRate} t/h`);
+    console.log(`Tokens Earned: ${tokensEarned.toFixed(8)} tokens`);
+    console.log(`Tokens Earned (rounded): ${tokensEarned.toFixed(4)} tokens`);
+    console.log(`===============================\n`);
+
     // Update session
     session.isActive = false;
     session.tokensEarned = tokensEarned;
@@ -220,17 +232,17 @@ export const getMiningStatus = async (req, res, next) => {
 
     // Get student info
     const student = await User.findById(studentId)
-      .populate('studentProfile.miningColleges.college', 'name country logo');
+      .populate('studentProfile.miningColleges.college', 'name country logo baseRate referralBonusRate');
 
     // Get all active mining sessions
     const activeSessions = await MiningSession.find({
       student: studentId,
       isActive: true
-    }).populate('college', 'name country logo');
+    }).populate('college', 'name country logo baseRate referralBonusRate');
 
     // Get all wallets
     const wallets = await Wallet.find({ student: studentId })
-      .populate('college', 'name country logo');
+      .populate('college', 'name country logo baseRate referralBonusRate');
 
     // Calculate current tokens for each active session
     const now = new Date();
@@ -252,17 +264,17 @@ export const getMiningStatus = async (req, res, next) => {
       };
     });
 
+    // Filter out null colleges (deleted colleges)
+    const validMiningColleges = student.studentProfile.miningColleges.filter(mc => mc.college !== null);
+    const validWallets = wallets.filter(w => w.college !== null);
+
     res.status(200).json({
       success: true,
       data: {
-        miningColleges: student.studentProfile.miningColleges,
+        miningColleges: validMiningColleges,
         activeSessions: sessionsWithCurrentTokens,
-        wallets,
-        earningRate: {
-          base: student.studentProfile.baseEarningRate,
-          referralBonus: student.studentProfile.referralBonus,
-          total: student.studentProfile.baseEarningRate + student.studentProfile.referralBonus
-        }
+        wallets: validWallets
+        // Note: Earning rates are now per-college, available in each session's earningRate field
       }
     });
   } catch (error) {
@@ -283,13 +295,13 @@ export const getMiningStatusForCollege = async (req, res, next) => {
       student: studentId,
       college: collegeId,
       isActive: true
-    }).populate('college', 'name country logo');
+    }).populate('college', 'name country logo baseRate referralBonusRate');
 
     // Get wallet for this college
     const wallet = await Wallet.findOne({
       student: studentId,
       college: collegeId
-    }).populate('college', 'name country logo');
+    }).populate('college', 'name country logo baseRate referralBonusRate');
 
     let sessionData = null;
     if (session) {

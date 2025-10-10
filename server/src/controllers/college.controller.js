@@ -55,7 +55,7 @@ export const getAllColleges = async (req, res, next) => {
 
     // Execute query
     const colleges = await College.find(query)
-      .select('name country city logo coverImage description tagline stats status admin type studentLife')
+      .select('name country city logo coverImage description tagline stats status admin type studentLife baseRate referralBonusRate')
       .sort(sortOrder)
       .limit(parseInt(limit))
       .skip(skip);
@@ -164,7 +164,7 @@ export const searchColleges = async (req, res, next) => {
         { country: { $regex: q, $options: 'i' } }
       ]
     })
-      .select('name country logo')
+      .select('name country logo baseRate referralBonusRate')
       .limit(10);
 
     res.status(200).json({

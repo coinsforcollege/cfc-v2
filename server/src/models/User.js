@@ -69,14 +69,6 @@ const userSchema = new mongoose.Schema({
     totalReferrals: {
       type: Number,
       default: 0
-    },
-    baseEarningRate: {
-      type: Number,
-      default: 0.25 // tokens per hour
-    },
-    referralBonus: {
-      type: Number,
-      default: 0 // 0.1 per successful referral
     }
   },
   isActive: {

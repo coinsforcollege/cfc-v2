@@ -110,7 +110,7 @@ export const addCollegeToMiningList = async (req, res, next) => {
     await student.save();
 
     // Populate the college data
-    await student.populate('studentProfile.miningColleges.college', 'name country logo stats');
+    await student.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
 
     res.status(200).json({
       success: true,
@@ -155,7 +155,7 @@ export const removeCollegeFromMiningList = async (req, res, next) => {
         }
       },
       { new: true }
-    ).populate('studentProfile.miningColleges.college', 'name country logo stats');
+    ).populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
 
     res.status(200).json({
       success: true,
@@ -195,7 +195,7 @@ export const setPrimaryCollege = async (req, res, next) => {
     student.college = collegeId;
     await student.save();
 
-    await student.populate('college', 'name country logo stats');
+    await student.populate('college', 'name country logo stats baseRate referralBonusRate');
 
     res.status(200).json({
       success: true,
@@ -217,7 +217,7 @@ export const getWallet = async (req, res, next) => {
     const studentId = req.user.id;
 
     const wallets = await Wallet.find({ student: studentId })
-      .populate('college', 'name country logo')
+      .populate('college', 'name country logo baseRate referralBonusRate')
       .sort({ balance: -1 });
 
     const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
@@ -248,18 +248,18 @@ export const getDashboard = async (req, res, next) => {
 
     // Get student with populated data
     const student = await User.findById(studentId)
-      .populate('college', 'name country logo')
-      .populate('studentProfile.miningColleges.college', 'name country logo stats');
+      .populate('college', 'name country logo baseRate referralBonusRate')
+      .populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
 
     // Get active mining sessions
     const activeSessions = await MiningSession.find({
       student: studentId,
       isActive: true
-    }).populate('college', 'name country logo');
+    }).populate('college', 'name country logo baseRate referralBonusRate');
 
     // Get wallets
     const wallets = await Wallet.find({ student: studentId })
-      .populate('college', 'name country logo')
+      .populate('college', 'name country logo baseRate referralBonusRate')
       .sort({ balance: -1 });
 
     // Calculate totals
@@ -286,6 +286,10 @@ export const getDashboard = async (req, res, next) => {
       };
     });
 
+    // Filter out null colleges (deleted colleges)
+    const validMiningColleges = student.studentProfile.miningColleges.filter(mc => mc.college !== null);
+    const validWallets = wallets.filter(w => w.college !== null);
+
     res.status(200).json({
       success: true,
       data: {
@@ -297,18 +301,14 @@ export const getDashboard = async (req, res, next) => {
           referralCode: student.studentProfile.referralCode,
           totalReferrals: student.studentProfile.totalReferrals
         },
-        miningColleges: student.studentProfile.miningColleges,
+        miningColleges: validMiningColleges,
         activeSessions: sessionsWithCurrentTokens,
-        wallets,
+        wallets: validWallets,
         summary: {
           totalBalance,
           totalMined,
-          activeMiningSessions: activeSessions.length,
-          earningRate: {
-            base: student.studentProfile.baseEarningRate,
-            referralBonus: student.studentProfile.referralBonus,
-            total: student.studentProfile.baseEarningRate + student.studentProfile.referralBonus
-          }
+          activeMiningSessions: activeSessions.length
+          // Note: Earning rates are now per-college, available in each session's earningRate field
         }
       }
     });
