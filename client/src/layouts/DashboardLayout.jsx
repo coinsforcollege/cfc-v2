@@ -17,6 +17,10 @@ const DashboardLayout = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
 
+  const handleCloseMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
   const getRoleTitle = (role) => {
     switch (role) {
       case 'student':
@@ -46,10 +50,10 @@ const DashboardLayout = ({
         </div>
 
         {/* Mobile Sidebar Drawer */}
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} modal={false}>
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetContent side="left" className="p-0" style={{ width: '260px', maxWidth: '80vw', paddingTop: '64px' }}>
             <div style={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
-              <DashboardSidebar stats={stats} />
+              <DashboardSidebar stats={stats} onNavigate={handleCloseMobileMenu} />
             </div>
           </SheetContent>
         </Sheet>

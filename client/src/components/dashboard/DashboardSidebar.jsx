@@ -16,9 +16,15 @@ import {
 import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 
-const DashboardSidebar = ({ stats = {} }) => {
+const DashboardSidebar = ({ stats = {}, onNavigate }) => {
   const { user } = useAuth();
   const location = useLocation();
+
+  const handleLinkClick = () => {
+    if (onNavigate) {
+      onNavigate();
+    }
+  };
 
   const navigationConfig = {
     student: [
@@ -142,6 +148,7 @@ const DashboardSidebar = ({ stats = {} }) => {
               key={item.id}
               component={item.disabled ? 'div' : Link}
               to={item.disabled ? undefined : item.path}
+              onClick={item.disabled ? undefined : handleLinkClick}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -227,6 +234,7 @@ const DashboardSidebar = ({ stats = {} }) => {
         <Box
           component={Link}
           to={getSettingsPath()}
+          onClick={handleLinkClick}
           sx={{
             display: 'flex',
             alignItems: 'center',
