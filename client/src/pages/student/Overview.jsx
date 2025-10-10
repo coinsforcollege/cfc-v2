@@ -35,19 +35,6 @@ import { studentApi } from '../../api/student.api';
 import { BorderBeam } from '@/components/ui/border-beam';
 import DashboardLayout from '../../layouts/DashboardLayout';
 
-const blockchainLogs = [
-  'BLOCK_VERIFY: 0x7f3a9b2c...hash validated | consensus: PoW',
-  'ENCRYPT_WALLET: AES-256 cipher active | ledger sync: 98%',
-  'TOKEN_MINT: +0.25 TCN | txn: 0x4e8f2d1a | gas optimized',
-  'CHAIN_SYNC: distributed ledger replicated | nodes: 847',
-  'MERKLE_ROOT: 0xae91b6f4...integrity verified | depth: 12',
-  'NONCE_COMPUTE: difficulty adjusted | hashrate: 2.3 TH/s',
-  'MEMPOOL_BROADCAST: pending txns queued | network latency: 42ms',
-  'SIGNATURE_VERIFY: ECDSA validation passed | pubkey confirmed',
-  'UTXO_UPDATE: balance reconciled | confirmations: 6/6',
-  'SMART_CONTRACT: execute() → success | gas used: 21000 wei'
-];
-
 const Overview = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -55,7 +42,6 @@ const Overview = () => {
   const { showToast } = useToast();
   const { miningStatus: wsMiningStatus } = useMiningWebSocket();
   const [dashboard, setDashboard] = useState(null);
-  const [currentLogIndex, setCurrentLogIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [miningStatus, setMiningStatus] = useState({});
@@ -116,13 +102,6 @@ const Overview = () => {
     };
   }, [user, navigate]);
 
-  useEffect(() => {
-    const logInterval = setInterval(() => {
-      setCurrentLogIndex((prev) => (prev + 1) % blockchainLogs.length);
-    }, 2500);
-    return () => clearInterval(logInterval);
-  }, []);
-
   const totalMiningTokens = useMemo(() => {
     return Object.values(miningStatus).reduce((sum, session) =>
       sum + (session.isActive && session.remainingHours > 0 ? session.currentTokens : 0), 0
@@ -168,44 +147,14 @@ const Overview = () => {
       searchPlaceholder="Search..."
     >
       <Box sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
-        {/* Header with Terminal */}
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 3 }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-              Welcome, {dashboard?.student.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {dashboard?.student.college?.name || 'No college assigned'}
-            </Typography>
-          </Box>
-
-          {/* Blockchain Activity Terminal */}
-          <Paper
-            elevation={0}
-            sx={{
-              bgcolor: '#f5f5f5',
-              borderRadius: 1,
-              px: 2,
-              py: 1
-            }}
-          >
-            <Box sx={{
-              fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-              fontSize: '0.65rem',
-              color: '#333',
-              fontWeight: 300,
-              lineHeight: 1.4,
-              overflow: 'hidden',
-              whiteSpace: 'nowrap'
-            }}>
-              <Box sx={{ opacity: 0.5 }}>
-                {blockchainLogs[(currentLogIndex + blockchainLogs.length - 1) % blockchainLogs.length]}
-              </Box>
-              <Box>
-                {blockchainLogs[currentLogIndex]}
-              </Box>
-            </Box>
-          </Paper>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
+            Welcome, {dashboard?.student.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {dashboard?.student.college?.name || 'No college assigned'}
+          </Typography>
         </Box>
 
         {/* Summary Cards */}
