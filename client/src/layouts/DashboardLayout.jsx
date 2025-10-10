@@ -51,10 +51,8 @@ const DashboardLayout = ({
 
         {/* Mobile Sidebar Drawer */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetContent side="left" className="p-0" style={{ width: '260px', maxWidth: '80vw', paddingTop: '64px' }}>
-            <div style={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
-              <DashboardSidebar stats={stats} onNavigate={handleCloseMobileMenu} />
-            </div>
+          <SheetContent side="left" className="p-0" style={{ width: '260px', maxWidth: '80vw', paddingTop: '64px', zIndex: 1301 }}>
+            <DashboardSidebar stats={stats} onNavigate={handleCloseMobileMenu} />
           </SheetContent>
         </Sheet>
 

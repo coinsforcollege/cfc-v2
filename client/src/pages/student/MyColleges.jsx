@@ -442,8 +442,30 @@ const MyColleges = () => {
         </Box>
 
         {/* College Cards Grid */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 2 }}>
-          {dashboard?.miningColleges.filter(mc => mc.college).map((mc) => {
+        <Box sx={{
+          display: 'grid',
+          gap: 2,
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+          },
+          '@media (min-width: 800px)': {
+            gridTemplateColumns: 'repeat(3, 1fr)',
+          },
+          '@media (min-width: 1300px)': {
+            gridTemplateColumns: 'repeat(4, 1fr)',
+          }
+        }}>
+          {dashboard?.miningColleges.filter(mc => mc.college).sort((a, b) => {
+            const sessionA = miningStatus[a.college._id];
+            const sessionB = miningStatus[b.college._id];
+            const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
+            const isMiningB = sessionB?.isActive && sessionB?.remainingHours > 0;
+
+            if (isMiningA && !isMiningB) return -1;
+            if (!isMiningA && isMiningB) return 1;
+            return 0;
+          }).map((mc) => {
             const session = miningStatus[mc.college._id];
             const wallet = dashboard?.wallets?.find(w => w.college && w.college._id === mc.college._id);
             const isActive = session && session.isActive && session.remainingHours > 0;

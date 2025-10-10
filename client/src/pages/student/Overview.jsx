@@ -280,7 +280,16 @@ const Overview = () => {
                   <TableBody>
                     {dashboard?.wallets && dashboard.wallets.length > 0 ? (
                       <>
-                        {dashboard.wallets.map((wallet, index) => {
+                        {dashboard.wallets.sort((a, b) => {
+                          const sessionA = a.college ? miningStatus[a.college._id] : null;
+                          const sessionB = b.college ? miningStatus[b.college._id] : null;
+                          const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
+                          const isMiningB = sessionB?.isActive && sessionB?.remainingHours > 0;
+
+                          if (isMiningA && !isMiningB) return -1;
+                          if (!isMiningA && isMiningB) return 1;
+                          return 0;
+                        }).map((wallet, index) => {
                           const percentage = totalBalance > 0 ? ((wallet.balance / totalBalance) * 100).toFixed(0) : 0;
                           return (
                             <TableRow key={index} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
@@ -376,7 +385,16 @@ const Overview = () => {
                   </TableHead>
                   <TableBody>
                     {dashboard?.miningColleges && dashboard.miningColleges.length > 0 ? (
-                      dashboard.miningColleges.filter(mc => mc.college).map((miningCollege, index) => {
+                      dashboard.miningColleges.filter(mc => mc.college).sort((a, b) => {
+                        const sessionA = miningStatus[a.college._id];
+                        const sessionB = miningStatus[b.college._id];
+                        const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
+                        const isMiningB = sessionB?.isActive && sessionB?.remainingHours > 0;
+
+                        if (isMiningA && !isMiningB) return -1;
+                        if (!isMiningA && isMiningB) return 1;
+                        return 0;
+                      }).map((miningCollege, index) => {
                         const session = miningStatus[miningCollege.college._id];
                         const isMining = session?.isActive && session?.remainingHours > 0;
                         const progress = isMining ? Math.round(((24 - session.remainingHours) / 24) * 100) : 0;

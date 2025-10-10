@@ -21,7 +21,7 @@ const io = new Server(server, {
       'https://www.coinsforcollege.org',
       'https://cfc-v2.onrender.com',
       'http://localhost:5173',
-      'http://192.168.0.95:5173',
+      'http://192.168.0.195:5173',
       'http://localhost:3000'
     ],
     methods: ['GET', 'POST'],

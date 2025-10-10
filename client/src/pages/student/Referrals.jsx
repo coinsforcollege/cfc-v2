@@ -256,27 +256,6 @@ const Referrals = () => {
           gap: 3,
           mb: 4
         }}>
-          {/* How It Works */}
-          <Card sx={{ flex: 1, p: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 2 }}>
-              How Community Rewards Work
-            </Typography>
-            <Box component="ul" sx={{ m: 0, pl: 2.5, '& li': { mb: 1.5, color: '#64748b', fontSize: '0.9rem' } }}>
-              <li>
-                <strong>Share Your Code:</strong> Every student gets a unique referral code to share with friends.
-              </li>
-              <li>
-                <strong>Earn Bonus Rates:</strong> When someone signs up with your code for a college, you earn extra tokens per hour for that college.
-              </li>
-              <li>
-                <strong>College-Specific:</strong> Each college sets its own bonus rate per referral (usually 0.10 tokens/hour).
-              </li>
-              <li>
-                <strong>Compound Earnings:</strong> More referrals = higher mining rate for each college.
-              </li>
-            </Box>
-          </Card>
-
           {/* Referral Code Section */}
           <Card sx={{ flex: 1, borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <Box sx={{
@@ -382,6 +361,27 @@ const Referrals = () => {
             </Box>
           </CardContent>
         </Card>
+
+          {/* How It Works */}
+          <Card sx={{ flex: 1, p: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 2 }}>
+              How Community Rewards Work
+            </Typography>
+            <Box component="ul" sx={{ m: 0, pl: 2.5, '& li': { mb: 1.5, color: '#64748b', fontSize: '0.9rem' } }}>
+              <li>
+                <strong>Share Your Code:</strong> Every student gets a unique referral code to share with friends.
+              </li>
+              <li>
+                <strong>Earn Bonus Rates:</strong> When someone signs up with your code for a college, you earn extra tokens per hour for that college.
+              </li>
+              <li>
+                <strong>College-Specific:</strong> Each college sets its own bonus rate per referral (usually 0.10 tokens/hour).
+              </li>
+              <li>
+                <strong>Compound Earnings:</strong> More referrals = higher mining rate for each college.
+              </li>
+            </Box>
+          </Card>
         </Box>
 
         {/* Community Members Table */}

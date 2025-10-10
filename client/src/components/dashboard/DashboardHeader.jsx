@@ -61,13 +61,14 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 1400,
+        zIndex: 9999,
         height: 64,
         background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        pointerEvents: 'auto',
       }}
     >
       <Box
