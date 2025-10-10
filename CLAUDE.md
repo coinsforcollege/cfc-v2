@@ -2,6 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Hard rules
+Step 1 - Find the actual problem, or understand the new task
+Step 2 - ask clarifying questions, no assumptions about what user wants or what the current codebase has
+Step 3 - read all, and i mean "all" related files from line to end
+Step 4 - if it requires backend modification, work on one endpoint at once only
+Step 5 - ask user to test the endpoint using postman
+Step 6 - make changes to related frontend
+Step 7 - ask user to test the frontend
+Step 8 - if it requires backend modification, work on one endpoint at once only
+and so on.
+
+# Never try to suggest or apply a workaround
+# never interact with git or github
+# Never use emojis, in code or conversation
+# Always build in chunks - build - test - fix - build - text and so on
+
+
 ## Project Overview
 
 Coins For College (CFC) is a full-stack educational blockchain platform where students can "mine" college-specific tokens. The codebase consists of three main applications:
