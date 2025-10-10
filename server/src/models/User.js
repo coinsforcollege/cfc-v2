@@ -54,7 +54,17 @@ const userSchema = new mongoose.Schema({
       addedAt: {
         type: Date,
         default: Date.now
-      }
+      },
+      referredStudents: [{
+        student: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        referredAt: {
+          type: Date,
+          default: Date.now
+        }
+      }]
     }],
     referralCode: {
       type: String,
@@ -64,6 +74,11 @@ const userSchema = new mongoose.Schema({
     referredBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+      default: null
+    },
+    referredForCollege: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'College',
       default: null
     },
     totalReferrals: {

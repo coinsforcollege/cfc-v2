@@ -38,7 +38,8 @@ import {
   CheckCircle,
   Close,
   CloudUpload,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Share
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
@@ -83,6 +84,7 @@ const StudentDashboard = () => {
   const [actionLoading, setActionLoading] = useState('');
   const [justSetPrimary, setJustSetPrimary] = useState(null);
   const [copiedReferral, setCopiedReferral] = useState(false);
+  const [copiedCollegeReferral, setCopiedCollegeReferral] = useState(null);
   const isInitialLoadRef = useRef(true);
 
   const fetchDashboard = useCallback(async () => {
@@ -321,6 +323,16 @@ const StudentDashboard = () => {
       navigator.clipboard.writeText(dashboard.student.referralCode);
       setCopiedReferral(true);
       setTimeout(() => setCopiedReferral(false), 2000);
+    }
+  }, [dashboard?.student?.referralCode]);
+
+  const copyCollegeReferralLink = useCallback((collegeId) => {
+    if (dashboard?.student?.referralCode) {
+      const baseUrl = window.location.origin;
+      const referralLink = `${baseUrl}/auth/register/student?ref=${dashboard.student.referralCode}&college=${collegeId}`;
+      navigator.clipboard.writeText(referralLink);
+      setCopiedCollegeReferral(collegeId);
+      setTimeout(() => setCopiedCollegeReferral(null), 2000);
     }
   }, [dashboard?.student?.referralCode]);
 
@@ -705,6 +717,18 @@ const StudentDashboard = () => {
           const isActive = session && session.isActive && session.remainingHours > 0;
           const progress = isActive ? ((24 - session.remainingHours) / 24) * 100 : 0;
 
+          // Calculate user's actual earning rate for this college
+          const baseRate = mc.college.baseRate || 0.25;
+          const referralBonusRate = mc.college.referralBonusRate || 0.1;
+          const currentReferralsCount = mc.referredStudents?.length || 0;
+
+          // When mining is active, earning rate is locked. Calculate how many referrals were counted at session start
+          const effectiveReferralsForRate = isActive && session.earningRate
+            ? Math.round((session.earningRate - baseRate) / referralBonusRate)
+            : currentReferralsCount;
+
+          const userEarningRate = isActive ? session.earningRate : (baseRate + (currentReferralsCount * referralBonusRate));
+
           return (
             <Card
               key={mc.college._id}
@@ -782,47 +806,84 @@ const StudentDashboard = () => {
                       {isActive ? 'MINING' : 'OFFLINE'}
                     </Typography>
                   </Box>
-                  {dashboard?.student.college?._id === mc.college._id ? (
-                    <Chip
-                      label="PRIMARY"
-                      size="small"
-                      sx={{
-                        height: 18,
-                        background: 'rgba(34, 197, 94, 0.2)',
-                        border: '1px solid rgba(34, 197, 94, 0.5)',
-                        color: '#22c55e',
-                        fontSize: '0.6rem',
-                        fontWeight: 700,
-                        '& .MuiChip-label': { px: 0.75 }
-                      }}
-                    />
-                  ) : (
-                    <Chip
-                      label="SET PRIMARY"
-                      size="small"
-                      onClick={() => handleSetPrimaryCollege(mc.college._id)}
-                      disabled={actionLoading === `primary-${mc.college._id}`}
-                      sx={{
-                        height: 18,
-                        background: 'rgba(100, 116, 139, 0.2)',
-                        border: '1px solid rgba(100, 116, 139, 0.4)',
-                        color: '#94a3b8',
-                        fontSize: '0.6rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        '& .MuiChip-label': { px: 0.75 },
-                        '&:hover': {
-                          background: 'rgba(148, 163, 184, 0.3)',
-                          border: '1px solid rgba(148, 163, 184, 0.6)',
-                          color: '#cbd5e1'
-                        },
-                        '&.Mui-disabled': {
-                          opacity: 0.5,
-                          cursor: 'not-allowed'
-                        }
-                      }}
-                    />
-                  )}
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    {dashboard?.student.college?._id === mc.college._id ? (
+                      <Chip
+                        label="PRIMARY"
+                        size="small"
+                        sx={{
+                          height: 18,
+                          background: 'rgba(34, 197, 94, 0.2)',
+                          border: '1px solid rgba(34, 197, 94, 0.5)',
+                          color: '#22c55e',
+                          fontSize: '0.6rem',
+                          fontWeight: 700,
+                          '& .MuiChip-label': { px: 0.75 }
+                        }}
+                      />
+                    ) : (
+                      <Chip
+                        label="SET PRIMARY"
+                        size="small"
+                        onClick={() => handleSetPrimaryCollege(mc.college._id)}
+                        disabled={actionLoading === `primary-${mc.college._id}`}
+                        sx={{
+                          height: 18,
+                          background: 'rgba(100, 116, 139, 0.2)',
+                          border: '1px solid rgba(100, 116, 139, 0.4)',
+                          color: '#94a3b8',
+                          fontSize: '0.6rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          '& .MuiChip-label': { px: 0.75 },
+                          '&:hover': {
+                            background: 'rgba(148, 163, 184, 0.3)',
+                            border: '1px solid rgba(148, 163, 184, 0.6)',
+                            color: '#cbd5e1'
+                          },
+                          '&.Mui-disabled': {
+                            opacity: 0.5,
+                            cursor: 'not-allowed'
+                          }
+                        }}
+                      />
+                    )}
+                    <Tooltip title={copiedCollegeReferral === mc.college._id ? "Link copied!" : "Share referral link for this college"} arrow>
+                      <Chip
+                        label={copiedCollegeReferral === mc.college._id ? "COPIED" : "INVITE"}
+                        size="small"
+                        icon={copiedCollegeReferral === mc.college._id ? <CheckCircle sx={{ fontSize: '0.8rem' }} /> : <Share sx={{ fontSize: '0.8rem' }} />}
+                        onClick={() => copyCollegeReferralLink(mc.college._id)}
+                        sx={{
+                          height: 18,
+                          background: copiedCollegeReferral === mc.college._id
+                            ? 'rgba(34, 197, 94, 0.2)'
+                            : 'rgba(139, 92, 246, 0.2)',
+                          border: copiedCollegeReferral === mc.college._id
+                            ? '1px solid rgba(34, 197, 94, 0.5)'
+                            : '1px solid rgba(139, 92, 246, 0.5)',
+                          color: copiedCollegeReferral === mc.college._id ? '#22c55e' : '#a78bfa',
+                          fontSize: '0.6rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          '& .MuiChip-label': { px: 0.75 },
+                          '& .MuiChip-icon': {
+                            color: copiedCollegeReferral === mc.college._id ? '#22c55e' : '#a78bfa',
+                            marginLeft: '4px',
+                            marginRight: '-4px'
+                          },
+                          '&:hover': {
+                            background: copiedCollegeReferral === mc.college._id
+                              ? 'rgba(34, 197, 94, 0.3)'
+                              : 'rgba(139, 92, 246, 0.3)',
+                            border: copiedCollegeReferral === mc.college._id
+                              ? '1px solid rgba(34, 197, 94, 0.6)'
+                              : '1px solid rgba(139, 92, 246, 0.6)',
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  </Box>
                 </Box>
 
                 {/* College Name - Truncated */}
@@ -855,9 +916,13 @@ const StudentDashboard = () => {
 
                 {/* Rates */}
                 <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                  <Tooltip title="Base mining rate - tokens earned per hour" arrow placement="top">
+                  <Tooltip
+                    title={`Your earning rate: ${baseRate} base + ${(effectiveReferralsForRate * referralBonusRate).toFixed(2)} referral bonus${isActive && currentReferralsCount > effectiveReferralsForRate ? ' (restart mining to apply new referrals)' : ''}`}
+                    arrow
+                    placement="top"
+                  >
                     <Chip
-                      label={`${mc.college.baseRate || 0.25} T/H`}
+                      label={`${userEarningRate.toFixed(2)} T/H`}
                       size="small"
                       sx={{
                         height: 18,
@@ -871,10 +936,14 @@ const StudentDashboard = () => {
                       }}
                     />
                   </Tooltip>
-                  {mc.college.referralBonusRate && (
-                    <Tooltip title="Referral bonus - additional tokens per hour per referral" arrow placement="top">
+                  {currentReferralsCount > 0 && (
+                    <Tooltip
+                      title={`${currentReferralsCount} referral${currentReferralsCount > 1 ? 's' : ''} for this college${isActive && currentReferralsCount > effectiveReferralsForRate ? ` (${effectiveReferralsForRate} counted in current rate)` : ''}`}
+                      arrow
+                      placement="top"
+                    >
                       <Chip
-                        label={`+${mc.college.referralBonusRate} REF`}
+                        label={`${currentReferralsCount} REF`}
                         size="small"
                         sx={{
                           height: 18,
@@ -910,14 +979,23 @@ const StudentDashboard = () => {
                       <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem', mb: 0.75, display: 'block' }}>
                         CURRENT YIELD
                       </Typography>
-                      <Typography variant="h5" sx={{
-                        color: '#22d3ee',
-                        fontWeight: 700,
-                        fontFamily: 'Monaco, monospace',
-                        fontSize: '1.5rem'
-                      }}>
-                        {session.currentTokens.toFixed(4)}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                        <Typography variant="h5" sx={{
+                          color: '#22d3ee',
+                          fontWeight: 700,
+                          fontFamily: 'Monaco, monospace',
+                          fontSize: '1.5rem'
+                        }}>
+                          {session.currentTokens.toFixed(4)}
+                        </Typography>
+                        <Typography variant="caption" sx={{
+                          color: '#64748b',
+                          fontSize: '0.65rem',
+                          fontWeight: 700
+                        }}>
+                          @ {userEarningRate.toFixed(2)} T/H
+                        </Typography>
+                      </Box>
                     </Box>
 
                     {/* Progress Bar */}

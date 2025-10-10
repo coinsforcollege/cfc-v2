@@ -86,8 +86,30 @@ export const startMining = async (req, res, next) => {
       });
     }
 
-    // Calculate earning rate from college rates (base rate only for now, referral bonus will be per-college in Problem 1)
-    const earningRate = college.baseRate || 0.25;
+    // Calculate earning rate: base rate + per-college referral bonus
+    const baseRate = college.baseRate || 0.25;
+    const referralBonusRate = college.referralBonusRate || 0.1;
+
+    // Count active referrals for this specific college
+    const miningCollege = student.studentProfile.miningColleges.find(
+      mc => mc.college.toString() === collegeId
+    );
+
+    // Calculate referral bonus: number of referred students * bonus rate per referral
+    const activeReferrals = miningCollege?.referredStudents?.length || 0;
+    const referralBonus = activeReferrals * referralBonusRate;
+
+    const earningRate = baseRate + referralBonus;
+
+    console.log(`\n=== EARNING RATE CALCULATION ===`);
+    console.log(`College: ${college.name}`);
+    console.log(`Student: ${student.name}`);
+    console.log(`Base Rate: ${baseRate} t/h`);
+    console.log(`Active Referrals: ${activeReferrals}`);
+    console.log(`Referral Bonus Rate: ${referralBonusRate} t/h per referral`);
+    console.log(`Total Referral Bonus: ${referralBonus} t/h`);
+    console.log(`Final Earning Rate: ${earningRate} t/h`);
+    console.log(`================================\n`);
 
     // Create new mining session (24 hours)
     const startTime = new Date();

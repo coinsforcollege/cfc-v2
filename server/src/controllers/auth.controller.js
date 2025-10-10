@@ -7,7 +7,7 @@ import { generateToken } from '../utils/jwt.js';
 // @access  Public
 export const registerStudent = async (req, res, next) => {
   try {
-    const { name, email, phone, password, referralCode } = req.body;
+    const { name, email, phone, password, referralCode, collegeId } = req.body;
 
     // Validation
     if (!name || !email || !phone || !password) {
@@ -26,40 +26,119 @@ export const registerStudent = async (req, res, next) => {
       });
     }
 
+    // Validate college if collegeId provided
+    let college = null;
+    if (collegeId) {
+      college = await College.findById(collegeId);
+      if (!college) {
+        return res.status(404).json({
+          success: false,
+          message: 'College not found'
+        });
+      }
+    }
+
     // Handle referral code if provided
     let referredByUser = null;
     if (referralCode) {
-      referredByUser = await User.findOne({ 
+      referredByUser = await User.findOne({
         'studentProfile.referralCode': referralCode,
         role: 'student'
       });
+
+      if (!referredByUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid referral code'
+        });
+      }
     }
 
-    // Create student user WITHOUT college initially
+    // Prepare student profile
+    const studentProfile = {
+      miningColleges: [],
+      referredBy: referredByUser ? referredByUser._id : null,
+      referredForCollege: null
+    };
+
+    // If college is provided, add it to mining list
+    if (college) {
+      studentProfile.miningColleges.push({
+        college: college._id,
+        addedAt: new Date(),
+        referredStudents: []
+      });
+
+      // If there's also a referral code, set referredForCollege
+      if (referredByUser) {
+        studentProfile.referredForCollege = college._id;
+      }
+    }
+
+    // Create student user
     const user = await User.create({
       name,
       email,
       phone,
       password,
       role: 'student',
-      college: null, // No college yet
-      studentProfile: {
-        miningColleges: [], // Empty initially
-        referredBy: referredByUser ? referredByUser._id : null
-      }
+      college: college ? college._id : null, // Set primary college if provided
+      studentProfile
     });
 
-    // Update referrer's referral count if applicable (will be per-college later)
-    if (referredByUser) {
+    // Update referrer's data if applicable
+    if (referredByUser && college) {
+      // Increment total referrals count
       await User.findByIdAndUpdate(referredByUser._id, {
-        $inc: {
-          'studentProfile.totalReferrals': 1
-        }
+        $inc: { 'studentProfile.totalReferrals': 1 }
       });
+
+      // Add this student to the referrer's referredStudents for the specific college
+      const referrerCollegeIndex = referredByUser.studentProfile.miningColleges.findIndex(
+        mc => mc.college.toString() === college._id.toString()
+      );
+
+      if (referrerCollegeIndex !== -1) {
+        // Referrer has this college in their list, add to referredStudents
+        await User.findOneAndUpdate(
+          {
+            _id: referredByUser._id,
+            'studentProfile.miningColleges.college': college._id
+          },
+          {
+            $push: {
+              'studentProfile.miningColleges.$.referredStudents': {
+                student: user._id,
+                referredAt: new Date()
+              }
+            }
+          }
+        );
+      } else {
+        // Referrer doesn't have this college yet, add it with the referred student
+        await User.findByIdAndUpdate(referredByUser._id, {
+          $push: {
+            'studentProfile.miningColleges': {
+              college: college._id,
+              addedAt: new Date(),
+              referredStudents: [{
+                student: user._id,
+                referredAt: new Date()
+              }]
+            }
+          }
+        });
+      }
     }
 
     // Generate JWT token
     const token = generateToken(user._id, user.role);
+
+    // Populate college data for response
+    if (college) {
+      await user.populate('college', 'name country logo stats baseRate referralBonusRate');
+      await user.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+    }
 
     // Return user data (without password)
     const userData = {
@@ -68,8 +147,14 @@ export const registerStudent = async (req, res, next) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      college: null,
-      studentProfile: user.studentProfile
+      college: user.college,
+      studentProfile: {
+        miningColleges: user.studentProfile.miningColleges,
+        referredBy: user.studentProfile.referredBy,
+        referredForCollege: user.studentProfile.referredForCollege,
+        totalReferrals: user.studentProfile.totalReferrals,
+        referralCode: user.studentProfile.referralCode
+      }
     };
 
     res.status(201).json({
@@ -321,6 +406,7 @@ export const login = async (req, res, next) => {
       userData.studentProfile = {
         miningColleges: validMiningColleges,
         referredBy: user.studentProfile.referredBy,
+        referredForCollege: user.studentProfile.referredForCollege,
         totalReferrals: user.studentProfile.totalReferrals,
         referralCode: user.studentProfile.referralCode
       };
@@ -375,6 +461,7 @@ export const getMe = async (req, res, next) => {
       userData.studentProfile = {
         miningColleges: validMiningColleges,
         referredBy: user.studentProfile.referredBy,
+        referredForCollege: user.studentProfile.referredForCollege,
         totalReferrals: user.studentProfile.totalReferrals,
         referralCode: user.studentProfile.referralCode
       };

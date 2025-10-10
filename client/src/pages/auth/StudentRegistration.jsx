@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router';
 import {
   Box,
   TextField,
   Button,
   Typography,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Chip
 } from '@mui/material';
+import { School } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
+import { collegesApi } from '../../api/colleges.api';
 
 const StudentRegistration = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,6 +28,28 @@ const StudentRegistration = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [referralCollege, setReferralCollege] = useState(null);
+
+  // Extract referral code and college ID from URL params
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    const collegeId = searchParams.get('college');
+
+    if (refCode) {
+      setFormData(prev => ({ ...prev, referralCode: refCode }));
+    }
+
+    if (collegeId) {
+      // Fetch college details to display
+      collegesApi.getById(collegeId)
+        .then(response => {
+          setReferralCollege(response.data);
+        })
+        .catch(err => {
+          console.error('Failed to fetch college:', err);
+        });
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setFormData({
@@ -45,22 +71,33 @@ const StudentRegistration = () => {
     setLoading(true);
 
     try {
+      const collegeId = searchParams.get('college');
+
       const registrationData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        referralCode: formData.referralCode || undefined
+        referralCode: formData.referralCode || undefined,
+        collegeId: collegeId || undefined
       };
 
       const response = await authApi.registerStudent(registrationData);
-      
+
       if (response.success) {
         // Auto-login
         login(response.data, response.token);
-        
-        // Redirect to college selection
-        navigate('/auth/college-selection');
+
+        // Check if college was auto-added via referral
+        const hasColleges = response.data.studentProfile?.miningColleges?.length > 0;
+
+        if (hasColleges) {
+          // College was auto-added, go directly to dashboard
+          navigate('/student/dashboard');
+        } else {
+          // No college added, go to college selection
+          navigate('/auth/college-selection');
+        }
       }
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -205,6 +242,30 @@ const StudentRegistration = () => {
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}
+            </Alert>
+          )}
+
+          {referralCollege && (
+            <Alert
+              severity="info"
+              icon={<School />}
+              sx={{
+                mb: 3,
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                '& .MuiAlert-icon': {
+                  color: '#8b5cf6'
+                }
+              }}
+            >
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#2d3748', mb: 0.5 }}>
+                  You were invited to join {referralCollege.name}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#4a5568' }}>
+                  This college will be automatically added to your mining list
+                </Typography>
+              </Box>
             </Alert>
           )}
 
