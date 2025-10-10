@@ -338,9 +338,11 @@ const MyColleges = () => {
               <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>
                 Base Rate
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#0891b2' }}>
-                0.25 T/H
-              </Typography>
+              <Tooltip title="Base tokens earned per hour (default rate for all students)">
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0891b2', cursor: 'help' }}>
+                  0.25 Token/hr
+                </Typography>
+              </Tooltip>
             </Box>
           </Box>
 
@@ -369,9 +371,11 @@ const MyColleges = () => {
               <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>
                 Referral Bonus
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#8b5cf6' }}>
-                +0.10 T/H
-              </Typography>
+              <Tooltip title="Additional tokens earned per hour for each successful referral">
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#8b5cf6', cursor: 'help' }}>
+                  +0.10 Token/hr
+                </Typography>
+              </Tooltip>
             </Box>
           </Box>
 
@@ -643,12 +647,12 @@ const MyColleges = () => {
                   {/* Rates */}
                   <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                     <Tooltip
-                      title={`Your earning rate: ${baseRate} base + ${(effectiveReferralsForRate * referralBonusRate).toFixed(2)} referral bonus${isActive && currentReferralsCount > effectiveReferralsForRate ? ' (restart mining to apply new referrals)' : ''}`}
+                      title={`Your earning rate: ${baseRate} tokens per hour (base) + ${(effectiveReferralsForRate * referralBonusRate).toFixed(2)} tokens per hour (referral bonus)${isActive && currentReferralsCount > effectiveReferralsForRate ? ' (restart mining to apply new referrals)' : ''}`}
                       arrow
                       placement="top"
                     >
                       <Chip
-                        label={`${userEarningRate.toFixed(2)} T/H`}
+                        label={`${userEarningRate.toFixed(2)} Token/hr`}
                         size="small"
                         sx={{
                           height: 18,
@@ -718,7 +722,7 @@ const MyColleges = () => {
                             fontSize: '0.65rem',
                             fontWeight: 700
                           }}>
-                            @ {userEarningRate.toFixed(2)} T/H
+                            @ {userEarningRate.toFixed(2)} Token/hr
                           </Typography>
                         </Box>
                       </Box>

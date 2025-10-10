@@ -27,6 +27,7 @@ import {
   PlayArrow,
   Stop
 } from '@mui/icons-material';
+import Tooltip from '@mui/material/Tooltip';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
 import { useToast } from '../../contexts/ToastContext';
@@ -289,9 +290,11 @@ const Overview = () => {
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
                 Current Rate
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                {currentEarningRate.toFixed(2)} /hr
-              </Typography>
+              <Tooltip title="Total tokens earned per hour from all active mining sessions">
+                <Typography variant="h5" sx={{ fontWeight: 700, cursor: 'help' }}>
+                  {currentEarningRate.toFixed(2)} Token/hr
+                </Typography>
+              </Tooltip>
             </CardContent>
           </Card>
         </Box>

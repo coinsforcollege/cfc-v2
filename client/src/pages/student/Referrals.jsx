@@ -205,7 +205,7 @@ const Referrals = () => {
                 Total Bonus Rate
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                +{totalBonus.toFixed(2)} /hr
+                +{totalBonus.toFixed(2)} Token/hr
               </Typography>
             </CardContent>
           </Card>
@@ -243,7 +243,7 @@ const Referrals = () => {
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 +{dashboard?.miningColleges?.length > 0
                   ? (totalBonus / dashboard.miningColleges.filter(mc => mc.college).length).toFixed(2)
-                  : '0.00'} /hr
+                  : '0.00'} Token/hr
               </Typography>
             </CardContent>
           </Card>
@@ -579,7 +579,7 @@ const Referrals = () => {
                           </TableCell>
                           <TableCell align="center">
                             <Typography variant="body2" sx={{ fontWeight: 600, color: '#667eea' }}>
-                              {bonusRate.toFixed(2)} T/H
+                              {bonusRate.toFixed(2)} Token/hr
                             </Typography>
                           </TableCell>
                           <TableCell align="right">
@@ -587,7 +587,7 @@ const Referrals = () => {
                               fontWeight: 700,
                               color: collegeReferrals > 0 ? '#22c55e' : '#94a3b8'
                             }}>
-                              +{totalCollegeBonus.toFixed(2)} T/H
+                              +{totalCollegeBonus.toFixed(2)} Token/hr
                             </Typography>
                           </TableCell>
                         </TableRow>

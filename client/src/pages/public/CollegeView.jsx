@@ -321,7 +321,7 @@ const CollegeView = () => {
               </Typography>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Chip
-                  label={`${college.baseRate || 0.25} t/h`}
+                  label={`${college.baseRate || 0.25} Token/hr`}
                   size="medium"
                   sx={{
                     background: 'rgba(16, 185, 129, 0.15)',
@@ -333,7 +333,7 @@ const CollegeView = () => {
                 />
                 {college.referralBonusRate && (
                   <Chip
-                    label={`+${college.referralBonusRate} t/h per referral`}
+                    label={`+${college.referralBonusRate} Token/hr per referral`}
                     size="medium"
                     sx={{
                       background: 'rgba(59, 130, 246, 0.15)',

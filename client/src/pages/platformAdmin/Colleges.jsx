@@ -616,12 +616,12 @@ const Colleges = () => {
                             </TableCell>
                             <TableCell align="right">
                               <Typography variant="body2" fontWeight={600} color="success.main">
-                                {college.baseRate || 0.25} t/h
+                                {college.baseRate || 0.25} Token/hr
                               </Typography>
                             </TableCell>
                             <TableCell align="right">
                               <Typography variant="body2" fontWeight={600} sx={{ color: '#3b82f6' }}>
-                                {college.referralBonusRate || 0.1} t/h
+                                {college.referralBonusRate || 0.1} Token/hr
                               </Typography>
                             </TableCell>
                             <TableCell align="right">

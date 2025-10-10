@@ -592,7 +592,7 @@ const CollegeBrowse = () => {
                           </Box>
                           <Box sx={{ display: 'flex', gap: 1 }}>
                             <Chip
-                              label={`${college.baseRate || 0.25} t/h`}
+                              label={`${college.baseRate || 0.25} Token/hr`}
                               size="small"
                               sx={{
                                 background: 'rgba(16, 185, 129, 0.1)',
@@ -603,7 +603,7 @@ const CollegeBrowse = () => {
                             />
                             {college.referralBonusRate && (
                               <Chip
-                                label={`+${college.referralBonusRate} t/h/ref`}
+                                label={`+${college.referralBonusRate} Token/hr/ref`}
                                 size="small"
                                 sx={{
                                   background: 'rgba(59, 130, 246, 0.1)',
