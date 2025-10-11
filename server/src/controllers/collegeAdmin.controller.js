@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import College from '../models/College.js';
 import User from '../models/User.js';
 import Wallet from '../models/Wallet.js';
@@ -369,56 +370,149 @@ export const viewCommunity = async (req, res, next) => {
     const admin = await User.findById(req.user.id);
     const collegeId = admin.managedCollege;
 
-    // Get all students mining for this college
-    const miners = await User.find({
-      role: 'student',
-      'studentProfile.miningColleges.college': collegeId
-    })
-      .select('name email studentProfile.referralCode studentProfile.totalReferrals createdAt')
-      .sort({ 'studentProfile.totalReferrals': -1 });
+    // Get pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 100, 100); // Max 100 per page
+    const skip = (page - 1) * limit;
 
-    // Get wallet data and mining status for each miner
+    // Use aggregation pipeline to fetch all data in a single query
     const now = new Date();
-    const minersWithWallets = await Promise.all(
-      miners.map(async (miner) => {
-        const wallet = await Wallet.findOne({
-          student: miner._id,
-          college: collegeId
-        });
 
-        // Check if miner has active mining session
-        const activeMining = await MiningSession.findOne({
-          student: miner._id,
-          college: collegeId,
-          isActive: true
-        });
-
-        // Calculate current mining tokens if session is active
-        let currentMiningTokens = 0;
-        if (activeMining) {
-          const miningDuration = (now - activeMining.startTime) / (1000 * 60 * 60); // in hours
-          currentMiningTokens = miningDuration * activeMining.earningRate;
+    // First, get total count
+    const totalCountPipeline = [
+      {
+        $match: {
+          role: 'student',
+          'studentProfile.miningColleges.college': new mongoose.Types.ObjectId(collegeId)
         }
+      },
+      {
+        $count: 'total'
+      }
+    ];
 
-        return {
-          id: miner._id,
-          name: miner.name,
-          email: miner.email,
-          referralCode: miner.studentProfile.referralCode,
-          totalReferrals: miner.studentProfile.totalReferrals,
-          tokensMined: (wallet ? wallet.balance : 0) + currentMiningTokens,
-          status: activeMining ? 'active' : 'idle',
-          joinedAt: miner.createdAt
-        };
-      })
-    );
+    const countResult = await User.aggregate(totalCountPipeline);
+    const totalMiners = countResult.length > 0 ? countResult[0].total : 0;
 
-    // Sort by tokens mined
-    minersWithWallets.sort((a, b) => b.tokensMined - a.tokensMined);
+    // Then fetch paginated data
+    const minersWithWallets = await User.aggregate([
+      // Match students mining for this college
+      {
+        $match: {
+          role: 'student',
+          'studentProfile.miningColleges.college': new mongoose.Types.ObjectId(collegeId)
+        }
+      },
+      // Lookup wallet data
+      {
+        $lookup: {
+          from: 'wallets',
+          let: { studentId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$student', '$$studentId'] },
+                    { $eq: ['$college', new mongoose.Types.ObjectId(collegeId)] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'wallet'
+        }
+      },
+      // Lookup active mining session
+      {
+        $lookup: {
+          from: 'miningsessions',
+          let: { studentId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$student', '$$studentId'] },
+                    { $eq: ['$college', new mongoose.Types.ObjectId(collegeId)] },
+                    { $eq: ['$isActive', true] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'activeMining'
+        }
+      },
+      // Unwind arrays (use preserveNullAndEmptyArrays to keep miners without wallet/session)
+      {
+        $addFields: {
+          wallet: { $arrayElemAt: ['$wallet', 0] },
+          activeMining: { $arrayElemAt: ['$activeMining', 0] }
+        }
+      },
+      // Calculate current mining tokens
+      {
+        $addFields: {
+          currentMiningTokens: {
+            $cond: {
+              if: '$activeMining',
+              then: {
+                $multiply: [
+                  {
+                    $divide: [
+                      { $subtract: [now, '$activeMining.startTime'] },
+                      3600000 // milliseconds in an hour
+                    ]
+                  },
+                  '$activeMining.earningRate'
+                ]
+              },
+              else: 0
+            }
+          }
+        }
+      },
+      // Project final shape
+      {
+        $project: {
+          id: '$_id',
+          name: 1,
+          email: 1,
+          referralCode: '$studentProfile.referralCode',
+          totalReferrals: '$studentProfile.totalReferrals',
+          tokensMined: {
+            $add: [
+              { $ifNull: ['$wallet.balance', 0] },
+              '$currentMiningTokens'
+            ]
+          },
+          status: {
+            $cond: {
+              if: '$activeMining',
+              then: 'active',
+              else: 'idle'
+            }
+          },
+          joinedAt: '$createdAt'
+        }
+      },
+      // Sort by tokens mined descending
+      {
+        $sort: { tokensMined: -1 }
+      },
+      // Pagination
+      {
+        $skip: skip
+      },
+      {
+        $limit: limit
+      }
+    ]);
 
     // Get college to check if it's new
     const college = await College.findById(collegeId);
-    const isNewCollege = miners.length === 0;
+    const isNewCollege = totalMiners === 0;
 
     // If new college, return dummy data with message
     if (isNewCollege) {
@@ -463,8 +557,15 @@ export const viewCommunity = async (req, res, next) => {
       isRepresentational: false,
       data: {
         miners: minersWithWallets,
-        totalMiners: miners.length,
-        totalTokensMined: college.stats.totalTokensMined
+        totalMiners: totalMiners,
+        totalTokensMined: college.stats.totalTokensMined,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalMiners / limit),
+          pageSize: limit,
+          hasNextPage: page < Math.ceil(totalMiners / limit),
+          hasPrevPage: page > 1
+        }
       }
     });
   } catch (error) {

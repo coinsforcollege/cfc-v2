@@ -313,6 +313,9 @@ collegeSchema.index({ country: 1 });
 collegeSchema.index({ 'stats.totalMiners': -1 });
 collegeSchema.index({ 'stats.totalTokensMined': -1 });
 
+// Index for status-based filtering
+collegeSchema.index({ status: 1 });
+
 const College = mongoose.model('College', collegeSchema);
 
 export default College;

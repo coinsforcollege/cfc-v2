@@ -94,47 +94,58 @@ export const setupWebSocketHandlers = (io) => {
   });
 
   // Send periodic updates every 5 seconds to users with active mining sessions
+  // Using batched processing to prevent overwhelming the server
   setInterval(async () => {
     const now = Date.now();
-    
-    // Batch process all users in parallel for better performance
-    const updatePromises = [];
-    
-    for (const userId of usersWithActiveMining) {
-      const userSockets = userConnections.get(userId);
-      if (userSockets && userSockets.size > 0) {
-        // Use cached data to calculate current tokens without DB query
-        const updatePromise = (async () => {
+    const usersArray = Array.from(usersWithActiveMining);
+
+    // If no users, skip processing
+    if (usersArray.length === 0) return;
+
+    // Process users in batches to prevent overwhelming the server
+    const BATCH_SIZE = 50; // Process 50 users at a time
+    const BATCH_DELAY = Math.floor(5000 / Math.ceil(usersArray.length / BATCH_SIZE)); // Spread batches across 5 seconds
+
+    for (let i = 0; i < usersArray.length; i += BATCH_SIZE) {
+      const batch = usersArray.slice(i, i + BATCH_SIZE);
+
+      // Process batch in parallel
+      const batchPromises = batch.map(async (userId) => {
+        const userSockets = userConnections.get(userId);
+        if (userSockets && userSockets.size > 0) {
           try {
             const miningStatus = await getMiningStatusForUserOptimized(userId, now);
-            
+
             // Broadcast to all devices of this user using room
             ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
-            
+
             // Check if user still has active sessions
-            const hasActiveSessions = miningStatus.activeSessions?.some(session => 
+            const hasActiveSessions = miningStatus.activeSessions?.some(session =>
               session.isActive && session.remainingHours > 0
             );
-            
+
             if (!hasActiveSessions) {
               usersWithActiveMining.delete(userId);
-              userMiningCache.delete(userId); // Clear cache when mining stops
+              userMiningCache.delete(userId);
             }
           } catch (error) {
             console.error(`Error sending periodic update to user ${userId}:`, error);
           }
-        })();
-        
-        updatePromises.push(updatePromise);
-      } else {
-        // Clean up tracking for disconnected users
-        usersWithActiveMining.delete(userId);
-        userMiningCache.delete(userId);
+        } else {
+          // Clean up tracking for disconnected users
+          usersWithActiveMining.delete(userId);
+          userMiningCache.delete(userId);
+        }
+      });
+
+      // Wait for current batch to complete before starting next batch
+      await Promise.all(batchPromises);
+
+      // Add delay between batches if there are more users (except for last batch)
+      if (i + BATCH_SIZE < usersArray.length && BATCH_DELAY > 0) {
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
       }
     }
-    
-    // Wait for all updates to complete in parallel
-    await Promise.all(updatePromises);
   }, 5000); // Update every 5 seconds
 };
 

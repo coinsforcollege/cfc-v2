@@ -49,6 +49,12 @@ const miningSessionSchema = new mongoose.Schema({
 // Compound index for finding active mining sessions
 miningSessionSchema.index({ student: 1, college: 1, isActive: 1 });
 
+// Index for expired session queries
+miningSessionSchema.index({ endTime: 1, isActive: 1 });
+
+// Compound index for efficient expired session cleanup and status checks
+miningSessionSchema.index({ student: 1, isActive: 1, endTime: 1 });
+
 const MiningSession = mongoose.model('MiningSession', miningSessionSchema);
 
 export default MiningSession;

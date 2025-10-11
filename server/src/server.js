@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import connectDB from './config/db.js';
 import app from './app.js';
 import { setupWebSocketHandlers } from './websocket/miningSocket.js';
+import { cleanupExpiredSessions } from './jobs/cleanupExpiredSessions.js';
 
 // Load env vars
 dotenv.config();
@@ -34,7 +35,23 @@ const io = new Server(server, {
 connectDB().then(() => {
   // Setup WebSocket handlers
   setupWebSocketHandlers(io);
-  
+
+  // Start cleanup job - runs every 5 minutes
+  const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  console.log(`🧹 Starting cleanup job - runs every 5 minutes`);
+
+  // Run cleanup immediately on startup
+  cleanupExpiredSessions().catch(err => {
+    console.error('Error in initial cleanup job:', err);
+  });
+
+  // Schedule periodic cleanup
+  setInterval(() => {
+    cleanupExpiredSessions().catch(err => {
+      console.error('Error in cleanup job:', err);
+    });
+  }, CLEANUP_INTERVAL);
+
   // Start server
   server.listen(PORT, () => {
     console.log(`🚀 Server is running on port: ${PORT}`);
