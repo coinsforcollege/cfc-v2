@@ -324,41 +324,6 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // Check for hardcoded platform admin
-    if (email === 'admin@gmail.com' && password === '123456') {
-      // Check if platform admin exists in DB
-      let adminUser = await User.findOne({ email: 'admin@gmail.com', role: 'platform_admin' });
-      
-      if (!adminUser) {
-        // Create platform admin if doesn't exist
-        adminUser = await User.create({
-          name: 'Platform Admin',
-          email: 'admin@gmail.com',
-          phone: '0000000000',
-          password: '123456',
-          role: 'platform_admin'
-        });
-      }
-
-      // Generate token
-      const token = generateToken(adminUser._id, adminUser.role);
-
-      // Update last login
-      await User.findByIdAndUpdate(adminUser._id, { lastLogin: new Date() });
-
-      return res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        data: {
-          id: adminUser._id,
-          name: adminUser.name,
-          email: adminUser.email,
-          role: adminUser.role
-        },
-        token
-      });
-    }
-
     // Find user by email and include password
     const user = await User.findOne({ email }).select('+password');
 

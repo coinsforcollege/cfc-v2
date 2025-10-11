@@ -25,11 +25,28 @@ export const startMining = async (req, res, next) => {
       const miningDuration = (session.endTime - session.startTime) / (1000 * 60 * 60);
       const tokensEarned = miningDuration * session.earningRate;
 
-      session.isActive = false;
-      session.tokensEarned = tokensEarned;
-      await session.save();
+      // Atomically mark session inactive - only if STILL active
+      // This prevents multiple processes from stopping the same session
+      const updatedSession = await MiningSession.findOneAndUpdate(
+        {
+          _id: session._id,
+          isActive: true
+        },
+        {
+          $set: {
+            isActive: false,
+            tokensEarned: tokensEarned
+          }
+        },
+        { new: false }
+      );
 
-      // Update wallet (upsert to ensure tokens never lost if wallet doesn't exist)
+      // If null, another process already stopped this session - skip wallet/stats updates
+      if (!updatedSession) {
+        continue;
+      }
+
+      // We successfully stopped the session - proceed with wallet and stats updates
       await Wallet.findOneAndUpdate(
         { student: session.student, college: session.college },
         {
@@ -42,7 +59,7 @@ export const startMining = async (req, res, next) => {
         { upsert: true }
       );
 
-      // Update college stats
+      // Decrement activeMiners by 1 (we know this session was active)
       await College.findByIdAndUpdate(session.college, {
         $inc: {
           'stats.activeMiners': -1,
@@ -195,15 +212,6 @@ export const stopMining = async (req, res, next) => {
       });
     }
 
-    // Race condition protection: Check if session is still active
-    // This prevents double-token credit if stopMining is called concurrently
-    if (!session.isActive) {
-      return res.status(400).json({
-        success: false,
-        message: 'Session already stopped'
-      });
-    }
-
     // Calculate tokens earned
     const now = new Date();
     const miningDuration = (now - session.startTime) / (1000 * 60 * 60); // in hours
@@ -221,11 +229,30 @@ export const stopMining = async (req, res, next) => {
     console.log(`Tokens Earned (rounded): ${tokensEarned.toFixed(4)} tokens`);
     console.log(`===============================\n`);
 
-    // Mark session inactive BEFORE wallet update (critical for race condition prevention)
-    session.isActive = false;
-    session.tokensEarned = tokensEarned;
-    session.endTime = now;
-    await session.save();
+    // Atomically mark session inactive - only if STILL active
+    // This prevents multiple processes from stopping the same session
+    const updatedSession = await MiningSession.findOneAndUpdate(
+      {
+        _id: session._id,
+        isActive: true
+      },
+      {
+        $set: {
+          isActive: false,
+          tokensEarned: tokensEarned,
+          endTime: now
+        }
+      },
+      { new: false }
+    );
+
+    if (!updatedSession) {
+      // Session was already stopped by another process
+      return res.status(400).json({
+        success: false,
+        message: 'Session was already stopped'
+      });
+    }
 
     // Find wallet and validate ownership before updating
     let wallet = await Wallet.findOne({ student: studentId, college: collegeId });
@@ -251,7 +278,7 @@ export const stopMining = async (req, res, next) => {
     wallet.lastUpdated = now;
     await wallet.save();
 
-    // Update college stats
+    // Update college stats - decrement activeMiners by 1 (we know this session was active)
     await College.findByIdAndUpdate(collegeId, {
       $inc: {
         'stats.activeMiners': -1,
@@ -406,12 +433,27 @@ export const autoStopExpiredSessions = async (req, res, next) => {
       const miningDuration = (session.endTime - session.startTime) / (1000 * 60 * 60);
       const tokensEarned = miningDuration * session.earningRate;
 
-      // Update session
-      session.isActive = false;
-      session.tokensEarned = tokensEarned;
-      await session.save();
+      // Atomically mark session inactive - only if STILL active
+      const updatedSession = await MiningSession.findOneAndUpdate(
+        {
+          _id: session._id,
+          isActive: true
+        },
+        {
+          $set: {
+            isActive: false,
+            tokensEarned: tokensEarned
+          }
+        },
+        { new: false }
+      );
 
-      // Update wallet (upsert to ensure tokens never lost if wallet doesn't exist)
+      // If null, another process already stopped this session - skip wallet/stats updates
+      if (!updatedSession) {
+        continue;
+      }
+
+      // We successfully stopped the session - proceed with wallet and stats updates
       await Wallet.findOneAndUpdate(
         { student: session.student, college: session.college },
         {
@@ -424,7 +466,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
         { upsert: true }
       );
 
-      // Update college stats
+      // Decrement activeMiners by 1 (we know this session was active)
       await College.findByIdAndUpdate(session.college, {
         $inc: {
           'stats.activeMiners': -1,

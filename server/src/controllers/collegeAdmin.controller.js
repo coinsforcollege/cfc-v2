@@ -139,12 +139,6 @@ export const getDashboard = async (req, res, next) => {
       'studentProfile.miningColleges.college': college._id
     });
 
-    // Get active miners (students with active mining sessions)
-    const activeMiningCount = await MiningSession.countDocuments({
-      college: college._id,
-      isActive: true
-    });
-
     // Calculate total tokens mined from all wallets
     const wallets = await Wallet.find({ college: college._id });
     const walletBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
@@ -164,19 +158,17 @@ export const getDashboard = async (req, res, next) => {
 
     const totalTokensMined = walletBalance + activeSessionTokens;
 
-    // Update college stats
-    college.stats = {
-      totalMiners,
-      activeMiners: activeMiningCount,
-      totalTokensMined
-    };
+    // Update college stats (activeMiners is maintained by mining operations only)
+    college.stats.totalMiners = totalMiners;
+    college.stats.totalTokensMined = totalTokensMined;
+    // Note: activeMiners is NOT modified here - it's maintained by atomic increment/decrement in start/stop mining
     await college.save();
 
     res.status(200).json({
       success: true,
       data: {
         college,
-        activeMinersCount: activeMiningCount,
+        activeMinersCount: college.stats.activeMiners,
         stats: college.stats
       }
     });

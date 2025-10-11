@@ -31,7 +31,27 @@ export const cleanupExpiredSessions = async () => {
         const miningDuration = (session.endTime - session.startTime) / (1000 * 60 * 60); // in hours
         const tokensEarned = Math.max(0, miningDuration * session.earningRate);
 
-        // Update wallet - credit tokens
+        // Atomically mark session inactive - only if STILL active
+        const updatedSession = await MiningSession.findOneAndUpdate(
+          {
+            _id: session._id,
+            isActive: true
+          },
+          {
+            $set: {
+              isActive: false,
+              tokensEarned: tokensEarned
+            }
+          },
+          { new: false }
+        );
+
+        // If null, another process already stopped this session - skip wallet/stats updates
+        if (!updatedSession) {
+          continue;
+        }
+
+        // We successfully stopped the session - proceed with wallet and stats updates
         await Wallet.findOneAndUpdate(
           {
             student: session.student,
@@ -46,12 +66,7 @@ export const cleanupExpiredSessions = async () => {
           { upsert: true }
         );
 
-        // Mark session as inactive and set tokens earned
-        session.isActive = false;
-        session.tokensEarned = tokensEarned;
-        await session.save();
-
-        // Update college stats - decrement active miners
+        // Decrement activeMiners by 1 (we know this session was active)
         if (session.college) {
           await College.findByIdAndUpdate(session.college._id, {
             $inc: {

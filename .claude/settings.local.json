@@ -5,7 +5,10 @@
       "Bash(cat:*)",
       "Bash(npx shadcn@latest add:*)",
       "Bash(curl -X GET http://localhost:4000/api/college-admin/dashboard -H \"Authorization: Bearer YOUR_TOKEN\")",
-      "Bash(claude logout)"
+      "Bash(claude logout)",
+      "WebSearch",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": [],
     "ask": []

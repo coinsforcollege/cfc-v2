@@ -250,15 +250,18 @@ const collegeSchema = new mongoose.Schema({
   stats: {
     totalMiners: {
       type: Number,
-      default: 0
+      default: 0,
+      min: [0, 'Total miners cannot be negative']
     },
     activeMiners: {
       type: Number,
-      default: 0
+      default: 0,
+      min: [0, 'Active miners cannot be negative']
     },
     totalTokensMined: {
       type: Number,
-      default: 0
+      default: 0,
+      min: [0, 'Total tokens mined cannot be negative']
     }
   },
   // Additional informational content (legacy - can be deprecated)

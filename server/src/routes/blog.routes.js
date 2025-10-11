@@ -1,5 +1,6 @@
 import express from 'express';
 import * as blogController from '../controllers/blog.controller.js';
+import { protect, authorize } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -20,8 +21,8 @@ router.post('/subscribe', blogController.subscribe);
 // Contact form route
 router.post('/contact', blogController.contactSubmission);
 
-// Admin routes (TODO: protect with auth middleware)
-router.get('/subscribers', blogController.getSubscribers);
-router.delete('/subscribers/:id', blogController.deleteSubscriber);
+// Admin routes - Protected (Platform Admin only)
+router.get('/subscribers', protect, authorize('platform_admin'), blogController.getSubscribers);
+router.delete('/subscribers/:id', protect, authorize('platform_admin'), blogController.deleteSubscriber);
 
 export default router;

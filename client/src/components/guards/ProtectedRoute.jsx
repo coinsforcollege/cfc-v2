@@ -1,10 +1,11 @@
 import React from 'react';
-import { Navigate } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -28,6 +29,15 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
       return <Navigate to="/platform-admin/dashboard" replace />;
     }
     return <Navigate to="/" replace />;
+  }
+
+  // Enforce prerequisites for students - must have at least one college selected
+  // Skip this check if already on college-selection page
+  if (user?.role === 'student' && location.pathname !== '/auth/college-selection') {
+    const hasColleges = user?.studentProfile?.miningColleges?.length > 0;
+    if (!hasColleges) {
+      return <Navigate to="/auth/college-selection" replace />;
+    }
   }
 
   return children;
