@@ -2,9 +2,21 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CTASection = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const getDashboardPath = () => {
+    if (!user) return '/auth/register/student';
+    if (user.role === 'student') return '/student/dashboard';
+    if (user.role === 'college_admin') return '/college-admin/dashboard';
+    if (user.role === 'platform_admin') return '/platform-admin/dashboard';
+    return '/';
+  };
+
   return (
     <Box
       sx={{
@@ -75,63 +87,90 @@ const CTASection = () => {
             >
               Join the digital fundraising revolution. Increase transparency, build stronger relationships, and unlock new revenue streams.
             </Typography>
-            <Stack 
-              direction={{ xs: 'column', sm: 'row' }} 
-              spacing={2} 
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
               justifyContent="center"
               sx={{ mt: 4 }}
             >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  component={Link}
-                  to="/auth/register/admin"
-                  variant="contained"
-                  size="large"
-                  endIcon={<ArrowForward />}
-                  sx={{
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                    color: '#ffffff',
-                    px: 4,
-                    py: 2,
-                    fontSize: '1.125rem',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    borderRadius: '12px',
-                    boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
-                    '&:hover': {
-                      boxShadow: '0 12px 40px rgba(139, 92, 246, 0.4)',
-                    },
-                  }}
-                >
-                  Start Fundraising
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  component={Link}
-                  to="/auth/register/student"
-                  variant="outlined"
-                  size="large"
-                  sx={{
-                    color: '#8b5cf6',
-                    borderColor: '#8b5cf6',
-                    px: 4,
-                    py: 2,
-                    fontSize: '1.125rem',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    borderRadius: '12px',
-                    backdropFilter: 'blur(10px)',
-                    backgroundColor: 'rgba(139, 92, 246, 0.08)',
-                    '&:hover': {
-                      borderColor: '#7c3aed',
-                      backgroundColor: 'rgba(139, 92, 246, 0.12)',
-                    },
-                  }}
-                >
-                  Start Mining
-                </Button>
-              </motion.div>
+              {user ? (
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={() => navigate(getDashboardPath())}
+                    variant="contained"
+                    size="large"
+                    endIcon={<ArrowForward />}
+                    sx={{
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                      color: '#ffffff',
+                      px: 4,
+                      py: 2,
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
+                      '&:hover': {
+                        boxShadow: '0 12px 40px rgba(139, 92, 246, 0.4)',
+                      },
+                    }}
+                  >
+                    Go to Dashboard
+                  </Button>
+                </motion.div>
+              ) : (
+                <>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={() => navigate('/auth/register/college')}
+                      variant="contained"
+                      size="large"
+                      endIcon={<ArrowForward />}
+                      sx={{
+                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                        color: '#ffffff',
+                        px: 4,
+                        py: 2,
+                        fontSize: '1.125rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
+                        '&:hover': {
+                          boxShadow: '0 12px 40px rgba(139, 92, 246, 0.4)',
+                        },
+                      }}
+                    >
+                      Join Waitlist
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={() => navigate('/auth/register/student')}
+                      variant="outlined"
+                      size="large"
+                      sx={{
+                        color: '#8b5cf6',
+                        borderColor: '#8b5cf6',
+                        px: 4,
+                        py: 2,
+                        fontSize: '1.125rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        borderRadius: '12px',
+                        backdropFilter: 'blur(10px)',
+                        backgroundColor: 'rgba(139, 92, 246, 0.08)',
+                        '&:hover': {
+                          borderColor: '#7c3aed',
+                          backgroundColor: 'rgba(139, 92, 246, 0.12)',
+                        },
+                      }}
+                    >
+                      Start Mining
+                    </Button>
+                  </motion.div>
+                </>
+              )}
             </Stack>
           </Box>
         </motion.div>

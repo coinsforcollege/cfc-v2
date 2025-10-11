@@ -4,7 +4,8 @@
       "Bash(test:*)",
       "Bash(cat:*)",
       "Bash(npx shadcn@latest add:*)",
-      "Bash(curl -X GET http://localhost:4000/api/college-admin/dashboard -H \"Authorization: Bearer YOUR_TOKEN\")"
+      "Bash(curl -X GET http://localhost:4000/api/college-admin/dashboard -H \"Authorization: Bearer YOUR_TOKEN\")",
+      "Bash(claude logout)"
     ],
     "deny": [],
     "ask": []

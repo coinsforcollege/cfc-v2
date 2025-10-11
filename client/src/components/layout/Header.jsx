@@ -25,7 +25,13 @@ const Header = () => {
   }, []);
 
   const handleGetStartedClick = () => {
-    setPopupOpen(true);
+    if (user) {
+      // If already logged in, navigate to dashboard
+      navigate(getDashboardPath());
+    } else {
+      // If not logged in, show registration options
+      setPopupOpen(true);
+    }
   };
 
   const handleClosePopup = () => {
@@ -114,24 +120,11 @@ const Header = () => {
           {/* Desktop Navigation */}
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: '24px' }}>
-              <Link 
-                to="/student/build-on-collegen" 
-                style={{ 
-                  textDecoration: 'none', 
-                  color: '#111827', 
-                  fontSize: '0.95rem',
-                  transition: 'color 0.3s ease',
-                }}
-                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
-                onMouseLeave={(e) => e.target.style.color = '#111827'}
-              >
-                For Students
-              </Link>
-              <Link 
-                to="/how-it-works/colleges" 
-                style={{ 
-                  textDecoration: 'none', 
-                  color: '#111827', 
+              <Link
+                to="/how-it-works/colleges"
+                style={{
+                  textDecoration: 'none',
+                  color: '#111827',
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
@@ -153,11 +146,11 @@ const Header = () => {
               >
                 Colleges
               </Link>
-              <Link 
-                to="/#network-map" 
-                style={{ 
-                  textDecoration: 'none', 
-                  color: '#111827', 
+              <Link
+                to="/network"
+                style={{
+                  textDecoration: 'none',
+                  color: '#111827',
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
@@ -248,7 +241,7 @@ const Header = () => {
                   <Button
                     variant="contained"
                     onClick={handleGetStartedClick}
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
@@ -262,7 +255,7 @@ const Header = () => {
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    Get Started
+                    {user ? 'Go to Dashboard' : 'Get Started'}
                   </Button>
                 </>
               )}
@@ -320,15 +313,8 @@ const Header = () => {
             </Box>
             
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <Link 
-                to="/student/build-on-collegen" 
-                style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
-                onClick={toggleMobileMenu}
-              >
-                For Students
-              </Link>
-              <Link 
-                to="/how-it-works/colleges" 
+              <Link
+                to="/how-it-works/colleges"
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
               >
@@ -341,8 +327,8 @@ const Header = () => {
               >
                 Colleges
               </Link>
-              <Link 
-                to="/#network-map" 
+              <Link
+                to="/network"
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
               >
@@ -416,14 +402,14 @@ const Header = () => {
                       toggleMobileMenu();
                     }}
                     fullWidth
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
                       color: '#ffffff',
                     }}
                   >
-                    Get Started
+                    {user ? 'Go to Dashboard' : 'Get Started'}
                   </Button>
                 </>
               )}

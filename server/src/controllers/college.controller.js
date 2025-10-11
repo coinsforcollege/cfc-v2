@@ -5,7 +5,7 @@ import College from '../models/College.js';
 // @access  Public
 export const getAllColleges = async (req, res, next) => {
   try {
-    const { search, country, type, status, sortBy = 'tokens', page = 1, limit = 50 } = req.query;
+    const { search, country, type, status, sortBy = 'miners', page = 1, limit = 50 } = req.query;
 
     // Build query - show all colleges (both active and waitlist)
     let query = {};
@@ -50,12 +50,12 @@ export const getAllColleges = async (req, res, next) => {
     } else if (sortBy === 'name') {
       sortOrder = { name: 1 };
     } else {
-      sortOrder = { 'stats.totalTokensMined': -1, name: 1 };
+      sortOrder = { 'stats.totalMiners': -1, name: 1 };
     }
 
     // Execute query
     const colleges = await College.find(query)
-      .select('name country city logo coverImage description tagline stats status admin type studentLife baseRate referralBonusRate')
+      .select('name country city logo coverImage description tagline stats status admin type studentLife baseRate referralBonusRate createdAt')
       .sort(sortOrder)
       .limit(parseInt(limit))
       .skip(skip);
@@ -184,12 +184,91 @@ export const getCollegeMetadata = async (req, res, next) => {
     // Get unique countries and types using MongoDB aggregation
     const countries = await College.distinct('country');
     const types = await College.distinct('type');
-    
+
     res.status(200).json({
       success: true,
       data: {
         countries: countries.filter(Boolean).sort(),
         types: types.filter(Boolean).sort()
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get global statistics (public)
+// @route   GET /api/colleges/global-stats
+// @access  Public
+export const getGlobalStats = async (req, res, next) => {
+  try {
+    const MiningSession = (await import('../models/Mining.js')).default;
+
+    // Get total counts
+    const totalColleges = await College.countDocuments();
+    const activeMiningSessions = await MiningSession.countDocuments({ isActive: true });
+
+    // Get aggregate stats
+    const collegeStats = await College.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalMiners: { $sum: '$stats.totalMiners' },
+          activeMiners: { $sum: '$stats.activeMiners' },
+          totalTokensMined: { $sum: '$stats.totalTokensMined' }
+        }
+      }
+    ]);
+
+    const stats = collegeStats[0] || {
+      totalMiners: 0,
+      activeMiners: 0,
+      totalTokensMined: 0
+    };
+
+    // Get top colleges by different metrics (for activity feed)
+    const topByMiners = await College.find()
+      .sort({ 'stats.totalMiners': -1 })
+      .limit(5)
+      .select('name stats.totalMiners stats.activeMiners stats.totalTokensMined status');
+
+    const topByTokens = await College.find()
+      .sort({ 'stats.totalTokensMined': -1 })
+      .limit(5)
+      .select('name stats.totalMiners stats.activeMiners stats.totalTokensMined status');
+
+    // Get recent colleges that joined
+    const recentColleges = await College.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('name createdAt status');
+
+    // Get colleges by status
+    const statusCounts = await College.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        global: {
+          totalColleges,
+          totalMiners: stats.totalMiners || 0,
+          activeMiners: stats.activeMiners || 0,
+          totalTokensMined: stats.totalTokensMined || 0,
+          activeMiningSessions
+        },
+        statusCounts,
+        topColleges: {
+          byMiners: topByMiners,
+          byTokens: topByTokens
+        },
+        recentColleges
       }
     });
   } catch (error) {

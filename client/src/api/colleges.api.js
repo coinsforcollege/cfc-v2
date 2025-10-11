@@ -5,5 +5,7 @@ export const collegesApi = {
   getAll: (params) => apiClient.get('/colleges', { params }),
   getById: (id) => apiClient.get(`/colleges/${id}`),
   search: (query) => apiClient.get('/colleges/search', { params: { q: query } }),
+  getGlobalStats: () => apiClient.get('/colleges/global-stats'),
+  getMetadata: () => apiClient.get('/colleges/metadata'),
 };
 

@@ -3,70 +3,107 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Stack } from '@mui/material';
 import { School, TrendingUp, People, LocationOn } from '@mui/icons-material';
 import * as d3 from 'd3';
+import { collegesApi } from '../../api/colleges.api';
 
 const NetworkMapSection = () => {
   const [activeNode, setActiveNode] = useState(null);
   const [pulseNodes, setPulseNodes] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [globalStats, setGlobalStats] = useState(null);
+  const [activities, setActivities] = useState([]);
   const svgRef = useRef();
 
-  // Mock college data with blank nodes
-  const colleges = [
-    { id: 1, name: 'MIT', supporters: 3200, status: 'live', tier: 'tier1', isBlank: false },
-    { id: 2, name: 'Stanford', supporters: 2800, status: 'live', tier: 'tier1', isBlank: false },
-    { id: 3, name: 'Harvard', supporters: 2500, status: 'live', tier: 'tier1', isBlank: false },
-    { id: 4, name: 'IIT Bombay', supporters: 3200, status: 'live', tier: 'tier1', isBlank: false },
-    { id: 5, name: 'University of Toronto', supporters: 1800, status: 'waitlist', tier: 'tier2', isBlank: false },
-    { id: 6, name: 'BITS Pilani', supporters: 1500, status: 'setup', tier: 'tier2', isBlank: false },
-    { id: 7, name: 'Oxford', supporters: 1200, status: 'waitlist', tier: 'tier2', isBlank: false },
-    { id: 8, name: 'Cambridge', supporters: 1100, status: 'waitlist', tier: 'tier2', isBlank: false },
-    { id: 9, name: 'ETH Zurich', supporters: 900, status: 'setup', tier: 'tier3', isBlank: false },
-    { id: 10, name: 'NUS Singapore', supporters: 800, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 11, name: 'UCLA', supporters: 700, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 12, name: 'Berkeley', supporters: 650, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 13, name: 'Columbia', supporters: 600, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 14, name: 'Yale', supporters: 550, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 15, name: 'Princeton', supporters: 500, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 16, name: 'Caltech', supporters: 450, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 17, name: 'Carnegie Mellon', supporters: 400, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 18, name: 'Georgia Tech', supporters: 350, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 19, name: 'UIUC', supporters: 300, status: 'waitlist', tier: 'tier3', isBlank: false },
-    { id: 20, name: 'Purdue', supporters: 250, status: 'waitlist', tier: 'tier3', isBlank: false },
-    // Add 30 blank nodes for future colleges
-    { id: 21, name: 'blank_21', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 22, name: 'blank_22', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 23, name: 'blank_23', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 24, name: 'blank_24', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 25, name: 'blank_25', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 26, name: 'blank_26', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 27, name: 'blank_27', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 28, name: 'blank_28', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 29, name: 'blank_29', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 30, name: 'blank_30', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 31, name: 'blank_31', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 32, name: 'blank_32', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 33, name: 'blank_33', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 34, name: 'blank_34', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 35, name: 'blank_35', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 36, name: 'blank_36', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 37, name: 'blank_37', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 38, name: 'blank_38', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 39, name: 'blank_39', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 40, name: 'blank_40', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 41, name: 'blank_41', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 42, name: 'blank_42', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 43, name: 'blank_43', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 44, name: 'blank_44', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 45, name: 'blank_45', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 46, name: 'blank_46', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 47, name: 'blank_47', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 48, name: 'blank_48', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 49, name: 'blank_49', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-    { id: 50, name: 'blank_50', supporters: 0, status: 'blank', tier: 'blank', isBlank: true },
-  ];
+  // Fetch real college data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [collegesRes, statsRes] = await Promise.all([
+          collegesApi.getAll({ limit: 50 }),
+          collegesApi.getGlobalStats()
+        ]);
+
+        const realColleges = collegesRes.colleges.map((college, index) => ({
+          id: college._id,
+          name: college.name,
+          supporters: college.stats?.totalMiners || 0,
+          status: college.status.toLowerCase(),
+          tier: getTierByMiners(college.stats?.totalMiners || 0),
+          isBlank: false
+        }));
+
+        // Add some blank nodes as fillers
+        const blankNodes = Array.from({ length: 15 }, (_, i) => ({
+          id: `blank_${i + 1}`,
+          name: `blank_${i + 1}`,
+          supporters: 0,
+          status: 'blank',
+          tier: 'blank',
+          isBlank: true
+        }));
+
+        setColleges([...realColleges, ...blankNodes]);
+        setGlobalStats(statsRes.data);
+
+        // Generate activities from real data
+        generateActivities(statsRes.data);
+      } catch (error) {
+        console.error('Error fetching colleges:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const getTierByMiners = (miners) => {
+    if (miners >= 1000) return 'tier1';
+    if (miners >= 500) return 'tier2';
+    if (miners >= 100) return 'tier3';
+    return 'tier3';
+  };
+
+  const generateActivities = (stats) => {
+    const activityList = [];
+
+    if (stats.topColleges?.byMiners?.[0]) {
+      const top = stats.topColleges.byMiners[0];
+      activityList.push({
+        text: `${top.name}: ${top.stats.totalMiners.toLocaleString()} total supporters`,
+        icon: TrendingUp,
+        color: '#68d391'
+      });
+    }
+
+    if (stats.recentColleges?.[0]) {
+      activityList.push({
+        text: `${stats.recentColleges[0].name} joined the network`,
+        icon: School,
+        color: '#a8c8ec'
+      });
+    }
+
+    if (stats.global?.activeMiners > 0) {
+      activityList.push({
+        text: `${stats.global.activeMiners.toLocaleString()} students actively mining`,
+        icon: People,
+        color: '#fbbf24'
+      });
+    }
+
+    if (stats.topColleges?.byTokens?.[0]) {
+      const top = stats.topColleges.byTokens[0];
+      activityList.push({
+        text: `${top.name} reached ${Math.round(top.stats.totalTokensMined).toLocaleString()} tokens`,
+        icon: LocationOn,
+        color: '#c4a8f2'
+      });
+    }
+
+    setActivities(activityList);
+  };
 
   // Create D3 network visualization
   useEffect(() => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || colleges.length === 0) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -272,12 +309,14 @@ const NetworkMapSection = () => {
     return () => {
       simulation.stop();
     };
-  }, []);
+  }, [colleges]);
 
   // Simulate live activity pulses for any node (including blank nodes)
   useEffect(() => {
+    if (colleges.length === 0) return;
+
     const interval = setInterval(() => {
-      const randomNode = Math.floor(Math.random() * 50); // 50 total nodes (20 named + 30 blank)
+      const randomNode = Math.floor(Math.random() * colleges.length);
       setPulseNodes(prev => [...prev, randomNode]);
       setTimeout(() => {
         setPulseNodes(prev => prev.filter(node => node !== randomNode));
@@ -285,7 +324,7 @@ const NetworkMapSection = () => {
     }, 300); // 3 times per second (every 300ms)
 
     return () => clearInterval(interval);
-  }, []);
+  }, [colleges]);
 
   // Handle pulsing animation - only animate the pulsing nodes
   useEffect(() => {
@@ -411,18 +450,7 @@ const NetworkMapSection = () => {
             >
               Global Network Map
             </Typography>
-            <Typography
-              sx={{
-                color: '#718096',
-                fontSize: { xs: '1.1rem', md: '1.25rem' },
-                lineHeight: 1.6,
-                maxWidth: '600px',
-                mx: 'auto',
-              }}
-            >
-              Interactive visualization of colleges building their digital economies. 
-              Hover over nodes to see real-time activity and join the movement.
-            </Typography>
+            
           </Box>
         </motion.div>
 
@@ -439,35 +467,18 @@ const NetworkMapSection = () => {
         </Box>
 
         {/* Box 2: Activity Feed Universe */}
-        <Typography
-          variant="h3"
-          sx={{
-            fontSize: { xs: '1.5rem', md: '2rem' },
-            fontWeight: 700,
-            color: '#2d3748',
-            mb: 4,
-            textAlign: 'center',
-          }}
-        >
-          Live Activity Feed
-        </Typography>
-
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { 
-            xs: 'repeat(2, 1fr)', 
-            sm: 'repeat(2, 1fr)', 
-            md: 'repeat(4, 1fr)' 
-          }, 
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'repeat(2, 1fr)',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)'
+          },
           gap: 2,
           mb: 6,
+          mt: 8
         }}>
-          {[
-            { text: 'IIT Bombay: 3,200 early supporters', icon: TrendingUp, color: '#68d391' },
-            { text: 'University of Toronto joined waitlist', icon: School, color: '#a8c8ec' },
-            { text: 'MIT students mining at accelerated rate', icon: People, color: '#fbbf24' },
-            { text: 'BITS Pilani configured tokenomics structure', icon: LocationOn, color: '#c4a8f2' },
-          ].map((activity, index) => (
+          {activities.map((activity, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
@@ -520,58 +531,6 @@ const NetworkMapSection = () => {
             </motion.div>
           ))}
         </Box>
-
-        {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          viewport={{ once: true }}
-        >
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
-            {[
-              { label: 'Active Colleges', value: '20+', color: '#a8c8ec' },
-              { label: 'Early Supporters', value: '25K+', color: '#c4a8f2' },
-              { label: 'Countries', value: '15+', color: '#f2a8c8' },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '20px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                    textAlign: 'center',
-                    p: 4,
-                  }}
-                >
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      fontSize: { xs: '2rem', md: '2.5rem' },
-                      fontWeight: 800,
-                      background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}80 100%)`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                      mb: 1,
-                    }}
-                  >
-                    {stat.value}
-                  </Typography>
-                  <Typography sx={{ color: '#718096', fontSize: '1rem', fontWeight: 500 }}>
-                    {stat.label}
-                  </Typography>
-                </Card>
-              </motion.div>
-            ))}
-          </Box>
-        </motion.div>
       </Container>
 
       {/* CSS Animations */}

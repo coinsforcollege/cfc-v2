@@ -17,7 +17,104 @@ and so on.
 # never interact with git or github
 # Never use emojis, in code or conversation
 # Always build in chunks - build - test - fix - build - text and so on
+# never start or stop servers or services
 
+## Debugging and Question Handling Rules
+
+### When investigating issues:
+1. **Always investigate yourself first** using available tools (Read, Grep, Glob, Bash for API calls)
+2. **Only ask the user to check something** if you need information only they can access:
+   - Runtime behavior in their browser (console errors, network requests)
+   - Visual issues you cannot see (layout problems, rendering issues)
+   - User-specific environment issues
+
+### If you need to ask the user something:
+1. **Give complete, clear instructions**:
+   - GOOD: "Press F12 to open browser console, go to Console tab, refresh the page, and tell me what errors you see"
+   - BAD: "Check the console" or "Look at the data"
+2. **WAIT for their response** before proceeding
+3. **Don't start investigating on your own** while waiting for their answer
+4. If they ask "where?" or similar clarifying questions, answer them directly and literally
+
+### Conditional plans are NOT allowed:
+1. **Don't present plans that depend on unknown information**
+   - BAD: "Check console logs, then based on what's found, fix the issue"
+   - GOOD: Investigate files first, identify the issue, then present a complete fix plan
+2. **Gather all information first**:
+   - Read backend files to see what data is returned
+   - Check frontend code to see what data is expected
+   - Only after understanding the full picture, present a plan
+3. **Plan mode is for ready-to-execute plans**, not "if this then that" scenarios
+
+### Communication rules:
+1. **Never say "you're right"** or similar validation phrases
+2. Answer user questions literally - if they ask "where", tell them the location, not what you'll do
+3. When you make a mistake, acknowledge it by changing behavior, not by repeating apologies
+
+## Design Consistency Rules
+
+### Always check existing design patterns before creating new UI:
+1. **Read these files first**:
+   - Dashboard pages: `client/src/pages/student/Overview.jsx`, `client/src/pages/collegeAdmin/Overview.jsx`
+   - Section components: `client/src/components/sections/TractionProofSection.jsx`, `client/src/components/sections/NetworkMapSection.jsx`
+   - Card examples in dashboards to understand spacing, gradients, and animations
+
+### Design elements to follow:
+
+**Glass morphism cards:**
+```javascript
+{
+  background: 'rgba(255, 255, 255, 0.9)',
+  backdropFilter: 'blur(20px)',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  borderRadius: '20px',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+}
+```
+
+**Gradient backgrounds with radial patterns:**
+```javascript
+background: `
+  radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+  radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
+  radial-gradient(circle at 40% 60%, rgba(6, 182, 212, 0.05) 0%, transparent 50%)
+`
+```
+
+**Color palette:**
+- Primary purple: `#8b5cf6`
+- Primary pink: `#ec4899`
+- Success green: `#10b981`
+- Warning orange: `#f59e0b`
+- Text primary: `#2d3748`
+- Text secondary: `#718096`
+
+**Animations:**
+- Use framer-motion for scroll animations
+- Standard animation: `initial={{ opacity: 0, y: 30 }}, whileInView={{ opacity: 1, y: 0 }}, transition={{ duration: 0.6 }}, viewport={{ once: true }}`
+- Add staggered delays for lists: `delay: index * 0.05`
+
+**Tables:**
+- Header with gradient background: `background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)'`
+- Row hover effect: `'&:hover': { background: 'rgba(139, 92, 246, 0.02)' }`
+- Progress bars with gradient: `background: 'linear-gradient(90deg, #8b5cf6 0%, #ec4899 100%)'`
+
+**Status chips:**
+- Live: `#10b981` (green)
+- Waitlist/Building: `#f59e0b` (orange)
+- Unaffiliated: `#6b7280` (gray)
+
+### Data validation before rendering:
+1. **Always check if data exists** before rendering charts or tables
+2. **Show fallback messages** for empty data: "No data available"
+3. **Validate numbers** before operations:
+   - Check for NaN: `if (isNaN(value))`
+   - Check for null/undefined: `if (!value)`
+   - Use default values: `value || 0`
+4. **Format numbers properly**:
+   - Decimals: `.toFixed(2)`
+   - Thousands separator: `.toLocaleString()`
+   - Percentages: `(value * 100).toFixed(0)}%`
 
 ## Project Overview
 

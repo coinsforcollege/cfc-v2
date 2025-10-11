@@ -1,39 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Avatar } from '@mui/material';
+import { collegesApi } from '../../api/colleges.api';
 
 const TractionProofSection = () => {
-  const colleges = [
-    { name: 'MIT', supporters: 5234, status: 'live', logo: 'MIT' },
-    { name: 'Stanford', supporters: 4891, status: 'live', logo: 'S' },
-    { name: 'IIT Bombay', supporters: 4567, status: 'live', logo: 'IIT' },
-    { name: 'Harvard', supporters: 4123, status: 'live', logo: 'H' },
-    { name: 'Oxford', supporters: 3890, status: 'waitlist', logo: 'O' },
-    { name: 'Cambridge', supporters: 3654, status: 'waitlist', logo: 'C' },
-    { name: 'Berkeley', supporters: 3421, status: 'live', logo: 'B' },
-    { name: 'Toronto', supporters: 3210, status: 'waitlist', logo: 'T' },
-    { name: 'BITS Pilani', supporters: 2987, status: 'live', logo: 'BP' },
-    { name: 'IIT Delhi', supporters: 2754, status: 'live', logo: 'ID' },
-    { name: 'Yale', supporters: 2521, status: 'waitlist', logo: 'Y' },
-    { name: 'Princeton', supporters: 2288, status: 'waitlist', logo: 'P' }
-  ];
+  const [colleges, setColleges] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const response = await collegesApi.getAll({ limit: 12, sortBy: 'miners' });
+        setColleges(response.colleges);
+      } catch (error) {
+        console.error('Error fetching colleges:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchColleges();
+  }, []);
 
 
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'live': return '#10b981';
       case 'waitlist': return '#f59e0b';
+      case 'building': return '#3b82f6';
+      case 'unaffiliated': return '#6b7280';
       default: return '#6b7280';
     }
   };
 
   const getStatusText = (status) => {
-    switch (status) {
+    if (!status) return 'Coming Soon';
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
       case 'live': return 'Live';
       case 'waitlist': return 'Waitlist';
+      case 'building': return 'Building';
+      case 'unaffiliated': return 'Unaffiliated';
       default: return 'Coming Soon';
     }
   };
+
+  const getCollegeLogo = (name) => {
+    const words = name.split(' ');
+    if (words.length >= 2) {
+      return words[0][0] + words[1][0];
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  if (loading) {
+    return null;
+  }
 
   return (
     <Box
@@ -175,8 +197,9 @@ const TractionProofSection = () => {
 
               {/* Table Rows */}
               {colleges.map((college, index) => {
-                const maxSupporters = Math.max(...colleges.map(c => c.supporters));
-                const progressPercentage = (college.supporters / maxSupporters) * 100;
+                const supporters = college.stats?.totalMiners || 0;
+                const maxSupporters = Math.max(...colleges.map(c => c.stats?.totalMiners || 0));
+                const progressPercentage = maxSupporters > 0 ? (supporters / maxSupporters) * 100 : 0;
                 
                 return (
                   <motion.div
@@ -200,18 +223,32 @@ const TractionProofSection = () => {
                     >
                       {/* Institution */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                        <Avatar
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                            color: 'white',
-                            fontWeight: 700,
-                            fontSize: '0.9rem',
-                          }}
-                        >
-                          {college.logo}
-                        </Avatar>
+                        {college.logo ? (
+                          <Box
+                            component="img"
+                            src={college.logo}
+                            alt={college.name}
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                            }}
+                          />
+                        ) : (
+                          <Avatar
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                              color: 'white',
+                              fontWeight: 700,
+                              fontSize: '0.9rem',
+                            }}
+                          >
+                            {getCollegeLogo(college.name)}
+                          </Avatar>
+                        )}
                         <Typography
                           sx={{
                             fontSize: '1rem',
@@ -257,7 +294,7 @@ const TractionProofSection = () => {
                               textAlign: 'right',
                             }}
                           >
-                            {college.supporters.toLocaleString()}
+                            {supporters.toLocaleString()}
                           </Typography>
                         </Box>
                       </Box>

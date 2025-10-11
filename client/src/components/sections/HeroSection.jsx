@@ -2,37 +2,143 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Container, Typography, Button, Stack, Grid, Card, CardContent } from '@mui/material';
 import { ArrowForward, TrendingUp, School, Security, Timer } from '@mui/icons-material';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useAuth } from '../../contexts/AuthContext';
+import { collegesApi } from '../../api/colleges.api';
 import collegenIcon from '../../assets/collegen-icon-blue-transparent-bg.svg';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [currentActivity, setCurrentActivity] = useState(0);
+  const [globalStats, setGlobalStats] = useState(null);
+  const [activities, setActivities] = useState([]);
   const rotatingTexts = ['Digital Economy', 'Alumni Network', 'Blockchain Gateway'];
-  
-  const activities = [
-    { text: 'IIT Bombay: 3,200 early supporters', type: 'supporters', college: 'IIT Bombay' },
-    { text: 'University of Toronto joined waitlist', type: 'waitlist', college: 'Toronto' },
-    { text: 'MIT students mining at accelerated rate', type: 'mining', college: 'MIT' },
-    { text: 'BITS Pilani configured tokenomics structure', type: 'config', college: 'BITS Pilani' },
-    { text: 'Stanford alumni donations increased 340%', type: 'donations', college: 'Stanford' },
-    { text: 'Harvard launched NFT endowment program', type: 'nft', college: 'Harvard' }
-  ];
+
+  const getDashboardPath = () => {
+    if (!user) return '/auth/register/student';
+    if (user.role === 'student') return '/student/dashboard';
+    if (user.role === 'college_admin') return '/college-admin/dashboard';
+    if (user.role === 'platform_admin') return '/platform-admin/dashboard';
+    return '/';
+  };
+
+  // Fetch global stats and generate activities
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await collegesApi.getGlobalStats();
+        const stats = response.data;
+        setGlobalStats(stats);
+        generateActivities(stats);
+      } catch (error) {
+        console.error('Error fetching global stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const generateActivities = (stats) => {
+    const activityList = [];
+
+    if (stats.topColleges?.byMiners?.[0]) {
+      const top = stats.topColleges.byMiners[0];
+      activityList.push({
+        text: `${top.name}: ${top.stats.totalMiners.toLocaleString()} early supporters`,
+        type: 'supporters',
+        college: top.name
+      });
+    }
+
+    if (stats.recentColleges?.[0]) {
+      activityList.push({
+        text: `${stats.recentColleges[0].name} joined waitlist`,
+        type: 'waitlist',
+        college: stats.recentColleges[0].name
+      });
+    }
+
+    if (stats.global?.activeMiners > 0) {
+      activityList.push({
+        text: `${stats.global.activeMiners.toLocaleString()} students actively mining`,
+        type: 'mining',
+        college: 'Global'
+      });
+    }
+
+    if (stats.topColleges?.byTokens?.[0]) {
+      const top = stats.topColleges.byTokens[0];
+      activityList.push({
+        text: `${top.name} mined ${Math.round(top.stats.totalTokensMined).toLocaleString()} tokens`,
+        type: 'tokens',
+        college: top.name
+      });
+    }
+
+    if (stats.global?.totalColleges > 0) {
+      activityList.push({
+        text: `${stats.global.totalColleges} institutions building digital economies`,
+        type: 'growth',
+        college: 'Network'
+      });
+    }
+
+    if (stats.topColleges?.byMiners?.[1]) {
+      const second = stats.topColleges.byMiners[1];
+      activityList.push({
+        text: `${second.name} reaching ${second.stats.totalMiners.toLocaleString()} supporters`,
+        type: 'milestone',
+        college: second.name
+      });
+    }
+
+    if (stats.global?.activeMiningSessions > 0) {
+      activityList.push({
+        text: `${stats.global.activeMiningSessions.toLocaleString()} active mining sessions now`,
+        type: 'sessions',
+        college: 'Platform'
+      });
+    }
+
+    if (stats.topColleges?.byTokens?.[1]) {
+      const second = stats.topColleges.byTokens[1];
+      activityList.push({
+        text: `${second.name} distributed ${Math.round(second.stats.totalTokensMined).toLocaleString()} tokens to students`,
+        type: 'distribution',
+        college: second.name
+      });
+    }
+
+    setActivities(activityList.length > 0 ? activityList : [{
+      text: 'Platform launching soon - Join the waitlist',
+      type: 'announcement',
+      college: 'Platform'
+    }]);
+  };
 
   useEffect(() => {
     const textInterval = setInterval(() => {
       setCurrentTextIndex((prevIndex) => (prevIndex + 1) % rotatingTexts.length);
     }, 3000); // Change text every 3 seconds
 
+    return () => {
+      clearInterval(textInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activities.length === 0) return;
+
     const activityInterval = setInterval(() => {
       setCurrentActivity((prev) => (prev + 1) % activities.length);
     }, 3000);
 
     return () => {
-      clearInterval(textInterval);
       clearInterval(activityInterval);
     };
-  }, []);
+  }, [activities]);
 
   return (
     <Box
@@ -208,8 +314,7 @@ const HeroSection = () => {
               <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
-                    component={Link}
-                    to="/auth/register/student"
+                    onClick={() => navigate(getDashboardPath())}
                     variant="contained"
                     size="large"
                     sx={{
@@ -228,75 +333,79 @@ const HeroSection = () => {
                     }}
                   >
                     <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.9, lineHeight: 1 }}>
-                      Students
+                      {user ? (user.role === 'student' ? 'Continue' : 'Go to') : 'Students'}
                     </Box>
                     <Box sx={{ lineHeight: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      Start Mining
+                      {user ? (user.role === 'student' ? 'Mining' : 'Dashboard') : 'Start Mining'}
                       <ArrowForward sx={{ fontSize: '1rem' }} />
                     </Box>
                   </Button>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    component={Link}
-                    to="/auth/register/college"
-                    variant="outlined"
-                    size="large"
-                    sx={{
-                    color: '#8b5cf6',
-                    borderColor: '#8b5cf6',
-                      px: 4,
-                      py: 2,
-                      fontSize: '1.125rem',
-                      fontWeight: 600,
-                      textTransform: 'none',
-                      borderRadius: '12px',
-                      backdropFilter: 'blur(10px)',
-                      backgroundColor: 'rgba(139, 92, 246, 0.08)',
-                      flexDirection: 'column',
-                      gap: 0,
-                      alignItems: 'flex-start',
-                      '&:hover': {
-                        borderColor: '#7c3aed',
-                        backgroundColor: 'rgba(139, 92, 246, 0.12)',
-                      },
-                    }}
-                  >
-                    <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.8, lineHeight: 1 }}>
-                      Colleges
-                    </Box>
-                    <Box sx={{ lineHeight: 1 }}>
-                      Join Waitlist
-                    </Box>
-                  </Button>
-                </motion.div>
+                {!user && (
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      component={Link}
+                      to="/auth/register/college"
+                      variant="outlined"
+                      size="large"
+                      sx={{
+                      color: '#8b5cf6',
+                      borderColor: '#8b5cf6',
+                        px: 4,
+                        py: 2,
+                        fontSize: '1.125rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        borderRadius: '12px',
+                        backdropFilter: 'blur(10px)',
+                        backgroundColor: 'rgba(139, 92, 246, 0.08)',
+                        flexDirection: 'column',
+                        gap: 0,
+                        alignItems: 'flex-start',
+                        '&:hover': {
+                          borderColor: '#7c3aed',
+                          backgroundColor: 'rgba(139, 92, 246, 0.12)',
+                        },
+                      }}
+                    >
+                      <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.8, lineHeight: 1 }}>
+                        Colleges
+                      </Box>
+                      <Box sx={{ lineHeight: 1 }}>
+                        Join Waitlist
+                      </Box>
+                    </Button>
+                  </motion.div>
+                )}
               </Stack>
 
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  px: 3,
-                  py: 2,
-                  backgroundColor: 'rgba(155, 214, 195, 0.15)',
-                  borderRadius: '50px',
-                  border: '1px solid rgba(155, 214, 195, 0.3)',
-                  backdropFilter: 'blur(10px)',
-                }}
-              >
+              {globalStats && (
                 <Box
                   sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    backgroundColor: '#9bd6c3',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    px: 3,
+                    py: 2,
+                    backgroundColor: 'rgba(155, 214, 195, 0.15)',
+                    borderRadius: '50px',
+                    border: '1px solid rgba(155, 214, 195, 0.3)',
+                    backdropFilter: 'blur(10px)',
                   }}
-                />
-                <Typography sx={{ color: '#059669', fontSize: '1rem', fontWeight: 500 }}>
-                  12,450 students mining now
-                </Typography>
-              </Box>
+                >
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: '#9bd6c3',
+                    }}
+                  />
+                  <Typography sx={{ color: '#059669', fontSize: '1rem', fontWeight: 500 }}>
+                    {globalStats.global.activeMiningSessions.toLocaleString()} mining sessions active now
+                  </Typography>
+                </Box>
+              )}
             </motion.div>
         </Box>
         
@@ -431,25 +540,27 @@ const HeroSection = () => {
               </Typography>
             </Box>
             
-            <motion.div
-              key={currentActivity}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.3 }}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}
-            >
-              <Timer sx={{ color: '#8b5cf6', fontSize: '16px' }} />
-              <Typography
-                sx={{
-                  fontSize: '0.9rem',
-                  color: '#4a5568',
-                  fontWeight: 500,
-                }}
+            {activities.length > 0 && (
+              <motion.div
+                key={currentActivity}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.3 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}
               >
-                {activities[currentActivity].text}
-              </Typography>
-            </motion.div>
+                <Timer sx={{ color: '#8b5cf6', fontSize: '16px' }} />
+                <Typography
+                  sx={{
+                    fontSize: '0.9rem',
+                    color: '#4a5568',
+                    fontWeight: 500,
+                  }}
+                >
+                  {activities[currentActivity]?.text || 'Loading...'}
+                </Typography>
+              </motion.div>
+            )}
 
             {/* Activity Indicators */}
             <Box sx={{ display: 'flex', gap: 0.5 }}>

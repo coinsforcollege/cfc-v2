@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Menu, X, Search, Bell, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { Menu, X, Search, Bell, LogOut, Settings as SettingsIcon, Home, School, BookOpen, Map } from 'lucide-react';
 import { IconButton, Avatar, Menu as MuiMenu, MenuItem, ListItemIcon, Divider, Badge, Box } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -303,6 +303,31 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
               <Box sx={{ fontWeight: 600, color: '#1e293b' }}>{user?.name}</Box>
               <Box sx={{ fontSize: '0.8rem', color: '#64748b' }}>{user?.email}</Box>
             </Box>
+            <Divider />
+            <MenuItem onClick={() => { setAnchorEl(null); navigate('/'); }}>
+              <ListItemIcon>
+                <Home size={18} />
+              </ListItemIcon>
+              Home
+            </MenuItem>
+            <MenuItem onClick={() => { setAnchorEl(null); navigate('/colleges'); }}>
+              <ListItemIcon>
+                <School size={18} />
+              </ListItemIcon>
+              Browse Colleges
+            </MenuItem>
+            <MenuItem onClick={() => { setAnchorEl(null); navigate('/blog'); }}>
+              <ListItemIcon>
+                <BookOpen size={18} />
+              </ListItemIcon>
+              Blog
+            </MenuItem>
+            <MenuItem onClick={() => { setAnchorEl(null); navigate('/#network-map'); }}>
+              <ListItemIcon>
+                <Map size={18} />
+              </ListItemIcon>
+              Network Map
+            </MenuItem>
             <Divider />
             <MenuItem onClick={() => { setAnchorEl(null); navigate(getSettingsPath()); }}>
               <ListItemIcon>
