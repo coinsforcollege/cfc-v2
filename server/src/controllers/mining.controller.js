@@ -29,7 +29,7 @@ export const startMining = async (req, res, next) => {
       session.tokensEarned = tokensEarned;
       await session.save();
 
-      // Update wallet
+      // Update wallet (upsert to ensure tokens never lost if wallet doesn't exist)
       await Wallet.findOneAndUpdate(
         { student: session.student, college: session.college },
         {
@@ -38,7 +38,8 @@ export const startMining = async (req, res, next) => {
             totalMined: tokensEarned
           },
           lastUpdated: now
-        }
+        },
+        { upsert: true }
       );
 
       // Update college stats
@@ -72,11 +73,12 @@ export const startMining = async (req, res, next) => {
       });
     }
 
-    // Check if already mining for this college
+    // Check if already mining for this college (active AND unexpired session)
     const existingSession = await MiningSession.findOne({
       student: studentId,
       college: collegeId,
-      isActive: true
+      isActive: true,
+      endTime: { $gt: now }
     });
 
     if (existingSession) {
@@ -185,6 +187,23 @@ export const stopMining = async (req, res, next) => {
       });
     }
 
+    // Defense-in-depth: Explicitly validate session belongs to authenticated user
+    if (session.student.toString() !== studentId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized: Session does not belong to you'
+      });
+    }
+
+    // Race condition protection: Check if session is still active
+    // This prevents double-token credit if stopMining is called concurrently
+    if (!session.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'Session already stopped'
+      });
+    }
+
     // Calculate tokens earned
     const now = new Date();
     const miningDuration = (now - session.startTime) / (1000 * 60 * 60); // in hours
@@ -202,24 +221,35 @@ export const stopMining = async (req, res, next) => {
     console.log(`Tokens Earned (rounded): ${tokensEarned.toFixed(4)} tokens`);
     console.log(`===============================\n`);
 
-    // Update session
+    // Mark session inactive BEFORE wallet update (critical for race condition prevention)
     session.isActive = false;
     session.tokensEarned = tokensEarned;
     session.endTime = now;
     await session.save();
 
+    // Find wallet and validate ownership before updating
+    let wallet = await Wallet.findOne({ student: studentId, college: collegeId });
+
+    if (!wallet) {
+      return res.status(404).json({
+        success: false,
+        message: 'Wallet not found'
+      });
+    }
+
+    // Defense-in-depth: Explicitly validate wallet belongs to authenticated user
+    if (wallet.student.toString() !== studentId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized: Wallet does not belong to you'
+      });
+    }
+
     // Update wallet
-    const wallet = await Wallet.findOneAndUpdate(
-      { student: studentId, college: collegeId },
-      {
-        $inc: {
-          balance: tokensEarned,
-          totalMined: tokensEarned
-        },
-        lastUpdated: now
-      },
-      { new: true }
-    );
+    wallet.balance += tokensEarned;
+    wallet.totalMined += tokensEarned;
+    wallet.lastUpdated = now;
+    await wallet.save();
 
     // Update college stats
     await College.findByIdAndUpdate(collegeId, {
@@ -381,7 +411,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
       session.tokensEarned = tokensEarned;
       await session.save();
 
-      // Update wallet
+      // Update wallet (upsert to ensure tokens never lost if wallet doesn't exist)
       await Wallet.findOneAndUpdate(
         { student: session.student, college: session.college },
         {
@@ -390,7 +420,8 @@ export const autoStopExpiredSessions = async (req, res, next) => {
             totalMined: tokensEarned
           },
           lastUpdated: now
-        }
+        },
+        { upsert: true }
       );
 
       // Update college stats

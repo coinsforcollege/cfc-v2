@@ -634,17 +634,48 @@ export const getPlatformStats = async (req, res, next) => {
     const activeMiningSessions = await MiningSession.countDocuments({ isActive: true });
 
     // Get total tokens mined across all colleges (wallet balance + active mining)
-    const wallets = await Wallet.find();
-    const walletBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
+    // Use aggregation to calculate sum in database instead of loading all wallets into memory
+    const walletAggregation = await Wallet.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalBalance: { $sum: '$balance' }
+        }
+      }
+    ]);
+    const walletBalance = walletAggregation.length > 0 ? walletAggregation[0].totalBalance : 0;
 
-    // Add tokens from all active mining sessions
-    const activeSessions = await MiningSession.find({ isActive: true });
+    // Calculate tokens from active sessions using aggregation
+    // Formula: (now - startTime) / (1000 * 60 * 60) * earningRate
     const now = new Date();
-    const activeSessionTokens = activeSessions.reduce((sum, session) => {
-      const miningDuration = (now - session.startTime) / (1000 * 60 * 60); // in hours
-      const currentTokens = miningDuration * session.earningRate;
-      return sum + currentTokens;
-    }, 0);
+    const activeSessionAggregation = await MiningSession.aggregate([
+      {
+        $match: { isActive: true }
+      },
+      {
+        $project: {
+          miningDuration: {
+            $divide: [
+              { $subtract: [now, '$startTime'] },
+              3600000 // milliseconds in an hour
+            ]
+          },
+          earningRate: 1
+        }
+      },
+      {
+        $project: {
+          currentTokens: { $multiply: ['$miningDuration', '$earningRate'] }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalActiveTokens: { $sum: '$currentTokens' }
+        }
+      }
+    ]);
+    const activeSessionTokens = activeSessionAggregation.length > 0 ? activeSessionAggregation[0].totalActiveTokens : 0;
 
     const totalTokensMined = walletBalance + activeSessionTokens;
 
