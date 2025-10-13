@@ -110,7 +110,7 @@ const AnnouncementBanner = () => {
             />
           )}
 
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Typography
               variant="body2"
               sx={{
@@ -119,13 +119,34 @@ const AnnouncementBanner = () => {
                 lineHeight: 1.4,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: { xs: 1, sm: 2 },
-                WebkitBoxOrient: 'vertical',
+                whiteSpace: { xs: 'nowrap', sm: 'normal' },
+                display: { xs: 'block', sm: '-webkit-box' },
+                WebkitLineClamp: { sm: 2 },
+                WebkitBoxOrient: { sm: 'vertical' },
+                flex: 1
               }}
             >
               {announcement.message}
             </Typography>
+            {announcement.link && announcement.linkLabel && (
+              <Box
+                component="a"
+                href={announcement.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  display: { xs: 'inline', sm: 'none' },
+                  color: 'white',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  textDecoration: 'underline',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}
+              >
+                Read more
+              </Box>
+            )}
           </Box>
 
           {announcement.link && announcement.linkLabel && (
