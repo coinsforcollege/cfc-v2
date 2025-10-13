@@ -19,6 +19,7 @@ import CollegeAdminSelection from './pages/auth/CollegeAdminSelection';
 import Home from './pages/public/Home';
 import HowItWorksStudents from './pages/public/HowItWorksStudents';
 import HowItWorksColleges from './pages/public/HowItWorksColleges';
+import ThingsToKnow from './pages/public/ThingsToKnow';
 import CollegeBrowse from './pages/public/CollegeBrowse';
 import CollegeView from './pages/public/CollegeView';
 import NetworkMap from './pages/public/NetworkMap';
@@ -66,6 +67,7 @@ function App() {
         <Route index element={<Home />} />
         <Route path="how-it-works/students" element={<HowItWorksStudents />} />
         <Route path="how-it-works/colleges" element={<HowItWorksColleges />} />
+        <Route path="things-to-know" element={<ThingsToKnow />} />
         <Route path="colleges" element={<CollegeBrowse />} />
         <Route path="colleges/:id" element={<CollegeView />} />
         <Route path="network" element={<NetworkMap />} />
