@@ -319,18 +319,19 @@ export const subscribe = async (req, res) => {
 // Contact form submission
 export const contactSubmission = async (req, res) => {
   try {
-    const { name, email, subject, message, postSlug } = req.body;
-    
+    const { name, email, phone, subject, message, postSlug } = req.body;
+
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
         message: 'Name, email, and message are required'
       });
     }
-    
+
     const contactData = {
       name,
       email,
+      phone,
       subject,
       message,
       ipAddress: req.ip
@@ -428,6 +429,30 @@ export const deleteSubscriber = async (req, res) => {
       success: false,
       message: 'Failed to delete subscriber',
       error: error.message
+    });
+  }
+};
+
+// Get active announcements
+export const getAnnouncements = async (req, res) => {
+  try {
+    const response = await strapiClient.get('/announcements', {
+      params: {
+        'filters[active][$eq]': true,
+        'populate[image]': true,
+        'sort': 'priority:desc,createdAt:desc'
+      }
+    });
+
+    res.json({
+      success: true,
+      data: response.data.results || response.data.data || []
+    });
+  } catch (error) {
+    console.error('Error fetching announcements:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch announcements'
     });
   }
 };

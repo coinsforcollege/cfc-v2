@@ -21,6 +21,9 @@ router.post('/subscribe', blogController.subscribe);
 // Contact form route
 router.post('/contact', blogController.contactSubmission);
 
+// Announcements route
+router.get('/announcements', blogController.getAnnouncements);
+
 // Admin routes - Protected (Platform Admin only)
 router.get('/subscribers', protect, authorize('platform_admin'), blogController.getSubscribers);
 router.delete('/subscribers/:id', protect, authorize('platform_admin'), blogController.deleteSubscriber);

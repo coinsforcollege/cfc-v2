@@ -110,6 +110,12 @@ const Overview = () => {
     );
   }, [miningStatus]);
 
+  const hasActiveMiner = useMemo(() => {
+    return Object.values(miningStatus).some(session =>
+      session.isActive && session.remainingHours > 0
+    );
+  }, [miningStatus]);
+
   if (loading) {
     return (
       <DashboardLayout stats={{}}>
@@ -174,26 +180,43 @@ const Overview = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{
-            flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            color: 'white',
-            borderRadius: 3,
-            boxShadow: '0 4px 20px rgba(240, 147, 251, 0.3)',
-            position: 'relative'
-          }}>
-            <BorderBeam
-              size={80}
-              duration={7.5}
-              delay={0}
-              colorFrom="#ffffff"
-              colorTo="#f0f0f0"
-              borderWidth={3}
-            />
+          <Card
+            onClick={() => navigate('/student/colleges')}
+            sx={{
+              flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
+              background: hasActiveMiner
+                ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+              color: 'white',
+              borderRadius: 3,
+              boxShadow: hasActiveMiner
+                ? '0 4px 20px rgba(240, 147, 251, 0.3)'
+                : '0 4px 20px rgba(100, 116, 139, 0.2)',
+              position: 'relative',
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: hasActiveMiner
+                  ? '0 6px 24px rgba(240, 147, 251, 0.4)'
+                  : '0 6px 24px rgba(100, 116, 139, 0.3)'
+              }
+            }}
+          >
+            {hasActiveMiner && (
+              <BorderBeam
+                size={80}
+                duration={7.5}
+                delay={0}
+                colorFrom="#ffffff"
+                colorTo="#f0f0f0"
+                borderWidth={3}
+              />
+            )}
             <CardContent sx={{ position: 'relative', zIndex: 1 }}>
               <TrendingUp sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                Miner Running
+                {hasActiveMiner ? 'Miner Running' : 'All Miners Inactive'}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {totalMiningTokens.toFixed(4)}
@@ -201,13 +224,22 @@ const Overview = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{
-            flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
-            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            color: 'white',
-            borderRadius: 3,
-            boxShadow: '0 4px 20px rgba(79, 172, 254, 0.3)'
-          }}>
+          <Card
+            onClick={() => navigate('/student/colleges')}
+            sx={{
+              flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
+              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+              color: 'white',
+              borderRadius: 3,
+              boxShadow: '0 4px 20px rgba(79, 172, 254, 0.3)',
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 6px 24px rgba(79, 172, 254, 0.4)'
+              }
+            }}
+          >
             <CardContent>
               <School sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
@@ -219,13 +251,22 @@ const Overview = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{
-            flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
-            background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-            color: 'white',
-            borderRadius: 3,
-            boxShadow: '0 4px 20px rgba(250, 112, 154, 0.3)'
-          }}>
+          <Card
+            onClick={() => navigate('/student/colleges')}
+            sx={{
+              flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
+              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+              color: 'white',
+              borderRadius: 3,
+              boxShadow: '0 4px 20px rgba(250, 112, 154, 0.3)',
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 6px 24px rgba(250, 112, 154, 0.4)'
+              }
+            }}
+          >
             <CardContent>
               <Refresh sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
@@ -360,9 +401,28 @@ const Overview = () => {
             boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
           }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-                Active Miners
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                  Active Miners
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => navigate('/student/colleges')}
+                  sx={{
+                    textTransform: 'none',
+                    borderColor: '#8b5cf6',
+                    color: '#8b5cf6',
+                    fontWeight: 600,
+                    '&:hover': {
+                      borderColor: '#7c3aed',
+                      background: 'rgba(139, 92, 246, 0.05)'
+                    }
+                  }}
+                >
+                  My Colleges
+                </Button>
+              </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Mining status for all your colleges
               </Typography>

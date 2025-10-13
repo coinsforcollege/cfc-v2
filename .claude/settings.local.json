@@ -8,7 +8,8 @@
       "Bash(claude logout)",
       "WebSearch",
       "WebFetch(domain:medium.com)",
-      "WebFetch(domain:stackoverflow.com)"
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

@@ -148,8 +148,8 @@ const HeroSection = () => {
         alignItems: 'center',
         background: `url(${collegenIcon})`,
         background: `
-          linear-gradient(135deg, 
-            rgba(155, 184, 224, 0.4) 0%, 
+          linear-gradient(135deg,
+            rgba(155, 184, 224, 0.4) 0%,
             rgba(179, 154, 232, 0.3) 25%,
             rgba(230, 155, 184, 0.3) 50%,
             rgba(155, 214, 195, 0.3) 75%,
@@ -177,15 +177,15 @@ const HeroSection = () => {
         }
       }}
     >
-      <Box sx={{ 
-        position: 'relative', 
-        zIndex: 2, 
-        display: 'flex', 
-        alignItems: 'center', 
-        minHeight: '100vh', 
-        px: { xs: 2, md: 4 }, 
-        maxWidth: '1200px', 
-        mx: 'auto', 
+      <Box sx={{
+        position: 'relative',
+        zIndex: 2,
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: '100vh',
+        px: { xs: 2, md: 4 },
+        maxWidth: '1200px',
+        mx: 'auto',
         gap: { xs: 2, md: 4 },
         flexDirection: { xs: 'column', md: 'row' },
         justifyContent: { xs: 'center', md: 'flex-start' }

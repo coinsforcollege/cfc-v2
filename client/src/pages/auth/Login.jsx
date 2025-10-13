@@ -67,7 +67,8 @@ const Login = () => {
         justifyContent: 'center',
         background: 'linear-gradient(135deg, rgba(155, 184, 224, 0.4) 0%, rgba(179, 154, 232, 0.3) 50%, rgba(230, 155, 184, 0.3) 100%)',
         px: 2,
-        py: 4
+        pt: { xs: 12, md: 14 },
+        pb: 4
       }}
     >
       <Box

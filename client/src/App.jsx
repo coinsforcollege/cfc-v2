@@ -25,6 +25,7 @@ import NetworkMap from './pages/public/NetworkMap';
 import AmbassadorApply from './pages/public/AmbassadorApply';
 import BlogList from './pages/public/BlogList';
 import BlogPost from './pages/public/BlogPost';
+import Contact from './pages/Contact';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -70,6 +71,7 @@ function App() {
         <Route path="network" element={<NetworkMap />} />
         <Route path="blog" element={<BlogList />} />
         <Route path="blog/:slug" element={<BlogPost />} />
+        <Route path="contact" element={<Contact />} />
         <Route path="ambassador/apply" element={<AmbassadorApply />} />
         <Route
           path="auth"

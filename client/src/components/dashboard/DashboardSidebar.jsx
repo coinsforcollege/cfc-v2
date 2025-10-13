@@ -316,8 +316,9 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
               Check our documentation or contact support
             </Typography>
             <Box
-              component="a"
-              href="mailto:info@coinsforcollege.org"
+              component={Link}
+              to="/contact"
+              onClick={handleLinkClick}
               sx={{
                 display: 'block',
                 px: 2,
