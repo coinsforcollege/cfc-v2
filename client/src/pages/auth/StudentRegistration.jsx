@@ -13,6 +13,7 @@ import { School } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
 import { collegesApi } from '../../api/colleges.api';
+import OTPDialog from '../../components/OTPDialog';
 
 const StudentRegistration = () => {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ const StudentRegistration = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [referralCollege, setReferralCollege] = useState(null);
+  const [showOTPDialog, setShowOTPDialog] = useState(false);
+  const [verificationToken, setVerificationToken] = useState(null);
 
   // Extract referral code and college ID from URL params
   useEffect(() => {
@@ -73,7 +76,7 @@ const StudentRegistration = () => {
     try {
       const collegeId = searchParams.get('college');
 
-      const registrationData = {
+      const otpData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -82,20 +85,46 @@ const StudentRegistration = () => {
         collegeId: collegeId || undefined
       };
 
+      const response = await authApi.sendOTPStudent(otpData);
+
+      if (response.success) {
+        setShowOTPDialog(true);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to send verification code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOTPVerified = async (token) => {
+    setVerificationToken(token);
+    setShowOTPDialog(false);
+    setLoading(true);
+
+    try {
+      const collegeId = searchParams.get('college');
+
+      const registrationData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        referralCode: formData.referralCode || undefined,
+        collegeId: collegeId || undefined,
+        verificationToken: token
+      };
+
       const response = await authApi.registerStudent(registrationData);
 
       if (response.success) {
-        // Auto-login
         login(response.data, response.token);
 
-        // Check if college was auto-added via referral
         const hasColleges = response.data.studentProfile?.miningColleges?.length > 0;
 
         if (hasColleges) {
-          // College was auto-added, go directly to dashboard
           navigate('/student/dashboard');
         } else {
-          // No college added, go to college selection
           navigate('/auth/college-selection');
         }
       }
@@ -104,6 +133,10 @@ const StudentRegistration = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseOTPDialog = () => {
+    setShowOTPDialog(false);
   };
 
   return (
@@ -351,7 +384,7 @@ const StudentRegistration = () => {
                 mb: 2
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Continue'}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
@@ -372,6 +405,14 @@ const StudentRegistration = () => {
           </form>
         </Box>
       </Box>
+
+      <OTPDialog
+        open={showOTPDialog}
+        email={formData.email}
+        role="student"
+        onVerified={handleOTPVerified}
+        onClose={handleCloseOTPDialog}
+      />
     </Box>
   );
 };

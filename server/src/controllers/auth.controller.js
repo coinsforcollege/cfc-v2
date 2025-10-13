@@ -1,19 +1,69 @@
 import User from '../models/User.js';
 import College from '../models/College.js';
+import OTPVerification from '../models/OTPVerification.js';
 import { generateToken } from '../utils/jwt.js';
+import jwt from 'jsonwebtoken';
 
 // @desc    Register a new student
 // @route   POST /api/auth/register/student
 // @access  Public
 export const registerStudent = async (req, res, next) => {
   try {
-    const { name, email, phone, password, referralCode, collegeId } = req.body;
+    const { name, email, phone, password, referralCode, collegeId, verificationToken } = req.body;
 
     // Validation
     if (!name || !email || !phone || !password) {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields: name, email, phone, password'
+      });
+    }
+
+    // Verify OTP token
+    if (!verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email verification required. Please verify your email first.'
+      });
+    }
+
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token. Please verify your email again.'
+      });
+    }
+
+    // Verify token type and data
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'student') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    // Verify email matches
+    if (tokenData.email !== email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email does not match verified email'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: email.toLowerCase(),
+      role: 'student',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email verification not found. Please verify your email again.'
       });
     }
 
@@ -85,6 +135,9 @@ export const registerStudent = async (req, res, next) => {
       college: college ? college._id : null, // Set primary college if provided
       studentProfile
     });
+
+    // Delete OTP verification record after successful registration
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'student' });
 
     // Update referrer's data if applicable
     if (referredByUser && college) {
@@ -173,13 +226,61 @@ export const registerStudent = async (req, res, next) => {
 // @access  Public
 export const registerCollegeAdmin = async (req, res, next) => {
   try {
-    const { name, email, phone, password, collegeId, newCollege } = req.body;
+    const { name, email, phone, password, collegeId, newCollege, verificationToken } = req.body;
 
     // Validation
     if (!name || !email || !phone || !password) {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields: name, email, phone, password'
+      });
+    }
+
+    // Verify OTP token
+    if (!verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email verification required. Please verify your email first.'
+      });
+    }
+
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token. Please verify your email again.'
+      });
+    }
+
+    // Verify token type and data
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'college_admin') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    // Verify email matches
+    if (tokenData.email !== email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email does not match verified email'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: email.toLowerCase(),
+      role: 'college_admin',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email verification not found. Please verify your email again.'
       });
     }
 
@@ -276,6 +377,9 @@ export const registerCollegeAdmin = async (req, res, next) => {
     }
 
     const user = await User.create(userPayload);
+
+    // Delete OTP verification record after successful registration
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'college_admin' });
 
     // Update college with admin reference and status if college was selected/created
     if (college) {
@@ -567,6 +671,94 @@ export const changePassword = async (req, res, next) => {
     // Update password
     user.password = newPassword;
     await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Change password with OTP verification
+// @route   PUT /api/auth/change-password-with-otp
+// @access  Private
+export const changePasswordWithOTP = async (req, res, next) => {
+  try {
+    const { newPassword, verificationToken } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!newPassword || !verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide new password and verification token'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters'
+      });
+    }
+
+    // Find user
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify token
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token. Please verify OTP again.'
+      });
+    }
+
+    // Verify token type and email
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'password_change') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    if (tokenData.email !== user.email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token does not match user email'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: user.email.toLowerCase(),
+      role: 'password_change',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP verification not found. Please verify OTP again.'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    // Delete OTP verification record after successful password change
+    await OTPVerification.deleteMany({ email: user.email.toLowerCase(), role: 'password_change' });
 
     res.status(200).json({
       success: true,

@@ -32,6 +32,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { authApi } from '../../api/auth.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import OTPDialog from '../../components/OTPDialog';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -56,6 +57,10 @@ const Settings = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+
+  // OTP dialog state
+  const [showOTPDialog, setShowOTPDialog] = useState(false);
+  const [verificationToken, setVerificationToken] = useState(null);
 
   // Logout confirmation dialog
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -130,9 +135,30 @@ const Settings = () => {
 
     try {
       setPasswordLoading(true);
-      const response = await authApi.changePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
+      const response = await authApi.sendOTPForPasswordChange({
+        currentPassword: passwordData.currentPassword
+      });
+
+      if (response.success) {
+        setShowOTPDialog(true);
+      }
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to send verification code');
+      showToast(err.message || 'Failed to send verification code', 'error');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleOTPVerified = async (token) => {
+    setVerificationToken(token);
+    setShowOTPDialog(false);
+    setPasswordLoading(true);
+
+    try {
+      const response = await authApi.changePasswordWithOTP({
+        newPassword: passwordData.newPassword,
+        verificationToken: token
       });
 
       if (response.success) {
@@ -150,6 +176,10 @@ const Settings = () => {
     } finally {
       setPasswordLoading(false);
     }
+  };
+
+  const handleCloseOTPDialog = () => {
+    setShowOTPDialog(false);
   };
 
   const handleLogout = async () => {
@@ -503,6 +533,14 @@ const Settings = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        <OTPDialog
+          open={showOTPDialog}
+          email={user?.email}
+          role="password_change"
+          onVerified={handleOTPVerified}
+          onClose={handleCloseOTPDialog}
+        />
       </Box>
     </DashboardLayout>
   );

@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
+import OTPDialog from '../../components/OTPDialog';
 
 const CollegeRegistration = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const CollegeRegistration = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showOTPDialog, setShowOTPDialog] = useState(false);
+  const [verificationToken, setVerificationToken] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -44,20 +47,43 @@ const CollegeRegistration = () => {
     setLoading(true);
 
     try {
-      const registrationData = {
+      const otpData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password
       };
 
-      const response = await authApi.registerCollege(registrationData);
-      
+      const response = await authApi.sendOTPCollege(otpData);
+
       if (response.success) {
-        // Auto-login
+        setShowOTPDialog(true);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to send verification code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOTPVerified = async (token) => {
+    setVerificationToken(token);
+    setShowOTPDialog(false);
+    setLoading(true);
+
+    try {
+      const registrationData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        verificationToken: token
+      };
+
+      const response = await authApi.registerCollege(registrationData);
+
+      if (response.success) {
         login(response.data, response.token);
-        
-        // Redirect to college selection
         navigate('/auth/college-admin-selection');
       }
     } catch (err) {
@@ -65,6 +91,10 @@ const CollegeRegistration = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseOTPDialog = () => {
+    setShowOTPDialog(false);
   };
 
   return (
@@ -279,7 +309,7 @@ const CollegeRegistration = () => {
                 mb: 2
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Continue'}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
@@ -300,6 +330,14 @@ const CollegeRegistration = () => {
           </form>
         </Box>
       </Box>
+
+      <OTPDialog
+        open={showOTPDialog}
+        email={formData.email}
+        role="college_admin"
+        onVerified={handleOTPVerified}
+        onClose={handleCloseOTPDialog}
+      />
     </Box>
   );
 };

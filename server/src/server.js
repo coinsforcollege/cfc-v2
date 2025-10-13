@@ -1,4 +1,6 @@
-import dotenv from 'dotenv';
+// MUST be first import to load env vars before other modules
+import 'dotenv/config';
+
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import connectDB from './config/db.js';
@@ -6,8 +8,12 @@ import app from './app.js';
 import { setupWebSocketHandlers } from './websocket/miningSocket.js';
 import { cleanupExpiredSessions } from './jobs/cleanupExpiredSessions.js';
 
-// Load env vars
-dotenv.config();
+// Verify env loaded
+console.log('🔍 ENV CHECK:', {
+  ZEPTOMAIL_API_KEY: !!process.env.ZEPTOMAIL_API_KEY,
+  MONGODB_URI: !!process.env.MONGODB_URI,
+  allZeptoKeys: Object.keys(process.env).filter(k => k.includes('ZEPTO'))
+});
 
 const PORT = process.env.PORT || 4000;
 
