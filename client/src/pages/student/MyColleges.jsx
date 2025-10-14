@@ -45,6 +45,7 @@ import { studentApi } from '../../api/student.api';
 import { miningApi } from '../../api/mining.api';
 import { collegesApi } from '../../api/colleges.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import ShareDialog from '../../components/ShareDialog';
 
 const MyColleges = () => {
   const navigate = useNavigate();
@@ -66,6 +67,8 @@ const MyColleges = () => {
   const [logoPreview, setLogoPreview] = useState('');
   const [actionLoading, setActionLoading] = useState('');
   const [copiedCollegeReferral, setCopiedCollegeReferral] = useState(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareDialogData, setShareDialogData] = useState(null);
 
   const fetchDashboard = async () => {
     try {
@@ -261,6 +264,21 @@ const MyColleges = () => {
       setTimeout(() => setCopiedCollegeReferral(null), 2000);
     }
   }, [dashboard?.student?.referralCode]);
+
+  const handleShareCollege = useCallback((college) => {
+    const wallet = dashboard?.wallets?.find(w => w.college && w.college._id === college._id);
+    const baseUrl = window.location.origin;
+
+    setShareDialogData({
+      collegeName: college.name,
+      collegeLogo: college.logo,
+      balance: wallet?.balance || 0,
+      isGeneral: false,
+      text: `I'm building my portfolio on Coins For College with ${college.name}. Join me!`,
+      url: `${baseUrl}/auth/register/student?ref=${dashboard?.student?.referralCode}&college=${college._id}`
+    });
+    setShowShareDialog(true);
+  }, [dashboard]);
 
   if (loading) {
     return (
@@ -592,37 +610,29 @@ const MyColleges = () => {
                           }}
                         />
                       )}
-                      <Tooltip title={copiedCollegeReferral === mc.college._id ? "Link copied!" : "Share referral link for this college"} arrow>
+                      <Tooltip title="Share this college to social media" arrow>
                         <Chip
-                          label={copiedCollegeReferral === mc.college._id ? "COPIED" : "INVITE"}
+                          label="SHARE"
                           size="small"
-                          icon={copiedCollegeReferral === mc.college._id ? <CheckCircle sx={{ fontSize: '0.8rem' }} /> : <Share sx={{ fontSize: '0.8rem' }} />}
-                          onClick={() => copyCollegeReferralLink(mc.college._id)}
+                          icon={<Share sx={{ fontSize: '0.8rem' }} />}
+                          onClick={() => handleShareCollege(mc.college)}
                           sx={{
                             height: 18,
-                            background: copiedCollegeReferral === mc.college._id
-                              ? 'rgba(34, 197, 94, 0.2)'
-                              : 'rgba(139, 92, 246, 0.2)',
-                            border: copiedCollegeReferral === mc.college._id
-                              ? '1px solid rgba(34, 197, 94, 0.5)'
-                              : '1px solid rgba(139, 92, 246, 0.5)',
-                            color: copiedCollegeReferral === mc.college._id ? '#22c55e' : '#a78bfa',
+                            background: 'rgba(139, 92, 246, 0.2)',
+                            border: '1px solid rgba(139, 92, 246, 0.5)',
+                            color: '#a78bfa',
                             fontSize: '0.6rem',
                             fontWeight: 700,
                             cursor: 'pointer',
                             '& .MuiChip-label': { px: 0.75 },
                             '& .MuiChip-icon': {
-                              color: copiedCollegeReferral === mc.college._id ? '#22c55e' : '#a78bfa',
+                              color: '#a78bfa',
                               marginLeft: '4px',
                               marginRight: '-4px'
                             },
                             '&:hover': {
-                              background: copiedCollegeReferral === mc.college._id
-                                ? 'rgba(34, 197, 94, 0.3)'
-                                : 'rgba(139, 92, 246, 0.3)',
-                              border: copiedCollegeReferral === mc.college._id
-                                ? '1px solid rgba(34, 197, 94, 0.6)'
-                                : '1px solid rgba(139, 92, 246, 0.6)',
+                              background: 'rgba(139, 92, 246, 0.3)',
+                              border: '1px solid rgba(139, 92, 246, 0.6)',
                             }
                           }}
                         />
@@ -1151,6 +1161,13 @@ const MyColleges = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Share Dialog */}
+        <ShareDialog
+          open={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+          shareData={shareDialogData}
+        />
       </Box>
     </DashboardLayout>
   );

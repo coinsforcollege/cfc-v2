@@ -17,7 +17,8 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Button
 } from '@mui/material';
 import {
   ContentCopy,
@@ -27,12 +28,14 @@ import {
   Link as LinkIcon,
   PersonAdd,
   EmojiEvents,
-  FiberManualRecord
+  FiberManualRecord,
+  Share
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { studentApi } from '../../api/student.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import ShareDialog from '../../components/ShareDialog';
 
 const Referrals = () => {
   const navigate = useNavigate();
@@ -43,6 +46,8 @@ const Referrals = () => {
   const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareDialogData, setShareDialogData] = useState(null);
 
   const fetchDashboard = async () => {
     try {
@@ -96,6 +101,22 @@ const Referrals = () => {
       }
       return sum;
     }, 0);
+  };
+
+  const handleShareGeneral = () => {
+    const primaryCollege = dashboard?.student?.college;
+    const totalBalance = dashboard?.summary?.totalBalance || 0;
+    const baseUrl = window.location.origin;
+
+    setShareDialogData({
+      collegeName: primaryCollege?.name || 'My College',
+      collegeLogo: primaryCollege?.logo,
+      balance: totalBalance,
+      isGeneral: true,
+      text: "I'm earning tokens on Coins For College. Join the community!",
+      url: `${baseUrl}/auth/register/student?ref=${dashboard?.student?.referralCode}`
+    });
+    setShowShareDialog(true);
   };
 
   const getAllReferredStudents = () => {
@@ -359,6 +380,34 @@ const Referrals = () => {
                 </IconButton>
               </Box>
             </Box>
+
+            {/* Share Button */}
+            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid rgba(139, 92, 246, 0.1)' }}>
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<Share />}
+                onClick={handleShareGeneral}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  fontWeight: 600,
+                  py: 1.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '0.95rem',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5568d3 0%, #633a8a 100%)',
+                    boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
+                    transform: 'translateY(-2px)'
+                  },
+                  transition: 'all 0.2s'
+                }}
+              >
+                Share to Social Media
+              </Button>
+            </Box>
           </CardContent>
         </Card>
 
@@ -599,6 +648,13 @@ const Referrals = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Share Dialog */}
+        <ShareDialog
+          open={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+          shareData={shareDialogData}
+        />
       </Box>
     </DashboardLayout>
   );
