@@ -217,7 +217,9 @@ export const updateCollegeDetails = async (req, res, next) => {
           try {
             updateData[field] = JSON.parse(req.body[field]);
           } catch (e) {
-            // ignore parse error
+            // Delete invalid JSON strings instead of corrupting the database
+            console.warn(`Failed to parse ${field}, removing from update:`, req.body[field]);
+            // Don't add this field to updateData
           }
         } else {
           updateData[field] = req.body[field];
@@ -272,7 +274,7 @@ export const updateCollegeDetails = async (req, res, next) => {
 export const updateTokenPreferences = async (req, res, next) => {
   try {
     const admin = await User.findById(req.user.id);
-    const {
+    let {
       name,
       ticker,
       maximumSupply,
@@ -282,6 +284,26 @@ export const updateTokenPreferences = async (req, res, next) => {
       needExchangeListing,
       allocationForEarlyMiners
     } = req.body;
+
+    // Parse preferredUtilities if it's a JSON string (from FormData)
+    if (preferredUtilities !== undefined && typeof preferredUtilities === 'string') {
+      try {
+        preferredUtilities = JSON.parse(preferredUtilities);
+      } catch (e) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid preferredUtilities format. Must be a valid JSON array.'
+        });
+      }
+    }
+
+    // Validate that preferredUtilities is an array if provided
+    if (preferredUtilities !== undefined && !Array.isArray(preferredUtilities)) {
+      return res.status(400).json({
+        success: false,
+        message: 'preferredUtilities must be an array'
+      });
+    }
 
     const tokenPreferences = {};
     if (name !== undefined) tokenPreferences['tokenPreferences.name'] = name;

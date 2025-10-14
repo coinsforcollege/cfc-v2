@@ -59,6 +59,7 @@ export const createCollege = async (req, res, next) => {
         try {
           collegeData[field] = JSON.parse(collegeData[field]);
         } catch (e) {
+          console.warn(`Failed to parse ${field}, removing from create:`, collegeData[field]);
           delete collegeData[field];
         }
       }
@@ -243,11 +244,15 @@ export const updateCollege = async (req, res, next) => {
     // Parse JSON fields if they are strings (from FormData)
     const jsonFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
     jsonFields.forEach(field => {
-      if (typeof updateData[field] === 'string') {
-        try {
-          updateData[field] = JSON.parse(updateData[field]);
-        } catch (e) {
-          // ignore parse error, leave as is
+      if (updateData[field] !== undefined) {
+        if (typeof updateData[field] === 'string') {
+          try {
+            updateData[field] = JSON.parse(updateData[field]);
+          } catch (e) {
+            // Delete invalid JSON strings instead of corrupting the database
+            console.warn(`Failed to parse ${field}, removing from update:`, updateData[field]);
+            delete updateData[field];
+          }
         }
       }
     });

@@ -282,8 +282,22 @@ const CollegeAdminDashboard = () => {
       
       const formData = new FormData();
       
-      // Add all text fields
-      const objectFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
+      // All object/array fields from College schema that need JSON.stringify
+      const objectFields = [
+        'socialMedia', 
+        'departments', 
+        'campusSize', 
+        'studentLife', 
+        'tokenPreferences',
+        'admissions',
+        'stats',
+        'images',
+        'accreditations',
+        'rankings',
+        'programs',
+        'highlights',
+        'facilities'
+      ];
       Object.keys(collegeFormData).forEach(key => {
         if (objectFields.includes(key)) {
           formData.append(key, JSON.stringify(collegeFormData[key]));
