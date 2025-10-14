@@ -14,13 +14,14 @@ import {
   Security,
   Rocket
 } from '@mui/icons-material';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 
 const Footer = () => {
   const footerLinks = {
     platform: [
       { name: 'InTuition Exchange', href: '/exchange' },
-      { name: 'Collegen Blockchain', href: '/blockchain' },
+      { name: 'CollegenZ Blockchain', href: '/blockchain' },
       { name: 'Gas Manager', href: '/gas-manager' }
     ],
     resources: [

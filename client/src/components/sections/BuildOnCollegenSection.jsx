@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Stack, Button } from '@mui/material';
 import { 
@@ -14,7 +15,6 @@ import {
 } from '@mui/icons-material';
 import { Link } from 'react-router';
 import collegenIcon from '../../assets/collegen-icon-blue-transparent-bg.svg';
-import dappsIcon from '../../assets/dapps-light-colored-transparent-bg.svg';
 
 const BuildOnCollegenSection = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -22,7 +22,7 @@ const BuildOnCollegenSection = () => {
   const features = [
     {
       icon: Code,
-      title: 'Deploy dApps on Collegen L2',
+      title: 'Deploy dApps on CollegenZ L2',
       description: 'Students get access to our blockchain infrastructure with negligible gas costs. Build, test, and launch decentralized applications without financial barriers.',
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
@@ -128,7 +128,7 @@ const BuildOnCollegenSection = () => {
                 mb: 3,
               }}
             >
-              Build on Collegen
+              Build on CollegenZ
             </Typography>
             <Typography
               sx={{
@@ -386,7 +386,7 @@ const BuildOnCollegenSection = () => {
                   mb: 4,
                 }}
               >
-                Build your next project on Collegen with the help of your college and our gas sponsorship and take an early step towards a career that you control.
+                Build your next project on CollegenZ with the help of your college and our gas sponsorship and take an early step towards a career that you control.
               </Typography>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button

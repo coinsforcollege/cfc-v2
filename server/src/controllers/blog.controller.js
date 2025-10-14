@@ -14,13 +14,14 @@ const strapiClient = axios.create({
 // Get all blog posts with filters
 export const getPosts = async (req, res) => {
   try {
-    const { page = 1, pageSize = 10, category, tag, search, featured } = req.query;
-    
+    const { page = 1, pageSize = 10, category, tag, search, featured, showOnHomepage } = req.query;
+
     const filters = {};
     if (category) filters.categories = { slug: { $eq: category } };
     if (tag) filters.tags = { slug: { $eq: tag } };
     if (search) filters.title = { $containsi: search };
     if (featured === 'true') filters.featured = true;
+    if (showOnHomepage === 'true') filters.showOnHomepage = true;
     
     const response = await strapiClient.get('/blog-posts', {
       params: {

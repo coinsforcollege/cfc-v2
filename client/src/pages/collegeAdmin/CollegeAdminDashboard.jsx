@@ -92,7 +92,6 @@ const CollegeAdminDashboard = () => {
   const [community, setCommunity] = useState([]);
   const [activeSection, setActiveSection] = useState('overview');
   const [showCollegeForm, setShowCollegeForm] = useState(false);
-  const [showTokenForm, setShowTokenForm] = useState(false);
   const [tempInput, setTempInput] = useState('');
   
   const [tokenFormData, setTokenFormData] = useState({
@@ -371,7 +370,7 @@ const CollegeAdminDashboard = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                🎉 Welcome to Collegen, {college.name}!
+                Welcome to Coins For College, {college.name}!
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9 }}>
                 You're part of something big. Your college token journey starts here.
@@ -1367,7 +1366,6 @@ const CollegeAdminDashboard = () => {
       onSectionChange={(section) => {
         setActiveSection(section);
         setShowCollegeForm(false);
-        setShowTokenForm(false);
       }}
       stats={sidebarStats}
       searchPlaceholder="Search students..."

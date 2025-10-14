@@ -85,6 +85,10 @@
     "featured": {
       "type": "boolean",
       "default": false
+    },
+    "showOnHomepage": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

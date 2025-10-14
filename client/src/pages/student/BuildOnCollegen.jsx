@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Stack, Button, Grid } from '@mui/material';
 import { 
@@ -32,7 +33,6 @@ import {
 } from '@mui/icons-material';
 import { Link } from 'react-router';
 import Header from '../../components/layout/Header';
-import blockchainImage from '../../assets/blockchain-development-dark-purple-bg-vector.jpg';
 
 const BuildOnCollegen = () => {
   const [currentLine, setCurrentLine] = useState(0);
@@ -65,60 +65,6 @@ const BuildOnCollegen = () => {
     "        return true;",
     "    }",
     "}"
-  ];
-
-  const pixelArtFeatures = [
-    {
-      icon: Rocket,
-      title: "Deploy in Seconds",
-      description: "No more waiting for gas fees to drop",
-      color: "#ff6b6b",
-      gas: "0.001 ETH",
-      savings: "99.9%"
-    },
-    {
-      icon: FlashOn,
-      title: "Lightning Fast",
-      description: "Transactions confirmed instantly",
-      color: "#4ecdc4",
-      gas: "0.0001 ETH",
-      savings: "99.99%"
-    },
-    {
-      icon: Security,
-      title: "Secure & Audited",
-      description: "Enterprise-grade security",
-      color: "#45b7d1",
-      gas: "0.0005 ETH",
-      savings: "99.5%"
-    }
-  ];
-
-  const pixelArtResources = [
-    {
-      icon: Code,
-      title: "Complete SDK",
-      description: "Everything you need to start building",
-      color: "#96ceb4"
-    },
-    {
-      icon: EmojiEvents,
-      title: "Hackathons",
-      description: "Compete for epic prizes",
-      color: "#feca57"
-    },
-    {
-      icon: MonetizationOn,
-      title: "Gas Sponsorship",
-      description: "We pay for your transactions",
-      color: "#ff9ff3"
-    },
-    {
-      icon: Star,
-      title: "Project Grants",
-      description: "Funding for innovative ideas",
-      color: "#54a0ff"
-    }
   ];
 
   useEffect(() => {
@@ -240,7 +186,7 @@ const BuildOnCollegen = () => {
                   textShadow: '0 4px 8px rgba(0,0,0,0.1)',
                 }}
               >
-                Build on Collegen
+                Build on CollegenZ
               </Typography>
               <Typography
                 sx={{
@@ -308,7 +254,7 @@ const BuildOnCollegen = () => {
                 <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
                   <PlayArrow sx={{ color: '#4ecdc4', fontSize: '20px' }} />
                   <Typography sx={{ color: '#4ecdc4', fontSize: '0.8rem' }}>
-                    Deploying to Collegen L2...
+                    Deploying to CollegenZ L2...
                   </Typography>
                 </Box>
               </Box>
@@ -462,7 +408,7 @@ const BuildOnCollegen = () => {
                         sx={{ width: 24, height: 24 }}
                       />
                       <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: '#2d3748' }}>
-                        Collegen L2
+                        CollegenZ L2
                       </Typography>
                     </Box>
                     <Typography
@@ -528,7 +474,7 @@ const BuildOnCollegen = () => {
             </Box>
           </motion.div>
 
-          {/* Why Students Love Collegen & Developer Resources */}
+          {/* Why Students Love CollegenZ & Developer Resources */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -546,7 +492,7 @@ const BuildOnCollegen = () => {
                   textAlign: 'center',
                 }}
               >
-                Why Students Love Collegen
+                Why Students Love CollegenZ
               </Typography>
               
               {/* Main Features Row */}
@@ -858,7 +804,7 @@ const BuildOnCollegen = () => {
                     Fallback Value Protection
                   </Typography>
                   <Typography sx={{ color: '#718096', lineHeight: 1.6, mb: 3 }}>
-                    If a college hasn't joined after 1 year, surrender your mined tokens for TUIT (Collegen's native token). Exchange rate calculated at time of surrender based on TUIT market value and college tier.
+                    If a college hasn't joined after 1 year, surrender your mined tokens for TUIT (CollegenZ's native token). Exchange rate calculated at time of surrender based on TUIT market value and college tier.
                   </Typography>
                   
                   <Box sx={{ p: 3, background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)', textAlign: 'center' }}>

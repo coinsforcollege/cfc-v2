@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Avatar } from '@mui/material';
 import { collegesApi } from '../../api/colleges.api';
@@ -116,7 +117,7 @@ const TractionProofSection = () => {
                 mb: 3,
               }}
             >
-              Institutions Already Moving
+              Communities Already Moving
             </Typography>
             <Typography
               sx={{

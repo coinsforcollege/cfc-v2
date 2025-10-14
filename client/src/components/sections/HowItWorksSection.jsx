@@ -1,4 +1,5 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { 
   Box, 
@@ -7,9 +8,7 @@ import {
   Stack, 
   Card, 
   CardContent,
-  Chip,
-  useTheme,
-  useMediaQuery
+  Chip
 } from '@mui/material';
 import { 
   School, 
@@ -23,9 +22,6 @@ import {
 import { colors, gradients, spacing, typography, shadows, borderRadius } from '../../utils/designTokens';
 
 const HowItWorksSection = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
   const steps = [
     {
       id: 1,
@@ -70,7 +66,7 @@ const HowItWorksSection = () => {
       color: colors.success[500],
       gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
       details: [
-        "Smart contracts deployed on Collegen L2",
+        "Smart contracts deployed on CollegenZ L2",
         "Tokens minted according to configuration",
         "Early supporters' balances unlock",
         "KYC verification for token release",

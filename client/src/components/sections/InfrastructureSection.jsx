@@ -1,4 +1,5 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Grid, Chip, Stack } from '@mui/material';
 import { 
@@ -149,7 +150,7 @@ const InfrastructureSection = () => {
               }}
             >
               Your college gets a complete digital economy without the technical overhead. 
-              Custom tokens, governance frameworks, and payment rails deployed on Collegen's Ethereum L2.
+              Custom tokens, governance frameworks, and payment rails deployed on CollegenZ's Ethereum L2.
             </Typography>
           </Box>
         </motion.div>

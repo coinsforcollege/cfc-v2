@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Container, Typography, Button, Stack, Grid, Card, CardContent } from '@mui/material';
 import { ArrowForward, TrendingUp, School, Security, Timer } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { collegesApi } from '../../api/colleges.api';
+import { blogApi } from '../../api/blog.api';
 import collegenIcon from '../../assets/collegen-icon-blue-transparent-bg.svg';
 
 const HeroSection = () => {
@@ -14,6 +16,7 @@ const HeroSection = () => {
   const [currentActivity, setCurrentActivity] = useState(0);
   const [globalStats, setGlobalStats] = useState(null);
   const [activities, setActivities] = useState([]);
+  const [featuredPosts, setFeaturedPosts] = useState([]);
   const rotatingTexts = ['Digital Economy', 'Alumni Network', 'Blockchain Gateway'];
 
   const getDashboardPath = () => {
@@ -22,6 +25,17 @@ const HeroSection = () => {
     if (user.role === 'college_admin') return '/college-admin/dashboard';
     if (user.role === 'platform_admin') return '/platform-admin/dashboard';
     return '/';
+  };
+
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    const baseUrl = import.meta.env.VITE_STRAPI_URL || 'http://localhost:1337';
+    return image.url?.startsWith('http') ? image.url : `${baseUrl}${image.url}`;
+  };
+
+  const truncateText = (text, lines) => {
+    if (!text) return '';
+    return text;
   };
 
   // Fetch global stats and generate activities
@@ -37,7 +51,19 @@ const HeroSection = () => {
       }
     };
 
+    const fetchFeaturedPosts = async () => {
+      try {
+        const response = await blogApi.getPosts({ showOnHomepage: 'true', pageSize: 3 });
+        if (response.success) {
+          setFeaturedPosts(response.data.slice(0, 3));
+        }
+      } catch (error) {
+        console.error('Error fetching featured posts:', error);
+      }
+    };
+
     fetchStats();
+    fetchFeaturedPosts();
   }, []);
 
   const generateActivities = (stats) => {
@@ -306,7 +332,7 @@ const HeroSection = () => {
               >
                 Turnkey token infrastructure, smart contracts, and full ecosystem deployment on{' '}
                 <Box component="span" sx={{ color: '#8b5cf6', fontWeight: 600 }}>
-                  Collegen L2
+                  CollegenZ L2
                 </Box>
                 . From configuration to go-live in weeks, not months.
               </Typography>
@@ -333,7 +359,7 @@ const HeroSection = () => {
                     }}
                   >
                     <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.9, lineHeight: 1 }}>
-                      {user ? (user.role === 'student' ? 'Continue' : 'Go to') : 'Students'}
+                      {user ? (user.role === 'student' ? 'Continue' : 'Go to') : 'Community'}
                     </Box>
                     <Box sx={{ lineHeight: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       {user ? (user.role === 'student' ? 'Mining' : 'Dashboard') : 'Start Mining'}
@@ -420,71 +446,140 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <Stack spacing={3}>
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <School sx={{ color: '#9bb8e0', fontSize: '2rem' }} />
-                      <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
-                        500+ Colleges
-                      </Typography>
-                    </Box>
-                    <Typography sx={{ color: '#718096' }}>
-                      Leading institutions already building their digital economies
-                    </Typography>
-                  </CardContent>
-                </Card>
+                {featuredPosts.length > 0 ? (
+                  featuredPosts.map((post, index) => (
+                    <Card
+                      key={post.id}
+                      onClick={() => navigate(`/blog/${post.slug}`)}
+                      sx={{
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
+                        },
+                      }}
+                    >
+                      {post.featuredImage && (
+                        <Box
+                          component="img"
+                          src={getImageUrl(post.featuredImage)}
+                          alt={post.title}
+                          sx={{
+                            width: '100%',
+                            height: '150px',
+                            objectFit: 'cover',
+                            borderTopLeftRadius: '16px',
+                            borderTopRightRadius: '16px',
+                          }}
+                        />
+                      )}
+                      <CardContent sx={{ p: 3 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: '#2d3748',
+                            fontWeight: 600,
+                            mb: 1,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                          }}
+                        >
+                          {post.title}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            color: '#718096',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {post.excerpt || 'Click to read more...'}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <>
+                    <Card
+                      sx={{
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                      }}
+                    >
+                      <CardContent sx={{ p: 3 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                          <School sx={{ color: '#9bb8e0', fontSize: '2rem' }} />
+                          <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
+                            500+ Colleges
+                          </Typography>
+                        </Box>
+                        <Typography sx={{ color: '#718096' }}>
+                          Leading institutions already building their digital economies
+                        </Typography>
+                      </CardContent>
+                    </Card>
 
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <TrendingUp sx={{ color: '#b39ae8', fontSize: '2rem' }} />
-                      <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
-                        $2M+ Deployed
-                      </Typography>
-                    </Box>
-                    <Typography sx={{ color: '#718096' }}>
-                      Tokens already in circulation across campus networks
-                    </Typography>
-                  </CardContent>
-                </Card>
+                    <Card
+                      sx={{
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                      }}
+                    >
+                      <CardContent sx={{ p: 3 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                          <TrendingUp sx={{ color: '#b39ae8', fontSize: '2rem' }} />
+                          <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
+                            $2M+ Deployed
+                          </Typography>
+                        </Box>
+                        <Typography sx={{ color: '#718096' }}>
+                          Tokens already in circulation across campus networks
+                        </Typography>
+                      </CardContent>
+                    </Card>
 
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Security sx={{ color: '#e69bb8', fontSize: '2rem' }} />
-                      <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
-                        Enterprise Grade
-                      </Typography>
-                    </Box>
-                    <Typography sx={{ color: '#718096' }}>
-                      Audited smart contracts and institutional infrastructure
-                    </Typography>
-                  </CardContent>
-                </Card>
+                    <Card
+                      sx={{
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                      }}
+                    >
+                      <CardContent sx={{ p: 3 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                          <Security sx={{ color: '#e69bb8', fontSize: '2rem' }} />
+                          <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
+                            Enterprise Grade
+                          </Typography>
+                        </Box>
+                        <Typography sx={{ color: '#718096' }}>
+                          Audited smart contracts and institutional infrastructure
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </Stack>
             </motion.div>
         </Box>
