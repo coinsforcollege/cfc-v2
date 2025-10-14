@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Container, Typography, Button, Stack, Grid, Card, CardContent } from '@mui/material';
+import { Box, Container, Typography, Button, Stack, Grid, Card, CardContent, Skeleton } from '@mui/material';
 import { ArrowForward, TrendingUp, School, Security, Timer } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,6 +17,7 @@ const HeroSection = () => {
   const [globalStats, setGlobalStats] = useState(null);
   const [activities, setActivities] = useState([]);
   const [featuredPosts, setFeaturedPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
   const rotatingTexts = ['Digital Economy', 'Alumni Network', 'Blockchain Gateway'];
 
   const getDashboardPath = () => {
@@ -59,6 +60,8 @@ const HeroSection = () => {
         }
       } catch (error) {
         console.error('Error fetching featured posts:', error);
+      } finally {
+        setLoadingPosts(false);
       }
     };
 
@@ -446,7 +449,33 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <Stack spacing={3}>
-                {featuredPosts.length > 0 ? (
+                {loadingPosts ? (
+                  <>
+                    {[1, 2, 3].map((i) => (
+                      <Card
+                        key={i}
+                        sx={{
+                          background: 'rgba(255, 255, 255, 0.9)',
+                          backdropFilter: 'blur(20px)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '16px',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                        }}
+                      >
+                        <CardContent sx={{ p: 3 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                            <Skeleton variant="rectangular" width={64} height={64} sx={{ borderRadius: '12px' }} />
+                            <Box sx={{ flex: 1 }}>
+                              <Skeleton variant="text" width="80%" height={24} sx={{ mb: 0.5 }} />
+                              <Skeleton variant="text" width="100%" height={20} />
+                              <Skeleton variant="text" width="60%" height={20} />
+                            </Box>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
+                ) : featuredPosts.length > 0 ? (
                   featuredPosts.map((post, index) => (
                     <Card
                       key={post.id}
@@ -465,49 +494,55 @@ const HeroSection = () => {
                         },
                       }}
                     >
-                      {post.featuredImage && (
-                        <Box
-                          component="img"
-                          src={getImageUrl(post.featuredImage)}
-                          alt={post.title}
-                          sx={{
-                            width: '100%',
-                            height: '150px',
-                            objectFit: 'cover',
-                            borderTopLeftRadius: '16px',
-                            borderTopRightRadius: '16px',
-                          }}
-                        />
-                      )}
                       <CardContent sx={{ p: 3 }}>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            color: '#2d3748',
-                            fontWeight: 600,
-                            mb: 1,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: 'vertical',
-                          }}
-                        >
-                          {post.title}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            color: '#718096',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {post.excerpt || 'Click to read more...'}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                          {post.featuredImage && (
+                            <Box
+                              component="img"
+                              src={getImageUrl(post.featuredImage)}
+                              alt={post.title}
+                              sx={{
+                                width: '64px',
+                                height: '64px',
+                                objectFit: 'cover',
+                                borderRadius: '12px',
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                color: '#2d3748',
+                                fontWeight: 600,
+                                mb: 0.5,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                                fontSize: '1rem',
+                              }}
+                            >
+                              {post.title}
+                            </Typography>
+                            <Typography
+                              sx={{
+                                color: '#718096',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                lineHeight: 1.4,
+                                fontSize: '0.875rem',
+                              }}
+                            >
+                              {post.excerpt || 'Click to read more...'}
+                            </Typography>
+                          </Box>
+                        </Box>
                       </CardContent>
                     </Card>
                   ))

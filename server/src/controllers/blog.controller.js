@@ -16,29 +16,24 @@ export const getPosts = async (req, res) => {
   try {
     const { page = 1, pageSize = 10, category, tag, search, featured, showOnHomepage } = req.query;
 
-    const filters = {};
-    if (category) filters.categories = { slug: { $eq: category } };
-    if (tag) filters.tags = { slug: { $eq: tag } };
-    if (search) filters.title = { $containsi: search };
-    if (featured === 'true') filters.featured = true;
-    if (showOnHomepage === 'true') filters.showOnHomepage = true;
-    
-    const response = await strapiClient.get('/blog-posts', {
-      params: {
-        'filters[publishedAt][$notNull]': true,
-        ...Object.entries(filters).reduce((acc, [key, value]) => ({
-          ...acc,
-          [`filters[${key}]`]: value
-        }), {}),
-        'populate[featuredImage]': true,
-        'populate[author][populate][avatar]': true,
-        'populate[categories]': true,
-        'populate[tags]': true,
-        'pagination[page]': page,
-        'pagination[pageSize]': pageSize,
-        'sort': 'publishedAt:desc'
-      }
-    });
+    const params = {
+      'filters[publishedAt][$notNull]': true,
+      'populate[featuredImage]': true,
+      'populate[author][populate][avatar]': true,
+      'populate[categories]': true,
+      'populate[tags]': true,
+      'pagination[page]': page,
+      'pagination[pageSize]': pageSize,
+      'sort': 'publishedAt:desc'
+    };
+
+    if (category) params['filters[categories][slug][$eq]'] = category;
+    if (tag) params['filters[tags][slug][$eq]'] = tag;
+    if (search) params['filters[title][$containsi]'] = search;
+    if (featured === 'true') params['filters[featured][$eq]'] = true;
+    if (showOnHomepage === 'true') params['filters[showOnHomepage][$eq]'] = true;
+
+    const response = await strapiClient.get('/blog-posts', { params });
     
     console.log('Strapi response:', JSON.stringify(response.data, null, 2));
     
