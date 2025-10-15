@@ -30,7 +30,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
     student: [
       { id: 'dashboard', label: 'Overview', icon: LayoutDashboard, path: '/student/dashboard' },
       { id: 'colleges', label: 'My Colleges', icon: School, badge: stats.collegesCount, path: '/student/colleges' },
-      { id: 'community', label: 'Community', icon: Users, badge: stats.referralsCount, path: '/student/referrals' },
+      { id: 'community', label: 'Community', icon: Users, badge: stats.referralsCount, path: '/student/community' },
       { id: 'ambassador', label: 'Ambassador', icon: Megaphone, path: '/student/ambassador' },
       { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, path: '/student/leaderboard', disabled: true, comingSoon: true },
     ],

@@ -355,6 +355,29 @@ export const getDashboard = async (req, res, next) => {
       };
     });
 
+    // Calculate active friends for the dashboard card
+    // Count unique referred students who have at least one active mining session
+    const uniqueReferredStudents = new Set();
+    const activeReferredStudents = new Set();
+
+    validMiningColleges.forEach(mc => {
+      mc.referredStudents?.forEach(ref => {
+        if (ref.student && ref.student._id) {
+          const studentId = ref.student._id.toString();
+          uniqueReferredStudents.add(studentId);
+
+          if (referredStudentsData[studentId]?.activeMiningCount > 0) {
+            activeReferredStudents.add(studentId);
+          }
+        }
+      });
+    });
+
+    const activeFriendsCount = {
+      active: activeReferredStudents.size,
+      total: uniqueReferredStudents.size
+    };
+
     res.status(200).json({
       success: true,
       data: {
@@ -372,7 +395,8 @@ export const getDashboard = async (req, res, next) => {
         summary: {
           totalBalance,
           totalMined,
-          activeMiningSessions: activeSessions.length
+          activeMiningSessions: activeSessions.length,
+          activeFriendsCount
           // Note: Earning rates are now per-college, available in each session's earningRate field
         }
       }

@@ -21,7 +21,9 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Avatar,
-  Tooltip
+  Tooltip,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
 import {
   School,
@@ -36,7 +38,10 @@ import {
   Share,
   Speed,
   Groups,
-  Schedule
+  Schedule,
+  Delete,
+  DeleteOutline,
+  RemoveCircleOutline
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
@@ -69,6 +74,10 @@ const MyColleges = () => {
   const [copiedCollegeReferral, setCopiedCollegeReferral] = useState(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareDialogData, setShareDialogData] = useState(null);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [collegeToDelete, setCollegeToDelete] = useState(null);
+  const [deleteConfirmChecked, setDeleteConfirmChecked] = useState(false);
 
   const fetchDashboard = async () => {
     try {
@@ -280,6 +289,59 @@ const MyColleges = () => {
     setShowShareDialog(true);
   }, [dashboard]);
 
+  const handleToggleDeleteMode = () => {
+    setDeleteMode(!deleteMode);
+  };
+
+  const handleDeleteCollegeClick = (college) => {
+    const wallet = dashboard?.wallets?.find(w => w.college && w.college._id === college._id);
+    setCollegeToDelete({ ...college, balance: wallet?.balance || 0 });
+    setShowDeleteDialog(true);
+    setDeleteConfirmChecked(false);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDialog(false);
+    setCollegeToDelete(null);
+    setDeleteConfirmChecked(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!collegeToDelete || !deleteConfirmChecked) return;
+
+    try {
+      setActionLoading(`delete-${collegeToDelete._id}`);
+
+      const session = miningStatus[collegeToDelete._id];
+      const isActive = session && session.isActive && session.remainingHours > 0;
+
+      if (isActive) {
+        await miningApi.stopMining(collegeToDelete._id);
+      }
+
+      const response = await studentApi.removeCollege(collegeToDelete._id);
+
+      if (response.success) {
+        // Immediately update the local dashboard state to remove the deleted college
+        setDashboard(prev => ({
+          ...prev,
+          miningColleges: prev.miningColleges.filter(mc => mc.college?._id !== collegeToDelete._id),
+          wallets: prev.wallets.filter(w => w.college?._id !== collegeToDelete._id)
+        }));
+
+        showToast('College removed successfully!', 'success');
+        fetchDashboard();
+        handleCloseDeleteDialog();
+        setDeleteMode(false);
+      }
+    } catch (err) {
+      console.error('Failed to remove college:', err);
+      showToast(err.message || 'Failed to remove college', 'error');
+    } finally {
+      setActionLoading('');
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout stats={{}}>
@@ -422,33 +484,76 @@ const MyColleges = () => {
         </Box>
 
         {/* My Colleges Header */}
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             Active Colleges ({dashboard?.miningColleges.filter(mc => mc.college).length}/10)
           </Typography>
-          {dashboard?.miningColleges.filter(mc => mc.college).length < 10 && (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setShowAddCollegeDialog(true)}
-              sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                borderRadius: 2,
-                boxShadow: '0 2px 12px rgba(102, 126, 234, 0.4)',
-                fontWeight: 600,
-                px: 2,
-                py: 1,
-                fontSize: '0.875rem',
-                transition: 'all 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 16px rgba(102, 126, 234, 0.5)'
-                }
-              }}
-            >
-              Add College
-            </Button>
-          )}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {dashboard?.miningColleges.filter(mc => mc.college).length > 0 && (
+              <Button
+                variant={deleteMode ? 'contained' : 'outlined'}
+                startIcon={deleteMode ? <Close /> : <RemoveCircleOutline />}
+                onClick={handleToggleDeleteMode}
+                sx={{
+                  background: deleteMode ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)' : 'transparent',
+                  borderColor: deleteMode ? 'transparent' : '#dc2626',
+                  color: deleteMode ? 'white' : '#dc2626',
+                  borderRadius: 2,
+                  boxShadow: deleteMode ? '0 2px 12px rgba(220, 38, 38, 0.4)' : 'none',
+                  fontWeight: 600,
+                  px: { xs: 0.75, sm: 2 },
+                  py: { xs: 0.5, sm: 1 },
+                  fontSize: { xs: '0.65rem', sm: '0.875rem' },
+                  transition: 'all 0.2s',
+                  minWidth: 'auto',
+                  '& .MuiButton-startIcon': {
+                    marginRight: { xs: 0.25, sm: 1 },
+                    '& > svg': {
+                      fontSize: { xs: '0.875rem', sm: '1.25rem' }
+                    }
+                  },
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    background: deleteMode ? 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)' : 'rgba(220, 38, 38, 0.1)',
+                    borderColor: '#dc2626',
+                    boxShadow: deleteMode ? '0 4px 16px rgba(220, 38, 38, 0.5)' : 'none'
+                  }
+                }}
+              >
+                {deleteMode ? 'Cancel' : 'Remove College'}
+              </Button>
+            )}
+            {dashboard?.miningColleges.filter(mc => mc.college).length < 10 && (
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setShowAddCollegeDialog(true)}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: 2,
+                  boxShadow: '0 2px 12px rgba(102, 126, 234, 0.4)',
+                  fontWeight: 600,
+                  px: { xs: 0.75, sm: 2 },
+                  py: { xs: 0.5, sm: 1 },
+                  fontSize: { xs: '0.65rem', sm: '0.875rem' },
+                  transition: 'all 0.2s',
+                  minWidth: 'auto',
+                  '& .MuiButton-startIcon': {
+                    marginRight: { xs: 0.25, sm: 1 },
+                    '& > svg': {
+                      fontSize: { xs: '0.875rem', sm: '1.25rem' }
+                    }
+                  },
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.5)'
+                  }
+                }}
+              >
+                Add College
+              </Button>
+            )}
+          </Box>
         </Box>
 
         {/* College Cards Grid */}
@@ -502,18 +607,24 @@ const MyColleges = () => {
                   borderRadius: 2,
                   position: 'relative',
                   overflow: 'hidden',
-                  border: isActive ? '1px solid rgba(34, 211, 238, 0.3)' : '1px solid rgba(71, 85, 105, 0.3)',
+                  border: deleteMode
+                    ? '2px solid rgba(220, 38, 38, 0.5)'
+                    : (isActive ? '1px solid rgba(34, 211, 238, 0.3)' : '1px solid rgba(71, 85, 105, 0.3)'),
                   transition: 'all 0.3s ease',
                   display: 'flex',
                   flexDirection: 'column',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    boxShadow: isActive
-                      ? '0 20px 40px rgba(34, 211, 238, 0.3)'
-                      : '0 20px 40px rgba(0, 0, 0, 0.5)',
-                    border: isActive ? '1px solid rgba(34, 211, 238, 0.5)' : '1px solid rgba(71, 85, 105, 0.5)'
+                    boxShadow: deleteMode
+                      ? '0 20px 40px rgba(220, 38, 38, 0.4)'
+                      : (isActive
+                        ? '0 20px 40px rgba(34, 211, 238, 0.3)'
+                        : '0 20px 40px rgba(0, 0, 0, 0.5)'),
+                    border: deleteMode
+                      ? '2px solid rgba(220, 38, 38, 0.7)'
+                      : (isActive ? '1px solid rgba(34, 211, 238, 0.5)' : '1px solid rgba(71, 85, 105, 0.5)')
                   },
-                  ...(isActive && {
+                  ...(isActive && !deleteMode && {
                     '&::before': {
                       content: '""',
                       position: 'absolute',
@@ -531,6 +642,27 @@ const MyColleges = () => {
                   })
                 }}
               >
+                {deleteMode && (
+                  <IconButton
+                    onClick={() => handleDeleteCollegeClick(mc.college)}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      zIndex: 10,
+                      background: 'rgba(220, 38, 38, 0.9)',
+                      color: 'white',
+                      width: 40,
+                      height: 40,
+                      '&:hover': {
+                        background: 'rgba(185, 28, 28, 1)',
+                        transform: 'scale(1.1)'
+                      }
+                    }}
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+                )}
                 {/* Header Section */}
                 <Box sx={{
                   p: 2,
@@ -1158,6 +1290,139 @@ const MyColleges = () => {
               }}
             >
               {actionLoading === 'add-college' ? <CircularProgress size={20} color="inherit" /> : 'Add College'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={showDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
+            }
+          }}
+        >
+          <DialogTitle
+            sx={{
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              py: 2.5,
+              px: 3
+            }}
+          >
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#dc2626' }}>
+              Remove College
+            </Typography>
+            <IconButton onClick={handleCloseDeleteDialog} size="small">
+              <Close />
+            </IconButton>
+          </DialogTitle>
+
+          <DialogContent sx={{ py: 4, px: 3 }}>
+            <Box sx={{ mb: 3, textAlign: 'center' }}>
+              <Box
+                sx={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: 'rgba(220, 38, 38, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 2
+                }}
+              >
+                <Delete sx={{ fontSize: 32, color: '#dc2626' }} />
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', mb: 1 }}>
+                Are you sure?
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                You are about to remove <strong>{collegeToDelete?.name}</strong> from your mining list.
+              </Typography>
+            </Box>
+
+            <Alert severity="warning" sx={{ mb: 3 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                Warning: Balance will be lost
+              </Typography>
+              <Typography variant="body2">
+                Your current balance of <strong>{collegeToDelete?.balance?.toFixed(4) || '0.0000'} tokens</strong> for this college will be permanently deleted. This action cannot be undone.
+              </Typography>
+            </Alert>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={deleteConfirmChecked}
+                  onChange={(e) => setDeleteConfirmChecked(e.target.checked)}
+                  sx={{
+                    color: '#dc2626',
+                    '&.Mui-checked': {
+                      color: '#dc2626'
+                    }
+                  }}
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ color: '#475569' }}>
+                  I understand that my balance will be lost
+                </Typography>
+              }
+            />
+          </DialogContent>
+
+          <DialogActions
+            sx={{
+              borderTop: '1px solid #e2e8f0',
+              px: 3,
+              py: 2.5,
+              gap: 1
+            }}
+          >
+            <Button
+              onClick={handleCloseDeleteDialog}
+              size="large"
+              sx={{
+                textTransform: 'none',
+                color: '#64748b',
+                fontWeight: 600,
+                '&:hover': {
+                  backgroundColor: 'rgba(100, 116, 139, 0.04)'
+                }
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              disabled={!deleteConfirmChecked || actionLoading.startsWith('delete-')}
+              variant="contained"
+              size="large"
+              sx={{
+                background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+                px: 4,
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: 2,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)'
+                },
+                '&:disabled': {
+                  background: '#e2e8f0',
+                  color: '#94a3b8'
+                }
+              }}
+            >
+              {actionLoading.startsWith('delete-') ? <CircularProgress size={20} color="inherit" /> : 'Remove College'}
             </Button>
           </DialogActions>
         </Dialog>

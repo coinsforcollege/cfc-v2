@@ -38,7 +38,7 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import Overview from './pages/student/Overview';
 import MyColleges from './pages/student/MyColleges';
 import Leaderboard from './pages/student/Leaderboard';
-import Referrals from './pages/student/Referrals';
+import Community from './pages/student/Community';
 import Ambassador from './pages/student/Ambassador';
 import StudentSettings from './pages/student/Settings';
 import BuildOnCollegen from './pages/student/BuildOnCollegen';
@@ -101,7 +101,8 @@ function App() {
       <Route path="student/overview" element={<ProtectedRoute allowedRoles={['student']}><Overview /></ProtectedRoute>} />
       <Route path="student/colleges" element={<ProtectedRoute allowedRoles={['student']}><MyColleges /></ProtectedRoute>} />
       <Route path="student/leaderboard" element={<ProtectedRoute allowedRoles={['student']}><Leaderboard /></ProtectedRoute>} />
-      <Route path="student/referrals" element={<ProtectedRoute allowedRoles={['student']}><Referrals /></ProtectedRoute>} />
+      <Route path="student/community" element={<ProtectedRoute allowedRoles={['student']}><Community /></ProtectedRoute>} />
+      <Route path="student/referrals" element={<ProtectedRoute allowedRoles={['student']}><Community /></ProtectedRoute>} />
       <Route path="student/ambassador" element={<ProtectedRoute allowedRoles={['student']}><Ambassador /></ProtectedRoute>} />
       <Route path="student/settings" element={<ProtectedRoute allowedRoles={['student']}><StudentSettings /></ProtectedRoute>} />
       <Route path="student/build-on-collegen" element={<BuildOnCollegen />} />

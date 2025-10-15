@@ -25,7 +25,8 @@ import {
   TrendingUp,
   Refresh,
   PlayArrow,
-  Stop
+  Stop,
+  People
 } from '@mui/icons-material';
 import Tooltip from '@mui/material/Tooltip';
 import { useAuth } from '../../contexts/AuthContext';
@@ -225,7 +226,7 @@ const Overview = () => {
           </Card>
 
           <Card
-            onClick={() => navigate('/student/colleges')}
+            onClick={() => navigate('/student/community')}
             sx={{
               flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
               background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
@@ -241,12 +242,12 @@ const Overview = () => {
             }}
           >
             <CardContent>
-              <School sx={{ color: 'white', fontSize: 24, mb: 1 }} />
+              <People sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                Colleges
+                Active Friends
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                {dashboard?.miningColleges.filter(mc => mc.college).length} / 10
+                {dashboard?.summary?.activeFriendsCount?.active || 0} / {dashboard?.summary?.activeFriendsCount?.total || 0}
               </Typography>
             </CardContent>
           </Card>

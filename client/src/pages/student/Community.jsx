@@ -37,7 +37,7 @@ import { studentApi } from '../../api/student.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import ShareDialog from '../../components/ShareDialog';
 
-const Referrals = () => {
+const Community = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -660,4 +660,4 @@ const Referrals = () => {
   );
 };
 
-export default Referrals;
+export default Community;

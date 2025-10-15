@@ -12,7 +12,9 @@
       "Bash(tree:*)",
       "WebFetch(domain:ckeditor.com)",
       "WebFetch(domain:www.npmjs.com)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(mv:*)",
+      "Bash(npm run build)"
     ],
     "deny": [],
     "ask": []
