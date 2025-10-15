@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import {
   Box,
@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
 import OTPDialog from '../../components/OTPDialog';
+import CollegeAdminConfirmationDialog from '../../components/CollegeAdminConfirmationDialog';
 
 const CollegeRegistration = () => {
   const navigate = useNavigate();
@@ -26,6 +27,16 @@ const CollegeRegistration = () => {
   const [loading, setLoading] = useState(false);
   const [showOTPDialog, setShowOTPDialog] = useState(false);
   const [verificationToken, setVerificationToken] = useState(null);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(true);
+  const [confirmedAsAdmin, setConfirmedAsAdmin] = useState(false);
+
+  useEffect(() => {
+    const hasConfirmed = sessionStorage.getItem('collegeAdminConfirmed');
+    if (hasConfirmed === 'true') {
+      setConfirmedAsAdmin(true);
+      setShowConfirmationDialog(false);
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -96,6 +107,36 @@ const CollegeRegistration = () => {
   const handleCloseOTPDialog = () => {
     setShowOTPDialog(false);
   };
+
+  const handleConfirmAdmin = () => {
+    setConfirmedAsAdmin(true);
+    setShowConfirmationDialog(false);
+    sessionStorage.setItem('collegeAdminConfirmed', 'true');
+  };
+
+  const handleCancelConfirmation = () => {
+    navigate('/auth/student-registration');
+  };
+
+  if (!confirmedAsAdmin) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, rgba(155, 184, 224, 0.4) 0%, rgba(179, 154, 232, 0.3) 50%, rgba(230, 155, 184, 0.3) 100%)',
+        }}
+      >
+        <CollegeAdminConfirmationDialog
+          open={showConfirmationDialog}
+          onConfirm={handleConfirmAdmin}
+          onCancel={handleCancelConfirmation}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box
