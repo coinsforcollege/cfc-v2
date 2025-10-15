@@ -49,7 +49,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Warning sx={{ color: '#f59e0b', fontSize: 24 }} />
           <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>
-            College Admin Registration
+            ATTENTION
           </Typography>
         </Box>
       </DialogTitle>
