@@ -691,6 +691,98 @@ export interface ApiContactSubmissionContactSubmission
   };
 }
 
+export interface ApiDocArticleDocArticle extends Struct.CollectionTypeSchema {
+  collectionName: 'doc_articles';
+  info: {
+    description: 'Documentation articles with rich text content';
+    displayName: 'Doc Article';
+    pluralName: 'doc-articles';
+    singularName: 'doc-article';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    category: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::doc-category.doc-category'
+    >;
+    content: Schema.Attribute.RichText &
+      Schema.Attribute.CustomField<
+        'plugin::ckeditor5.CKEditor',
+        {
+          preset: 'defaultHtml';
+        }
+      >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    excerpt: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    featuredImage: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::doc-article.doc-article'
+    > &
+      Schema.Attribute.Private;
+    ogImage: Schema.Attribute.Media<'images'>;
+    publishedAt: Schema.Attribute.DateTime;
+    readingTime: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<5>;
+    seoDescription: Schema.Attribute.Text;
+    seoKeywords: Schema.Attribute.String;
+    seoTitle: Schema.Attribute.String;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    viewCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+  };
+}
+
+export interface ApiDocCategoryDocCategory extends Struct.CollectionTypeSchema {
+  collectionName: 'doc_categories';
+  info: {
+    description: 'Documentation categories';
+    displayName: 'Doc Category';
+    pluralName: 'doc-categories';
+    singularName: 'doc-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    doc_articles: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::doc-article.doc-article'
+    >;
+    icon: Schema.Attribute.String & Schema.Attribute.DefaultTo<'HelpOutline'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::doc-category.doc-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiSubscriberSubscriber extends Struct.CollectionTypeSchema {
   collectionName: 'subscribers';
   info: {
@@ -1274,6 +1366,8 @@ declare module '@strapi/strapi' {
       'api::category.category': ApiCategoryCategory;
       'api::comment.comment': ApiCommentComment;
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
+      'api::doc-article.doc-article': ApiDocArticleDocArticle;
+      'api::doc-category.doc-category': ApiDocCategoryDocCategory;
       'api::subscriber.subscriber': ApiSubscriberSubscriber;
       'api::tag.tag': ApiTagTag;
       'plugin::content-releases.release': PluginContentReleasesRelease;

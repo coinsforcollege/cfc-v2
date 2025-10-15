@@ -36,7 +36,7 @@ const Footer = () => {
       { name: 'Disclaimer', href: '/things-to-know' }
     ],
     contact: [
-      { name: 'Contact Us', href: '/contact', icon: Email },
+      { name: 'Get Help', href: '/docs', icon: Email },
       { name: 'hello@coinsforcollege.com', href: 'mailto:hello@coinsforcollege.com', icon: Email },
       { name: 'San Francisco, CA', href: '#', icon: LocationOn }
     ]

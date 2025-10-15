@@ -99,7 +99,8 @@ const Contact = () => {
           radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
           radial-gradient(circle at 40% 60%, rgba(6, 182, 212, 0.05) 0%, transparent 50%)
         `,
-        py: 8
+        pt: 12,
+        pb: 8
       }}
     >
       <Container maxWidth="lg">

@@ -20,6 +20,7 @@ import collegeAdminRoutes from './routes/collegeAdmin.routes.js';
 import platformAdminRoutes from './routes/platformAdmin.routes.js';
 import ambassadorRoutes from './routes/ambassador.routes.js';
 import blogRoutes from './routes/blog.routes.js';
+import docsRoutes from './routes/docs.routes.js';
 
 // Import middleware
 import errorHandler from './middlewares/errorHandler.js';
@@ -103,6 +104,7 @@ app.use('/api/college-admin', collegeAdminRoutes);
 app.use('/api/platform-admin', platformAdminRoutes);
 app.use('/api/ambassador', ambassadorRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api/docs', docsRoutes);
 
 // 404
 app.use('*', (req, res) => {

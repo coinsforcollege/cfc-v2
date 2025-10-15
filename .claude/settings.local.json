@@ -9,7 +9,10 @@
       "WebSearch",
       "WebFetch(domain:medium.com)",
       "WebFetch(domain:stackoverflow.com)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:ckeditor.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

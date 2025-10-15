@@ -1,0 +1,79 @@
+{
+  "kind": "collectionType",
+  "collectionName": "doc_articles",
+  "info": {
+    "singularName": "doc-article",
+    "pluralName": "doc-articles",
+    "displayName": "Doc Article",
+    "description": "Documentation articles with rich text content"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "excerpt": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::doc-category.doc-category",
+      "inversedBy": "doc_articles"
+    },
+    "featuredImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "readingTime": {
+      "type": "integer",
+      "default": 5
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "viewCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "seoTitle": {
+      "type": "string"
+    },
+    "seoDescription": {
+      "type": "text"
+    },
+    "seoKeywords": {
+      "type": "string"
+    },
+    "ogImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "content": {
+      "type": "customField",
+      "customField": "plugin::ckeditor5.CKEditor",
+      "options": {
+        "preset": "defaultHtml"
+      }
+    }
+  }
+}

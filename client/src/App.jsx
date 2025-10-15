@@ -27,6 +27,11 @@ import AmbassadorApply from './pages/public/AmbassadorApply';
 import BlogList from './pages/public/BlogList';
 import BlogPost from './pages/public/BlogPost';
 import Contact from './pages/Contact';
+import DocsHome from './pages/public/DocsHome';
+import DocsCategory from './pages/public/DocsCategory';
+import DocsArticle from './pages/public/DocsArticle';
+import DocsSearch from './pages/public/DocsSearch';
+import DocsFeatured from './pages/public/DocsFeatured';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -73,6 +78,11 @@ function App() {
         <Route path="network" element={<NetworkMap />} />
         <Route path="blog" element={<BlogList />} />
         <Route path="blog/:slug" element={<BlogPost />} />
+        <Route path="docs" element={<DocsHome />} />
+        <Route path="docs/search" element={<DocsSearch />} />
+        <Route path="docs/featured" element={<DocsFeatured />} />
+        <Route path="docs/:categorySlug" element={<DocsCategory />} />
+        <Route path="docs/:categorySlug/:articleSlug" element={<DocsArticle />} />
         <Route path="contact" element={<Contact />} />
         <Route path="ambassador/apply" element={<AmbassadorApply />} />
         <Route
