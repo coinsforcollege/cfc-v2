@@ -21,9 +21,9 @@ function HowItWorks({ theme }) {
         <Grid container spacing={4}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Card elevation={3} sx={{ height: '100%', p: 3 }}>
-              <Typography sx={{ typography: { xs: 'h5', md: 'h4' } }} color="primary" gutterBottom>For Students</Typography>
+              <Typography sx={{ typography: { xs: 'h5', md: 'h4' } }} color="primary" gutterBottom>For Community Members</Typography>
               <Stack spacing={3} sx={{ mt: 3 }}>
-                {[{ step: '1', title: 'Sign Up', desc: 'Create your account with your college email' }, { step: '2', title: 'Select College', desc: 'Choose your college from our list' }, { step: '3', title: 'Start Mining', desc: 'Begin earning tokens for your college daily' }].map((item) => (
+                {[{ step: '1', title: 'Sign Up', desc: 'Create your account and verify your identity' }, { step: '2', title: 'Select College', desc: 'Choose your favorite college from our list' }, { step: '3', title: 'Start Mining', desc: 'Begin earning tokens for your college daily' }].map((item) => (
                   <Box key={item.step} sx={{ display: 'flex', gap: 2 }}>
                     <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48, fontWeight: 600, fontSize: '1.2rem' }}>{item.step}</Avatar>
                     <Box>

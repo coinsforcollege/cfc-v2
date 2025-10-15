@@ -37,7 +37,7 @@ import {
 const steps = [
   {
     label: 'Create Your Account',
-    description: 'Sign up with your email and verify your student status',
+    description: 'Sign up with your email and get started',
     details: 'Enter your basic information including name, email, and phone number. You\'ll receive verification codes to confirm your identity.',
   },
   {
@@ -64,15 +64,15 @@ const faqs = [
   },
   {
     question: 'Are these real cryptocurrency tokens?',
-    answer: 'Currently, these are interest tokens that represent student engagement. When your college admin configures the token and launches it, these may be converted to actual blockchain tokens.',
+    answer: 'Currently, these are interest tokens that represent community engagement. When your college admin configures the token and launches it, these may be converted to actual blockchain tokens.',
   },
   {
     question: 'Can I switch to a different college?',
-    answer: 'Yes, but switching colleges will reset your mining progress and tokens. We recommend staying with your actual college for the best experience.',
+    answer: 'Yes, but switching colleges will reset your mining progress and tokens. We recommend staying with your favorite college for the best experience.',
   },
   {
     question: 'Is there a cost to participate?',
-    answer: 'No! Mining tokens is completely free. We never ask for payment or credit card information from students.',
+    answer: 'No! Mining tokens is completely free. We never ask for payment or credit card information from participants.',
   },
   {
     question: 'What happens if I miss a day of mining?',
@@ -123,7 +123,7 @@ function HowItWorksStudents() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            How It Works for Students
+            How It Works for Community Members
           </Typography>
           <Typography
             variant="h6"
@@ -131,7 +131,7 @@ function HowItWorksStudents() {
             color="text.secondary"
             sx={{ maxWidth: '700px', mx: 'auto' }}
           >
-            Everything you need to know about mining college tokens and building your crypto future
+            Everything you need to know about mining college tokens - for students, alumni, fans, and supporters
           </Typography>
         </Container>
       </Box>

@@ -192,13 +192,11 @@ const StudentRegistration = () => {
             </Typography>
 
             <Typography variant="body1" sx={{ mb: 3, color: '#4a5568', lineHeight: 1.7 }}>
-              Start mining tokens for your college and be part of a revolutionary digital economy built by students, for students.
+              Start mining tokens for your favorite college and be part of a revolutionary digital economy. Whether you're a student, alumni, fan, or supporter - everyone can participate!
             </Typography>
 
             <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#2d3748' }}>
-                Why Join?
-              </Typography>
+              
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
@@ -224,7 +222,7 @@ const StudentRegistration = () => {
                     🤝 Build Your Network
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Connect with students across colleges and grow the decentralized education economy.
+                    Connect with community members across colleges and grow the decentralized education economy.
                   </Typography>
                 </Box>
 

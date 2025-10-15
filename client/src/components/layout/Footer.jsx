@@ -33,7 +33,7 @@ const Footer = () => {
     legal: [
       { name: 'Privacy Policy', href: '/privacy' },
       { name: 'Terms of Service', href: '/terms' },
-      { name: 'Disclaimer', href: '/disclaimer' }
+      { name: 'Disclaimer', href: '/things-to-know' }
     ],
     contact: [
       { name: 'Contact Us', href: '/contact', icon: Email },

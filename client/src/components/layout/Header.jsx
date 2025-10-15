@@ -537,11 +537,11 @@ const Header = () => {
                   <SchoolIcon sx={{ color: 'white', fontSize: '24px' }} />
                 </Box>
                 <Typography variant="h5" sx={{ color: '#8B5CF6', fontWeight: '700' }}>
-                  For Students
+                  For Community Members
                 </Typography>
               </Box>
               <Typography variant="body1" sx={{ color: '#374151', lineHeight: 1.6, fontSize: '1rem' }}>
-                Start mining your college token and earn rewards while supporting your campus community.
+                Join as a student, alumni, fan, or supporter. Mine your favorite college tokens and be part of building their digital economy.
               </Typography>
               <Box sx={{ 
                 position: 'absolute', 
