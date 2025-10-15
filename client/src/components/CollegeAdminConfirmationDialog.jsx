@@ -10,7 +10,7 @@ import {
   Typography,
   Alert
 } from '@mui/material';
-import { Warning, School, Person } from '@mui/icons-material';
+import { Warning, School } from '@mui/icons-material';
 import { Link } from 'react-router';
 
 const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
@@ -47,7 +47,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
     >
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Warning sx={{ color: '#f59e0b', fontSize: 32 }} />
+          <Warning sx={{ color: '#f59e0b', fontSize: 24 }} />
           <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>
             College Admin Registration
           </Typography>
@@ -59,7 +59,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
           severity="warning"
           icon={<School />}
           sx={{
-            mb: 3,
+            mb: 2,
             background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)',
             border: '1px solid rgba(245, 158, 11, 0.3)',
             '& .MuiAlert-icon': {
@@ -67,85 +67,64 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
             }
           }}
         >
-          <Typography variant="body2" sx={{ fontWeight: 600, color: '#2d3748', mb: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2d3748', mb: 0.5 }}>
             This registration is ONLY for official college representatives
           </Typography>
         </Alert>
 
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1" sx={{ color: '#4a5568', mb: 2, lineHeight: 1.7 }}>
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="body2" sx={{ color: '#4a5568', mb: 1, lineHeight: 1.4 }}>
             If you are a <strong>student, alumni, fan, or supporter</strong> who wants to mine tokens for your college, you should register through the Community Signup instead.
           </Typography>
 
-          <Box
+          <Button
+            component={Link}
+            to="/auth/student-registration"
+            variant="contained"
+            size="medium"
             sx={{
-              p: 2.5,
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
-              borderRadius: '12px',
-              border: '1px solid rgba(139, 92, 246, 0.2)',
-              mb: 3
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+              color: '#ffffff',
+              textTransform: 'none',
+              fontWeight: 600,
+              mb: 1,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
+              }
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-              <Person sx={{ color: '#8b5cf6' }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2d3748' }}>
-                Are you a student or supporter?
-              </Typography>
-            </Box>
-            <Typography variant="body2" sx={{ color: '#4a5568', mb: 1.5 }}>
-              Join the community and start mining tokens for your favorite college right away!
-            </Typography>
-            <Button
-              component={Link}
-              to="/auth/student-registration"
-              variant="contained"
-              size="small"
-              sx={{
-                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                color: '#ffffff',
-                textTransform: 'none',
-                fontWeight: 600,
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
-                }
-              }}
-            >
-              Go to Community Signup
-            </Button>
-          </Box>
+            Go to Community Signup
+          </Button>
         </Box>
 
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 1 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2d3748', mb: 1.5 }}>
             College Admin Account Requirements:
           </Typography>
           <Box sx={{ pl: 2 }}>
-            <Typography variant="body2" sx={{ color: '#4a5568', mb: 1, display: 'flex', alignItems: 'flex-start' }}>
+            <Typography variant="body2" sx={{ color: '#4a5568', display: 'flex', alignItems: 'flex-start' }}>
               <Box component="span" sx={{ mr: 1, color: '#0EA5E9', fontWeight: 700 }}>•</Box>
               You must be an official representative of a college or university
             </Typography>
-            <Typography variant="body2" sx={{ color: '#4a5568', mb: 1, display: 'flex', alignItems: 'flex-start' }}>
+            <Typography variant="body2" sx={{ color: '#4a5568', display: 'flex', alignItems: 'flex-start' }}>
               <Box component="span" sx={{ mr: 1, color: '#0EA5E9', fontWeight: 700 }}>•</Box>
               You will be asked to provide proof of your official association
             </Typography>
-            <Typography variant="body2" sx={{ color: '#4a5568', mb: 1, display: 'flex', alignItems: 'flex-start' }}>
+            <Typography variant="body2" sx={{ color: '#4a5568', display: 'flex', alignItems: 'flex-start' }}>
               <Box component="span" sx={{ mr: 1, color: '#0EA5E9', fontWeight: 700 }}>•</Box>
               Your account will remain unverified until proof is approved
             </Typography>
-            <Typography variant="body2" sx={{ color: '#4a5568', display: 'flex', alignItems: 'flex-start' }}>
-              <Box component="span" sx={{ mr: 1, color: '#0EA5E9', fontWeight: 700 }}>•</Box>
-              All features will be unlocked after verification is complete
-            </Typography>
+            
           </Box>
         </Box>
 
         <Box
           sx={{
-            p: 2.5,
+            p: 2,
             background: 'rgba(239, 246, 255, 0.6)',
             borderRadius: '12px',
             border: '1px solid rgba(59, 130, 246, 0.2)',
-            mb: 3
+            mb: 1
           }}
         >
           <Typography variant="body2" sx={{ fontWeight: 600, color: '#2d3748', mb: 1.5 }}>
