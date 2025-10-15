@@ -300,39 +300,82 @@ const Community = () => {
               </Typography>
               <Box sx={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                p: 2,
-                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
-                borderRadius: 2,
-                transition: 'all 0.2s',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.15)'
-                }
+                gap: 2
               }}>
-                <Typography variant="h5" sx={{
-                  flex: 1,
-                  fontWeight: 700,
-                  fontFamily: 'Monaco, monospace',
-                  color: '#667eea',
-                  letterSpacing: 2
-                }}>
-                  {dashboard?.student?.referralCode}
-                </Typography>
-                <IconButton
-                  onClick={copyReferralCode}
-                  sx={{
-                    background: copiedCode ? 'rgba(34, 197, 94, 0.15)' : 'rgba(102, 126, 234, 0.15)',
-                    color: copiedCode ? '#22c55e' : '#667eea',
+                {/* Code Box - First Column */}
+                <Box sx={{ width: '50%' }}>
+                  <Box sx={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    p: 2,
+                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                    borderRadius: 2,
+                    transition: 'all 0.2s',
                     '&:hover': {
-                      background: copiedCode ? 'rgba(34, 197, 94, 0.25)' : 'rgba(102, 126, 234, 0.25)'
+                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.15)'
                     }
-                  }}
-                >
-                  {copiedCode ? <CheckCircle /> : <ContentCopy />}
-                </IconButton>
+                  }}>
+                    <Typography sx={{
+                      flex: 1,
+                      fontWeight: 700,
+                      fontFamily: 'Monaco, monospace',
+                      color: '#667eea',
+                      fontSize: '1rem',
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {dashboard?.student?.referralCode}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={copyReferralCode}
+                      sx={{
+                        flexShrink: 0,
+                        background: copiedCode ? 'rgba(34, 197, 94, 0.15)' : 'rgba(102, 126, 234, 0.15)',
+                        color: copiedCode ? '#22c55e' : '#667eea',
+                        '&:hover': {
+                          background: copiedCode ? 'rgba(34, 197, 94, 0.25)' : 'rgba(102, 126, 234, 0.25)'
+                        }
+                      }}
+                    >
+                      {copiedCode ? <CheckCircle fontSize="small" /> : <ContentCopy fontSize="small" />}
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                {/* Share Button - Second Column */}
+                <Box sx={{ width: '50%' }}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={<Share />}
+                    onClick={handleShareGeneral}
+                    sx={{
+                      height: '100%',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontSize: '0.95rem',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5568d3 0%, #633a8a 100%)',
+                        boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
+                        transform: 'translateY(-2px)'
+                      },
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    Share With Friends
+                  </Button>
+                </Box>
               </Box>
             </Box>
 
@@ -379,34 +422,6 @@ const Community = () => {
                   {copiedLink ? <CheckCircle /> : <ContentCopy />}
                 </IconButton>
               </Box>
-            </Box>
-
-            {/* Share Button */}
-            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid rgba(139, 92, 246, 0.1)' }}>
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<Share />}
-                onClick={handleShareGeneral}
-                sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  fontWeight: 600,
-                  py: 1.5,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5568d3 0%, #633a8a 100%)',
-                    boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
-                    transform: 'translateY(-2px)'
-                  },
-                  transition: 'all 0.2s'
-                }}
-              >
-                Share to Social Media
-              </Button>
             </Box>
           </CardContent>
         </Card>
