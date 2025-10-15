@@ -103,11 +103,11 @@ const MyColleges = () => {
       });
       setMiningStatus(statusMap);
 
+      // Only update activeSessions, NOT miningColleges or wallets
+      // This prevents WebSocket from overwriting user actions (add/delete)
       setDashboard(prev => ({
         ...prev,
-        miningColleges: wsMiningStatus.miningColleges,
-        activeSessions: wsMiningStatus.activeSessions,
-        wallets: wsMiningStatus.wallets
+        activeSessions: wsMiningStatus.activeSessions
       }));
     }
   }, [wsMiningStatus]);
@@ -322,13 +322,6 @@ const MyColleges = () => {
       const response = await studentApi.removeCollege(collegeToDelete._id);
 
       if (response.success) {
-        // Immediately update the local dashboard state to remove the deleted college
-        setDashboard(prev => ({
-          ...prev,
-          miningColleges: prev.miningColleges.filter(mc => mc.college?._id !== collegeToDelete._id),
-          wallets: prev.wallets.filter(w => w.college?._id !== collegeToDelete._id)
-        }));
-
         showToast('College removed successfully!', 'success');
         fetchDashboard();
         handleCloseDeleteDialog();

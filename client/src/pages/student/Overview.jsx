@@ -77,11 +77,11 @@ const Overview = () => {
       });
       setMiningStatus(statusMap);
 
+      // Only update activeSessions, NOT miningColleges or wallets
+      // This prevents WebSocket from overwriting user actions (add/delete)
       setDashboard(prev => ({
         ...prev,
-        miningColleges: wsMiningStatus.miningColleges,
-        activeSessions: wsMiningStatus.activeSessions,
-        wallets: wsMiningStatus.wallets
+        activeSessions: wsMiningStatus.activeSessions
       }));
     }
   }, [wsMiningStatus]);
@@ -101,9 +101,24 @@ const Overview = () => {
     );
   }, [miningStatus]);
 
+  const activeCollegeIds = useMemo(() => {
+    return new Set(
+      dashboard?.miningColleges
+        ?.filter(mc => mc.college)
+        .map(mc => mc.college._id) || []
+    );
+  }, [dashboard?.miningColleges]);
+
+  const filteredWallets = useMemo(() => {
+    return dashboard?.wallets?.filter(wallet =>
+      wallet.college && activeCollegeIds.has(wallet.college._id)
+    ) || [];
+  }, [dashboard?.wallets, activeCollegeIds]);
+
   const totalBalance = useMemo(() => {
-    return (dashboard?.summary?.totalBalance || 0) + totalMiningTokens;
-  }, [dashboard?.summary?.totalBalance, totalMiningTokens]);
+    const walletBalance = filteredWallets.reduce((sum, wallet) => sum + (wallet.balance || 0), 0);
+    return walletBalance + totalMiningTokens;
+  }, [filteredWallets, totalMiningTokens]);
 
   const currentEarningRate = useMemo(() => {
     return Object.values(miningStatus).reduce((sum, session) =>
@@ -312,9 +327,9 @@ const Overview = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {dashboard?.wallets && dashboard.wallets.length > 0 ? (
+                    {filteredWallets && filteredWallets.length > 0 ? (
                       <>
-                        {dashboard.wallets.sort((a, b) => {
+                        {filteredWallets.sort((a, b) => {
                           const sessionA = a.college ? miningStatus[a.college._id] : null;
                           const sessionB = b.college ? miningStatus[b.college._id] : null;
                           const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
