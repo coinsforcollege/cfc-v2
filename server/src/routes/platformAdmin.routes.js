@@ -15,7 +15,8 @@ import {
   resetStudentPassword,
   addStudentBalance,
   bulkImportPreview,
-  bulkImportConfirm
+  bulkImportConfirm,
+  bulkRemoveImages
 } from '../controllers/platformAdmin.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
 import upload, { uploadCSV } from '../middlewares/upload.js';
@@ -42,6 +43,9 @@ router.post('/colleges', upload.fields([
   { name: 'logoFile', maxCount: 1 },
   { name: 'coverFile', maxCount: 1 }
 ]), createCollege);
+router.post('/colleges/bulk-import-preview', uploadCSV.single('csvFile'), bulkImportPreview);
+router.post('/colleges/bulk-import-confirm', bulkImportConfirm);
+router.put('/colleges/bulk-remove-images', bulkRemoveImages);
 router.get('/colleges/:id', getCollegeDetails);
 router.put('/colleges/:id', upload.fields([
   { name: 'logoFile', maxCount: 1 },
@@ -49,8 +53,6 @@ router.put('/colleges/:id', upload.fields([
 ]), updateCollege);
 router.put('/colleges/:id/rates', updateCollegeRates);
 router.delete('/colleges/:id', deleteCollege);
-router.post('/colleges/bulk-import-preview', uploadCSV.single('csvFile'), bulkImportPreview);
-router.post('/colleges/bulk-import-confirm', bulkImportConfirm);
 
 export default router;
 

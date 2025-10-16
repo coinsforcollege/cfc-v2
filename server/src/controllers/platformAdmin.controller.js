@@ -279,12 +279,17 @@ export const updateCollege = async (req, res, next) => {
         updateData.coverImage = `/images/cover/${req.files.coverFile[0].filename}`;
       }
     }
-    
-    // Remove empty logo/coverImage to preserve existing values
-    if (updateData.logo === '' || updateData.logo === null || updateData.logo === undefined) {
+
+    // Handle explicit deletion of images
+    if (updateData.logo === 'DELETE') {
+      updateData.logo = '';
+    } else if (updateData.logo === '' || updateData.logo === null || updateData.logo === undefined) {
       delete updateData.logo;
     }
-    if (updateData.coverImage === '' || updateData.coverImage === null || updateData.coverImage === undefined) {
+
+    if (updateData.coverImage === 'DELETE') {
+      updateData.coverImage = '';
+    } else if (updateData.coverImage === '' || updateData.coverImage === null || updateData.coverImage === undefined) {
       delete updateData.coverImage;
     }
 
@@ -1069,6 +1074,45 @@ export const bulkImportConfirm = async (req, res, next) => {
       success: true,
       message: `Import completed: ${results.created.length} created, ${results.updated.length} updated, ${results.failed.length} failed`,
       data: results
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove all logo and cover images from all colleges
+// @route   PUT /api/platform-admin/colleges/bulk-remove-images
+// @access  Private (Platform Admin only)
+export const bulkRemoveImages = async (req, res, next) => {
+  try {
+    // Count colleges with logos or cover images before removal
+    const collegesWithLogo = await College.countDocuments({
+      logo: { $exists: true, $ne: '' }
+    });
+
+    const collegesWithCover = await College.countDocuments({
+      coverImage: { $exists: true, $ne: '' }
+    });
+
+    // Remove all logo and cover images
+    const result = await College.updateMany(
+      {},
+      {
+        $set: {
+          logo: '',
+          coverImage: ''
+        }
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'All college images removed successfully',
+      data: {
+        collegesUpdated: result.modifiedCount,
+        collegesWithLogo,
+        collegesWithCover
+      }
     });
   } catch (error) {
     next(error);

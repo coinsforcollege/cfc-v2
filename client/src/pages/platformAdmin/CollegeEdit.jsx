@@ -192,6 +192,18 @@ const CollegeEdit = () => {
     }
   };
 
+  const handleDeleteLogo = () => {
+    setLogoFile(null);
+    setLogoPreview('');
+    handleCollegeFormChange('logo', 'DELETE');
+  };
+
+  const handleDeleteCover = () => {
+    setCoverFile(null);
+    setCoverPreview('');
+    handleCollegeFormChange('coverImage', 'DELETE');
+  };
+
   const handleSaveCollege = async () => {
     try {
       setSaveLoading(true);
@@ -411,9 +423,32 @@ const CollegeEdit = () => {
                   Or Upload Logo File
                   <input type="file" hidden accept="image/*" onChange={handleLogoFileChange} />
                 </Button>
-                <Box sx={{ height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  {logoPreview && (
-                    <Avatar src={logoPreview} sx={{ width: 100, height: 100 }} />
+                <Box sx={{ height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                  {logoPreview ? (
+                    <>
+                      <Avatar src={logoPreview} sx={{ width: 100, height: 100 }} />
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        startIcon={<Delete />}
+                        onClick={handleDeleteLogo}
+                        sx={{
+                          position: 'absolute',
+                          bottom: -10,
+                          right: '50%',
+                          transform: 'translateX(50%)',
+                          minWidth: 'auto',
+                          padding: '4px 12px'
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No logo uploaded
+                    </Typography>
                   )}
                 </Box>
               </Box>
@@ -433,9 +468,31 @@ const CollegeEdit = () => {
                   Or Upload Cover File
                   <input type="file" hidden accept="image/*" onChange={handleCoverFileChange} />
                 </Button>
-                <Box sx={{ height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  {coverPreview && (
-                    <Box component="img" src={coverPreview} sx={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 2 }} />
+                <Box sx={{ height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                  {coverPreview ? (
+                    <>
+                      <Box component="img" src={coverPreview} sx={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 2 }} />
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        startIcon={<Delete />}
+                        onClick={handleDeleteCover}
+                        sx={{
+                          position: 'absolute',
+                          bottom: 5,
+                          right: 5,
+                          minWidth: 'auto',
+                          padding: '4px 12px'
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No cover image uploaded
+                    </Typography>
                   )}
                 </Box>
               </Box>
