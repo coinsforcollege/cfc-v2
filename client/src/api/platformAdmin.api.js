@@ -12,6 +12,13 @@ export const platformAdminApi = {
   resetStudentPassword: (id, data) => apiClient.put(`/platform-admin/students/${id}/reset-password`, data),
   addStudentBalance: (id, data) => apiClient.post(`/platform-admin/students/${id}/add-balance`, data),
 
+  // College Admins
+  getAllCollegeAdmins: (params) => apiClient.get('/platform-admin/college-admins', { params }),
+  getCollegeAdminDetails: (id) => apiClient.get(`/platform-admin/college-admins/${id}`),
+  updateCollegeAdmin: (id, data) => apiClient.put(`/platform-admin/college-admins/${id}`, data),
+  deleteCollegeAdmin: (id) => apiClient.delete(`/platform-admin/college-admins/${id}`),
+  resetCollegeAdminPassword: (id, data) => apiClient.put(`/platform-admin/college-admins/${id}/reset-password`, data),
+
   // Colleges
   getAllColleges: (params) => apiClient.get('/platform-admin/colleges', { params }),
   getCollegeDetails: (id) => apiClient.get(`/platform-admin/colleges/${id}`),

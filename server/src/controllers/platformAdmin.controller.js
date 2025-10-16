@@ -458,7 +458,7 @@ export const updateDefaultRates = async (req, res, next) => {
 export const updateStudent = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email, phone } = req.body;
+    const { name, email, phone, isActive } = req.body;
 
     const student = await User.findById(id);
 
@@ -494,6 +494,11 @@ export const updateStudent = async (req, res, next) => {
     }
 
     if (name) student.name = name;
+
+    // Update active status if provided
+    if (isActive !== undefined) {
+      student.isActive = isActive;
+    }
 
     await student.save();
 

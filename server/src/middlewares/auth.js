@@ -32,6 +32,14 @@ export const protect = async (req, res, next) => {
         });
       }
 
+      // Check if account is active
+      if (!req.user.isActive) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account has been deactivated. Please contact support.'
+        });
+      }
+
       next();
     } catch (error) {
       return res.status(401).json({

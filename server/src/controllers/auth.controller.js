@@ -448,6 +448,14 @@ export const login = async (req, res, next) => {
       });
     }
 
+    // Check if account is active
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been deactivated. Please contact support.'
+      });
+    }
+
     // Generate JWT token
     const token = generateToken(user._id, user.role);
 

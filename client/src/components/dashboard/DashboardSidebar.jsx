@@ -43,7 +43,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
     ],
     platform_admin: [
       { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/platform-admin/dashboard' },
-      { id: 'students', label: 'Students', icon: GraduationCap, badge: stats.studentsCount, path: '/platform-admin/students' },
+      { id: 'users', label: 'Users', icon: Users, badge: (stats.studentsCount || 0) + (stats.collegeAdminsCount || 0), path: '/platform-admin/users' },
       { id: 'colleges', label: 'Colleges', icon: School, badge: stats.collegesCount, path: '/platform-admin/colleges' },
       { id: 'ambassadors', label: 'Ambassadors', icon: Megaphone, badge: stats.ambassadorsCount, path: '/platform-admin/ambassadors' },
       { id: 'subscribers', label: 'Subscribers', icon: Mail, badge: stats.subscribersCount, path: '/platform-admin/subscribers' },

@@ -14,6 +14,11 @@ import {
   deleteStudent,
   resetStudentPassword,
   addStudentBalance,
+  getAllCollegeAdmins,
+  getCollegeAdminDetails,
+  updateCollegeAdmin,
+  deleteCollegeAdmin,
+  resetCollegeAdminPassword,
   bulkImportPreview,
   bulkImportConfirm,
   bulkRemoveImages
@@ -36,6 +41,13 @@ router.put('/students/:id', updateStudent);
 router.delete('/students/:id', deleteStudent);
 router.put('/students/:id/reset-password', resetStudentPassword);
 router.post('/students/:id/add-balance', addStudentBalance);
+
+// College Admin routes
+router.get('/college-admins', getAllCollegeAdmins);
+router.get('/college-admins/:id', getCollegeAdminDetails);
+router.put('/college-admins/:id', updateCollegeAdmin);
+router.delete('/college-admins/:id', deleteCollegeAdmin);
+router.put('/college-admins/:id/reset-password', resetCollegeAdminPassword);
 
 // College routes
 router.get('/colleges', getAllColleges);
