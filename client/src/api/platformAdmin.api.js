@@ -18,6 +18,8 @@ export const platformAdminApi = {
   createCollege: (data) => apiClient.post('/platform-admin/colleges', data),
   updateCollege: (id, data) => apiClient.put(`/platform-admin/colleges/${id}`, data),
   deleteCollege: (id) => apiClient.delete(`/platform-admin/colleges/${id}`),
+  bulkImportPreview: (formData) => apiClient.post('/platform-admin/colleges/bulk-import-preview', formData),
+  bulkImportConfirm: (data) => apiClient.post('/platform-admin/colleges/bulk-import-confirm', data),
 
   // Earning Rates
   updateCollegeRates: (id, data) => apiClient.put(`/platform-admin/colleges/${id}/rates`, data),

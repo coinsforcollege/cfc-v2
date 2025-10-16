@@ -49,12 +49,37 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Create multer upload instance
+// Create multer upload instance for images
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB max file size
+  }
+});
+
+// Configure CSV file storage
+const csvStorage = multer.memoryStorage(); // Store in memory for parsing
+
+// CSV file filter
+const csvFileFilter = (req, file, cb) => {
+  const allowedMimes = ['text/csv', 'application/vnd.ms-excel', 'text/plain'];
+  const allowedExtensions = ['.csv'];
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (allowedMimes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only CSV files are allowed.'), false);
+  }
+};
+
+// Create multer upload instance for CSV files
+export const uploadCSV = multer({
+  storage: csvStorage,
+  fileFilter: csvFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB max file size for CSV
   }
 });
 

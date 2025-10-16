@@ -55,6 +55,9 @@ import PlatformAdminColleges from './pages/platformAdmin/Colleges';
 import PlatformAdminCollegeEdit from './pages/platformAdmin/CollegeEdit';
 import PlatformAdminAmbassadors from './pages/platformAdmin/Ambassadors';
 import PlatformAdminSubscribers from './pages/platformAdmin/Subscribers';
+import BulkImportUpload from './pages/platformAdmin/BulkImportUpload';
+import BulkImportPreview from './pages/platformAdmin/BulkImportPreview';
+import BulkImportResults from './pages/platformAdmin/BulkImportResults';
   
 const darkTheme = createTheme({
   palette: {
@@ -116,6 +119,9 @@ function App() {
       <Route path="platform-admin/dashboard" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminDashboard /></ProtectedRoute>} />
       <Route path="platform-admin/students" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminStudents /></ProtectedRoute>} />
       <Route path="platform-admin/colleges" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminColleges /></ProtectedRoute>} />
+      <Route path="platform-admin/colleges/bulk-import-upload" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportUpload /></ProtectedRoute>} />
+      <Route path="platform-admin/colleges/bulk-import-preview" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportPreview /></ProtectedRoute>} />
+      <Route path="platform-admin/colleges/bulk-import-results" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportResults /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/:id/edit" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeEdit /></ProtectedRoute>} />
       <Route path="platform-admin/ambassadors" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminAmbassadors /></ProtectedRoute>} />
       <Route path="platform-admin/subscribers" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminSubscribers /></ProtectedRoute>} />

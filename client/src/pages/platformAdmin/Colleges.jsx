@@ -42,7 +42,8 @@ import {
   AttachMoney,
   Save,
   ArrowBack,
-  Verified
+  Verified,
+  UploadFile
 } from '@mui/icons-material';
 import { platformAdminApi } from '../../api/platformAdmin.api';
 import { useToast } from '../../contexts/ToastContext';
@@ -506,6 +507,22 @@ const Colleges = () => {
               }}
             >
               Refresh
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<UploadFile />}
+              onClick={() => navigate('/platform-admin/colleges/bulk-import-upload')}
+              sx={{
+                borderColor: '#06b6d4',
+                color: '#06b6d4',
+                fontWeight: 600,
+                '&:hover': {
+                  borderColor: '#0891b2',
+                  background: 'rgba(6, 182, 212, 0.04)'
+                }
+              }}
+            >
+              Bulk Import
             </Button>
             <Button
               variant="contained"

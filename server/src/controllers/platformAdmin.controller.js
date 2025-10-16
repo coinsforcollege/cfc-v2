@@ -2,6 +2,9 @@ import User from '../models/User.js';
 import College from '../models/College.js';
 import MiningSession from '../models/Mining.js';
 import Wallet from '../models/Wallet.js';
+import csv from 'csv-parser';
+import { Readable } from 'stream';
+import { parseAddress } from '../utils/addressParsers.js';
 
 // @desc    Get all students
 // @route   GET /api/platform-admin/students
@@ -710,6 +713,355 @@ export const getPlatformStats = async (req, res, next) => {
           recentColleges
         }
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Preview bulk college import from CSV
+// @route   POST /api/platform-admin/colleges/bulk-import-preview
+// @access  Private (Platform Admin only)
+export const bulkImportPreview = async (req, res, next) => {
+  try {
+    // Validate file upload
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please upload a CSV file'
+      });
+    }
+
+    const { country, mode } = req.body;
+
+    // Validate required fields
+    if (!country || !mode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Country and import mode are required'
+      });
+    }
+
+    // Validate mode
+    const validModes = ['auto', 'add_only', 'update_only'];
+    if (!validModes.includes(mode)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid import mode. Must be: auto, add_only, or update_only'
+      });
+    }
+
+    // Parse CSV file
+    const results = [];
+    const errors = [];
+    const buffer = req.file.buffer;
+    const stream = Readable.from(buffer.toString());
+
+    // Process CSV
+    await new Promise((resolve, reject) => {
+      let rowIndex = 0;
+      stream
+        .pipe(csv())
+        .on('data', (row) => {
+          rowIndex++;
+          results.push({ ...row, csvRow: rowIndex + 1 }); // +1 for header row
+        })
+        .on('end', resolve)
+        .on('error', reject);
+    });
+
+    if (results.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'CSV file is empty or invalid'
+      });
+    }
+
+    // Process each row
+    const toBeCreated = [];
+    const toBeUpdated = [];
+    const skipped = [];
+
+    for (const row of results) {
+      const csvRow = row.csvRow;
+
+      // Validate required field: Name
+      if (!row.Name || row.Name.trim() === '') {
+        errors.push({
+          csvRow,
+          data: row,
+          reason: 'Missing required field: Name'
+        });
+        continue;
+      }
+
+      // Parse address
+      const addressComponents = parseAddress(row.Address, country);
+
+      // Map CSV data to college schema
+      const collegeData = {
+        name: row.Name.trim(),
+        country,
+        state: addressComponents.state,
+        city: addressComponents.city,
+        address: addressComponents.address,
+        zipCode: addressComponents.zipCode,
+        website: row.Website ? row.Website.trim() : '',
+        type: 'University', // Default
+        status: 'Unaffiliated',
+        baseRate: 0.25,
+        referralBonusRate: 0.1,
+        stats: {
+          totalMiners: 0,
+          activeMiners: 0,
+          totalTokensMined: 0
+        }
+      };
+
+      // Parse student population
+      if (row['Student population']) {
+        const studentPop = parseInt(row['Student population'].replace(/,/g, ''));
+        if (!isNaN(studentPop)) {
+          collegeData.studentLife = collegeData.studentLife || {};
+          collegeData.studentLife.totalStudents = studentPop;
+        }
+      }
+
+      // Parse campus housing
+      if (row['Campus housing']) {
+        const housing = row['Campus housing'].trim().toLowerCase();
+        collegeData.studentLife = collegeData.studentLife || {};
+        collegeData.studentLife.housing = collegeData.studentLife.housing || {};
+        collegeData.studentLife.housing.available = housing === 'yes';
+      }
+
+      // Warnings array for this row
+      const warnings = [];
+      if (!addressComponents.city || !addressComponents.state) {
+        warnings.push('Address parse failed - stored as-is');
+      }
+
+      // Check for duplicates
+      const existing = await College.findOne({
+        name: { $regex: new RegExp(`^${collegeData.name}$`, 'i') },
+        state: collegeData.state || undefined,
+        country: country
+      });
+
+      if (existing) {
+        // College exists
+        if (mode === 'add_only') {
+          // Skip existing colleges
+          skipped.push({
+            csvRow,
+            name: collegeData.name,
+            reason: 'Already exists (Add-only mode)'
+          });
+        } else {
+          // Auto or Update-only mode: prepare update
+          const changes = {};
+          const noChanges = {};
+
+          // Only update if field is empty in DB
+          if (collegeData.website && !existing.website) {
+            changes.website = { before: existing.website || '(empty)', after: collegeData.website };
+          } else if (existing.website) {
+            noChanges.website = { reason: 'Already set', current: existing.website };
+          }
+
+          if (collegeData.address && !existing.address) {
+            changes.address = { before: existing.address || '(empty)', after: collegeData.address };
+          } else if (existing.address) {
+            noChanges.address = { reason: 'Already set', current: existing.address };
+          }
+
+          if (collegeData.city && !existing.city) {
+            changes.city = { before: existing.city || '(empty)', after: collegeData.city };
+          } else if (existing.city) {
+            noChanges.city = { reason: 'Already set', current: existing.city };
+          }
+
+          if (collegeData.state && !existing.state) {
+            changes.state = { before: existing.state || '(empty)', after: collegeData.state };
+          } else if (existing.state) {
+            noChanges.state = { reason: 'Already set', current: existing.state };
+          }
+
+          if (collegeData.zipCode && !existing.zipCode) {
+            changes.zipCode = { before: existing.zipCode || '(empty)', after: collegeData.zipCode };
+          } else if (existing.zipCode) {
+            noChanges.zipCode = { reason: 'Already set', current: existing.zipCode };
+          }
+
+          if (collegeData.studentLife?.totalStudents && !existing.studentLife?.totalStudents) {
+            changes['studentLife.totalStudents'] = {
+              before: existing.studentLife?.totalStudents || 0,
+              after: collegeData.studentLife.totalStudents
+            };
+          } else if (existing.studentLife?.totalStudents) {
+            noChanges['studentLife.totalStudents'] = {
+              reason: 'Already set',
+              current: existing.studentLife.totalStudents
+            };
+          }
+
+          if (collegeData.studentLife?.housing?.available !== undefined &&
+              existing.studentLife?.housing?.available === undefined) {
+            changes['studentLife.housing.available'] = {
+              before: existing.studentLife?.housing?.available || false,
+              after: collegeData.studentLife.housing.available
+            };
+          } else if (existing.studentLife?.housing?.available !== undefined) {
+            noChanges['studentLife.housing.available'] = {
+              reason: 'Already set',
+              current: existing.studentLife.housing.available
+            };
+          }
+
+          // Protected fields
+          noChanges.admin = { reason: 'Protected field', current: existing.admin || 'None' };
+          noChanges.stats = { reason: 'Protected field', current: existing.stats };
+
+          // Only add to toBeUpdated if there are actual changes
+          if (Object.keys(changes).length > 0) {
+            toBeUpdated.push({
+              csvRow,
+              existingId: existing._id.toString(),
+              name: collegeData.name,
+              changes,
+              noChanges,
+              fieldsToUpdate: Object.keys(changes),
+              warnings
+            });
+          } else {
+            skipped.push({
+              csvRow,
+              name: collegeData.name,
+              reason: 'No fields to update (all fields already set)'
+            });
+          }
+        }
+      } else {
+        // College doesn't exist
+        if (mode === 'update_only') {
+          // Skip new colleges
+          skipped.push({
+            csvRow,
+            name: collegeData.name,
+            reason: 'New college (Update-only mode)'
+          });
+        } else {
+          // Auto or Add-only mode: create new
+          toBeCreated.push({
+            csvRow,
+            action: 'CREATE',
+            finalState: collegeData,
+            warnings
+          });
+        }
+      }
+    }
+
+    // Send response
+    res.status(200).json({
+      success: true,
+      country,
+      mode,
+      summary: {
+        totalInCSV: results.length,
+        willBeCreated: toBeCreated.length,
+        willBeUpdated: toBeUpdated.length,
+        willBeSkipped: skipped.length,
+        errors: errors.length
+      },
+      toBeCreated,
+      toBeUpdated,
+      skipped,
+      errors
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Confirm bulk college import
+// @route   POST /api/platform-admin/colleges/bulk-import-confirm
+// @access  Private (Platform Admin only)
+export const bulkImportConfirm = async (req, res, next) => {
+  try {
+    const { country, mode, toBeCreated, toBeUpdated } = req.body;
+
+    // Validate input
+    if (!country || !mode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Country and mode are required'
+      });
+    }
+
+    if (!toBeCreated && !toBeUpdated) {
+      return res.status(400).json({
+        success: false,
+        message: 'No colleges to import'
+      });
+    }
+
+    const results = {
+      created: 0,
+      updated: 0,
+      failed: 0,
+      errors: []
+    };
+
+    // Create new colleges
+    if (toBeCreated && toBeCreated.length > 0) {
+      for (const item of toBeCreated) {
+        try {
+          await College.create(item.finalState);
+          results.created++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push({
+            csvRow: item.csvRow,
+            name: item.finalState.name,
+            error: error.message
+          });
+        }
+      }
+    }
+
+    // Update existing colleges
+    if (toBeUpdated && toBeUpdated.length > 0) {
+      for (const item of toBeUpdated) {
+        try {
+          const updateData = {};
+
+          // Build update object from changes
+          for (const [field, change] of Object.entries(item.changes)) {
+            updateData[field] = change.after;
+          }
+
+          await College.findByIdAndUpdate(
+            item.existingId,
+            updateData,
+            { runValidators: true }
+          );
+          results.updated++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push({
+            csvRow: item.csvRow,
+            name: item.name,
+            error: error.message
+          });
+        }
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Import completed: ${results.created} created, ${results.updated} updated, ${results.failed} failed`,
+      data: results
     });
   } catch (error) {
     next(error);

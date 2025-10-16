@@ -13,10 +13,12 @@ import {
   updateStudent,
   deleteStudent,
   resetStudentPassword,
-  addStudentBalance
+  addStudentBalance,
+  bulkImportPreview,
+  bulkImportConfirm
 } from '../controllers/platformAdmin.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
-import upload from '../middlewares/upload.js';
+import upload, { uploadCSV } from '../middlewares/upload.js';
 
 const router = express.Router();
 
@@ -47,6 +49,8 @@ router.put('/colleges/:id', upload.fields([
 ]), updateCollege);
 router.put('/colleges/:id/rates', updateCollegeRates);
 router.delete('/colleges/:id', deleteCollege);
+router.post('/colleges/bulk-import-preview', uploadCSV.single('csvFile'), bulkImportPreview);
+router.post('/colleges/bulk-import-confirm', bulkImportConfirm);
 
 export default router;
 
