@@ -1,5 +1,6 @@
 import AmbassadorApplication from '../models/AmbassadorApplication.js';
 import User from '../models/User.js';
+import { createNotification } from '../services/notification.service.js';
 
 // @desc    Submit ambassador application
 // @route   POST /api/ambassador/apply
@@ -206,6 +207,45 @@ export const updateApplicationStatus = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: 'Application not found'
+      });
+    }
+
+    // Notify student about application status change
+    let notificationTitle, notificationMessage, notificationType, notificationPriority;
+
+    if (status === 'approved') {
+      notificationTitle = 'Ambassador application approved!';
+      notificationMessage = `Congratulations! Your ambassador application for ${application.college.name} has been approved. Welcome to the ambassador program!`;
+      notificationType = 'ambassador_approved';
+      notificationPriority = 'high';
+    } else if (status === 'rejected') {
+      notificationTitle = 'Ambassador application update';
+      notificationMessage = `Your ambassador application for ${application.college.name} has been reviewed. ${reviewNotes || 'Please check the application details for more information.'}`;
+      notificationType = 'ambassador_rejected';
+      notificationPriority = 'medium';
+    } else if (status === 'under_review') {
+      notificationTitle = 'Ambassador application under review';
+      notificationMessage = `Your ambassador application for ${application.college.name} is now under review. We'll notify you once a decision has been made.`;
+      notificationType = 'ambassador_under_review';
+      notificationPriority = 'low';
+    }
+
+    if (notificationTitle) {
+      await createNotification({
+        recipient: application.student._id,
+        type: notificationType,
+        title: notificationTitle,
+        message: notificationMessage,
+        data: {
+          applicationId: application._id,
+          collegeId: application.college._id,
+          collegeName: application.college.name,
+          status: status,
+          reviewNotes: reviewNotes
+        },
+        category: 'ambassador',
+        priority: notificationPriority,
+        actionUrl: '/student/ambassador/application'
       });
     }
 

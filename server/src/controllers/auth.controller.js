@@ -3,6 +3,7 @@ import College from '../models/College.js';
 import OTPVerification from '../models/OTPVerification.js';
 import { generateToken } from '../utils/jwt.js';
 import jwt from 'jsonwebtoken';
+import { createNotification } from '../services/notification.service.js';
 
 // @desc    Register a new student
 // @route   POST /api/auth/register/student
@@ -182,6 +183,23 @@ export const registerStudent = async (req, res, next) => {
           }
         });
       }
+
+      // Notify the referrer about new signup
+      await createNotification({
+        recipient: referredByUser._id,
+        type: 'referral_signup',
+        title: 'Your referral code was used!',
+        message: `${name} just signed up using your referral code for ${college.name}. You'll earn bonus tokens when they mine!`,
+        data: {
+          newStudentId: user._id,
+          newStudentName: name,
+          collegeId: college._id,
+          collegeName: college.name
+        },
+        category: 'referral',
+        priority: 'high',
+        actionUrl: '/student/community'
+      });
     }
 
     // Generate JWT token

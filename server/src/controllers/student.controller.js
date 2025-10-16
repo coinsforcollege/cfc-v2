@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import College from '../models/College.js';
 import Wallet from '../models/Wallet.js';
 import MiningSession from '../models/Mining.js';
+import { createNotification, checkMinerMilestone, notifyStudentsAboutMinerMilestone, notifyAdminAboutMinerMilestone } from '../services/notification.service.js';
 
 // @desc    Add college to student's mining list
 // @route   POST /api/student/colleges/add
@@ -110,7 +111,44 @@ export const addCollegeToMiningList = async (req, res, next) => {
     await student.save();
 
     // Populate the college data
-    await student.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+    await student.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate admin');
+
+    // Get updated miner count for this college
+    const currentMinerCount = await User.countDocuments({
+      role: 'student',
+      'studentProfile.miningColleges.college': college._id
+    });
+
+    // Check if college has an admin to notify
+    if (college.admin) {
+      // Notify college admin about new miner
+      await createNotification({
+        recipient: college.admin,
+        type: 'new_miner_joined',
+        title: 'New miner joined your college!',
+        message: `${student.name} just joined your college community and started mining for ${college.name}. Your community now has ${currentMinerCount} miners!`,
+        data: {
+          studentId: student._id,
+          studentName: student.name,
+          collegeId: college._id,
+          collegeName: college.name,
+          totalMiners: currentMinerCount
+        },
+        category: 'college',
+        priority: 'medium',
+        actionUrl: '/college-admin/community'
+      });
+
+      // Check for miner milestone
+      const milestone = checkMinerMilestone(currentMinerCount, currentMinerCount - 1);
+      if (milestone) {
+        // Notify admin about milestone
+        await notifyAdminAboutMinerMilestone(college.admin, college.name, milestone);
+
+        // Notify all students mining this college about milestone
+        await notifyStudentsAboutMinerMilestone(college._id, college.name, milestone);
+      }
+    }
 
     res.status(200).json({
       success: true,

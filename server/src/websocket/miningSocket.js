@@ -312,3 +312,44 @@ export const broadcastMiningUpdateToAll = async () => {
     console.error('Error broadcasting mining update to all:', error);
   }
 };
+
+// Broadcast notification to a specific user (all their devices)
+export const broadcastNotification = (userId, notification) => {
+  try {
+    if (!ioInstance) {
+      console.warn('WebSocket not initialized, cannot broadcast notification');
+      return;
+    }
+
+    const userSockets = userConnections.get(userId.toString());
+    if (userSockets && userSockets.size > 0) {
+      // Broadcast to all devices of this user using room
+      ioInstance.to(`user:${userId}`).emit('newNotification', notification);
+      console.log(`📬 Notification sent to user ${userId} (${userSockets.size} device(s))`);
+    }
+  } catch (error) {
+    console.error('Error broadcasting notification:', error);
+  }
+};
+
+// Broadcast notification to multiple users (bulk)
+export const broadcastNotificationBulk = (notifications) => {
+  try {
+    if (!ioInstance) {
+      console.warn('WebSocket not initialized, cannot broadcast notifications');
+      return;
+    }
+
+    notifications.forEach(notification => {
+      const userId = notification.recipient.toString();
+      const userSockets = userConnections.get(userId);
+      if (userSockets && userSockets.size > 0) {
+        ioInstance.to(`user:${userId}`).emit('newNotification', notification);
+      }
+    });
+
+    console.log(`📬 Bulk notifications sent to ${notifications.length} user(s)`);
+  } catch (error) {
+    console.error('Error broadcasting bulk notifications:', error);
+  }
+};

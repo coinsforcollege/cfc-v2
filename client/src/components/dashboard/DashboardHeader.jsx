@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Menu, X, Search, Bell, LogOut, Settings as SettingsIcon, Home, School, BookOpen, Map } from 'lucide-react';
-import { IconButton, Avatar, Menu as MuiMenu, MenuItem, ListItemIcon, Divider, Badge, Box } from '@mui/material';
+import { IconButton, Avatar, Menu as MuiMenu, MenuItem, ListItemIcon, Divider, Badge, Box, Tooltip, Fade } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNotifications } from '../../contexts/NotificationContext';
+import NotificationDropdown from '../notifications/NotificationDropdown';
 
 const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholder = "Search..." }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { unreadCount, showTooltip, hideTooltip } = useNotifications();
   const [searchQuery, setSearchQuery] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const notificationOpen = Boolean(notificationAnchorEl);
 
   const getDashboardPath = () => {
     if (!user) return '/';
@@ -211,31 +216,79 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
           </IconButton>
 
           {/* Notifications */}
-          <IconButton
-            sx={{
-              color: 'white',
-              '&:hover': {
-                background: 'rgba(255, 255, 255, 0.1)',
-              },
-            }}
-          >
-            <Badge
-              badgeContent={3}
-              sx={{
-                '& .MuiBadge-badge': {
-                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: '0.7rem',
-                  minWidth: 18,
-                  height: 18,
-                  boxShadow: '0 2px 8px rgba(245, 87, 108, 0.4)',
+          <Box sx={{ position: 'relative' }}>
+            <Tooltip
+              title="You have unread notifications"
+              open={showTooltip}
+              TransitionComponent={Fade}
+              TransitionProps={{ timeout: 300 }}
+              placement="bottom"
+              arrow
+              onClose={hideTooltip}
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    bgcolor: '#667eea',
+                    '& .MuiTooltip-arrow': {
+                      color: '#667eea',
+                    },
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    padding: '8px 12px',
+                  },
                 },
               }}
             >
-              <Bell size={20} />
-            </Badge>
-          </IconButton>
+              <IconButton
+                onClick={(e) => {
+                  setNotificationAnchorEl(notificationOpen ? null : e.currentTarget);
+                  hideTooltip();
+                }}
+                sx={{
+                  color: 'white',
+                  '&:hover': {
+                    background: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                <Badge
+                  badgeContent={unreadCount}
+                  max={99}
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                      color: 'white',
+                      fontWeight: 700,
+                      fontSize: '0.7rem',
+                      minWidth: 18,
+                      height: 18,
+                      boxShadow: '0 2px 8px rgba(245, 87, 108, 0.4)',
+                      animation: unreadCount > 0 ? 'pulse 2s infinite' : 'none',
+                      '@keyframes pulse': {
+                        '0%': {
+                          boxShadow: '0 2px 8px rgba(245, 87, 108, 0.4)',
+                        },
+                        '50%': {
+                          boxShadow: '0 2px 16px rgba(245, 87, 108, 0.8)',
+                        },
+                        '100%': {
+                          boxShadow: '0 2px 8px rgba(245, 87, 108, 0.4)',
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <Bell size={20} />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+
+            <NotificationDropdown
+              anchorEl={notificationAnchorEl}
+              open={notificationOpen}
+              onClose={() => setNotificationAnchorEl(null)}
+            />
+          </Box>
 
           {/* Profile */}
           <Box

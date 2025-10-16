@@ -7,6 +7,7 @@ import {
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import AuthLayout from './layouts/AuthLayout';
 import RootLayout from './layouts/RootLayout';
 import ProtectedRoute from './components/guards/ProtectedRoute';
@@ -143,8 +144,10 @@ function App() {
         <CssBaseline />
         <ToastProvider>
           <AuthProvider>
-            <RouterProvider router={router} />
-            <ReactQueryDevtools initialIsOpen={false} />
+            <NotificationProvider>
+              <RouterProvider router={router} />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </NotificationProvider>
           </AuthProvider>
         </ToastProvider>
       </ThemeProvider>

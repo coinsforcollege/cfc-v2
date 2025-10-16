@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import Wallet from '../models/Wallet.js';
 import MiningSession from '../models/Mining.js';
 import path from 'path';
+import { createBulkNotifications } from '../services/notification.service.js';
 
 // @desc    Select or create college for admin
 // @route   POST /api/college-admin/select-college
@@ -100,16 +101,42 @@ export const selectCollege = async (req, res, next) => {
     await admin.save();
 
     // Update college with admin reference and status
-    await College.findByIdAndUpdate(college._id, {
+    const updatedCollege = await College.findByIdAndUpdate(college._id, {
       admin: admin._id,
       status: 'Waitlist' // Move to Waitlist when admin joins
-    });
+    }, { new: true });
+
+    // Notify all students mining for this college about status change
+    const minersIds = await User.find({
+      role: 'student',
+      'studentProfile.miningColleges.college': college._id
+    }).distinct('_id');
+
+    if (minersIds.length > 0) {
+      const notifications = minersIds.map(studentId => ({
+        recipient: studentId,
+        type: 'college_status_changed',
+        title: `${college.name} has an admin!`,
+        message: `Great news! ${college.name} now has an official admin and has been moved to the waitlist. Your college is one step closer to launching its token!`,
+        data: {
+          collegeId: college._id,
+          collegeName: college.name,
+          newStatus: 'Waitlist',
+          oldStatus: 'Unaffiliated'
+        },
+        category: 'college',
+        priority: 'high',
+        actionUrl: '/student/dashboard'
+      }));
+
+      await createBulkNotifications(notifications);
+    }
 
     res.status(200).json({
       success: true,
       message: 'College selected successfully',
       data: {
-        college: college
+        college: updatedCollege
       }
     });
   } catch (error) {

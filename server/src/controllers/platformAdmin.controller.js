@@ -5,6 +5,7 @@ import Wallet from '../models/Wallet.js';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 import { parseAddress } from '../utils/addressParsers.js';
+import { createBulkNotifications } from '../services/notification.service.js';
 
 // @desc    Get all students
 // @route   GET /api/platform-admin/students
@@ -244,6 +245,15 @@ export const updateCollege = async (req, res, next) => {
     const { id } = req.params;
     const updateData = { ...req.body };
 
+    // Get the college before update to track status changes
+    const oldCollege = await College.findById(id).select('name status');
+    if (!oldCollege) {
+      return res.status(404).json({
+        success: false,
+        message: 'College not found'
+      });
+    }
+
     // Parse JSON fields if they are strings (from FormData)
     const jsonFields = ['socialMedia', 'departments', 'tokenPreferences', 'campusSize', 'studentLife'];
     jsonFields.forEach(field => {
@@ -299,11 +309,52 @@ export const updateCollege = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
-    if (!college) {
-      return res.status(404).json({
-        success: false,
-        message: 'College not found'
-      });
+    // Check if status changed and notify students
+    if (updateData.status && updateData.status !== oldCollege.status) {
+      const minersIds = await User.find({
+        role: 'student',
+        'studentProfile.miningColleges.college': college._id
+      }).distinct('_id');
+
+      if (minersIds.length > 0) {
+        let notificationTitle, notificationMessage, notificationPriority;
+
+        if (updateData.status === 'Live') {
+          notificationTitle = `${college.name} is now LIVE!`;
+          notificationMessage = `Exciting news! ${college.name} has officially launched. Your tokens are now active and can be used according to the college's token utilities!`;
+          notificationPriority = 'high';
+        } else if (updateData.status === 'Building') {
+          notificationTitle = `${college.name} is building!`;
+          notificationMessage = `Great news! ${college.name} has moved to the building phase. Your college token launch is getting closer!`;
+          notificationPriority = 'medium';
+        } else if (updateData.status === 'Waitlist') {
+          notificationTitle = `${college.name} status updated`;
+          notificationMessage = `${college.name} has been moved to the waitlist. Keep mining to support your college!`;
+          notificationPriority = 'low';
+        } else {
+          notificationTitle = `${college.name} status updated`;
+          notificationMessage = `The status of ${college.name} has been updated to ${updateData.status}.`;
+          notificationPriority = 'low';
+        }
+
+        const notifications = minersIds.map(studentId => ({
+          recipient: studentId,
+          type: 'college_status_changed',
+          title: notificationTitle,
+          message: notificationMessage,
+          data: {
+            collegeId: college._id,
+            collegeName: college.name,
+            newStatus: updateData.status,
+            oldStatus: oldCollege.status
+          },
+          category: 'college',
+          priority: notificationPriority,
+          actionUrl: '/student/dashboard'
+        }));
+
+        await createBulkNotifications(notifications);
+      }
     }
 
     res.status(200).json({

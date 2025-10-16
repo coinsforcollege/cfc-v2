@@ -3,6 +3,7 @@ import Wallet from '../models/Wallet.js';
 import User from '../models/User.js';
 import College from '../models/College.js';
 import { broadcastMiningUpdate } from '../websocket/miningSocket.js';
+import { createNotification, checkTokenMilestone, checkAdminTokenMilestone, notifyAdminAboutTokenMilestone } from '../services/notification.service.js';
 
 // @desc    Start mining for a college
 // @route   POST /api/mining/start/:collegeId
@@ -273,10 +274,15 @@ export const stopMining = async (req, res, next) => {
     }
 
     // Update wallet
+    const previousBalance = wallet.balance;
     wallet.balance += tokensEarned;
     wallet.totalMined += tokensEarned;
     wallet.lastUpdated = now;
     await wallet.save();
+
+    // Get college for notification (with admin)
+    const college = await College.findById(collegeId).select('name admin stats');
+    const previousTotalTokens = college.stats.totalTokensMined || 0;
 
     // Update college stats - decrement activeMiners by 1 (we know this session was active)
     await College.findByIdAndUpdate(collegeId, {
@@ -285,6 +291,52 @@ export const stopMining = async (req, res, next) => {
         'stats.totalTokensMined': tokensEarned
       }
     });
+
+    // Create mining completion notification
+    await createNotification({
+      recipient: studentId,
+      type: 'mining_completed',
+      title: 'Mining session completed!',
+      message: `You earned ${tokensEarned.toFixed(2)} tokens from ${college?.name || 'your college'}. Keep mining to earn more!`,
+      data: {
+        collegeId,
+        collegeName: college?.name,
+        tokensEarned: parseFloat(tokensEarned.toFixed(2)),
+        sessionDuration: miningDuration
+      },
+      category: 'mining',
+      priority: 'medium',
+      actionUrl: '/student/colleges'
+    });
+
+    // Check for token milestone
+    const milestone = await checkTokenMilestone(studentId, collegeId, wallet.balance);
+    if (milestone) {
+      await createNotification({
+        recipient: studentId,
+        type: 'token_milestone',
+        title: `${milestone.toLocaleString()} tokens milestone!`,
+        message: `Congratulations! You've mined ${milestone.toLocaleString()} tokens for ${college?.name || 'your college'}. Keep up the great work!`,
+        data: {
+          collegeId,
+          collegeName: college?.name,
+          milestone,
+          totalBalance: wallet.balance
+        },
+        category: 'milestone',
+        priority: 'high',
+        actionUrl: '/student/colleges'
+      });
+    }
+
+    // Check for admin token milestone (college total tokens)
+    if (college.admin) {
+      const newTotalTokens = previousTotalTokens + tokensEarned;
+      const adminMilestone = checkAdminTokenMilestone(newTotalTokens, previousTotalTokens);
+      if (adminMilestone) {
+        await notifyAdminAboutTokenMilestone(college.admin, college.name, adminMilestone);
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -426,7 +478,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
     const expiredSessions = await MiningSession.find({
       isActive: true,
       endTime: { $lte: now }
-    });
+    }).populate('college', 'name admin stats');
 
     let stoppedCount = 0;
     for (const session of expiredSessions) {
@@ -453,8 +505,11 @@ export const autoStopExpiredSessions = async (req, res, next) => {
         continue;
       }
 
+      // Store previous total tokens before update
+      const previousTotalTokens = session.college.stats.totalTokensMined || 0;
+
       // We successfully stopped the session - proceed with wallet and stats updates
-      await Wallet.findOneAndUpdate(
+      const wallet = await Wallet.findOneAndUpdate(
         { student: session.student, college: session.college },
         {
           $inc: {
@@ -463,7 +518,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
           },
           lastUpdated: now
         },
-        { upsert: true }
+        { upsert: true, new: true }
       );
 
       // Decrement activeMiners by 1 (we know this session was active)
@@ -473,6 +528,52 @@ export const autoStopExpiredSessions = async (req, res, next) => {
           'stats.totalTokensMined': tokensEarned
         }
       });
+
+      // Create mining completion notification
+      await createNotification({
+        recipient: session.student,
+        type: 'mining_completed',
+        title: 'Mining session completed!',
+        message: `You earned ${tokensEarned.toFixed(2)} tokens from ${session.college?.name || 'your college'}. Keep mining to earn more!`,
+        data: {
+          collegeId: session.college._id,
+          collegeName: session.college?.name,
+          tokensEarned: parseFloat(tokensEarned.toFixed(2)),
+          sessionDuration: miningDuration
+        },
+        category: 'mining',
+        priority: 'medium',
+        actionUrl: '/student/colleges'
+      });
+
+      // Check for token milestone
+      const milestone = await checkTokenMilestone(session.student, session.college._id, wallet.balance);
+      if (milestone) {
+        await createNotification({
+          recipient: session.student,
+          type: 'token_milestone',
+          title: `${milestone.toLocaleString()} tokens milestone!`,
+          message: `Congratulations! You've mined ${milestone.toLocaleString()} tokens for ${session.college?.name || 'your college'}. Keep up the great work!`,
+          data: {
+            collegeId: session.college._id,
+            collegeName: session.college?.name,
+            milestone,
+            totalBalance: wallet.balance
+          },
+          category: 'milestone',
+          priority: 'high',
+          actionUrl: '/student/colleges'
+        });
+      }
+
+      // Check for admin token milestone (college total tokens)
+      if (session.college.admin) {
+        const newTotalTokens = previousTotalTokens + tokensEarned;
+        const adminMilestone = checkAdminTokenMilestone(newTotalTokens, previousTotalTokens);
+        if (adminMilestone) {
+          await notifyAdminAboutTokenMilestone(session.college.admin, session.college.name, adminMilestone);
+        }
+      }
 
       stoppedCount++;
     }

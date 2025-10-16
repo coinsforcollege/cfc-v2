@@ -21,6 +21,7 @@ import platformAdminRoutes from './routes/platformAdmin.routes.js';
 import ambassadorRoutes from './routes/ambassador.routes.js';
 import blogRoutes from './routes/blog.routes.js';
 import docsRoutes from './routes/docs.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 // Import middleware
 import errorHandler from './middlewares/errorHandler.js';
@@ -105,6 +106,7 @@ app.use('/api/platform-admin', platformAdminRoutes);
 app.use('/api/ambassador', ambassadorRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/docs', docsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404
 app.use('*', (req, res) => {
