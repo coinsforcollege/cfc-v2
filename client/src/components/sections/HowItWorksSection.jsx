@@ -1,27 +1,29 @@
 import React from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Stack, 
-  Card, 
+import {
+  Box,
+  Container,
+  Typography,
+  Stack,
+  Card,
   CardContent,
   Chip
 } from '@mui/material';
-import { 
-  School, 
-  Settings, 
-  RocketLaunch, 
+import {
+  School,
+  Settings,
+  RocketLaunch,
   AccountBalance,
   TrendingUp,
   Timeline,
   ArrowForward
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router';
 import { colors, gradients, spacing, typography, shadows, borderRadius } from '../../utils/designTokens';
 
 const HowItWorksSection = () => {
+  const navigate = useNavigate();
   const steps = [
     {
       id: 1,
@@ -384,6 +386,7 @@ const HowItWorksSection = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Box
                   component="button"
+                  onClick={() => navigate('/auth/register/student')}
                   sx={{
                     background: gradients.primary,
                     color: 'white',
@@ -412,6 +415,7 @@ const HowItWorksSection = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Box
                   component="button"
+                  onClick={() => navigate('/auth/register/college')}
                   sx={{
                     background: 'rgba(255, 255, 255, 0.8)',
                     color: colors.neutral[700],

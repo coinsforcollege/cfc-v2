@@ -2,18 +2,20 @@ import React from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Grid, Chip, Stack } from '@mui/material';
-import { 
-  Build, 
-  Security, 
-  Api, 
-  Analytics, 
-  CheckCircle, 
+import {
+  Build,
+  Security,
+  Api,
+  Analytics,
+  CheckCircle,
   Settings,
   AccountBalance,
   Token
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router';
 
 const InfrastructureSection = () => {
+  const navigate = useNavigate();
   const controlItems = [
     {
       icon: Token,
@@ -417,6 +419,7 @@ const InfrastructureSection = () => {
               From configuration to go-live in weeks, not months.
             </Typography>
             <Box
+              onClick={() => navigate('/auth/register/college')}
               sx={{
                 display: 'inline-block',
                 px: 4,
