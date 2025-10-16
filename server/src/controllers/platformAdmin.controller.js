@@ -1007,21 +1007,24 @@ export const bulkImportConfirm = async (req, res, next) => {
     }
 
     const results = {
-      created: 0,
-      updated: 0,
-      failed: 0,
-      errors: []
+      created: [],
+      updated: [],
+      failed: []
     };
 
     // Create new colleges
     if (toBeCreated && toBeCreated.length > 0) {
       for (const item of toBeCreated) {
         try {
-          await College.create(item.finalState);
-          results.created++;
+          const college = await College.create(item.finalState);
+          results.created.push({
+            name: college.name,
+            city: college.city,
+            state: college.state,
+            country: college.country
+          });
         } catch (error) {
-          results.failed++;
-          results.errors.push({
+          results.failed.push({
             csvRow: item.csvRow,
             name: item.finalState.name,
             error: error.message
@@ -1041,15 +1044,19 @@ export const bulkImportConfirm = async (req, res, next) => {
             updateData[field] = change.after;
           }
 
-          await College.findByIdAndUpdate(
+          const college = await College.findByIdAndUpdate(
             item.existingId,
             updateData,
-            { runValidators: true }
+            { new: true, runValidators: true }
           );
-          results.updated++;
+          results.updated.push({
+            name: college.name,
+            city: college.city,
+            state: college.state,
+            country: college.country
+          });
         } catch (error) {
-          results.failed++;
-          results.errors.push({
+          results.failed.push({
             csvRow: item.csvRow,
             name: item.name,
             error: error.message
@@ -1060,7 +1067,7 @@ export const bulkImportConfirm = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `Import completed: ${results.created} created, ${results.updated} updated, ${results.failed} failed`,
+      message: `Import completed: ${results.created.length} created, ${results.updated.length} updated, ${results.failed.length} failed`,
       data: results
     });
   } catch (error) {
