@@ -52,6 +52,7 @@ import CollegeAdminSettings from './pages/collegeAdmin/Settings';
 import PlatformAdminDashboard from './pages/platformAdmin/PlatformAdminDashboard';
 import PlatformAdminStudents from './pages/platformAdmin/Students';
 import PlatformAdminColleges from './pages/platformAdmin/Colleges';
+import PlatformAdminCollegeCreate from './pages/platformAdmin/CollegeCreate';
 import PlatformAdminCollegeEdit from './pages/platformAdmin/CollegeEdit';
 import PlatformAdminAmbassadors from './pages/platformAdmin/Ambassadors';
 import PlatformAdminSubscribers from './pages/platformAdmin/Subscribers';
@@ -119,6 +120,7 @@ function App() {
       <Route path="platform-admin/dashboard" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminDashboard /></ProtectedRoute>} />
       <Route path="platform-admin/students" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminStudents /></ProtectedRoute>} />
       <Route path="platform-admin/colleges" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminColleges /></ProtectedRoute>} />
+      <Route path="platform-admin/colleges/create" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeCreate /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/bulk-import-upload" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportUpload /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/bulk-import-preview" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportPreview /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/bulk-import-results" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportResults /></ProtectedRoute>} />

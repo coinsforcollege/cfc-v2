@@ -50,6 +50,7 @@ import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { getImageUrl } from '../../utils/imageUtils';
 import { useNavigate } from 'react-router';
+import { COUNTRIES } from '../../constants/countries';
 
 const Colleges = () => {
   const { showToast } = useToast();
@@ -527,7 +528,7 @@ const Colleges = () => {
             <Button
               variant="contained"
               startIcon={<Add />}
-              onClick={handleAddCollege}
+              onClick={() => navigate('/platform-admin/colleges/create')}
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 fontWeight: 600,
@@ -918,11 +919,18 @@ const Colleges = () => {
                     <Grid item xs={12} md={6}>
                       <TextField
                         label="Country *"
+                        select
                         fullWidth
                         value={collegeFormData.country}
                         onChange={(e) => handleCollegeFormChange('country', e.target.value)}
                         required
-                      />
+                      >
+                        {COUNTRIES.map((country) => (
+                          <MenuItem key={country} value={country}>
+                            {country}
+                          </MenuItem>
+                        ))}
+                      </TextField>
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField

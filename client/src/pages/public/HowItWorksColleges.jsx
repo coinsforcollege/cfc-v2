@@ -266,7 +266,7 @@ function HowItWorksColleges() {
             <Typography
               variant="h1"
               sx={{
-                fontSize: { xs: '3rem', md: '4.5rem' },
+                fontSize: { xs: '3rem', md: '3rem' },
                 fontWeight: 800,
                 background: 'linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%)',
                 WebkitBackgroundClip: 'text',
@@ -281,7 +281,7 @@ function HowItWorksColleges() {
             <Typography
               sx={{
                 color: '#2d3748',
-                fontSize: { xs: '1.2rem', md: '1.5rem' },
+                fontSize: { xs: '1.2rem', md: '1.2rem' },
                 lineHeight: 1.6,
                 maxWidth: '800px',
                 mx: 'auto',
@@ -317,7 +317,7 @@ function HowItWorksColleges() {
             <Typography
               variant="h3"
               sx={{
-                fontSize: { xs: '2rem', md: '2.5rem' },
+                fontSize: { xs: '2rem', md: '2rem' },
                 fontWeight: 700,
                 color: '#2d3748',
                 mb: 4,
@@ -325,7 +325,7 @@ function HowItWorksColleges() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-                <Rocket sx={{ color: '#8b5cf6', fontSize: '2.5rem' }} />
+                <Rocket sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
                 Admin Signup Process
               </Box>
             </Typography>
@@ -482,7 +482,7 @@ function HowItWorksColleges() {
               <Typography
                 variant="h3"
                 sx={{
-                  fontSize: { xs: '2rem', md: '2.5rem' },
+                  fontSize: { xs: '2rem', md: '2rem' },
                   fontWeight: 700,
                   color: '#2d3748',
                   mb: 4,
@@ -490,7 +490,7 @@ function HowItWorksColleges() {
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-                  <Settings sx={{ color: '#8b5cf6', fontSize: '2.5rem' }} />
+                  <Settings sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
                   Token Configuration Walkthrough
                 </Box>
               </Typography>
@@ -730,7 +730,7 @@ function HowItWorksColleges() {
             <Typography
               variant="h3"
               sx={{
-                fontSize: { xs: '2rem', md: '2.5rem' },
+                fontSize: { xs: '2rem', md: '2rem' },
                 fontWeight: 700,
                 color: '#2d3748',
                 mb: 4,
@@ -738,7 +738,7 @@ function HowItWorksColleges() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-                <BarChart sx={{ color: '#4ecdc4', fontSize: '2.5rem' }} />
+                <BarChart sx={{ color: '#4ecdc4', fontSize: '2rem' }} />
                 Student Data & Analytics Overview
               </Box>
             </Typography>
@@ -904,7 +904,7 @@ function HowItWorksColleges() {
               <Typography
                 variant="h3"
                 sx={{
-                  fontSize: { xs: '2rem', md: '2.5rem' },
+                  fontSize: { xs: '2rem', md: '2rem' },
                   fontWeight: 700,
                   color: '#2d3748',
                   mb: 6,
@@ -912,7 +912,7 @@ function HowItWorksColleges() {
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-                  <Star sx={{ color: '#8b5cf6', fontSize: '2.5rem' }} />
+                  <Star sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
                   Why Should Colleges Participate?
                 </Box>
               </Typography>
@@ -1027,7 +1027,7 @@ function HowItWorksColleges() {
             <Typography
               variant="h3"
               sx={{
-                fontSize: { xs: '2rem', md: '2.5rem' },
+                fontSize: { xs: '2rem', md: '2rem' },
                 fontWeight: 700,
                 color: '#2d3748',
                 mb: 4,
@@ -1035,7 +1035,7 @@ function HowItWorksColleges() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-                <EmojiEvents sx={{ color: '#ff6b6b', fontSize: '2.5rem' }} />
+                <EmojiEvents sx={{ color: '#ff6b6b', fontSize: '2rem' }} />
                 Success Stories
               </Box>
             </Typography>
@@ -1121,7 +1121,7 @@ function HowItWorksColleges() {
                             fontWeight: 800,
                             color: '#ff6b6b',
                             mb: 1,
-                            fontSize: '2.5rem',
+                            fontSize: '2rem',
                           }}
                         >
                           {study.students.toLocaleString()}
@@ -1190,7 +1190,7 @@ function HowItWorksColleges() {
             <Typography
               variant="h3"
               sx={{
-                fontSize: { xs: '2rem', md: '2.5rem' },
+                fontSize: { xs: '2rem', md: '2rem' },
                 fontWeight: 700,
                 color: '#2d3748',
                 mb: 6,
@@ -1198,7 +1198,7 @@ function HowItWorksColleges() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-                <ContactSupport sx={{ color: '#8b5cf6', fontSize: '2.5rem' }} />
+                <ContactSupport sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
                 FAQ for Administrators
               </Box>
             </Typography>
@@ -1292,7 +1292,7 @@ function HowItWorksColleges() {
               <Typography
                 variant="h2"
                 sx={{
-                  fontSize: { xs: '2.5rem', md: '3.5rem' },
+                  fontSize: { xs: '2rem', md: '3rem' },
                   fontWeight: 800,
                   mb: 4,
                 }}

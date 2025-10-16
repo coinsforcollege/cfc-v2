@@ -18,7 +18,10 @@ import {
   Divider,
   ToggleButton,
   ToggleButtonGroup,
-  Slider
+  Slider,
+  Paper,
+  InputBase,
+  IconButton
 } from '@mui/material';
 import {
   Search,
@@ -121,17 +124,6 @@ const CollegeBrowse = () => {
     setSearchInput(searchTerm);
   }, [searchTerm]);
 
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchInput !== searchTerm) {
-        updateFilters({ search: searchInput });
-      }
-    }, 500); // 500ms debounce
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
   useEffect(() => {
     fetchColleges();
   }, [searchParams]);
@@ -223,51 +215,103 @@ const CollegeBrowse = () => {
         mx: 'auto',
         px: { xs: 2, md: 3 }
       }}>
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 4, mt: 4 }}>
-          <Typography variant="h3" sx={{ 
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 2
-          }}>
-            Explore Colleges
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Join the future of college tokens and start mining today
-          </Typography>
+        {/* Row 1: Header with Title/Tagline and Stats */}
+        <Box sx={{ mb: 4, mt: 4, display: 'flex', width: '100%', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+          {/* Column 1: Title & Tagline - 50% */}
+          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <Typography variant="h5" sx={{
+              fontWeight: 700,
+              color: '#000',
+              mb: 1
+            }}>
+              Explore Colleges
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Join the future of college tokens and start mining today
+            </Typography>
+          </Box>
+
+          {/* Column 2: Stat Cards - 50% */}
+          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', gap: 4, justifyContent: { xs: 'center', md: 'flex-end' }, alignItems: 'center' }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#8b5cf6', mb: 0.5 }}>
+                {globalStats.totalColleges || 0}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Colleges
+              </Typography>
+            </Box>
+
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#ec4899', mb: 0.5 }}>
+                {globalStats.totalMiners || 0}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Total Miners
+              </Typography>
+            </Box>
+
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#06b6d4', mb: 0.5 }}>
+                {(() => {
+                  const total = globalStats.totalTokensMined || 0;
+                  return total < 1 ? total.toFixed(2) : total.toFixed(0);
+                })()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Tokens Mined
+              </Typography>
+            </Box>
+          </Box>
         </Box>
 
-        {/* Stats Banner */}
-        <Box sx={{ 
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 4,
-          mb: 4,
-          flexWrap: 'wrap'
-        }}>
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
-              {globalStats.totalColleges || 0}
+        {/* Row 2: Search Bar */}
+        <Box sx={{ mb: 4, width: '100%' }}>
+          <Paper
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              updateFilters({ search: searchInput });
+            }}
+            sx={{
+              p: '2px 4px',
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              border: '1px solid #e2e8f0'
+            }}
+          >
+            <IconButton
+              type="submit"
+              sx={{ p: '10px' }}
+              aria-label="search"
+            >
+              <Search />
+            </IconButton>
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder="Search by name, city, country..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            <Typography
+              onClick={() => updateFilters({ search: searchInput })}
+              sx={{
+                px: 2,
+                py: 1,
+                cursor: 'pointer',
+                color: '#667eea',
+                fontWeight: 600,
+                '&:hover': {
+                  color: '#764ba2'
+                }
+              }}
+            >
+              Search
             </Typography>
-            <Typography variant="body2" color="text.secondary">Colleges</Typography>
-          </Box>
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
-              {globalStats.totalMiners || 0}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">Active Miners</Typography>
-          </Box>
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
-              {(() => {
-                const total = globalStats.totalTokensMined || 0;
-                return total < 1 ? total.toFixed(2) : total.toFixed(0);
-              })()}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">Tokens Mined</Typography>
-          </Box>
+          </Paper>
         </Box>
 
         {/* Main Content with Sidebar */}
@@ -285,35 +329,69 @@ const CollegeBrowse = () => {
               background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%)'
             }}>
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                  <Search sx={{ fontSize: 24, color: '#667eea' }} />
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Find Colleges
-                  </Typography>
-                </Box>
+                
 
-                {/* Search */}
-                <TextField
-                  fullWidth
-                  placeholder="Search by name, city..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  size="small"
-                  sx={{ 
-                    mb: 3,
-                    '& .MuiOutlinedInput-root': {
+                {/* Clear Filters */}
+                {(searchTerm || countryFilter || statusFilter !== 'all' || typeFilter) && (
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={() => {
+                      setSearchParams({});
+                    }}
+                    sx={{
+                      mb: 3,
                       borderRadius: 2,
-                      background: 'white'
-                    }
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search sx={{ fontSize: 20, color: '#667eea' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                      fontWeight: 600,
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+                      }
+                    }}
+                  >
+                    Clear All Filters
+                  </Button>
+                )}
+
+                {/* Sort By */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Sort sx={{ fontSize: 18, color: '#667eea' }} />
+                    Sort By
+                  </Typography>
+                  <FormControl fullWidth size="small">
+                    <Select
+                      value={sortBy}
+                      onChange={(e) => updateFilters({ sort: e.target.value })}
+                      sx={{
+                        borderRadius: 2,
+                        background: 'white',
+                        '& .MuiSelect-select': {
+                          py: 1.2
+                        }
+                      }}
+                    >
+                      <MenuItem value="miners">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <People sx={{ fontSize: 18 }} />
+                          Most Miners
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="tokens">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TrendingUp sx={{ fontSize: 18 }} />
+                          Most Tokens
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="name">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <School sx={{ fontSize: 18 }} />
+                          Name (A-Z)
+                        </Box>
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
 
                 <Divider sx={{ my: 2.5 }} />
 
@@ -323,34 +401,33 @@ const CollegeBrowse = () => {
                     <CheckCircle sx={{ fontSize: 18, color: '#667eea' }} />
                     Status
                   </Typography>
-                  <ToggleButtonGroup
-                    value={statusFilter}
-                    exclusive
-                    onChange={(e, newValue) => newValue && updateFilters({ status: newValue })}
-                    orientation="vertical"
-                    fullWidth
-                    size="small"
-                    sx={{
-                      '& .MuiToggleButton-root': {
-                        textTransform: 'none',
-                        fontWeight: 500,
-                        borderRadius: 1.5,
-                        '&.Mui-selected': {
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          color: 'white',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
-                          }
-                        }
-                      }
-                    }}
-                  >
-                    <ToggleButton value="all">All</ToggleButton>
-                    <ToggleButton value="Unaffiliated">Unaffiliated</ToggleButton>
-                    <ToggleButton value="Waitlist">Waitlist</ToggleButton>
-                    <ToggleButton value="Building">Building</ToggleButton>
-                    <ToggleButton value="Live">Live</ToggleButton>
-                  </ToggleButtonGroup>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {['all', 'Unaffiliated', 'Waitlist', 'Building', 'Live'].map(status => (
+                      <Chip
+                        key={status}
+                        label={status === 'all' ? 'All' : status}
+                        onClick={() => updateFilters({ status: status })}
+                        sx={{
+                          cursor: 'pointer',
+                          fontWeight: 500,
+                          ...(statusFilter === status ? {
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                            }
+                          } : {
+                            background: 'white',
+                            border: '1px solid #e2e8f0',
+                            '&:hover': {
+                              background: '#f8fafc',
+                              borderColor: '#667eea'
+                            }
+                          })
+                        }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
 
                 <Divider sx={{ my: 2.5 }} />
@@ -424,69 +501,6 @@ const CollegeBrowse = () => {
                     ))}
                   </Box>
                 </Box>
-
-
-                {/* Sort By */}
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Sort sx={{ fontSize: 18, color: '#667eea' }} />
-                    Sort By
-                  </Typography>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={sortBy}
-                      onChange={(e) => updateFilters({ sort: e.target.value })}
-                      sx={{ 
-                        borderRadius: 2,
-                        background: 'white',
-                        '& .MuiSelect-select': {
-                          py: 1.2
-                        }
-                      }}
-                    >
-                      <MenuItem value="miners">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <People sx={{ fontSize: 18 }} />
-                          Most Miners
-                        </Box>
-                      </MenuItem>
-                      <MenuItem value="tokens">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <TrendingUp sx={{ fontSize: 18 }} />
-                          Most Tokens
-                        </Box>
-                      </MenuItem>
-                      <MenuItem value="name">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <School sx={{ fontSize: 18 }} />
-                          Name (A-Z)
-                        </Box>
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                {/* Clear Filters */}
-                {(searchInput || countryFilter || statusFilter !== 'all' || typeFilter) && (
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={() => {
-                      setSearchParams({});
-                    }}
-                    sx={{ 
-                      mt: 2, 
-                      borderRadius: 2,
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      fontWeight: 600,
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
-                      }
-                    }}
-                  >
-                    Clear All Filters
-                  </Button>
-                )}
               </CardContent>
             </Card>
           </Box>

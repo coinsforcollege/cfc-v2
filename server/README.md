@@ -93,12 +93,6 @@ The server will start on `http://localhost:4000`
 }
 ```
 
-**Platform Admin Login:**
-```json
-{
-  "email": "admin@gmail.com",
-  "password": "123456"
-}
 ```
 
 #### Get Current User

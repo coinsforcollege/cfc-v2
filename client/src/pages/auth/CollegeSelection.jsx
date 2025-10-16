@@ -18,13 +18,15 @@ import {
   Chip,
   ToggleButtonGroup,
   ToggleButton,
-  IconButton
+  IconButton,
+  MenuItem
 } from '@mui/material';
 import { Search, School, People, TrendingUp, LocationOn, Add, Close, CloudUpload, Link as LinkIcon } from '@mui/icons-material';
 import { collegesApi } from '../../api/colleges.api';
 import { studentApi } from '../../api/student.api';
 import { useAuth } from '../../contexts/AuthContext';
 import { getImageUrl } from '../../utils/imageUtils';
+import { COUNTRIES } from '../../constants/countries';
 
 // Helper function to get chip style based on status
 const getStatusChipStyle = (status) => {
@@ -512,17 +514,24 @@ const CollegeSelection = () => {
           {/* Country */}
           <TextField
             fullWidth
+            select
             label="Country"
             value={newCollege.country}
             onChange={(e) => setNewCollege({ ...newCollege, country: e.target.value })}
             required
-            sx={{ 
+            sx={{
               mb: 4,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2
               }
             }}
-          />
+          >
+            {COUNTRIES.map((country) => (
+              <MenuItem key={country} value={country}>
+                {country}
+              </MenuItem>
+            ))}
+          </TextField>
 
           {/* Logo Upload Section */}
           <Box sx={{ mb: 3 }}>

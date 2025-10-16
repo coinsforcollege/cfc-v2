@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import {
   Box,
   Typography,
@@ -9,7 +9,6 @@ import {
   TextField,
   Chip,
   Avatar,
-  LinearProgress,
   MenuItem,
   InputAdornment,
   Paper
@@ -28,16 +27,13 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { platformAdminApi } from '../../api/platformAdmin.api';
-import { getImageUrl } from '../../utils/imageUtils';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { COUNTRIES } from '../../constants/countries';
 
-const CollegeEdit = () => {
-  const { id } = useParams();
+const CollegeCreate = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const [loading, setLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
   const [tempInput, setTempInput] = useState('');
 
@@ -89,38 +85,7 @@ const CollegeEdit = () => {
       navigate('/auth/login');
       return;
     }
-    fetchCollege();
-  }, [user, navigate, id]);
-
-  const fetchCollege = async () => {
-    try {
-      setLoading(true);
-      const response = await platformAdminApi.getCollegeDetails(id);
-
-      if (response.success) {
-        const college = response.data.college;
-        setCollegeFormData({
-          ...college,
-          socialMedia: college.socialMedia || { facebook: '', twitter: '', instagram: '', linkedin: '', youtube: '' },
-          studentLife: college.studentLife || { totalStudents: '', internationalStudents: '', studentToFacultyRatio: '', clubs: '' },
-          departments: college.departments || [],
-          campusSize: college.campusSize || { value: '', unit: 'acres' }
-        });
-
-        if (college.logo) {
-          setLogoPreview(getImageUrl(college.logo));
-        }
-        if (college.coverImage) {
-          setCoverPreview(getImageUrl(college.coverImage));
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching college:', error);
-      showToast('Failed to load college data', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, navigate]);
 
   const handleCollegeFormChange = (field, value) => {
     if (field.includes('.')) {
@@ -196,13 +161,13 @@ const CollegeEdit = () => {
   const handleDeleteLogo = () => {
     setLogoFile(null);
     setLogoPreview('');
-    handleCollegeFormChange('logo', 'DELETE');
+    handleCollegeFormChange('logo', '');
   };
 
   const handleDeleteCover = () => {
     setCoverFile(null);
     setCoverPreview('');
-    handleCollegeFormChange('coverImage', 'DELETE');
+    handleCollegeFormChange('coverImage', '');
   };
 
   const handleSaveCollege = async () => {
@@ -227,24 +192,16 @@ const CollegeEdit = () => {
         formData.append('coverFile', coverFile);
       }
 
-      await platformAdminApi.updateCollege(id, formData);
-      showToast('College updated successfully', 'success');
+      await platformAdminApi.createCollege(formData);
+      showToast('College created successfully', 'success');
       navigate('/platform-admin/colleges');
     } catch (error) {
-      console.error('Error saving college:', error);
-      showToast('Failed to update college', 'error');
+      console.error('Error creating college:', error);
+      showToast('Failed to create college', 'error');
     } finally {
       setSaveLoading(false);
     }
   };
-
-  if (loading && !collegeFormData.name) {
-    return (
-      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <LinearProgress sx={{ width: '50%' }} />
-      </Box>
-    );
-  }
 
   const sidebarStats = {};
 
@@ -256,10 +213,10 @@ const CollegeEdit = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <Box>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Edit College
+                  Create New College
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {collegeFormData.name}
+                  Add a new college to the platform
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: 2 }}>
@@ -282,7 +239,7 @@ const CollegeEdit = () => {
                     }
                   }}
                 >
-                  {saveLoading ? 'Saving...' : 'Save Changes'}
+                  {saveLoading ? 'Creating...' : 'Create College'}
                 </Button>
               </Box>
             </Box>
@@ -778,7 +735,7 @@ const CollegeEdit = () => {
                 }
               }}
             >
-              {saveLoading ? 'Saving...' : 'Save Changes'}
+              {saveLoading ? 'Creating...' : 'Create College'}
             </Button>
           </Box>
         </Paper>
@@ -787,4 +744,4 @@ const CollegeEdit = () => {
   );
 };
 
-export default CollegeEdit;
+export default CollegeCreate;

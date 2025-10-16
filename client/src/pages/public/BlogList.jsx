@@ -157,7 +157,7 @@ const BlogList = () => {
           <Box sx={{ flex: { xs: '1', md: '0 0 70%' } }}>
             {/* Simple Header */}
             <Box sx={{ mb: 5, borderBottom: `1px solid ${colors.neutral[200]}`, pb: 4 }}>
-              <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: colors.neutral[900] }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: colors.neutral[900] }}>
                 Latest Stories
               </Typography>
               <Typography variant="body1" sx={{ color: colors.neutral[600] }}>

@@ -30,6 +30,7 @@ import { collegeAdminApi } from '../../api/collegeAdmin.api';
 import { getImageUrl } from '../../utils/imageUtils';
 import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import { COUNTRIES } from '../../constants/countries';
 
 const CollegeProfile = () => {
   const { user } = useAuth();
@@ -353,13 +354,20 @@ const CollegeProfile = () => {
             <Box sx={{ marginBottom: 3 }}>
               <TextField
                 fullWidth
+                select
                 label="Country"
                 value={collegeFormData.country}
                 onChange={(e) => handleCollegeFormChange('country', e.target.value)}
                 required
                 disabled
                 helperText="Cannot be changed after registration"
-              />
+              >
+                {COUNTRIES.map((country) => (
+                  <MenuItem key={country} value={country}>
+                    {country}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField

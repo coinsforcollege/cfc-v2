@@ -21,13 +21,14 @@ import { platformAdminApi } from '../../api/platformAdmin.api';
 import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { useNavigate } from 'react-router';
+import { COUNTRIES } from '../../constants/countries';
 
 const BulkImportUpload = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [csvFile, setCsvFile] = useState(null);
-  const [country, setCountry] = useState('USA');
+  const [country, setCountry] = useState('United States');
   const [mode, setMode] = useState('auto');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -216,9 +217,11 @@ Stanford University,"450 Serra Mall, Stanford, California 94305",www.stanford.ed
                     }
                   }}
                 >
-                  <MenuItem value="USA">United States</MenuItem>
-                  <MenuItem value="Canada">Canada</MenuItem>
-                  <MenuItem value="UK">United Kingdom</MenuItem>
+                  {COUNTRIES.map((countryName) => (
+                    <MenuItem key={countryName} value={countryName}>
+                      {countryName}
+                    </MenuItem>
+                  ))}
                 </TextField>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
                   Select the country for address parsing

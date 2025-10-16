@@ -636,6 +636,239 @@ export const addStudentBalance = async (req, res, next) => {
   }
 };
 
+// @desc    Get all college admins
+// @route   GET /api/platform-admin/college-admins
+// @access  Private (Platform Admin only)
+export const getAllCollegeAdmins = async (req, res, next) => {
+  try {
+    const { search, page = 1, limit = 50 } = req.query;
+
+    let query = { role: 'college_admin' };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+
+    const collegeAdmins = await User.find(query)
+      .populate('managedCollege', 'name country logo')
+      .select('name email phone managedCollege createdAt lastLogin isActive')
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(skip);
+
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: collegeAdmins,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get single college admin details
+// @route   GET /api/platform-admin/college-admins/:id
+// @access  Private (Platform Admin only)
+export const getCollegeAdminDetails = async (req, res, next) => {
+  try {
+    const collegeAdmin = await User.findById(req.params.id)
+      .populate('managedCollege', 'name country logo stats address city state zipCode website type status');
+
+    if (!collegeAdmin || collegeAdmin.role !== 'college_admin') {
+      return res.status(404).json({
+        success: false,
+        message: 'College admin not found'
+      });
+    }
+
+    // Get additional stats if managing a college
+    let collegeStats = {};
+    if (collegeAdmin.managedCollege) {
+      const minersCount = await User.countDocuments({
+        role: 'student',
+        'studentProfile.miningColleges.college': collegeAdmin.managedCollege._id
+      });
+
+      const activeSessionsCount = await MiningSession.countDocuments({
+        college: collegeAdmin.managedCollege._id,
+        isActive: true
+      });
+
+      collegeStats = {
+        minersCount,
+        activeSessionsCount
+      };
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        collegeAdmin,
+        collegeStats
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update college admin details
+// @route   PUT /api/platform-admin/college-admins/:id
+// @access  Private (Platform Admin only)
+export const updateCollegeAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, managedCollege, isActive } = req.body;
+
+    const collegeAdmin = await User.findById(id);
+
+    if (!collegeAdmin || collegeAdmin.role !== 'college_admin') {
+      return res.status(404).json({
+        success: false,
+        message: 'College admin not found'
+      });
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (email && email !== collegeAdmin.email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: id } });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already in use'
+        });
+      }
+      collegeAdmin.email = email;
+    }
+
+    // Check if phone is being changed and if it's already taken
+    if (phone && phone !== collegeAdmin.phone) {
+      const existingUser = await User.findOne({ phone, _id: { $ne: id } });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number already in use'
+        });
+      }
+      collegeAdmin.phone = phone;
+    }
+
+    if (name) collegeAdmin.name = name;
+
+    // Update managed college if provided
+    if (managedCollege !== undefined) {
+      if (managedCollege) {
+        // Verify college exists
+        const college = await College.findById(managedCollege);
+        if (!college) {
+          return res.status(404).json({
+            success: false,
+            message: 'College not found'
+          });
+        }
+        collegeAdmin.managedCollege = managedCollege;
+      } else {
+        collegeAdmin.managedCollege = null;
+      }
+    }
+
+    // Update active status if provided
+    if (isActive !== undefined) {
+      collegeAdmin.isActive = isActive;
+    }
+
+    await collegeAdmin.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'College admin updated successfully',
+      data: collegeAdmin
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete college admin
+// @route   DELETE /api/platform-admin/college-admins/:id
+// @access  Private (Platform Admin only)
+export const deleteCollegeAdmin = async (req, res, next) => {
+  try {
+    const collegeAdmin = await User.findById(req.params.id);
+
+    if (!collegeAdmin || collegeAdmin.role !== 'college_admin') {
+      return res.status(404).json({
+        success: false,
+        message: 'College admin not found'
+      });
+    }
+
+    // If managing a college, remove admin reference from college
+    if (collegeAdmin.managedCollege) {
+      await College.findByIdAndUpdate(collegeAdmin.managedCollege, {
+        admin: null
+      });
+    }
+
+    await collegeAdmin.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'College admin deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Reset college admin password
+// @route   PUT /api/platform-admin/college-admins/:id/reset-password
+// @access  Private (Platform Admin only)
+export const resetCollegeAdminPassword = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    const collegeAdmin = await User.findById(id);
+
+    if (!collegeAdmin || collegeAdmin.role !== 'college_admin') {
+      return res.status(404).json({
+        success: false,
+        message: 'College admin not found'
+      });
+    }
+
+    collegeAdmin.password = newPassword;
+    await collegeAdmin.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get platform statistics
 // @route   GET /api/platform-admin/stats
 // @access  Private (Platform Admin only)
