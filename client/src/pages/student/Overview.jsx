@@ -26,7 +26,10 @@ import {
   Refresh,
   PlayArrow,
   Stop,
-  People
+  People,
+  KeyboardArrowUp,
+  KeyboardArrowDown,
+  Circle
 } from '@mui/icons-material';
 import Tooltip from '@mui/material/Tooltip';
 import { useAuth } from '../../contexts/AuthContext';
@@ -499,109 +502,200 @@ const Overview = () => {
             </CardContent>
           </Card>
 
-          {/* Balance Breakdown Table */}
+          {/* Crypto Wallet */}
           <Card sx={{
             flex: { xs: '100%', md: 'calc(50% - 8px)' },
-            borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+            borderRadius: 3,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+            overflow: 'hidden',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            }
           }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-                Wallet
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Your token balance across all colleges
-              </Typography>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>Balance</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>%</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredWallets && filteredWallets.length > 0 ? (
-                      <>
-                        {filteredWallets.sort((a, b) => {
-                          const sessionA = a.college ? miningStatus[a.college._id] : null;
-                          const sessionB = b.college ? miningStatus[b.college._id] : null;
-                          const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
-                          const isMiningB = sessionB?.isActive && sessionB?.remainingHours > 0;
+            <CardContent sx={{ p: 3, pt: 4 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 2,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
+                  }}>
+                    <AccountBalanceWallet sx={{ color: 'white', fontSize: 20 }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
+                      Token Wallet
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                      Multi-College Portfolio
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
 
-                          if (isMiningA && !isMiningB) return -1;
-                          if (!isMiningA && isMiningB) return 1;
-                          return 0;
-                        }).map((wallet, index) => {
-                          const percentage = totalBalance > 0 ? ((wallet.balance / totalBalance) * 100).toFixed(0) : 0;
-                          return (
-                            <TableRow key={index} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
-                              <TableCell>
-                                <Box>
-                                  <Typography variant="body2" fontWeight={600}>
-                                    {wallet.college?.name || 'Unknown'}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {wallet.college?.country || '-'}
+              {/* Total Balance Display */}
+              <Box sx={{
+                mt: 3,
+                mb: 3,
+                p: 2.5,
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                border: '1px solid rgba(102, 126, 234, 0.2)'
+              }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1 }}>
+                  TOTAL PORTFOLIO VALUE
+                </Typography>
+                <Typography variant="h4" sx={{
+                  fontWeight: 700,
+                  color: 'white',
+                  fontFamily: 'Monaco, Courier, monospace',
+                  letterSpacing: '-0.5px'
+                }}>
+                  {totalBalance.toFixed(4)} <Typography component="span" variant="h6" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>TOKENS</Typography>
+                </Typography>
+              </Box>
+
+              {/* Token Holdings */}
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                Holdings
+              </Typography>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {filteredWallets && filteredWallets.length > 0 ? (
+                  <>
+                    {filteredWallets.sort((a, b) => {
+                      const sessionA = a.college ? miningStatus[a.college._id] : null;
+                      const sessionB = b.college ? miningStatus[b.college._id] : null;
+                      const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
+                      const isMiningB = sessionB?.isActive && sessionB?.remainingHours > 0;
+
+                      if (isMiningA && !isMiningB) return -1;
+                      if (!isMiningA && isMiningB) return 1;
+                      return (b.balance || 0) - (a.balance || 0);
+                    }).map((wallet, index) => {
+                      const percentage = totalBalance > 0 ? ((wallet.balance / totalBalance) * 100) : 0;
+                      const session = wallet.college ? miningStatus[wallet.college._id] : null;
+                      const isMining = session?.isActive && session?.remainingHours > 0;
+
+                      return (
+                        <Box
+                          key={index}
+                          sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            background: isMining
+                              ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(34, 211, 238, 0.15) 100%)'
+                              : 'rgba(30, 41, 59, 0.5)',
+                            border: isMining
+                              ? '1px solid rgba(34, 211, 238, 0.3)'
+                              : '1px solid rgba(71, 85, 105, 0.3)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              background: isMining
+                                ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(34, 211, 238, 0.2) 100%)'
+                                : 'rgba(30, 41, 59, 0.7)',
+                              transform: 'translateX(4px)'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '2px solid rgba(139, 92, 246, 0.3)'
+                              }}>
+                                <School sx={{ color: 'white', fontSize: 16 }} />
+                              </Box>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
+                                  {wallet.college?.name || 'Unknown'}
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
+                                  {isMining && (
+                                    <Circle sx={{
+                                      fontSize: 8,
+                                      color: '#22d3ee',
+                                      animation: 'pulse 2s ease-in-out infinite',
+                                      '@keyframes pulse': {
+                                        '0%, 100%': { opacity: 1 },
+                                        '50%': { opacity: 0.5 }
+                                      }
+                                    }} />
+                                  )}
+                                  <Typography variant="caption" sx={{ color: isMining ? '#22d3ee' : 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>
+                                    {isMining ? 'Mining Active' : 'Inactive'} • {wallet.college?.country || '-'}
                                   </Typography>
                                 </Box>
-                              </TableCell>
-                              <TableCell align="right">
-                                <Typography variant="body2" fontWeight={600} color="primary.main">
-                                  {wallet.balance.toFixed(2)}
-                                </Typography>
-                              </TableCell>
-                              <TableCell align="right">
-                                <Chip
-                                  label={`${percentage}%`}
-                                  size="small"
-                                  sx={{
-                                    fontWeight: 600,
-                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                    color: 'primary.main'
-                                  }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                        <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight={700}>
-                              Total
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography variant="body2" fontWeight={700} color="primary.main">
-                              {totalBalance.toFixed(2)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Chip
-                              label="100%"
-                              size="small"
-                              sx={{
+                              </Box>
+                            </Box>
+                            <Box sx={{ textAlign: 'right' }}>
+                              <Typography variant="body1" sx={{
                                 fontWeight: 700,
-                                bgcolor: 'primary.main',
-                                color: 'white'
-                              }}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      </>
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={3} align="center">
-                          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                            No balance data available
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                                color: 'white',
+                                fontFamily: 'Monaco, Courier, monospace',
+                                fontSize: '0.95rem'
+                              }}>
+                                {wallet.balance.toFixed(4)}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+                                {percentage.toFixed(1)}%
+                              </Typography>
+                            </Box>
+                          </Box>
+
+                          {/* Progress Bar */}
+                          <Box sx={{
+                            height: 4,
+                            background: 'rgba(15, 23, 42, 0.8)',
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            position: 'relative'
+                          }}>
+                            <Box sx={{
+                              height: '100%',
+                              width: `${percentage}%`,
+                              background: isMining
+                                ? 'linear-gradient(90deg, #06b6d4, #22d3ee)'
+                                : 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+                              transition: 'width 0.5s ease',
+                              boxShadow: isMining ? '0 0 8px rgba(34, 211, 238, 0.5)' : '0 0 8px rgba(139, 92, 246, 0.5)'
+                            }} />
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <AccountBalanceWallet sx={{ fontSize: 48, color: 'rgba(255,255,255,0.2)', mb: 1 }} />
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                      No balance data available
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>
+                      Start mining to earn tokens
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
             </CardContent>
           </Card>
 

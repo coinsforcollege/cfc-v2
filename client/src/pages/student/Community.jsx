@@ -278,153 +278,185 @@ const Community = () => {
           mb: 4
         }}>
           {/* Referral Code Section */}
-          <Card sx={{ flex: 1, borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-          <Box sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            p: 3,
-            color: 'white'
+          <Card sx={{
+            flex: 1,
+            borderRadius: 3,
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            }
           }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <LinkIcon />
-              Your Community Code
-            </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.95 }}>
-              Share this code or link with friends to grow your community
-            </Typography>
-          </Box>
-          <CardContent sx={{ p: 3 }}>
-            {/* Referral Code */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#475569', mb: 1.5 }}>
-                Your Unique Code
-              </Typography>
-              <Box sx={{
-                display: 'flex',
-                gap: 2
-              }}>
-                {/* Code Box - First Column */}
-                <Box sx={{ width: '50%' }}>
+            <CardContent sx={{ p: 3, pt: 4 }}>
+              {/* Header */}
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                   <Box sx={{
-                    width: '100%',
+                    width: 40,
+                    height: 40,
+                    borderRadius: 2,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1,
-                    p: 2,
-                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
-                    borderRadius: 2,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.15)'
-                    }
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
                   }}>
-                    <Typography sx={{
-                      flex: 1,
-                      fontWeight: 700,
-                      fontFamily: 'Monaco, monospace',
-                      color: '#667eea',
-                      fontSize: '1rem',
-                      minWidth: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {dashboard?.student?.referralCode}
+                    <LinkIcon sx={{ color: 'white', fontSize: 20 }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
+                      Community Code
                     </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={copyReferralCode}
-                      sx={{
-                        flexShrink: 0,
-                        background: copiedCode ? 'rgba(34, 197, 94, 0.15)' : 'rgba(102, 126, 234, 0.15)',
-                        color: copiedCode ? '#22c55e' : '#667eea',
-                        '&:hover': {
-                          background: copiedCode ? 'rgba(34, 197, 94, 0.25)' : 'rgba(102, 126, 234, 0.25)'
-                        }
-                      }}
-                    >
-                      {copiedCode ? <CheckCircle fontSize="small" /> : <ContentCopy fontSize="small" />}
-                    </IconButton>
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                      Grow your network & earn bonuses
+                    </Typography>
                   </Box>
                 </Box>
+              </Box>
 
-                {/* Share Button - Second Column */}
-                <Box sx={{ width: '50%' }}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    startIcon={<Share />}
-                    onClick={handleShareGeneral}
-                    sx={{
+              {/* Referral Code and Share Button - Side by Side */}
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                  Your Unique Code
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  {/* Code Box */}
+                  <Box sx={{ width: '50%' }}>
+                    <Box sx={{
                       height: '100%',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      fontWeight: 600,
+                      p: 2,
                       borderRadius: 2,
-                      textTransform: 'none',
-                      fontSize: '0.95rem',
-                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%)',
+                      border: '1px solid rgba(102, 126, 234, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 1.5,
+                      transition: 'all 0.3s ease',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #5568d3 0%, #633a8a 100%)',
-                        boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
-                        transform: 'translateY(-2px)'
-                      },
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    Share With Friends
-                  </Button>
+                        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
+                        border: '1px solid rgba(102, 126, 234, 0.4)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)'
+                      }
+                    }}>
+                      <Typography sx={{
+                        flex: 1,
+                        fontWeight: 700,
+                        fontFamily: 'Monaco, Courier, monospace',
+                        color: 'white',
+                        fontSize: '1rem',
+                        letterSpacing: '1px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {dashboard?.student?.referralCode}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={copyReferralCode}
+                        sx={{
+                          background: copiedCode ? 'rgba(34, 197, 94, 0.2)' : 'rgba(102, 126, 234, 0.2)',
+                          color: copiedCode ? '#22c55e' : 'white',
+                          border: copiedCode ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid rgba(102, 126, 234, 0.4)',
+                          '&:hover': {
+                            background: copiedCode ? 'rgba(34, 197, 94, 0.3)' : 'rgba(102, 126, 234, 0.3)',
+                          }
+                        }}
+                      >
+                        {copiedCode ? <CheckCircle fontSize="small" /> : <ContentCopy fontSize="small" />}
+                      </IconButton>
+                    </Box>
+                  </Box>
+
+                  {/* Share Button */}
+                  <Box sx={{ width: '50%' }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={<Share />}
+                      onClick={handleShareGeneral}
+                      sx={{
+                        height: '100%',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.95rem',
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        border: '1px solid rgba(102, 126, 234, 0.5)',
+                        boxShadow: '0 4px 20px rgba(102, 126, 234, 0.4)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #5568d3 0%, #633a8a 100%)',
+                          boxShadow: '0 6px 25px rgba(102, 126, 234, 0.5)',
+                          transform: 'translateY(-2px)'
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      Share With Friends
+                    </Button>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
 
-            {/* Referral Link */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#475569', mb: 1.5 }}>
-                Quick Share Link
-              </Typography>
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                p: 2,
-                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
-                borderRadius: 2,
-                transition: 'all 0.2s',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.15)'
-                }
-              }}>
-                <Typography sx={{
-                  flex: 1,
-                  fontSize: '0.9rem',
-                  fontFamily: 'Monaco, monospace',
-                  color: '#64748b',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {`${window.location.origin}/auth/register/student?ref=${dashboard?.student?.referralCode}`}
+              {/* Share Link */}
+              <Box>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                  Quick Share Link
                 </Typography>
-                <IconButton
-                  onClick={copyReferralLink}
-                  sx={{
-                    background: copiedLink ? 'rgba(34, 197, 94, 0.15)' : 'rgba(102, 126, 234, 0.15)',
-                    color: copiedLink ? '#22c55e' : '#667eea',
-                    '&:hover': {
-                      background: copiedLink ? 'rgba(34, 197, 94, 0.25)' : 'rgba(102, 126, 234, 0.25)'
-                    }
-                  }}
-                >
-                  {copiedLink ? <CheckCircle /> : <ContentCopy />}
-                </IconButton>
+                <Box sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  background: 'rgba(30, 41, 59, 0.5)',
+                  border: '1px solid rgba(71, 85, 105, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(30, 41, 59, 0.7)',
+                    border: '1px solid rgba(71, 85, 105, 0.5)',
+                  }
+                }}>
+                  <Typography sx={{
+                    flex: 1,
+                    fontSize: '0.8rem',
+                    fontFamily: 'Monaco, Courier, monospace',
+                    color: 'rgba(255,255,255,0.7)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {`${window.location.origin}/auth/register/student?ref=${dashboard?.student?.referralCode}`}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={copyReferralLink}
+                    sx={{
+                      background: copiedLink ? 'rgba(34, 197, 94, 0.2)' : 'rgba(100, 116, 139, 0.2)',
+                      color: copiedLink ? '#22c55e' : 'rgba(255,255,255,0.7)',
+                      border: copiedLink ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid rgba(100, 116, 139, 0.4)',
+                      '&:hover': {
+                        background: copiedLink ? 'rgba(34, 197, 94, 0.3)' : 'rgba(100, 116, 139, 0.3)',
+                      }
+                    }}
+                  >
+                    {copiedLink ? <CheckCircle fontSize="small" /> : <ContentCopy fontSize="small" />}
+                  </IconButton>
+                </Box>
               </Box>
-            </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
           {/* How It Works */}
           <Card sx={{ flex: 1, p: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
