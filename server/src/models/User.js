@@ -84,6 +84,10 @@ const userSchema = new mongoose.Schema({
     totalReferrals: {
       type: Number,
       default: 0
+    },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false
     }
   },
   isActive: {

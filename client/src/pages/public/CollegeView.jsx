@@ -84,6 +84,7 @@ const CollegeView = () => {
   const [isActivelyMining, setIsActivelyMining] = useState(false);
   const [miningStatus, setMiningStatus] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(user?.role === 'student');
 
   useEffect(() => {
     fetchCollege();
@@ -98,12 +99,13 @@ const CollegeView = () => {
       const miningColleges = wsMiningStatus.miningColleges || [];
       const inList = miningColleges.some(mc => mc.college && (mc.college._id === id || mc.college === id));
       setInMiningList(inList);
-      
+
       // Check if actively mining
       const activeSessions = wsMiningStatus.activeSessions || [];
       const activeSession = activeSessions.find(s => s.college && (s.college._id === id || s.college === id));
       setIsActivelyMining(!!activeSession && activeSession.isActive);
       setMiningStatus(activeSession || null);
+      setStatusLoading(false);
     }
   }, [wsMiningStatus, id]);
 
@@ -126,7 +128,7 @@ const CollegeView = () => {
         const miningColleges = response.data.miningColleges || [];
         const inList = miningColleges.some(mc => mc.college && (mc.college._id === id || mc.college === id));
         setInMiningList(inList);
-        
+
         // Check if actively mining
         const activeSessions = response.data.activeSessions || [];
         const activeSession = activeSessions.find(s => s.college && (s.college._id === id || s.college === id));
@@ -135,6 +137,8 @@ const CollegeView = () => {
       }
     } catch (error) {
       console.error('Error checking mining status:', error);
+    } finally {
+      setStatusLoading(false);
     }
   };
 
@@ -400,13 +404,26 @@ const CollegeView = () => {
               </>
             )}
 
+            {/* Student: Loading status */}
+            {isStudent && statusLoading && (
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 80,
+                minWidth: '220px'
+              }}>
+                <CircularProgress size={30} />
+              </Box>
+            )}
+
             {/* Student: Not in mining list */}
-            {isStudent && !inMiningList && (
+            {isStudent && !statusLoading && !inMiningList && (
               <Button
                 variant="contained"
                 onClick={handleAddToMiningList}
                 disabled={actionLoading}
-                sx={{ 
+                sx={{
                   background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                   borderRadius: 3,
                   py: 2,
@@ -428,12 +445,12 @@ const CollegeView = () => {
             )}
 
             {/* Student: In mining list but not actively mining */}
-            {isStudent && inMiningList && !isActivelyMining && (
+            {isStudent && !statusLoading && inMiningList && !isActivelyMining && (
               <Button
                 variant="contained"
                 onClick={handleStartMining}
                 disabled={actionLoading}
-                sx={{ 
+                sx={{
                   background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                   borderRadius: 3,
                   py: 2,
@@ -455,7 +472,7 @@ const CollegeView = () => {
             )}
 
             {/* Student: Actively mining */}
-            {isStudent && isActivelyMining && miningStatus && (
+            {isStudent && !statusLoading && isActivelyMining && miningStatus && (
               <>
                 <Box sx={{ 
                   background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%)', 

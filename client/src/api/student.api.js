@@ -11,5 +11,8 @@ export const studentApi = {
   addCollege: (data) => apiClient.post('/student/colleges/add', data),
   removeCollege: (collegeId) => apiClient.delete(`/student/colleges/${collegeId}`),
   setPrimaryCollege: (collegeId) => apiClient.post('/student/colleges/set-primary', { collegeId }),
+
+  // Onboarding
+  completeOnboarding: () => apiClient.post('/student/complete-onboarding'),
 };
 

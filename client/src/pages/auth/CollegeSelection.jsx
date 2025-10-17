@@ -134,8 +134,8 @@ const CollegeSelection = () => {
         };
         updateUser(updatedUser);
 
-        // Redirect to colleges page
-        navigate('/student/colleges');
+        // Redirect to overview page
+        navigate('/student/overview');
       }
     } catch (err) {
       setError(err.message || 'Failed to add college');
@@ -217,9 +217,9 @@ const CollegeSelection = () => {
         };
         updateUser(updatedUser);
 
-        // Close dialog and redirect
+        // Close dialog and redirect to overview
         setShowAddDialog(false);
-        navigate('/student/colleges');
+        navigate('/student/overview');
       }
     } catch (err) {
       setError(err.message || 'Failed to add college');

@@ -33,8 +33,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
 import { useToast } from '../../contexts/ToastContext';
 import { studentApi } from '../../api/student.api';
+import { miningApi } from '../../api/mining.api';
 import { BorderBeam } from '@/components/ui/border-beam';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import GuidedTour, { WelcomeDialog } from '../../components/GuidedTour';
+import { useTour } from '../../contexts/TourContext';
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -42,10 +45,12 @@ const Overview = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { miningStatus: wsMiningStatus } = useMiningWebSocket();
+  const { tourActive, tourStep, startTour, nextStep } = useTour();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [miningStatus, setMiningStatus] = useState({});
+  const [actionLoading, setActionLoading] = useState('');
   const isInitialLoadRef = useRef(true);
 
   const fetchDashboard = async () => {
@@ -66,6 +71,40 @@ const Overview = () => {
       }
     }
   };
+
+  const handleStartMining = async (collegeId) => {
+    try {
+      setActionLoading(`start-${collegeId}`);
+      const response = await miningApi.startMining(collegeId);
+      if (response.success) {
+        showToast('Mining started successfully!', 'success');
+        fetchDashboard();
+        navigate('/student/colleges');
+      }
+    } catch (err) {
+      console.error('Failed to start mining:', err);
+      showToast(err.message || 'Failed to start mining', 'error');
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleStopMining = async (collegeId) => {
+    try {
+      setActionLoading(`stop-${collegeId}`);
+      const response = await miningApi.stopMining(collegeId);
+      if (response.success) {
+        showToast('Mining stopped successfully!', 'success');
+        fetchDashboard();
+      }
+    } catch (err) {
+      console.error('Failed to stop mining:', err);
+      showToast(err.message || 'Failed to stop mining', 'error');
+    } finally {
+      setActionLoading('');
+    }
+  };
+
 
   useEffect(() => {
     if (wsMiningStatus) {
@@ -94,6 +133,12 @@ const Overview = () => {
 
     fetchDashboard();
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (dashboard && !loading && dashboard.student?.onboardingCompleted === false) {
+      startTour();
+    }
+  }, [dashboard, loading]);
 
   const totalMiningTokens = useMemo(() => {
     return Object.values(miningStatus).reduce((sum, session) =>
@@ -304,6 +349,156 @@ const Overview = () => {
           gap: 2,
           mb: 3
         }}>
+          {/* Active Miners Table */}
+          <Card sx={{
+            flex: { xs: '100%', md: 'calc(50% - 8px)' },
+            borderRadius: 2,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                  Token Miners
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => navigate('/student/colleges')}
+                  sx={{
+                    textTransform: 'none',
+                    borderColor: '#8b5cf6',
+                    color: '#8b5cf6',
+                    fontWeight: 600,
+                    '&:hover': {
+                      borderColor: '#7c3aed',
+                      background: 'rgba(139, 92, 246, 0.05)'
+                    }
+                  }}
+                >
+                  View Colleges
+                </Button>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Mining status for all your colleges
+              </Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700, color: '#475569' }}>Action</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>Progress</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {dashboard?.miningColleges && dashboard.miningColleges.length > 0 ? (
+                      dashboard.miningColleges.filter(mc => mc.college).sort((a, b) => {
+                        const sessionA = miningStatus[a.college._id];
+                        const sessionB = miningStatus[b.college._id];
+                        const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
+                        const isMiningB = sessionB?.isActive && sessionB?.remainingHours > 0;
+
+                        if (isMiningA && !isMiningB) return -1;
+                        if (!isMiningA && isMiningB) return 1;
+                        return 0;
+                      }).map((miningCollege, index) => {
+                        const session = miningStatus[miningCollege.college._id];
+                        const isMining = session?.isActive && session?.remainingHours > 0;
+                        const progress = isMining ? Math.round(((24 - session.remainingHours) / 24) * 100) : 0;
+
+                        return (
+                          <TableRow key={index} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
+                            <TableCell>
+                              <Box>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {miningCollege.college.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {isMining ? 'Mining active' : 'Not mining'}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Tooltip title={isMining ? 'Stop mining' : 'Start mining'} arrow>
+                                <span>
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={isMining ? <Stop fontSize="small" /> : <PlayArrow fontSize="small" />}
+                                    onClick={() => isMining ? handleStopMining(miningCollege.college._id) : handleStartMining(miningCollege.college._id)}
+                                    disabled={actionLoading === `start-${miningCollege.college._id}` || actionLoading === `stop-${miningCollege.college._id}`}
+                                    sx={{
+                                      background: isMining
+                                        ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
+                                        : 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
+                                      color: 'white',
+                                      fontWeight: 600,
+                                      fontSize: '0.7rem',
+                                      py: 0.5,
+                                      px: 1.5,
+                                      textTransform: 'none',
+                                      '&:hover': {
+                                        background: isMining
+                                          ? 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)'
+                                          : 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
+                                      },
+                                      '&:disabled': {
+                                        background: '#e5e7eb',
+                                        color: '#9ca3af'
+                                      }
+                                    }}
+                                  >
+                                    {actionLoading === `start-${miningCollege.college._id}` || actionLoading === `stop-${miningCollege.college._id}`
+                                      ? <CircularProgress size={16} sx={{ color: 'white' }} />
+                                      : isMining ? 'Stop' : 'Start'
+                                    }
+                                  </Button>
+                                </span>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                                <Box
+                                  sx={{
+                                    width: 60,
+                                    height: 6,
+                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                    borderRadius: 1,
+                                    overflow: 'hidden'
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      width: `${progress}%`,
+                                      height: '100%',
+                                      bgcolor: isMining ? 'success.main' : 'grey.400',
+                                      transition: 'width 0.3s ease'
+                                    }}
+                                  />
+                                </Box>
+                                <Typography variant="caption" fontWeight={600} sx={{ minWidth: 35 }}>
+                                  {progress}%
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} align="center">
+                          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                            No colleges added yet
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+
           {/* Balance Breakdown Table */}
           <Card sx={{
             flex: { xs: '100%', md: 'calc(50% - 8px)' },
@@ -312,7 +507,7 @@ const Overview = () => {
           }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-                Balance Breakdown
+                Wallet
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Your token balance across all colleges
@@ -410,129 +605,18 @@ const Overview = () => {
             </CardContent>
           </Card>
 
-          {/* Active Miners Table */}
-          <Card sx={{
-            flex: { xs: '100%', md: 'calc(50% - 8px)' },
-            borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Active Miners
-                </Typography>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => navigate('/student/colleges')}
-                  sx={{
-                    textTransform: 'none',
-                    borderColor: '#8b5cf6',
-                    color: '#8b5cf6',
-                    fontWeight: 600,
-                    '&:hover': {
-                      borderColor: '#7c3aed',
-                      background: 'rgba(139, 92, 246, 0.05)'
-                    }
-                  }}
-                >
-                  My Colleges
-                </Button>
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Mining status for all your colleges
-              </Typography>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 700, color: '#475569' }}>Status</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>Progress</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {dashboard?.miningColleges && dashboard.miningColleges.length > 0 ? (
-                      dashboard.miningColleges.filter(mc => mc.college).sort((a, b) => {
-                        const sessionA = miningStatus[a.college._id];
-                        const sessionB = miningStatus[b.college._id];
-                        const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
-                        const isMiningB = sessionB?.isActive && sessionB?.remainingHours > 0;
-
-                        if (isMiningA && !isMiningB) return -1;
-                        if (!isMiningA && isMiningB) return 1;
-                        return 0;
-                      }).map((miningCollege, index) => {
-                        const session = miningStatus[miningCollege.college._id];
-                        const isMining = session?.isActive && session?.remainingHours > 0;
-                        const progress = isMining ? Math.round(((24 - session.remainingHours) / 24) * 100) : 0;
-
-                        return (
-                          <TableRow key={index} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
-                            <TableCell>
-                              <Box>
-                                <Typography variant="body2" fontWeight={600}>
-                                  {miningCollege.college.name}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {isMining ? 'Mining active' : 'Not mining'}
-                                </Typography>
-                              </Box>
-                            </TableCell>
-                            <TableCell align="center">
-                              <Chip
-                                icon={isMining ? <PlayArrow fontSize="small" /> : <Stop fontSize="small" />}
-                                label={isMining ? 'Mining' : 'Idle'}
-                                size="small"
-                                color={isMining ? 'success' : 'default'}
-                                sx={{ fontWeight: 600 }}
-                              />
-                            </TableCell>
-                            <TableCell align="right">
-                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                                <Box
-                                  sx={{
-                                    width: 60,
-                                    height: 6,
-                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                    borderRadius: 1,
-                                    overflow: 'hidden'
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      width: `${progress}%`,
-                                      height: '100%',
-                                      bgcolor: isMining ? 'success.main' : 'grey.400',
-                                      transition: 'width 0.3s ease'
-                                    }}
-                                  />
-                                </Box>
-                                <Typography variant="caption" fontWeight={600} sx={{ minWidth: 35 }}>
-                                  {progress}%
-                                </Typography>
-                              </Box>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={3} align="center">
-                          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                            No colleges added yet
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
+          
         </Box>
 
       </Box>
+
+      <WelcomeDialog
+        open={tourActive && tourStep === 'welcome'}
+        onNext={nextStep}
+        studentName={dashboard?.student?.name || 'Student'}
+      />
+
+      <GuidedTour targetElement="[data-tour='colleges-nav-link']" step="navigate" />
     </DashboardLayout>
   );
 };

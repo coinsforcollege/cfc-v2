@@ -37,13 +37,13 @@ const Login = () => {
         if (response.data.role === 'student') {
           // Check if student has colleges in miningColleges
           const hasColleges = response.data.studentProfile?.miningColleges?.length > 0;
-          
+
           if (!hasColleges) {
             // No colleges, redirect to college selection
             navigate('/auth/college-selection');
           } else {
-            // Has colleges, go to colleges page
-            navigate('/student/colleges');
+            // Has colleges, go to overview page
+            navigate('/student/overview');
           }
         } else if (response.data.role === 'college_admin') {
           navigate('/college-admin/dashboard');

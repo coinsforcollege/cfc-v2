@@ -51,6 +51,8 @@ import { miningApi } from '../../api/mining.api';
 import { collegesApi } from '../../api/colleges.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import ShareDialog from '../../components/ShareDialog';
+import GuidedTour, { SuccessDialog } from '../../components/GuidedTour';
+import { useTour } from '../../contexts/TourContext';
 
 const MyColleges = () => {
   const navigate = useNavigate();
@@ -58,6 +60,7 @@ const MyColleges = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { miningStatus: wsMiningStatus } = useMiningWebSocket();
+  const { tourActive, tourStep, nextStep, completeTour } = useTour();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -128,6 +131,10 @@ const MyColleges = () => {
       if (response.success) {
         showToast('Mining started successfully!', 'success');
         fetchDashboard();
+
+        if (tourActive && tourStep === 'mining') {
+          nextStep();
+        }
       }
     } catch (err) {
       console.error('Failed to start mining:', err);
@@ -150,6 +157,16 @@ const MyColleges = () => {
       showToast(err.message || 'Failed to stop mining', 'error');
     } finally {
       setActionLoading('');
+    }
+  };
+
+  const handleCompleteTour = async () => {
+    try {
+      await studentApi.completeOnboarding();
+      completeTour();
+      navigate('/student/overview');
+    } catch (err) {
+      console.error('Failed to complete onboarding:', err);
     }
   };
 
@@ -573,7 +590,7 @@ const MyColleges = () => {
             if (isMiningA && !isMiningB) return -1;
             if (!isMiningA && isMiningB) return 1;
             return 0;
-          }).map((mc) => {
+          }).map((mc, index) => {
             const session = miningStatus[mc.college._id];
             const wallet = dashboard?.wallets?.find(w => w.college && w.college._id === mc.college._id);
             const isActive = session && session.isActive && session.remainingHours > 0;
@@ -966,6 +983,7 @@ const MyColleges = () => {
                     fullWidth
                     variant="contained"
                     startIcon={isActive ? <Stop /> : <PlayArrow />}
+                    data-tour={tourActive && tourStep === 'mining' && index === 0 && !isActive ? 'start-mining-button' : undefined}
                     onClick={() => isActive ? handleStopMining(mc.college._id) : handleStartMining(mc.college._id)}
                     disabled={actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`}
                     sx={{
@@ -1425,6 +1443,14 @@ const MyColleges = () => {
           open={showShareDialog}
           onClose={() => setShowShareDialog(false)}
           shareData={shareDialogData}
+        />
+
+        {/* Guided Tour Components */}
+        <GuidedTour targetElement="[data-tour='start-mining-button']" step="mining" />
+
+        <SuccessDialog
+          open={tourActive && tourStep === 'success'}
+          onComplete={handleCompleteTour}
         />
       </Box>
     </DashboardLayout>

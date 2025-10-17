@@ -11,16 +11,22 @@ import {
   Coins,
   GraduationCap,
   Mail,
-  HelpCircle
+  HelpCircle,
+  Home
 } from 'lucide-react';
 import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTour } from '../../contexts/TourContext';
 
 const DashboardSidebar = ({ stats = {}, onNavigate }) => {
   const { user } = useAuth();
   const location = useLocation();
+  const { tourActive, tourStep, nextStep } = useTour();
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (itemId) => {
+    if (tourActive && tourStep === 'navigate' && itemId === 'colleges') {
+      nextStep();
+    }
     if (onNavigate) {
       onNavigate();
     }
@@ -148,7 +154,8 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
               key={item.id}
               component={item.disabled ? 'div' : Link}
               to={item.disabled ? undefined : item.path}
-              onClick={item.disabled ? undefined : handleLinkClick}
+              onClick={item.disabled ? undefined : () => handleLinkClick(item.id)}
+              data-tour={item.id === 'colleges' ? 'colleges-nav-link' : undefined}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -270,6 +277,45 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
             }}
           >
             Settings
+          </Typography>
+        </Box>
+
+        {/* Return to Home */}
+        <Box
+          component={Link}
+          to="/"
+          onClick={handleLinkClick}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            px: 2,
+            py: 1.5,
+            mt: 0.5,
+            borderRadius: 2,
+            cursor: 'pointer',
+            textDecoration: 'none',
+            transition: 'all 0.2s ease',
+            background: 'transparent',
+            color: '#475569',
+            '&:hover': {
+              background: 'rgba(102, 126, 234, 0.08)',
+              transform: 'translateX(4px)',
+            },
+          }}
+        >
+          <Home size={20} style={{ flexShrink: 0 }} />
+          <Typography
+            sx={{
+              flex: 1,
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Return to Home
           </Typography>
         </Box>
       </Box>

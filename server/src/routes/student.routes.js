@@ -4,7 +4,8 @@ import {
   removeCollegeFromMiningList,
   getWallet,
   getDashboard,
-  setPrimaryCollege
+  setPrimaryCollege,
+  completeOnboarding
 } from '../controllers/student.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -19,6 +20,7 @@ router.get('/wallet', getWallet);
 router.post('/colleges/add', upload.single('logoFile'), addCollegeToMiningList);
 router.post('/colleges/set-primary', setPrimaryCollege);
 router.delete('/colleges/:collegeId', removeCollegeFromMiningList);
+router.post('/complete-onboarding', completeOnboarding);
 
 export default router;
 

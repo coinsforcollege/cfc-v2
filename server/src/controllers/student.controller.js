@@ -3,6 +3,7 @@ import College from '../models/College.js';
 import Wallet from '../models/Wallet.js';
 import MiningSession from '../models/Mining.js';
 import { createNotification, checkMinerMilestone, notifyStudentsAboutMinerMilestone, notifyAdminAboutMinerMilestone } from '../services/notification.service.js';
+import { broadcastMiningUpdate } from '../websocket/miningSocket.js';
 
 // @desc    Add college to student's mining list
 // @route   POST /api/student/colleges/add
@@ -149,6 +150,9 @@ export const addCollegeToMiningList = async (req, res, next) => {
         await notifyStudentsAboutMinerMilestone(college._id, college.name, milestone);
       }
     }
+
+    // Broadcast mining update via WebSocket
+    await broadcastMiningUpdate(studentId);
 
     res.status(200).json({
       success: true,
@@ -425,7 +429,8 @@ export const getDashboard = async (req, res, next) => {
           email: student.email,
           college: student.college,
           referralCode: student.studentProfile.referralCode,
-          totalReferrals: student.studentProfile.totalReferrals
+          totalReferrals: student.studentProfile.totalReferrals,
+          onboardingCompleted: student.studentProfile.onboardingCompleted
         },
         miningColleges: enhancedMiningColleges,
         activeSessions: sessionsWithCurrentTokens,
@@ -437,6 +442,37 @@ export const getDashboard = async (req, res, next) => {
           activeFriendsCount
           // Note: Earning rates are now per-college, available in each session's earningRate field
         }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Mark onboarding as complete
+// @route   POST /api/student/complete-onboarding
+// @access  Private (Student only)
+export const completeOnboarding = async (req, res, next) => {
+  try {
+    const studentId = req.user.id;
+
+    const student = await User.findById(studentId);
+
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    student.studentProfile.onboardingCompleted = true;
+    await student.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Onboarding completed successfully',
+      data: {
+        onboardingCompleted: student.studentProfile.onboardingCompleted
       }
     });
   } catch (error) {
