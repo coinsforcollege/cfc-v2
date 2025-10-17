@@ -1,10 +1,12 @@
 import User from '../models/User.js';
 import College from '../models/College.js';
 import OTPVerification from '../models/OTPVerification.js';
+import EmailLog from '../models/EmailLog.js';
 import { generateToken } from '../utils/jwt.js';
 import jwt from 'jsonwebtoken';
 import { createNotification } from '../services/notification.service.js';
 import { verifyRecaptcha } from '../utils/recaptcha.js';
+import { sendWelcomeEmail } from '../utils/emailService.js';
 
 // @desc    Register a new student
 // @route   POST /api/auth/register/student
@@ -235,6 +237,25 @@ export const registerStudent = async (req, res, next) => {
       data: userData,
       token
     });
+
+    // Send welcome email asynchronously (don't wait for it)
+    const dashboardUrl = `${process.env.CLIENT_URL}/student/dashboard`;
+    const emailLog = await EmailLog.logEmail(user._id, user.email, 'welcome', { dashboardUrl });
+
+    sendWelcomeEmail(user.email, user.name, dashboardUrl)
+      .then(async (result) => {
+        if (result.success) {
+          await emailLog.markAsSent();
+          console.log(`Welcome email sent to ${user.email}`);
+        } else {
+          await emailLog.markAsFailed(result.error);
+          console.error(`Failed to send welcome email to ${user.email}:`, result.error);
+        }
+      })
+      .catch(async (error) => {
+        await emailLog.markAsFailed(error.message);
+        console.error(`Error sending welcome email to ${user.email}:`, error);
+      });
   } catch (error) {
     next(error);
   }

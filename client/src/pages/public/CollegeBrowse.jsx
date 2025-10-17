@@ -21,7 +21,8 @@ import {
   Slider,
   Paper,
   InputBase,
-  IconButton
+  IconButton,
+  Collapse
 } from '@mui/material';
 import {
   Search,
@@ -32,7 +33,10 @@ import {
   CheckCircle,
   Public,
   Groups,
-  Sort
+  Sort,
+  FilterList,
+  ExpandMore,
+  ExpandLess
 } from '@mui/icons-material';
 import apiClient from '../../api/apiClient';
 import { getImageUrl } from '../../utils/imageUtils';
@@ -100,6 +104,20 @@ const CollegeBrowse = () => {
   
   // Local state for search input (to prevent focus loss)
   const [searchInput, setSearchInput] = useState(searchTerm);
+
+  // Mobile filters state
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Count active filters
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (countryFilter) count++;
+    if (statusFilter && statusFilter !== 'all') count++;
+    if (typeFilter) count++;
+    if (sortBy && sortBy !== 'tokens') count++;
+    return count;
+  };
 
   // Update URL params
   const updateFilters = (updates) => {
@@ -313,11 +331,222 @@ const CollegeBrowse = () => {
           </Paper>
         </Box>
 
+        {/* Mobile Filters - Only visible on mobile */}
+        <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 3 }}>
+          {/* Filter Toggle Button */}
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+            endIcon={mobileFiltersOpen ? <ExpandLess /> : <ExpandMore />}
+            startIcon={<FilterList />}
+            sx={{
+              py: 1.5,
+              borderRadius: 2,
+              borderColor: '#e2e8f0',
+              color: '#2d3748',
+              fontWeight: 600,
+              justifyContent: 'space-between',
+              '&:hover': {
+                borderColor: '#667eea',
+                background: 'rgba(102, 126, 234, 0.02)'
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              Filters
+              {getActiveFilterCount() > 0 && (
+                <Chip
+                  label={getActiveFilterCount()}
+                  size="small"
+                  sx={{
+                    height: 20,
+                    minWidth: 20,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '0.7rem'
+                  }}
+                />
+              )}
+            </Box>
+          </Button>
+
+          {/* Collapsible Filter Content */}
+          <Collapse in={mobileFiltersOpen}>
+            <Card sx={{
+              mt: 2,
+              borderRadius: 3,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%)'
+            }}>
+              <CardContent>
+                {/* Clear Filters */}
+                {getActiveFilterCount() > 0 && (
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={() => {
+                      setSearchParams({});
+                    }}
+                    sx={{
+                      mb: 2,
+                      borderRadius: 2,
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                      fontWeight: 600,
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+                      }
+                    }}
+                  >
+                    Clear All Filters
+                  </Button>
+                )}
+
+                {/* Sort By - Compact */}
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
+                    SORT BY
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {[
+                      { value: 'miners', label: 'Miners', icon: People },
+                      { value: 'tokens', label: 'Tokens', icon: TrendingUp },
+                      { value: 'name', label: 'Name', icon: School }
+                    ].map(({ value, label, icon: Icon }) => (
+                      <Chip
+                        key={value}
+                        icon={<Icon sx={{ fontSize: 16 }} />}
+                        label={label}
+                        onClick={() => updateFilters({ sort: value })}
+                        sx={{
+                          cursor: 'pointer',
+                          fontWeight: 500,
+                          ...(sortBy === value ? {
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            '& .MuiChip-icon': { color: 'white' },
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                            }
+                          } : {
+                            background: 'white',
+                            border: '1px solid #e2e8f0',
+                            '&:hover': {
+                              background: '#f8fafc',
+                              borderColor: '#667eea'
+                            }
+                          })
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+
+                {/* Status Filter - Compact */}
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
+                    STATUS
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {['all', 'Unaffiliated', 'Waitlist', 'Building', 'Live'].map(status => (
+                      <Chip
+                        key={status}
+                        label={status === 'all' ? 'All' : status}
+                        size="small"
+                        onClick={() => updateFilters({ status: status })}
+                        sx={{
+                          cursor: 'pointer',
+                          fontWeight: 500,
+                          ...(statusFilter === status ? {
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                            }
+                          } : {
+                            background: 'white',
+                            border: '1px solid #e2e8f0',
+                            '&:hover': {
+                              background: '#f8fafc',
+                              borderColor: '#667eea'
+                            }
+                          })
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+
+                {/* Country and Type - Side by Side */}
+                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                  {/* Country Filter */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
+                      COUNTRY
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={countryFilter}
+                        onChange={(e) => updateFilters({ country: e.target.value })}
+                        displayEmpty
+                        sx={{
+                          borderRadius: 2,
+                          background: 'white',
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>All</em>
+                        </MenuItem>
+                        {allCountries.map(country => (
+                          <MenuItem key={country} value={country} sx={{ fontSize: '0.875rem' }}>
+                            {country}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+
+                  {/* Type Filter */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
+                      TYPE
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={typeFilter}
+                        onChange={(e) => updateFilters({ type: e.target.value })}
+                        displayEmpty
+                        sx={{
+                          borderRadius: 2,
+                          background: 'white',
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>All</em>
+                        </MenuItem>
+                        {allTypes.map(type => (
+                          <MenuItem key={type} value={type} sx={{ fontSize: '0.875rem' }}>
+                            {type}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Collapse>
+        </Box>
+
         {/* Main Content with Sidebar */}
         <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
-          {/* Sidebar Filters */}
-          <Box sx={{ 
-            width: { xs: '100%', md: '300px' },
+          {/* Sidebar Filters - Desktop Only */}
+          <Box sx={{
+            display: { xs: 'none', md: 'block' },
+            width: '300px',
             flexShrink: 0
           }}>
             <Card sx={{ 
