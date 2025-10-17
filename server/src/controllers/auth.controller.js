@@ -4,6 +4,7 @@ import OTPVerification from '../models/OTPVerification.js';
 import { generateToken } from '../utils/jwt.js';
 import jwt from 'jsonwebtoken';
 import { createNotification } from '../services/notification.service.js';
+import { verifyRecaptcha } from '../utils/recaptcha.js';
 
 // @desc    Register a new student
 // @route   POST /api/auth/register/student
@@ -436,13 +437,38 @@ export const registerCollegeAdmin = async (req, res, next) => {
 // @access  Public
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken } = req.body;
 
     // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Please provide email and password'
+      });
+    }
+
+    // Verify reCAPTCHA
+    if (!recaptchaToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'reCAPTCHA verification required'
+      });
+    }
+
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+
+    if (!recaptchaResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'reCAPTCHA verification failed. Please try again.'
+      });
+    }
+
+    // For reCAPTCHA v3, check the score (0.0 - 1.0, higher is more human-like)
+    if (recaptchaResult.score < 0.5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Security verification failed. Please try again.'
       });
     }
 

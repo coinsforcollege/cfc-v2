@@ -5,6 +5,7 @@ import {
   QueryClientProvider
 } from '@tanstack/react-query';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -143,16 +144,18 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
-        <ToastProvider>
-          <AuthProvider>
-            <TourProvider>
-              <NotificationProvider>
-                <RouterProvider router={router} />
-                <ReactQueryDevtools initialIsOpen={false} />
-              </NotificationProvider>
-            </TourProvider>
-          </AuthProvider>
-        </ToastProvider>
+        <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
+          <ToastProvider>
+            <AuthProvider>
+              <TourProvider>
+                <NotificationProvider>
+                  <RouterProvider router={router} />
+                  <ReactQueryDevtools initialIsOpen={false} />
+                </NotificationProvider>
+              </TourProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </GoogleReCaptchaProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

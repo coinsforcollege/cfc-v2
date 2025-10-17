@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { Box, TextField, Button, Typography, Alert, CircularProgress } from '@mui/material';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -28,7 +30,18 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await authApi.login(formData);
+      if (!executeRecaptcha) {
+        setError('reCAPTCHA not ready. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const recaptchaToken = await executeRecaptcha('login');
+
+      const response = await authApi.login({
+        ...formData,
+        recaptchaToken
+      });
       
       if (response.success) {
         login(response.data, response.token);
