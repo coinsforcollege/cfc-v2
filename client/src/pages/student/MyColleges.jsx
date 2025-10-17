@@ -18,6 +18,7 @@ import {
   IconButton,
   Paper,
   useTheme,
+  useMediaQuery,
   ToggleButtonGroup,
   ToggleButton,
   Avatar,
@@ -58,10 +59,12 @@ import { useTour } from '../../contexts/TourContext';
 const MyColleges = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery('(max-width:1200px)');
+  const showButtonIcons = useMediaQuery('(min-width:600px)');
   const { user } = useAuth();
   const { showToast } = useToast();
   const { miningStatus: wsMiningStatus } = useMiningWebSocket();
-  const { tourActive, tourStep, nextStep, completeTour } = useTour();
+  const { tourActive, tourStep, nextStep, completeTour, isMobileTour } = useTour();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -429,16 +432,16 @@ const MyColleges = () => {
           </Box>
         </Box>
 
-        {/* My Colleges Header */}
+        {/* Active Colleges Header */}
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.875rem', sm: '1.25rem' } }}>
             Active Colleges ({dashboard?.miningColleges.filter(mc => mc.college).length}/10)
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {dashboard?.miningColleges.filter(mc => mc.college).length > 0 && (
               <Button
                 variant={deleteMode ? 'contained' : 'outlined'}
-                startIcon={deleteMode ? <Close /> : <RemoveCircleOutline />}
+                startIcon={showButtonIcons ? (deleteMode ? <Close /> : <RemoveCircleOutline />) : null}
                 onClick={handleToggleDeleteMode}
                 sx={{
                   background: deleteMode ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)' : 'transparent',
@@ -447,7 +450,7 @@ const MyColleges = () => {
                   borderRadius: 2,
                   boxShadow: deleteMode ? '0 2px 12px rgba(220, 38, 38, 0.4)' : 'none',
                   fontWeight: 600,
-                  px: { xs: 0.75, sm: 2 },
+                  px: { xs: 1.5, sm: 2 },
                   py: { xs: 0.5, sm: 1 },
                   fontSize: { xs: '0.65rem', sm: '0.875rem' },
                   transition: 'all 0.2s',
@@ -472,14 +475,14 @@ const MyColleges = () => {
             {dashboard?.miningColleges.filter(mc => mc.college).length < 10 && (
               <Button
                 variant="contained"
-                startIcon={<Add />}
+                startIcon={showButtonIcons ? <Add /> : null}
                 onClick={() => setShowAddCollegeDialog(true)}
                 sx={{
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   borderRadius: 2,
                   boxShadow: '0 2px 12px rgba(102, 126, 234, 0.4)',
                   fontWeight: 600,
-                  px: { xs: 0.75, sm: 2 },
+                  px: { xs: 1.5, sm: 2 },
                   py: { xs: 0.5, sm: 1 },
                   fontSize: { xs: '0.65rem', sm: '0.875rem' },
                   transition: 'all 0.2s',
@@ -1408,12 +1411,17 @@ const MyColleges = () => {
         />
 
         {/* Guided Tour Components */}
-        <GuidedTour targetElement="[data-tour='start-mining-button']" step="mining" />
+        {tourActive && (
+          <>
+            <GuidedTour targetElement="[data-tour='start-mining-button']" step="mining" />
 
-        <SuccessDialog
-          open={tourActive && tourStep === 'success'}
-          onComplete={handleCompleteTour}
-        />
+            <SuccessDialog
+              open={tourStep === 'success'}
+              onComplete={handleCompleteTour}
+              isMobile={isMobileTour}
+            />
+          </>
+        )}
       </Box>
     </DashboardLayout>
   );

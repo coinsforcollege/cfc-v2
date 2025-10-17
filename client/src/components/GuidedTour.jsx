@@ -97,7 +97,7 @@ const GuidedTour = ({ targetElement, step }) => {
 };
 
 // Welcome Dialog Component
-export const WelcomeDialog = ({ open, onNext, studentName }) => {
+export const WelcomeDialog = ({ open, onNext, studentName, isMobile = false }) => {
   return (
     <Dialog
       open={open}
@@ -107,29 +107,30 @@ export const WelcomeDialog = ({ open, onNext, studentName }) => {
         sx: {
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          mx: isMobile ? 2 : 'auto',
         },
       }}
       disableEscapeKeyDown
     >
-      <DialogContent sx={{ py: 4, px: 4, textAlign: 'center' }}>
+      <DialogContent sx={{ py: isMobile ? 3 : 4, px: isMobile ? 2.5 : 4, textAlign: 'center' }}>
         <Box
           sx={{
-            width: 80,
-            height: 80,
+            width: isMobile ? 60 : 80,
+            height: isMobile ? 60 : 80,
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             mx: 'auto',
-            mb: 3,
+            mb: isMobile ? 2 : 3,
           }}
         >
-          <CheckCircle sx={{ fontSize: 50, color: 'white' }} />
+          <CheckCircle sx={{ fontSize: isMobile ? 36 : 50, color: 'white' }} />
         </Box>
 
         <Typography
-          variant="h4"
+          variant={isMobile ? 'h5' : 'h4'}
           sx={{
             fontWeight: 700,
             color: '#1e293b',
@@ -142,47 +143,49 @@ export const WelcomeDialog = ({ open, onNext, studentName }) => {
         <Typography
           variant="body1"
           color="text.secondary"
-          sx={{ mb: 3, lineHeight: 1.8 }}
+          sx={{ mb: isMobile ? 2 : 3, lineHeight: 1.8, fontSize: isMobile ? '0.9rem' : '1rem' }}
         >
           Your college has been successfully added. Let's take a quick tour to get you started with mining tokens.
         </Typography>
 
-        <Box
-          sx={{
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
-            borderRadius: 2,
-            p: 2.5,
-            mb: 2,
-          }}
-        >
-          <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.8 }}>
-            This tour will show you how to:
-          </Typography>
-          <Box component="ul" sx={{ textAlign: 'left', pl: 2, mt: 1, mb: 0 }}>
-            <li>
-              <Typography variant="body2" color="text.secondary">
-                Navigate to your colleges page
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2" color="text.secondary">
-                Start your first mining session
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2" color="text.secondary">
-                Understand how to earn tokens
-              </Typography>
-            </li>
+        {!isMobile && (
+          <Box
+            sx={{
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
+              borderRadius: 2,
+              p: 2.5,
+              mb: 2,
+            }}
+          >
+            <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.8 }}>
+              This tour will show you how to:
+            </Typography>
+            <Box component="ul" sx={{ textAlign: 'left', pl: 2, mt: 1, mb: 0 }}>
+              <li>
+                <Typography variant="body2" color="text.secondary">
+                  Navigate to your colleges page
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2" color="text.secondary">
+                  Start your first mining session
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2" color="text.secondary">
+                  Understand how to earn tokens
+                </Typography>
+              </li>
+            </Box>
           </Box>
-        </Box>
+        )}
       </DialogContent>
 
       <DialogActions
         sx={{
           borderTop: '1px solid #e2e8f0',
-          px: 4,
-          py: 3,
+          px: isMobile ? 2.5 : 4,
+          py: isMobile ? 2 : 3,
         }}
       >
         <Button
@@ -192,11 +195,11 @@ export const WelcomeDialog = ({ open, onNext, studentName }) => {
           endIcon={<ArrowForward />}
           sx={{
             background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-            py: 1.5,
+            py: isMobile ? 1.2 : 1.5,
             fontWeight: 600,
             textTransform: 'none',
             borderRadius: 2,
-            fontSize: '1rem',
+            fontSize: isMobile ? '0.9rem' : '1rem',
             '&:hover': {
               background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
             },
@@ -315,7 +318,7 @@ export const TourTooltip = ({ targetElement, title, description, onNext }) => {
 };
 
 // Success Dialog Component
-export const SuccessDialog = ({ open, onComplete }) => {
+export const SuccessDialog = ({ open, onComplete, isMobile = false }) => {
   return (
     <Dialog
       open={open}
@@ -325,29 +328,30 @@ export const SuccessDialog = ({ open, onComplete }) => {
         sx: {
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          mx: isMobile ? 2 : 'auto',
         },
       }}
       disableEscapeKeyDown
     >
-      <DialogContent sx={{ py: 4, px: 4, textAlign: 'center' }}>
+      <DialogContent sx={{ py: isMobile ? 3 : 4, px: isMobile ? 2.5 : 4, textAlign: 'center' }}>
         <Box
           sx={{
-            width: 80,
-            height: 80,
+            width: isMobile ? 60 : 80,
+            height: isMobile ? 60 : 80,
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #ec4899 0%, #f59e0b 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             mx: 'auto',
-            mb: 3,
+            mb: isMobile ? 2 : 3,
           }}
         >
-          <Celebration sx={{ fontSize: 50, color: 'white' }} />
+          <Celebration sx={{ fontSize: isMobile ? 36 : 50, color: 'white' }} />
         </Box>
 
         <Typography
-          variant="h4"
+          variant={isMobile ? 'h5' : 'h4'}
           sx={{
             fontWeight: 700,
             color: '#1e293b',
@@ -360,7 +364,7 @@ export const SuccessDialog = ({ open, onComplete }) => {
         <Typography
           variant="body1"
           color="text.secondary"
-          sx={{ mb: 3, lineHeight: 1.8 }}
+          sx={{ mb: isMobile ? 2 : 3, lineHeight: 1.8, fontSize: isMobile ? '0.9rem' : '1rem' }}
         >
           Your mining session has started successfully. Here are some tips to maximize your earnings:
         </Typography>
@@ -369,28 +373,28 @@ export const SuccessDialog = ({ open, onComplete }) => {
           sx={{
             background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
             borderRadius: 2,
-            p: 2.5,
+            p: isMobile ? 2 : 2.5,
             mb: 2,
           }}
         >
           <Box component="ul" sx={{ textAlign: 'left', pl: 2, m: 0 }}>
             <li>
-              <Typography variant="body2" color="text.primary" sx={{ mb: 1.5 }}>
+              <Typography variant="body2" color="text.primary" sx={{ mb: 1.5, fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
                 <strong>Come back daily</strong> - Mining sessions last 24 hours, restart them regularly
               </Typography>
             </li>
             <li>
-              <Typography variant="body2" color="text.primary" sx={{ mb: 1.5 }}>
+              <Typography variant="body2" color="text.primary" sx={{ mb: 1.5, fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
                 <strong>Add more colleges</strong> - Mine for up to 10 colleges simultaneously
               </Typography>
             </li>
             <li>
-              <Typography variant="body2" color="text.primary" sx={{ mb: 1.5 }}>
+              <Typography variant="body2" color="text.primary" sx={{ mb: 1.5, fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
                 <strong>Invite friends</strong> - Share your referral code to boost your earning rate
               </Typography>
             </li>
             <li>
-              <Typography variant="body2" color="text.primary">
+              <Typography variant="body2" color="text.primary" sx={{ fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
                 <strong>Set your primary</strong> - Choose a primary college to show your main affiliation
               </Typography>
             </li>
@@ -401,8 +405,8 @@ export const SuccessDialog = ({ open, onComplete }) => {
       <DialogActions
         sx={{
           borderTop: '1px solid #e2e8f0',
-          px: 4,
-          py: 3,
+          px: isMobile ? 2.5 : 4,
+          py: isMobile ? 2 : 3,
         }}
       >
         <Button
@@ -411,11 +415,11 @@ export const SuccessDialog = ({ open, onComplete }) => {
           fullWidth
           sx={{
             background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-            py: 1.5,
+            py: isMobile ? 1.2 : 1.5,
             fontWeight: 600,
             textTransform: 'none',
             borderRadius: 2,
-            fontSize: '1rem',
+            fontSize: isMobile ? '0.9rem' : '1rem',
             '&:hover': {
               background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
             },

@@ -10,6 +10,7 @@ import {
   Paper,
   Button,
   useTheme,
+  useMediaQuery,
   Table,
   TableBody,
   TableCell,
@@ -45,10 +46,11 @@ import { useTour } from '../../contexts/TourContext';
 const Overview = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery('(max-width:1200px)');
   const { user } = useAuth();
   const { showToast } = useToast();
   const { miningStatus: wsMiningStatus } = useMiningWebSocket();
-  const { tourActive, tourStep, startTour, nextStep } = useTour();
+  const { tourActive, tourStep, startTour, nextStep, isMobileTour } = useTour();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -139,9 +141,9 @@ const Overview = () => {
 
   useEffect(() => {
     if (dashboard && !loading && dashboard.student?.onboardingCompleted === false) {
-      startTour();
+      startTour(isMobile);
     }
-  }, [dashboard, loading]);
+  }, [dashboard, loading, isMobile]);
 
   const totalMiningTokens = useMemo(() => {
     return Object.values(miningStatus).reduce((sum, session) =>
@@ -366,7 +368,13 @@ const Overview = () => {
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => navigate('/student/colleges')}
+                  onClick={() => {
+                    if (tourActive && (tourStep === 'navigate-mobile' || tourStep === 'navigate')) {
+                      nextStep();
+                    }
+                    navigate('/student/colleges');
+                  }}
+                  data-tour={tourActive && tourStep === 'navigate-mobile' && isMobileTour ? 'view-colleges-mobile-button' : undefined}
                   sx={{
                     textTransform: 'none',
                     borderColor: '#8b5cf6',
@@ -704,13 +712,22 @@ const Overview = () => {
 
       </Box>
 
-      <WelcomeDialog
-        open={tourActive && tourStep === 'welcome'}
-        onNext={nextStep}
-        studentName={dashboard?.student?.name || 'Student'}
-      />
+      {tourActive && (
+        <>
+          <WelcomeDialog
+            open={tourStep === 'welcome'}
+            onNext={nextStep}
+            studentName={dashboard?.student?.name || 'Student'}
+            isMobile={isMobileTour}
+          />
 
-      <GuidedTour targetElement="[data-tour='colleges-nav-link']" step="navigate" />
+          {isMobileTour ? (
+            <GuidedTour targetElement="[data-tour='view-colleges-mobile-button']" step="navigate-mobile" />
+          ) : (
+            <GuidedTour targetElement="[data-tour='colleges-nav-link']" step="navigate" />
+          )}
+        </>
+      )}
     </DashboardLayout>
   );
 };
