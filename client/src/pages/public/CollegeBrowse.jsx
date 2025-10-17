@@ -29,7 +29,6 @@ import {
   People,
   TrendingUp,
   LocationOn,
-  ArrowForward,
   CheckCircle,
   Public,
   Groups,
@@ -216,9 +215,9 @@ const CollegeBrowse = () => {
         px: { xs: 2, md: 3 }
       }}>
         {/* Row 1: Header with Title/Tagline and Stats */}
-        <Box sx={{ mb: 4, mt: 4, display: 'flex', width: '100%', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+        <Box sx={{ mb: 4, mt: 4, display: 'flex', width: '100%', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: { xs: 'center', md: 'stretch' } }}>
           {/* Column 1: Title & Tagline - 50% */}
-          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: { xs: 'center', md: 'flex-start' }, textAlign: { xs: 'center', md: 'left' } }}>
             <Typography variant="h5" sx={{
               fontWeight: 700,
               color: '#000',
@@ -226,7 +225,7 @@ const CollegeBrowse = () => {
             }}>
               Explore Colleges
             </Typography>
-            <Typography variant="h6" color="text.secondary">
+            <Typography variant={{ xs: 'body1', md: 'h6' }} color="text.secondary">
               Join the future of college tokens and start mining today
             </Typography>
           </Box>
@@ -549,7 +548,7 @@ const CollegeBrowse = () => {
                       {/* College Info */}
                       <Box sx={{ flex: 1, minWidth: '200px' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, flexWrap: 'wrap' }}>
-                          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 700 }}>
                             {college.name}
                           </Typography>
                           <Chip 
@@ -587,14 +586,14 @@ const CollegeBrowse = () => {
                         )}
 
                         {/* Stats */}
-                        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <People sx={{ fontSize: 18, color: '#667eea' }} />
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                               {college.stats?.totalMiners || 0} miners
                             </Typography>
                           </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
                             <TrendingUp sx={{ fontSize: 18, color: '#10b981' }} />
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                               {college.stats?.totalTokensMined ?
@@ -604,7 +603,7 @@ const CollegeBrowse = () => {
                                 : 0} tokens
                             </Typography>
                           </Box>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
                             <Chip
                               label={`${college.baseRate || 0.25} Token/hr`}
                               size="small"
@@ -630,26 +629,6 @@ const CollegeBrowse = () => {
                           </Box>
                         </Box>
                       </Box>
-
-                      {/* View Button */}
-                      <Button
-                        variant="contained"
-                        endIcon={<ArrowForward />}
-                        sx={{ 
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          borderRadius: 2,
-                          px: 3,
-                          py: 1.5,
-                          fontWeight: 600,
-                          textTransform: 'none'
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/colleges/${college._id}`);
-                        }}
-                      >
-                        View Details
-                      </Button>
                     </Box>
                   </CardContent>
                 </Card>
