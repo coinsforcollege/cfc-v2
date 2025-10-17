@@ -17,7 +17,7 @@ const PublicRoute = ({ children }) => {
   if (isAuthenticated && user) {
     // Redirect authenticated users to their appropriate dashboard
     if (user.role === 'student') {
-      return <Navigate to="/student/dashboard" replace />;
+      return <Navigate to="/student/colleges" replace />;
     } else if (user.role === 'college_admin') {
       return <Navigate to="/college-admin/dashboard" replace />;
     } else if (user.role === 'platform_admin') {

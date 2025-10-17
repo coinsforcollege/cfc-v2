@@ -42,8 +42,8 @@ const Login = () => {
             // No colleges, redirect to college selection
             navigate('/auth/college-selection');
           } else {
-            // Has colleges, go to dashboard
-            navigate('/student/dashboard');
+            // Has colleges, go to colleges page
+            navigate('/student/colleges');
           }
         } else if (response.data.role === 'college_admin') {
           navigate('/college-admin/dashboard');

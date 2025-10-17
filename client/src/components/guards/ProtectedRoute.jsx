@@ -22,7 +22,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
     // Redirect to appropriate dashboard based on user's actual role
     if (user?.role === 'student') {
-      return <Navigate to="/student/dashboard" replace />;
+      return <Navigate to="/student/colleges" replace />;
     } else if (user?.role === 'college_admin') {
       return <Navigate to="/college-admin/dashboard" replace />;
     } else if (user?.role === 'platform_admin') {
