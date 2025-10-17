@@ -41,7 +41,8 @@ import {
   Schedule,
   Delete,
   DeleteOutline,
-  RemoveCircleOutline
+  RemoveCircleOutline,
+  Visibility
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
@@ -381,113 +382,48 @@ const MyColleges = () => {
       searchPlaceholder="Search colleges..."
     >
       <Box sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-          My Colleges
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Manage your college mining portfolio. Add up to 10 colleges and start earning tokens.
-        </Typography>
-
-        {/* Mining Stats */}
-        <Box sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
-          gap: 2,
-          mb: 4
-        }}>
-          <Box sx={{
-            p: 2.5,
-            borderRadius: 2,
-            background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(34, 211, 238, 0.1) 100%)',
-            border: '1px solid rgba(34, 211, 238, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2
-          }}>
-            <Box sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(34, 211, 238, 0.4)'
-            }}>
-              <Speed sx={{ color: 'white', fontSize: 24 }} />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>
-                Base Rate
-              </Typography>
-              <Tooltip title="Base tokens earned per hour (default rate for all students)">
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0891b2', cursor: 'help' }}>
-                  0.25 Token/hr
-                </Typography>
-              </Tooltip>
-            </Box>
+        {/* Header with Title/Tagline and Stats */}
+        <Box sx={{ mb: 4, mt: 4, display: 'flex', width: '100%', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: { xs: 'center', md: 'stretch' } }}>
+          {/* Title & Tagline - 50% */}
+          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: { xs: 'center', md: 'flex-start' }, textAlign: { xs: 'center', md: 'left' } }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
+              My Colleges
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Manage your college mining portfolio. Add up to 10 colleges and start earning tokens.
+            </Typography>
           </Box>
 
-          <Box sx={{
-            p: 2.5,
-            borderRadius: 2,
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%)',
-            border: '1px solid rgba(139, 92, 246, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2
-          }}>
-            <Box sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)'
-            }}>
-              <Groups sx={{ color: 'white', fontSize: 24 }} />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>
-                Referral Bonus
-              </Typography>
-              <Tooltip title="Additional tokens earned per hour for each successful referral">
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#8b5cf6', cursor: 'help' }}>
-                  +0.10 Token/hr
+          {/* Mining Stats - 50% */}
+          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', gap: 4, justifyContent: { xs: 'center', md: 'flex-end' }, alignItems: 'center' }}>
+            <Tooltip title="Base tokens earned per hour (default rate for all students)">
+              <Box sx={{ textAlign: 'center', cursor: 'help' }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: '#06b6d4', mb: 0.5 }}>
+                  0.25
                 </Typography>
-              </Tooltip>
-            </Box>
-          </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
+                  Base Rate
+                </Typography>
+              </Box>
+            </Tooltip>
 
-          <Box sx={{
-            p: 2.5,
-            borderRadius: 2,
-            background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(251, 113, 133, 0.1) 100%)',
-            border: '1px solid rgba(236, 72, 153, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2
-          }}>
-            <Box sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #ec4899 0%, #fb7185 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(236, 72, 153, 0.4)'
-            }}>
-              <Schedule sx={{ color: 'white', fontSize: 24 }} />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>
-                Session Length
+            <Tooltip title="Additional tokens earned per hour for each successful referral">
+              <Box sx={{ textAlign: 'center', cursor: 'help' }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: '#8b5cf6', mb: 0.5 }}>
+                  +0.10
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
+                  Referral Bonus
+                </Typography>
+              </Box>
+            </Tooltip>
+
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: '#ec4899', mb: 0.5 }}>
+                24
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#ec4899' }}>
-                24 Hours
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
+                Session Hours
               </Typography>
             </Box>
           </Box>
@@ -978,50 +914,76 @@ const MyColleges = () => {
                     )}
                   </Box>
 
-                  {/* Action Button */}
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    startIcon={isActive ? <Stop /> : <PlayArrow />}
-                    data-tour={tourActive && tourStep === 'mining' && index === 0 && !isActive ? 'start-mining-button' : undefined}
-                    onClick={() => isActive ? handleStopMining(mc.college._id) : handleStartMining(mc.college._id)}
-                    disabled={actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`}
-                    sx={{
-                      background: isActive
-                        ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
-                        : 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
-                      color: 'white',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      py: 1.25,
-                      borderRadius: 1.5,
-                      border: isActive
-                        ? '1px solid rgba(239, 68, 68, 0.5)'
-                        : '1px solid rgba(34, 211, 238, 0.5)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      boxShadow: isActive
-                        ? '0 4px 20px rgba(239, 68, 68, 0.4)'
-                        : '0 4px 20px rgba(34, 211, 238, 0.4)',
-                      '&:hover': {
+                  {/* Action Buttons */}
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={isActive ? <Stop /> : <PlayArrow />}
+                      data-tour={tourActive && tourStep === 'mining' && index === 0 && !isActive ? 'start-mining-button' : undefined}
+                      onClick={() => isActive ? handleStopMining(mc.college._id) : handleStartMining(mc.college._id)}
+                      disabled={actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`}
+                      sx={{
                         background: isActive
-                          ? 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)'
-                          : 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
+                          ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
+                          : 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                        py: 1.25,
+                        borderRadius: 1.5,
+                        border: isActive
+                          ? '1px solid rgba(239, 68, 68, 0.5)'
+                          : '1px solid rgba(34, 211, 238, 0.5)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                         boxShadow: isActive
-                          ? '0 6px 25px rgba(239, 68, 68, 0.5)'
-                          : '0 6px 25px rgba(34, 211, 238, 0.5)',
-                      },
-                      '&:disabled': {
-                        background: 'rgba(71, 85, 105, 0.3)',
-                        color: '#64748b'
+                          ? '0 4px 20px rgba(239, 68, 68, 0.4)'
+                          : '0 4px 20px rgba(34, 211, 238, 0.4)',
+                        '&:hover': {
+                          background: isActive
+                            ? 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)'
+                            : 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
+                          boxShadow: isActive
+                            ? '0 6px 25px rgba(239, 68, 68, 0.5)'
+                            : '0 6px 25px rgba(34, 211, 238, 0.5)',
+                        },
+                        '&:disabled': {
+                          background: 'rgba(71, 85, 105, 0.3)',
+                          color: '#64748b'
+                        }
+                      }}
+                    >
+                      {actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`
+                        ? <CircularProgress size={20} sx={{ color: 'white' }} />
+                        : isActive ? 'STOP' : 'START'
                       }
-                    }}
-                  >
-                    {actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`
-                      ? <CircularProgress size={20} sx={{ color: 'white' }} />
-                      : isActive ? 'STOP MINING' : 'START MINING'
-                    }
-                  </Button>
+                    </Button>
+
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<Visibility />}
+                      onClick={() => window.open(`/colleges/${mc.college._id}`, '_blank')}
+                      sx={{
+                        color: '#94a3b8',
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                        py: 1.25,
+                        borderRadius: 1.5,
+                        border: '1px solid rgba(148, 163, 184, 0.5)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        '&:hover': {
+                          background: 'rgba(148, 163, 184, 0.1)',
+                          border: '1px solid rgba(148, 163, 184, 0.7)',
+                          color: '#cbd5e1'
+                        }
+                      }}
+                    >
+                      VIEW
+                    </Button>
+                  </Box>
                 </Box>
               </Card>
             );

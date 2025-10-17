@@ -181,7 +181,7 @@ const Community = () => {
       searchPlaceholder="Search..."
     >
       <Box sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, color: '#1e293b', mb: 1 }}>
           Community
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
