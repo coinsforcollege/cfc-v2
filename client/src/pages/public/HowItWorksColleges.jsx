@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Container,
@@ -54,137 +55,143 @@ import {
 } from '@mui/icons-material';
 import { colors, gradients, spacing, typography, shadows, borderRadius } from '../../utils/designTokens';
 
-const signupSteps = [
+const getSignupSteps = (t) => [
   {
     icon: School,
-    title: 'Verify Your College',
-    description: 'Search for your college or add it to our database',
-    details: 'Use your official college email address (@collegename.edu) to verify your affiliation with the institution.',
+    title: t('howItWorksColleges.signupStep1Title'),
+    description: t('howItWorksColleges.signupStep1Desc'),
+    details: t('howItWorksColleges.signupStep1Details'),
     color: '#ff6b6b',
     gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
     image: '/images/students-working-study-group.jpg'
   },
   {
     icon: Verified,
-    title: 'Complete Admin Profile',
-    description: 'Provide your position and contact information',
-    details: 'We verify your role at the college to ensure legitimate administration access. This process typically takes 24-48 hours.',
+    title: t('howItWorksColleges.signupStep2Title'),
+    description: t('howItWorksColleges.signupStep2Desc'),
+    details: t('howItWorksColleges.signupStep2Details'),
     color: '#4ecdc4',
     gradient: 'linear-gradient(135deg, #4ecdc4 0%, #6ee7b7 100%)',
     image: '/images/large-modern-office-building.jpg'
   },
   {
     icon: Settings,
-    title: 'Configure College Profile',
-    description: 'Upload logo and set basic information',
-    details: 'Add your college logo, website, address, and other essential details that students will see on your profile page.',
+    title: t('howItWorksColleges.signupStep3Title'),
+    description: t('howItWorksColleges.signupStep3Desc'),
+    details: t('howItWorksColleges.signupStep3Details'),
     color: '#45b7d1',
     gradient: 'linear-gradient(135deg, #45b7d1 0%, #7dd3fc 100%)',
     image: '/images/large-modern-office-building.jpg'
   },
   {
     icon: Token,
-    title: 'Setup Your Token',
-    description: 'Define token parameters and use cases',
-    details: 'Configure your token name, ticker symbol, supply, and explain how students can earn and spend tokens on campus.',
+    title: t('howItWorksColleges.signupStep4Title'),
+    description: t('howItWorksColleges.signupStep4Desc'),
+    details: t('howItWorksColleges.signupStep4Details'),
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
     image: '/images/ethereum-cryptocurrency-pixel-art-illustration-600nw-2077265023.webp'
   },
 ];
 
-const benefits = [
+const getBenefits = (t) => [
   {
     icon: Group,
-    title: 'Student Engagement',
-    description: 'Build a vibrant community of engaged students before token launch',
-    metric: '2,847 avg students per college',
+    title: t('howItWorksColleges.benefit1Title'),
+    description: t('howItWorksColleges.benefit1Desc'),
+    metric: t('howItWorksColleges.benefit1Metric'),
     color: '#ff6b6b',
     gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
     image: '/images/students-working-study-group.jpg'
   },
   {
     icon: TrendingUp,
-    title: 'Growth Tracking',
-    description: 'Monitor student interest and engagement in real-time',
-    metric: '15-20% monthly growth',
+    title: t('howItWorksColleges.benefit2Title'),
+    description: t('howItWorksColleges.benefit2Desc'),
+    metric: t('howItWorksColleges.benefit2Metric'),
     color: '#4ecdc4',
     gradient: 'linear-gradient(135deg, #4ecdc4 0%, #6ee7b7 100%)',
     image: '/images/pixel-art-cherry-blossom-day-gif.gif'
   },
   {
     icon: BarChart,
-    title: 'Data & Analytics',
-    description: 'Access detailed insights about student demographics and behavior',
-    metric: '50+ data points tracked',
+    title: t('howItWorksColleges.benefit3Title'),
+    description: t('howItWorksColleges.benefit3Desc'),
+    metric: t('howItWorksColleges.benefit3Metric'),
     color: '#45b7d1',
     gradient: 'linear-gradient(135deg, #45b7d1 0%, #7dd3fc 100%)',
     image: '/images/akiro-art-nft-square.jpg'
   },
   {
     icon: Security,
-    title: 'Secure Platform',
-    description: 'Enterprise-grade security and compliance standards',
-    metric: 'Bank-level encryption',
+    title: t('howItWorksColleges.benefit4Title'),
+    description: t('howItWorksColleges.benefit4Desc'),
+    metric: t('howItWorksColleges.benefit4Metric'),
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
     image: '/images/pixel-art-mining-cart-with-gold-icon-for-8bit-game-on-white-background-vector.jpg'
   },
 ];
 
-const caseStudies = [
+const getCaseStudies = (t) => [
   {
     college: 'MIT',
     students: 2847,
-    status: 'Token Configured',
-    achievement: 'Reached 2,000 students in first 3 months',
-    quote: 'The platform helped us gauge student interest before making significant investments in blockchain infrastructure.',
+    status: t('howItWorksColleges.caseStudy1Status'),
+    achievement: t('howItWorksColleges.caseStudy1Achievement'),
+    quote: t('howItWorksColleges.caseStudy1Quote'),
   },
   {
     college: 'Stanford University',
     students: 2653,
-    status: 'Admin Verified',
-    achievement: '90% student retention rate',
-    quote: 'Our students are excited about the future of campus tokens. The engagement metrics are incredible.',
+    status: t('howItWorksColleges.caseStudy2Status'),
+    achievement: t('howItWorksColleges.caseStudy2Achievement'),
+    quote: t('howItWorksColleges.caseStudy2Quote'),
   },
   {
     college: 'UC Berkeley',
     students: 2287,
-    status: 'Token Configured',
-    achievement: 'Integrated with campus payment systems',
-    quote: 'This platform provides the perfect bridge between student interest and actual token deployment.',
+    status: t('howItWorksColleges.caseStudy3Status'),
+    achievement: t('howItWorksColleges.caseStudy3Achievement'),
+    quote: t('howItWorksColleges.caseStudy3Quote'),
   },
 ];
 
-const faqs = [
+const getFaqs = (t) => [
   {
-    question: 'What is the cost to participate?',
-    answer: 'The platform is completely free for colleges during the beta phase. We help you build student engagement at no cost while you prepare for token launch.',
+    question: t('howItWorksColleges.faq1Question'),
+    answer: t('howItWorksColleges.faq1Answer'),
   },
   {
-    question: 'How do we verify our college admin status?',
-    answer: 'You must sign up with an official college email address and provide your position/title. Our team reviews applications within 24-48 hours.',
+    question: t('howItWorksColleges.faq2Question'),
+    answer: t('howItWorksColleges.faq2Answer'),
   },
   {
-    question: 'Can we customize our token parameters later?',
-    answer: 'Yes! You can update token name, supply, use cases, and other parameters at any time before the official launch.',
+    question: t('howItWorksColleges.faq3Question'),
+    answer: t('howItWorksColleges.faq3Answer'),
   },
   {
-    question: 'What data do we get access to?',
-    answer: 'You can see student mining activity, demographics, referral networks, engagement metrics, and export all data to CSV for analysis.',
+    question: t('howItWorksColleges.faq4Question'),
+    answer: t('howItWorksColleges.faq4Answer'),
   },
   {
-    question: 'How do we launch the actual token?',
-    answer: 'Once you\'ve configured your token and built sufficient student interest, we provide guidance on blockchain deployment and token distribution.',
+    question: t('howItWorksColleges.faq5Question'),
+    answer: t('howItWorksColleges.faq5Answer'),
   },
   {
-    question: 'What if students leave or graduate?',
-    answer: 'Student accounts remain active as long as they maintain engagement. Graduated students can optionally keep their tokens or transfer them.',
+    question: t('howItWorksColleges.faq6Question'),
+    answer: t('howItWorksColleges.faq6Answer'),
   },
 ];
 
 function HowItWorksColleges() {
   const theme = useTheme();
+  const { t } = useTranslation();
+
+  const signupSteps = getSignupSteps(t);
+  const benefits = getBenefits(t);
+  const caseStudies = getCaseStudies(t);
+  const faqs = getFaqs(t);
 
   return (
     <Box
@@ -249,7 +256,7 @@ function HowItWorksColleges() {
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <School sx={{ fontSize: '1rem' }} />
-                  For Colleges
+                  {t('howItWorksColleges.chipLabel')}
                 </Box>
               }
               sx={{
@@ -276,7 +283,7 @@ function HowItWorksColleges() {
                 textShadow: '0 4px 8px rgba(0,0,0,0.1)',
               }}
             >
-              How It Works for Colleges
+              {t('howItWorksColleges.title')}
             </Typography>
             <Typography
               sx={{
@@ -291,15 +298,15 @@ function HowItWorksColleges() {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Rocket sx={{ color: '#4ecdc4', fontSize: '1.2rem' }} />
-                  Launch with confidence
+                  {t('howItWorksColleges.heroTagline1')}
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <FlashOn sx={{ color: '#4ecdc4', fontSize: '1.2rem' }} />
-                  Build engagement first
+                  {t('howItWorksColleges.heroTagline2')}
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Security sx={{ color: '#4ecdc4', fontSize: '1.2rem' }} />
-                  Enterprise secure
+                  {t('howItWorksColleges.heroTagline3')}
                 </Box>
               </Box>
             </Typography>
@@ -326,7 +333,7 @@ function HowItWorksColleges() {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
                 <Rocket sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
-                Admin Signup Process
+                {t('howItWorksColleges.signupSectionTitle')}
               </Box>
             </Typography>
             <Typography
@@ -340,7 +347,7 @@ function HowItWorksColleges() {
                 lineHeight: 1.6,
               }}
             >
-              Get started in minutes with our streamlined onboarding process
+              {t('howItWorksColleges.signupSectionSubtitle')}
             </Typography>
 
             <Grid container spacing={4}>
@@ -383,7 +390,7 @@ function HowItWorksColleges() {
                       
                       <Box>
                         <Chip
-                          label={`Step ${index + 1}`}
+                          label={t('howItWorksColleges.stepLabel', { number: index + 1 })}
                           sx={{
                             background: step.gradient,
                             color: 'white',
@@ -491,7 +498,7 @@ function HowItWorksColleges() {
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
                   <Settings sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
-                  Token Configuration Walkthrough
+                  {t('howItWorksColleges.tokenConfigSectionTitle')}
                 </Box>
               </Typography>
               <Typography
@@ -505,7 +512,7 @@ function HowItWorksColleges() {
                   lineHeight: 1.6,
                 }}
               >
-                Design your token with complete flexibility
+                {t('howItWorksColleges.tokenConfigSectionSubtitle')}
               </Typography>
 
               <Grid container spacing={4}>
@@ -513,26 +520,44 @@ function HowItWorksColleges() {
                   <Stack spacing={3}>
                     {[
                       {
-                        title: 'Token Identity',
-                        items: ['Choose token name', 'Set ticker symbol (3-5 characters)', 'Upload token logo'],
+                        title: t('howItWorksColleges.tokenIdentityTitle'),
+                        items: [
+                          t('howItWorksColleges.tokenIdentityItem1'),
+                          t('howItWorksColleges.tokenIdentityItem2'),
+                          t('howItWorksColleges.tokenIdentityItem3')
+                        ],
                         color: '#ff6b6b',
                         icon: Token
                       },
                       {
-                        title: 'Token Economics',
-                        items: ['Define max supply', 'Set initial distribution', 'Configure mining rewards'],
+                        title: t('howItWorksColleges.tokenEconomicsTitle'),
+                        items: [
+                          t('howItWorksColleges.tokenEconomicsItem1'),
+                          t('howItWorksColleges.tokenEconomicsItem2'),
+                          t('howItWorksColleges.tokenEconomicsItem3')
+                        ],
                         color: '#4ecdc4',
                         icon: MonetizationOn
                       },
                       {
-                        title: 'Earning Mechanisms',
-                        items: ['Daily login rewards', 'Event attendance', 'Academic achievements', 'Community service'],
+                        title: t('howItWorksColleges.earningMechanismsTitle'),
+                        items: [
+                          t('howItWorksColleges.earningMechanismsItem1'),
+                          t('howItWorksColleges.earningMechanismsItem2'),
+                          t('howItWorksColleges.earningMechanismsItem3'),
+                          t('howItWorksColleges.earningMechanismsItem4')
+                        ],
                         color: '#45b7d1',
                         icon: EmojiEvents
                       },
                       {
-                        title: 'Spending Options',
-                        items: ['Campus dining', 'Bookstore purchases', 'Event tickets', 'Parking fees'],
+                        title: t('howItWorksColleges.spendingOptionsTitle'),
+                        items: [
+                          t('howItWorksColleges.spendingOptionsItem1'),
+                          t('howItWorksColleges.spendingOptionsItem2'),
+                          t('howItWorksColleges.spendingOptionsItem3'),
+                          t('howItWorksColleges.spendingOptionsItem4')
+                        ],
                         color: '#8b5cf6',
                         icon: BusinessCenter
                       },
@@ -646,30 +671,30 @@ function HowItWorksColleges() {
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Lightbulb sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
-                            Configuration Tips
+                            {t('howItWorksColleges.configTipsTitle')}
                           </Box>
                         </Typography>
                         <Divider sx={{ my: 3, borderColor: 'rgba(139, 92, 246, 0.2)' }} />
                         <Stack spacing={4}>
                           {[
                             {
-                              title: 'Start Simple',
-                              description: 'You can always add more features later. Begin with basic earning and spending options.',
+                              title: t('howItWorksColleges.configTip1Title'),
+                              description: t('howItWorksColleges.configTip1Desc'),
                               color: '#ff6b6b'
                             },
                             {
-                              title: 'Be Specific',
-                              description: 'Clearly define how students earn and spend tokens. Transparency builds trust and engagement.',
+                              title: t('howItWorksColleges.configTip2Title'),
+                              description: t('howItWorksColleges.configTip2Desc'),
                               color: '#4ecdc4'
                             },
                             {
-                              title: 'Monitor & Adjust',
-                              description: 'Use our analytics to see what resonates with students and adjust your token parameters accordingly.',
+                              title: t('howItWorksColleges.configTip3Title'),
+                              description: t('howItWorksColleges.configTip3Desc'),
                               color: '#45b7d1'
                             },
                             {
-                              title: 'Plan for Growth',
-                              description: 'Set a token supply that can accommodate future growth while maintaining value.',
+                              title: t('howItWorksColleges.configTip4Title'),
+                              description: t('howItWorksColleges.configTip4Desc'),
                               color: '#8b5cf6'
                             },
                           ].map((tip, index) => (
@@ -739,7 +764,7 @@ function HowItWorksColleges() {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
                 <BarChart sx={{ color: '#4ecdc4', fontSize: '2rem' }} />
-                Student Data & Analytics Overview
+                {t('howItWorksColleges.analyticsSectionTitle')}
               </Box>
             </Typography>
             <Typography
@@ -753,31 +778,46 @@ function HowItWorksColleges() {
                 lineHeight: 1.6,
               }}
             >
-              Make data-driven decisions with comprehensive insights
+              {t('howItWorksColleges.analyticsSectionSubtitle')}
             </Typography>
 
             <Grid container spacing={4}>
               {[
                 {
                   icon: Dashboard,
-                  title: 'Real-Time Dashboard',
-                  metrics: ['Active students', 'Daily mining rate', 'Engagement trends', 'Referral activity'],
+                  title: t('howItWorksColleges.analyticsCard1Title'),
+                  metrics: [
+                    t('howItWorksColleges.analyticsCard1Metric1'),
+                    t('howItWorksColleges.analyticsCard1Metric2'),
+                    t('howItWorksColleges.analyticsCard1Metric3'),
+                    t('howItWorksColleges.analyticsCard1Metric4')
+                  ],
                   color: '#ff6b6b',
                   gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
                   image: '/images/hero-digital-economy.jpg'
                 },
                 {
                   icon: Assessment,
-                  title: 'Detailed Reports',
-                  metrics: ['Student demographics', 'Graduation year breakdown', 'Geographic distribution', 'Activity heatmaps'],
+                  title: t('howItWorksColleges.analyticsCard2Title'),
+                  metrics: [
+                    t('howItWorksColleges.analyticsCard2Metric1'),
+                    t('howItWorksColleges.analyticsCard2Metric2'),
+                    t('howItWorksColleges.analyticsCard2Metric3'),
+                    t('howItWorksColleges.analyticsCard2Metric4')
+                  ],
                   color: '#4ecdc4',
                   gradient: 'linear-gradient(135deg, #4ecdc4 0%, #6ee7b7 100%)',
                   image: '/images/pixel-art-game-arcade-pink.gif'
                 },
                 {
                   icon: BarChart,
-                  title: 'Growth Analytics',
-                  metrics: ['Week-over-week growth', 'Retention rates', 'Peak activity times', 'Viral coefficient'],
+                  title: t('howItWorksColleges.analyticsCard3Title'),
+                  metrics: [
+                    t('howItWorksColleges.analyticsCard3Metric1'),
+                    t('howItWorksColleges.analyticsCard3Metric2'),
+                    t('howItWorksColleges.analyticsCard3Metric3'),
+                    t('howItWorksColleges.analyticsCard3Metric4')
+                  ],
                   color: '#45b7d1',
                   gradient: 'linear-gradient(135deg, #45b7d1 0%, #7dd3fc 100%)',
                   image: '/images/immutable-place-game-screen-pixel-art.jpeg'
@@ -913,7 +953,7 @@ function HowItWorksColleges() {
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
                   <Star sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
-                  Why Should Colleges Participate?
+                  {t('howItWorksColleges.benefitsSectionTitle')}
                 </Box>
               </Typography>
 
@@ -1036,7 +1076,7 @@ function HowItWorksColleges() {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
                 <EmojiEvents sx={{ color: '#ff6b6b', fontSize: '2rem' }} />
-                Success Stories
+                {t('howItWorksColleges.successStoriesTitle')}
               </Box>
             </Typography>
             <Typography
@@ -1050,7 +1090,7 @@ function HowItWorksColleges() {
                 lineHeight: 1.6,
               }}
             >
-              See how leading colleges are building their token communities
+              {t('howItWorksColleges.successStoriesSubtitle')}
             </Typography>
 
             <Grid container spacing={4}>
@@ -1134,7 +1174,7 @@ function HowItWorksColleges() {
                             fontWeight: 500,
                           }}
                         >
-                          Students Mining
+                          {t('howItWorksColleges.studentsMiningLabel')}
                         </Typography>
                         
                         <Divider sx={{ my: 3, borderColor: 'rgba(255, 107, 107, 0.2)' }} />
@@ -1199,7 +1239,7 @@ function HowItWorksColleges() {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
                 <ContactSupport sx={{ color: '#8b5cf6', fontSize: '2rem' }} />
-                FAQ for Administrators
+                {t('howItWorksColleges.faqSectionTitle')}
               </Box>
             </Typography>
 
@@ -1297,7 +1337,7 @@ function HowItWorksColleges() {
                   mb: 4,
                 }}
               >
-                Ready to Launch Your College Token?
+                {t('howItWorksColleges.ctaTitle')}
               </Typography>
               <Typography
                 sx={{
@@ -1306,7 +1346,7 @@ function HowItWorksColleges() {
                   lineHeight: 1.6,
                 }}
               >
-                Join leading colleges building the future of campus tokens
+                {t('howItWorksColleges.ctaSubtitle')}
               </Typography>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -1335,7 +1375,7 @@ function HowItWorksColleges() {
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <School sx={{ fontSize: '1.3rem' }} />
-                    Register Your College
+                    {t('howItWorksColleges.ctaButton')}
                   </Box>
                 </Button>
               </motion.div>

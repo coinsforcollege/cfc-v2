@@ -8,12 +8,14 @@ import {
   Alert
 } from '@mui/material';
 import { Send, CheckCircle } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { blogApi } from '../../api/blog.api';
 import { colors, borderRadius } from '../../utils/designTokens';
 import { useToast } from '../../contexts/ToastContext';
 
 const ContactForm = ({ postSlug }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,7 +36,7 @@ const ContactForm = ({ postSlug }) => {
     e.preventDefault();
     
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      showToast('Please fill in all required fields', 'error');
+      showToast(t('auth.pleaseFillAllFields'), 'error');
       return;
     }
 
@@ -46,14 +48,14 @@ const ContactForm = ({ postSlug }) => {
       });
       
       if (response.success) {
-        showToast('Message sent successfully! We\'ll get back to you soon.', 'success');
+        showToast(t('auth.messageSentSuccessfully'), 'success');
         setSubmitted(true);
         setFormData({ name: '', email: '', subject: '', message: '' });
         
         setTimeout(() => setSubmitted(false), 5000);
       }
     } catch (error) {
-      showToast(error.message || 'Failed to send message', 'error');
+      showToast(error.message || t('auth.failedToSendMessage'), 'error');
     } finally {
       setLoading(false);
     }
@@ -66,10 +68,10 @@ const ContactForm = ({ postSlug }) => {
       borderBottom: `1px solid ${colors.neutral[200]}`
     }}>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-        Get in Touch
+        {t('auth.contactUs')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Have questions or feedback about this article? We'd love to hear from you!
+        {t('auth.getInTouch')}
       </Typography>
 
       {submitted ? (
@@ -82,10 +84,10 @@ const ContactForm = ({ postSlug }) => {
         }}>
           <CheckCircle sx={{ fontSize: 64, color: colors.success[500] }} />
           <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
-            Thank you for your message!
+            {t('auth.messageSent')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-            We'll respond to you as soon as possible
+            {t('auth.thankYouForContacting')}
           </Typography>
         </Box>
       ) : (
@@ -93,7 +95,7 @@ const ContactForm = ({ postSlug }) => {
           <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
             <TextField
               name="name"
-              placeholder="Your name *"
+              placeholder={`${t('auth.yourName')} *`}
               value={formData.name}
               onChange={handleChange}
               required
@@ -102,7 +104,7 @@ const ContactForm = ({ postSlug }) => {
             <TextField
               name="email"
               type="email"
-              placeholder="Your email *"
+              placeholder={`${t('auth.yourEmail')} *`}
               value={formData.email}
               onChange={handleChange}
               required
@@ -113,7 +115,7 @@ const ContactForm = ({ postSlug }) => {
           <TextField
             fullWidth
             name="subject"
-            placeholder="Subject (optional)"
+            placeholder={`${t('auth.subject')} (${t('common.optional')})`}
             value={formData.subject}
             onChange={handleChange}
             sx={{ mb: 2 }}
@@ -124,7 +126,7 @@ const ContactForm = ({ postSlug }) => {
             multiline
             rows={4}
             name="message"
-            placeholder="Your message *"
+            placeholder={`${t('auth.message')} *`}
             value={formData.message}
             onChange={handleChange}
             required
@@ -149,7 +151,7 @@ const ContactForm = ({ postSlug }) => {
               }
             }}
           >
-            {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Send Message'}
+            {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : t('auth.sendMessage')}
           </Button>
         </Box>
       )}

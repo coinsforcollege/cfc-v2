@@ -20,78 +20,80 @@ import {
   ArrowForward
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { colors, gradients, spacing, typography, shadows, borderRadius } from '../../utils/designTokens';
 
 const HowItWorksSection = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const steps = [
     {
       id: 1,
-      title: "Students Start Mining",
-      subtitle: "Create account, select up to 10 colleges, begin daily mining cycles",
-      description: "Students create their accounts and select up to 10 colleges they want to support. They begin daily mining cycles where tokens accumulate as virtual balance.",
+      title: t('howItWorks.step1Title'),
+      subtitle: t('howItWorks.step1Subtitle'),
+      description: t('howItWorks.step1Desc'),
       icon: <School sx={{ fontSize: '2.5rem' }} />,
       color: colors.primary[500],
       gradient: gradients.primary,
       details: [
-        "Create student account with email verification",
-        "Select up to 10 colleges to mine for",
-        "Start daily 24-hour mining cycles",
-        "Earn virtual tokens that accumulate over time",
-        "Invite peers for mining bonuses"
+        t('howItWorks.step1Detail1'),
+        t('howItWorks.step1Detail2'),
+        t('howItWorks.step1Detail3'),
+        t('howItWorks.step1Detail4'),
+        t('howItWorks.step1Detail5')
       ],
-      stats: "12,450+ students actively mining"
+      stats: t('howItWorks.step1Stats')
     },
     {
       id: 2,
-      title: "Colleges Join & Configure",
-      subtitle: "Institutions join waitlist, define token parameters, choose infrastructure model",
-      description: "Colleges join our waitlist and work with our team to define their token parameters, choose their preferred infrastructure model, and finalize tokenomics.",
+      title: t('howItWorks.step2Title'),
+      subtitle: t('howItWorks.step2Subtitle'),
+      description: t('howItWorks.step2Desc'),
       icon: <Settings sx={{ fontSize: '2.5rem' }} />,
       color: colors.secondary[500],
       gradient: gradients.primaryDark,
       details: [
-        "Join the official waitlist",
-        "Define token name, ticker, and supply",
-        "Choose infrastructure model (self-managed, guided, or fully managed)",
-        "Configure mining allocation for early supporters",
-        "Design utility: payments, perks, access rights"
+        t('howItWorks.step2Detail1'),
+        t('howItWorks.step2Detail2'),
+        t('howItWorks.step2Detail3'),
+        t('howItWorks.step2Detail4'),
+        t('howItWorks.step2Detail5')
       ],
-      stats: "500+ colleges on waitlist"
+      stats: t('howItWorks.step2Stats')
     },
     {
       id: 3,
-      title: "College Goes Live",
-      subtitle: "Smart contracts deploy, tokens mint, early supporters' balances unlock",
-      description: "When a college is ready to launch, smart contracts are deployed, tokens are minted, and early supporters' balances unlock based on the college's mining allocation formula.",
+      title: t('howItWorks.step3Title'),
+      subtitle: t('howItWorks.step3Subtitle'),
+      description: t('howItWorks.step3Desc'),
       icon: <RocketLaunch sx={{ fontSize: '2.5rem' }} />,
       color: colors.success[500],
       gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
       details: [
-        "Smart contracts deployed on CollegenZ L2",
-        "Tokens minted according to configuration",
-        "Early supporters' balances unlock",
-        "KYC verification for token release",
-        "Proof of college association required"
+        t('howItWorks.step3Detail1'),
+        t('howItWorks.step3Detail2'),
+        t('howItWorks.step3Detail3'),
+        t('howItWorks.step3Detail4'),
+        t('howItWorks.step3Detail5')
       ],
-      stats: "50+ colleges already live"
+      stats: t('howItWorks.step3Stats')
     },
     {
       id: 4,
-      title: "Ecosystem Activation",
-      subtitle: "Token lists on exchange, campus wallet rollout, digital economy operational",
-      description: "The token lists on InTuition Exchange, campus wallet rollout begins, and the digital economy becomes fully operational with payments, fundraising, governance, and student-built dApps.",
+      title: t('howItWorks.step4Title'),
+      subtitle: t('howItWorks.step4Subtitle'),
+      description: t('howItWorks.step4Desc'),
       icon: <AccountBalance sx={{ fontSize: '2.5rem' }} />,
       color: '#f59e0b',
       gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
       details: [
-        "Token lists on InTuition Exchange",
-        "Campus wallet system rollout",
-        "Digital payments and commerce active",
-        "Alumni fundraising portal live",
-        "Student dApps and governance active"
+        t('howItWorks.step4Detail1'),
+        t('howItWorks.step4Detail2'),
+        t('howItWorks.step4Detail3'),
+        t('howItWorks.step4Detail4'),
+        t('howItWorks.step4Detail5')
       ],
-      stats: "$2M+ in token circulation"
+      stats: t('howItWorks.step4Stats')
     }
   ];
 
@@ -128,7 +130,7 @@ const HowItWorksSection = () => {
         >
           <Box sx={{ textAlign: 'center', mb: { xs: spacing['3xl'], md: spacing['4xl'] } }}>
             <Chip
-              label="Process"
+              label={t('howItWorks.chipLabel')}
               sx={{
                 background: gradients.primary,
                 color: 'white',
@@ -149,7 +151,7 @@ const HowItWorksSection = () => {
                 lineHeight: typography.lineHeight.tight
               }}
             >
-              How It Works
+              {t('howItWorks.title')}
             </Typography>
             <Typography
               sx={{
@@ -160,7 +162,7 @@ const HowItWorksSection = () => {
                 lineHeight: typography.lineHeight.relaxed
               }}
             >
-              From Mining to Live Economy - A simple 4-step process that transforms your college into a digital economy powerhouse
+              {t('howItWorks.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -376,11 +378,11 @@ const HowItWorksSection = () => {
                 lineHeight: typography.lineHeight.relaxed
               }}
             >
-              Ready to start your college's digital transformation?
+              {t('howItWorks.ctaText')}
             </Typography>
-            <Stack 
-              direction={{ xs: 'column', sm: 'row' }} 
-              spacing={2} 
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
               sx={{ justifyContent: 'center', alignItems: 'center' }}
             >
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -408,7 +410,7 @@ const HowItWorksSection = () => {
                     }
                   }}
                 >
-                  Start Mining Now
+                  {t('howItWorks.ctaButton1')}
                   <ArrowForward />
                 </Box>
               </motion.div>
@@ -438,7 +440,7 @@ const HowItWorksSection = () => {
                     }
                   }}
                 >
-                  Join College Waitlist
+                  {t('howItWorks.ctaButton2')}
                   <Timeline />
                 </Box>
               </motion.div>

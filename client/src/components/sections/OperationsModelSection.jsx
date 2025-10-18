@@ -1,67 +1,69 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Button, Stack } from '@mui/material';
-import { 
-  Settings, 
-  Support, 
+import {
+  Settings,
+  Support,
   CloudDone,
   CheckCircle,
   Star,
   TrendingUp
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const OperationsModelSection = () => {
+  const { t } = useTranslation();
   const [selectedModel, setSelectedModel] = useState(0);
 
   const models = [
     {
       icon: Settings,
-      title: 'Self-Managed',
-      description: 'Full technical documentation and admin access. Your IT team maintains complete control.',
+      title: t('operationsModel.model1Title'),
+      description: t('operationsModel.model1Desc'),
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
       features: [
-        'Complete technical documentation',
-        'Full admin access and control',
-        'Your IT team manages everything',
-        'Maximum customization options'
+        t('operationsModel.model1Feature1'),
+        t('operationsModel.model1Feature2'),
+        t('operationsModel.model1Feature3'),
+        t('operationsModel.model1Feature4')
       ],
       image: '/images/blockchain-development-dark-purple-bg-vector.jpg'
     },
     {
       icon: Support,
-      title: 'Guided Implementation',
-      description: 'Free consultation on third-party service providers. We map the architecture; you execute with vetted partners.',
+      title: t('operationsModel.model2Title'),
+      description: t('operationsModel.model2Desc'),
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
       features: [
-        'Free consultation and planning',
-        'Vetted partner recommendations',
-        'Architecture mapping and guidance',
-        'You execute with our support'
+        t('operationsModel.model2Feature1'),
+        t('operationsModel.model2Feature2'),
+        t('operationsModel.model2Feature3'),
+        t('operationsModel.model2Feature4')
       ],
       image: '/images/hero-digital-economy.jpg'
     },
     {
       icon: CloudDone,
-      title: 'Fully Managed AMC',
-      description: 'We handle infrastructure, monitoring, scaling, and updates. Fixed annual contract, predictable costs.',
+      title: t('operationsModel.model3Title'),
+      description: t('operationsModel.model3Desc'),
       color: '#06b6d4',
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
       features: [
-        'Complete infrastructure management',
-        '24/7 monitoring and support',
-        'Automatic scaling and updates',
-        'Fixed annual contract pricing'
+        t('operationsModel.model3Feature1'),
+        t('operationsModel.model3Feature2'),
+        t('operationsModel.model3Feature3'),
+        t('operationsModel.model3Feature4')
       ],
       image: '/images/large-modern-office-building.jpg'
     }
   ];
 
   const earlyAdopterTerms = [
-    { icon: CheckCircle, text: 'Pay upfront development fee, OR' },
-    { icon: Star, text: 'Allocate up to 5% of tokens to Coins For College' },
-    { icon: TrendingUp, text: 'Free setup package for waitlisted institutions choosing token allocation model' }
+    { icon: CheckCircle, text: t('operationsModel.term1') },
+    { icon: Star, text: t('operationsModel.term2') },
+    { icon: TrendingUp, text: t('operationsModel.term3') }
   ];
 
   return (
@@ -100,7 +102,7 @@ const OperationsModelSection = () => {
         >
           <Box sx={{ textAlign: 'center', mb: 8 }}>
             <Chip
-              label="Your Infrastructure, Your Choice"
+              label={t('operationsModel.chipLabel')}
               sx={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                 color: '#ffffff',
@@ -123,7 +125,7 @@ const OperationsModelSection = () => {
                 mb: 3,
               }}
             >
-              Flexible Operations Model
+              {t('operationsModel.title')}
             </Typography>
             <Typography
               sx={{
@@ -134,7 +136,7 @@ const OperationsModelSection = () => {
                 mx: 'auto',
               }}
             >
-              Choose the level of control and support that fits your institution's needs and capabilities
+              {t('operationsModel.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -247,7 +249,7 @@ const OperationsModelSection = () => {
                           boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
                         }}
                       >
-                        POPULAR
+                        {t('operationsModel.popularBadge')}
                       </Box>
                     )}
 
@@ -525,7 +527,7 @@ const OperationsModelSection = () => {
                     mb: 3,
                   }}
                 >
-                  Early Adopter Terms
+                  {t('operationsModel.earlyAdopterTitle')}
                 </Typography>
                 <Typography
                   sx={{
@@ -535,7 +537,7 @@ const OperationsModelSection = () => {
                     lineHeight: 1.6,
                   }}
                 >
-                  Join the waitlist now and choose your preferred payment model
+                  {t('operationsModel.earlyAdopterDesc')}
                 </Typography>
                 
                 <Box>

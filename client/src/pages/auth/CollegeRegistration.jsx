@@ -8,6 +8,7 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
 import OTPDialog from '../../components/OTPDialog';
@@ -16,6 +17,7 @@ import CollegeAdminConfirmationDialog from '../../components/CollegeAdminConfirm
 const CollegeRegistration = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t, i18n } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -62,7 +64,8 @@ const CollegeRegistration = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        password: formData.password
+        password: formData.password,
+        language: i18n.language || 'en'
       };
 
       const response = await authApi.sendOTPCollege(otpData);
@@ -187,52 +190,52 @@ const CollegeRegistration = () => {
                 WebkitTextFillColor: 'transparent'
               }}
             >
-              Launch Your College Token
+              {t('auth.launchYourCollegeToken')}
             </Typography>
 
             <Typography variant="body1" sx={{ mb: 3, color: '#4a5568', lineHeight: 1.7 }}>
-              Join colleges building vibrant student communities through blockchain technology. Configure your token and track student engagement.
+              {t('auth.joinCollegesBuildingDesc')}
             </Typography>
 
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#2d3748' }}>
-                What You Get
+                {t('auth.whatYouGet')}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#0EA5E9', mb: 0.5 }}>
-                    📊 Student Engagement
+                    {t('auth.studentEngagement')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Build a vibrant community of engaged students before token launch
+                    {t('auth.studentEngagementDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#0EA5E9', mb: 0.5 }}>
-                    📈 Growth Tracking
+                    {t('auth.growthTracking')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Monitor student interest and engagement in real-time
+                    {t('auth.growthTrackingDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#0EA5E9', mb: 0.5 }}>
-                    🔧 Data & Analytics
+                    {t('auth.dataAndAnalytics')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Access detailed insights about student demographics and behavior
+                    {t('auth.dataAndAnalyticsDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#0EA5E9', mb: 0.5 }}>
-                    🔒 Secure Platform
+                    {t('auth.securePlatform')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Enterprise-grade security and compliance standards
+                    {t('auth.securePlatformDesc')}
                   </Typography>
                 </Box>
               </Box>
@@ -259,7 +262,7 @@ const CollegeRegistration = () => {
               color: '#2d3748'
             }}
           >
-            Create Admin Account
+            {t('auth.createAdminAccount')}
           </Typography>
           
           <Typography
@@ -269,7 +272,7 @@ const CollegeRegistration = () => {
               mb: 3
             }}
           >
-            Get started in under 2 minutes
+            {t('auth.getStartedInMinutes')}
           </Typography>
 
           {error && (
@@ -281,7 +284,7 @@ const CollegeRegistration = () => {
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Full Name"
+              label={t('auth.fullName')}
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -291,7 +294,7 @@ const CollegeRegistration = () => {
 
             <TextField
               fullWidth
-              label="Email"
+              label={t('auth.email')}
               name="email"
               type="email"
               value={formData.email}
@@ -302,7 +305,7 @@ const CollegeRegistration = () => {
 
             <TextField
               fullWidth
-              label="Phone"
+              label={t('auth.phone')}
               name="phone"
               value={formData.phone}
               onChange={handleChange}
@@ -312,7 +315,7 @@ const CollegeRegistration = () => {
 
             <TextField
               fullWidth
-              label="Password"
+              label={t('auth.password')}
               name="password"
               type="password"
               value={formData.password}
@@ -323,7 +326,7 @@ const CollegeRegistration = () => {
 
             <TextField
               fullWidth
-              label="Confirm Password"
+              label={t('auth.confirmPassword')}
               name="confirmPassword"
               type="password"
               value={formData.confirmPassword}
@@ -351,12 +354,12 @@ const CollegeRegistration = () => {
                 mb: 2
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Continue'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.continue')}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                Already have an account?{' '}
+                {t('auth.alreadyHaveAccount')}{' '}
                 <Link
                   to="/auth/login"
                   style={{
@@ -365,7 +368,7 @@ const CollegeRegistration = () => {
                     fontWeight: 600
                   }}
                 >
-                  Login
+                  {t('auth.loginLink')}
                 </Link>
               </Typography>
             </Box>

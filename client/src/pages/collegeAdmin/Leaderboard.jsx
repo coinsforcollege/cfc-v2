@@ -30,8 +30,10 @@ import { collegeAdminApi } from '../../api/collegeAdmin.api';
 import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { getImageUrl } from '../../utils/imageUtils';
+import { useTranslation } from 'react-i18next';
 
 const Leaderboard = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -62,7 +64,7 @@ const Leaderboard = () => {
       });
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
-      showToast('Failed to load leaderboard', 'error');
+      showToast(t('collegeAdminLeaderboard.errorLoadFailed'), 'error');
       setLeaderboardData({
         top10: [],
         currentCollege: null,
@@ -130,7 +132,7 @@ const Leaderboard = () => {
               {college.name}
               {isCurrentCollege && (
                 <Chip
-                  label="Your College"
+                  label={t('collegeAdminLeaderboard.yourCollege')}
                   size="small"
                   sx={{
                     ml: 1,
@@ -191,11 +193,11 @@ const Leaderboard = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
               <TrendingUp sx={{ color: '#667eea', fontSize: 32 }} />
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                College Leaderboard
+                {t('collegeAdminLeaderboard.pageTitle')}
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary">
-              Rankings based on total tokens mined
+              {t('collegeAdminLeaderboard.pageDescription')}
             </Typography>
           </Box>
           <IconButton
@@ -217,7 +219,7 @@ const Leaderboard = () => {
           <CardContent sx={{ p: 3 }}>
             <TextField
               fullWidth
-              placeholder="Search by college name, location, or description..."
+              placeholder={t('collegeAdminLeaderboard.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyPress={handleSearchKeyPress}
@@ -244,19 +246,19 @@ const Leaderboard = () => {
           <CardContent sx={{ p: 0 }}>
             <Box sx={{ p: 3, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb' }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                Top 10 Colleges
+                {t('collegeAdminLeaderboard.top10Colleges')}
               </Typography>
             </Box>
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569', width: 80 }}>Rank</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Total Students</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Active Sessions</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Total Tokens Mined</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Mining Rate</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569', width: 80 }}>{t('collegeAdminLeaderboard.headerRank')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('collegeAdminLeaderboard.headerCollege')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerTotalStudents')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerActiveSessions')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerTotalTokensMined')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerMiningRate')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -264,7 +266,7 @@ const Leaderboard = () => {
                     <TableRow>
                       <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                         <Typography variant="body2" color="text.secondary">
-                          No colleges found
+                          {t('collegeAdminLeaderboard.noCollegesFound')}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -283,22 +285,22 @@ const Leaderboard = () => {
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ p: 3, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Your College Ranking
+                  {t('collegeAdminLeaderboard.yourCollegeRanking')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Your college is ranked #{leaderboardData.currentCollege.rank}
+                  {t('collegeAdminLeaderboard.yourCollegeRanked', { rank: leaderboardData.currentCollege.rank })}
                 </Typography>
               </Box>
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569', width: 80 }}>Rank</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Total Students</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Active Sessions</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Total Tokens Mined</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Mining Rate</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', width: 80 }}>{t('collegeAdminLeaderboard.headerRank')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('collegeAdminLeaderboard.headerCollege')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerTotalStudents')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerActiveSessions')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerTotalTokensMined')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminLeaderboard.headerMiningRate')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

@@ -31,8 +31,10 @@ import { getImageUrl } from '../../utils/imageUtils';
 import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { COUNTRIES } from '../../constants/countries';
+import { useTranslation } from 'react-i18next';
 
 const CollegeProfile = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -115,7 +117,7 @@ const CollegeProfile = () => {
       }
     } catch (error) {
       console.error('Error fetching dashboard:', error);
-      showToast('Failed to load college data', 'error');
+      showToast(t('collegeAdminCollegeProfile.errorLoadFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -160,11 +162,11 @@ const CollegeProfile = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        showToast('Please select an image file', 'error');
+        showToast(t('collegeAdminCollegeProfile.errorInvalidImageFile'), 'error');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        showToast('File size should be less than 5MB', 'error');
+        showToast(t('collegeAdminCollegeProfile.errorFileSizeTooLarge'), 'error');
         return;
       }
       setLogoFile(file);
@@ -178,11 +180,11 @@ const CollegeProfile = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        showToast('Please select an image file', 'error');
+        showToast(t('collegeAdminCollegeProfile.errorInvalidImageFile'), 'error');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        showToast('File size should be less than 5MB', 'error');
+        showToast(t('collegeAdminCollegeProfile.errorFileSizeTooLarge'), 'error');
         return;
       }
       setCoverFile(file);
@@ -215,13 +217,13 @@ const CollegeProfile = () => {
       }
 
       await collegeAdminApi.updateCollegeDetails(formData);
-      showToast('College profile updated successfully', 'success');
+      showToast(t('collegeAdminCollegeProfile.successUpdated'), 'success');
       fetchDashboard();
       setLogoFile(null);
       setCoverFile(null);
     } catch (error) {
       console.error('Error saving college:', error);
-      showToast('Failed to update college profile', 'error');
+      showToast(t('collegeAdminCollegeProfile.errorUpdateFailed'), 'error');
     } finally {
       setSaveLoading(false);
     }
@@ -245,10 +247,10 @@ const CollegeProfile = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <Box>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  College Profile
+                  {t('collegeAdminCollegeProfile.pageTitle')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Update your college information and branding
+                  {t('collegeAdminCollegeProfile.pageDescription')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: 2 }}>
@@ -257,7 +259,7 @@ const CollegeProfile = () => {
                   startIcon={<ArrowBack />}
                   onClick={() => navigate('/college-admin/overview')}
                 >
-                  Cancel
+                  {t('collegeAdminCollegeProfile.buttonCancel')}
                 </Button>
                 <Button
                   variant="contained"
@@ -271,7 +273,7 @@ const CollegeProfile = () => {
                     }
                   }}
                 >
-                  {saveLoading ? 'Saving...' : 'Save Changes'}
+                  {saveLoading ? t('collegeAdminCollegeProfile.buttonSaving') : t('collegeAdminCollegeProfile.buttonSave')}
                 </Button>
               </Box>
             </Box>
@@ -281,86 +283,86 @@ const CollegeProfile = () => {
         <Paper sx={{ padding: 5, borderRadius: 3, boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)' }}>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#667eea' }}>
-              Basic Information
+              {t('collegeAdminCollegeProfile.sectionBasicInformation')}
             </Typography>
             <Box sx={{ marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="College Name"
+                label={t('collegeAdminCollegeProfile.labelCollegeName')}
                 value={collegeFormData.name}
                 onChange={(e) => handleCollegeFormChange('name', e.target.value)}
                 required
                 disabled
-                helperText="Cannot be changed after registration"
+                helperText={t('collegeAdminCollegeProfile.helperCannotChange')}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Short Name"
+                label={t('collegeAdminCollegeProfile.labelShortName')}
                 value={collegeFormData.shortName}
                 onChange={(e) => handleCollegeFormChange('shortName', e.target.value)}
-                placeholder="e.g., MIT, UCLA"
+                placeholder={t('collegeAdminCollegeProfile.placeholderShortName')}
               />
               <TextField
                 fullWidth
-                label="Tagline"
+                label={t('collegeAdminCollegeProfile.labelTagline')}
                 value={collegeFormData.tagline}
                 onChange={(e) => handleCollegeFormChange('tagline', e.target.value)}
-                placeholder="A memorable phrase"
+                placeholder={t('collegeAdminCollegeProfile.placeholderTagline')}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
                 select
-                label="Type"
+                label={t('collegeAdminCollegeProfile.labelType')}
                 value={collegeFormData.type}
                 onChange={(e) => handleCollegeFormChange('type', e.target.value)}
               >
-                <MenuItem value="University">University</MenuItem>
-                <MenuItem value="College">College</MenuItem>
-                <MenuItem value="Institute">Institute</MenuItem>
-                <MenuItem value="School">School</MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
+                <MenuItem value="University">{t('collegeAdminCollegeProfile.typeUniversity')}</MenuItem>
+                <MenuItem value="College">{t('collegeAdminCollegeProfile.typeCollege')}</MenuItem>
+                <MenuItem value="Institute">{t('collegeAdminCollegeProfile.typeInstitute')}</MenuItem>
+                <MenuItem value="School">{t('collegeAdminCollegeProfile.typeSchool')}</MenuItem>
+                <MenuItem value="Other">{t('collegeAdminCollegeProfile.typeOther')}</MenuItem>
               </TextField>
               <TextField
                 fullWidth
-                label="Established Year"
+                label={t('collegeAdminCollegeProfile.labelEstablishedYear')}
                 type="number"
                 value={collegeFormData.establishedYear}
                 onChange={(e) => handleCollegeFormChange('establishedYear', e.target.value)}
-                placeholder="1861"
+                placeholder={t('collegeAdminCollegeProfile.placeholderEstablishedYear')}
               />
             </Box>
             <Box sx={{ marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Short Description"
+                label={t('collegeAdminCollegeProfile.labelShortDescription')}
                 multiline
                 rows={3}
                 value={collegeFormData.description}
                 onChange={(e) => handleCollegeFormChange('description', e.target.value)}
-                placeholder="A brief 2-3 sentence overview"
-                helperText={`${(collegeFormData.description || '').length} characters`}
+                placeholder={t('collegeAdminCollegeProfile.placeholderShortDescription')}
+                helperText={`${(collegeFormData.description || '').length} ${t('collegeAdminCollegeProfile.characters')}`}
               />
             </Box>
           </Box>
 
           <Box sx={{ marginTop: 5 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#ec4899' }}>
-              Location
+              {t('collegeAdminCollegeProfile.sectionLocation')}
             </Typography>
             <Box sx={{ marginBottom: 3 }}>
               <TextField
                 fullWidth
                 select
-                label="Country"
+                label={t('collegeAdminCollegeProfile.labelCountry')}
                 value={collegeFormData.country}
                 onChange={(e) => handleCollegeFormChange('country', e.target.value)}
                 required
                 disabled
-                helperText="Cannot be changed after registration"
+                helperText={t('collegeAdminCollegeProfile.helperCannotChange')}
               >
                 {COUNTRIES.map((country) => (
                   <MenuItem key={country} value={country}>
@@ -372,46 +374,46 @@ const CollegeProfile = () => {
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="State / Province"
+                label={t('collegeAdminCollegeProfile.labelState')}
                 value={collegeFormData.state}
                 onChange={(e) => handleCollegeFormChange('state', e.target.value)}
-                placeholder="e.g., California"
+                placeholder={t('collegeAdminCollegeProfile.placeholderState')}
               />
               <TextField
                 fullWidth
-                label="City"
+                label={t('collegeAdminCollegeProfile.labelCity')}
                 value={collegeFormData.city}
                 onChange={(e) => handleCollegeFormChange('city', e.target.value)}
-                placeholder="e.g., Los Angeles"
+                placeholder={t('collegeAdminCollegeProfile.placeholderCity')}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Zip Code"
+                label={t('collegeAdminCollegeProfile.labelZipCode')}
                 value={collegeFormData.zipCode}
                 onChange={(e) => handleCollegeFormChange('zipCode', e.target.value)}
-                placeholder="e.g., 90001"
+                placeholder={t('collegeAdminCollegeProfile.placeholderZipCode')}
               />
               <TextField
                 fullWidth
-                label="Street Address"
+                label={t('collegeAdminCollegeProfile.labelStreetAddress')}
                 value={collegeFormData.address}
                 onChange={(e) => handleCollegeFormChange('address', e.target.value)}
-                placeholder="Complete street address"
+                placeholder={t('collegeAdminCollegeProfile.placeholderStreetAddress')}
               />
             </Box>
           </Box>
 
           <Box sx={{ marginTop: 5 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#4ecdc4' }}>
-              Branding
+              {t('collegeAdminCollegeProfile.sectionBranding')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <Box sx={{ width: '100%' }}>
                 <TextField
                   fullWidth
-                  label="Logo URL"
+                  label={t('collegeAdminCollegeProfile.labelLogoURL')}
                   value={collegeFormData.logo || ''}
                   onChange={(e) => {
                     handleCollegeFormChange('logo', e.target.value);
@@ -421,7 +423,7 @@ const CollegeProfile = () => {
                   sx={{ marginBottom: 2 }}
                 />
                 <Button variant="outlined" component="label" fullWidth sx={{ marginBottom: 2 }}>
-                  Or Upload Logo File
+                  {t('collegeAdminCollegeProfile.buttonUploadLogo')}
                   <input type="file" hidden accept="image/*" onChange={handleLogoFileChange} />
                 </Button>
                 <Box sx={{ height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -433,7 +435,7 @@ const CollegeProfile = () => {
               <Box sx={{ width: '100%' }}>
                 <TextField
                   fullWidth
-                  label="Cover Image URL"
+                  label={t('collegeAdminCollegeProfile.labelCoverImageURL')}
                   value={collegeFormData.coverImage || ''}
                   onChange={(e) => {
                     handleCollegeFormChange('coverImage', e.target.value);
@@ -443,7 +445,7 @@ const CollegeProfile = () => {
                   sx={{ marginBottom: 2 }}
                 />
                 <Button variant="outlined" component="label" fullWidth sx={{ marginBottom: 2 }}>
-                  Or Upload Cover File
+                  {t('collegeAdminCollegeProfile.buttonUploadCover')}
                   <input type="file" hidden accept="image/*" onChange={handleCoverFileChange} />
                 </Button>
                 <Box sx={{ height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -456,81 +458,81 @@ const CollegeProfile = () => {
             <Box sx={{ marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Video URL"
+                label={t('collegeAdminCollegeProfile.labelVideoURL')}
                 value={collegeFormData.videoUrl}
                 onChange={(e) => handleCollegeFormChange('videoUrl', e.target.value)}
                 placeholder="https://youtube.com/watch?v=..."
-                helperText="YouTube or Vimeo video"
+                helperText={t('collegeAdminCollegeProfile.helperVideoURL')}
               />
             </Box>
           </Box>
 
           <Box sx={{ marginTop: 5 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#f59e0b' }}>
-              About & Mission
+              {t('collegeAdminCollegeProfile.sectionAboutMission')}
             </Typography>
             <Box sx={{ marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="About"
+                label={t('collegeAdminCollegeProfile.labelAbout')}
                 multiline
                 rows={6}
                 value={collegeFormData.about}
                 onChange={(e) => handleCollegeFormChange('about', e.target.value)}
-                placeholder="Write about your college..."
-                helperText={`${(collegeFormData.about || '').length} characters`}
+                placeholder={t('collegeAdminCollegeProfile.placeholderAbout')}
+                helperText={`${(collegeFormData.about || '').length} ${t('collegeAdminCollegeProfile.characters')}`}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Mission Statement"
+                label={t('collegeAdminCollegeProfile.labelMission')}
                 multiline
                 rows={3}
                 value={collegeFormData.mission}
                 onChange={(e) => handleCollegeFormChange('mission', e.target.value)}
-                placeholder="What your college aims to achieve"
+                placeholder={t('collegeAdminCollegeProfile.placeholderMission')}
               />
               <TextField
                 fullWidth
-                label="Vision Statement"
+                label={t('collegeAdminCollegeProfile.labelVision')}
                 multiline
                 rows={3}
                 value={collegeFormData.vision}
                 onChange={(e) => handleCollegeFormChange('vision', e.target.value)}
-                placeholder="Your college's aspirations"
+                placeholder={t('collegeAdminCollegeProfile.placeholderVision')}
               />
             </Box>
           </Box>
 
           <Box sx={{ marginTop: 5 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#45b7d1' }}>
-              Contact Information
+              {t('collegeAdminCollegeProfile.sectionContactInformation')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Website"
+                label={t('collegeAdminCollegeProfile.labelWebsite')}
                 value={collegeFormData.website}
                 onChange={(e) => handleCollegeFormChange('website', e.target.value)}
-                placeholder="https://college.edu"
+                placeholder={t('collegeAdminCollegeProfile.placeholderWebsite')}
               />
               <TextField
                 fullWidth
-                label="Email"
+                label={t('collegeAdminCollegeProfile.labelEmail')}
                 type="email"
                 value={collegeFormData.email}
                 onChange={(e) => handleCollegeFormChange('email', e.target.value)}
-                placeholder="info@college.edu"
+                placeholder={t('collegeAdminCollegeProfile.placeholderEmail')}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Phone"
+                label={t('collegeAdminCollegeProfile.labelPhone')}
                 value={collegeFormData.phone}
                 onChange={(e) => handleCollegeFormChange('phone', e.target.value)}
-                placeholder="+1 (555) 123-4567"
+                placeholder={t('collegeAdminCollegeProfile.placeholderPhone')}
               />
               <Box sx={{ width: { xs: '0%', sm: '50%' } }}></Box>
             </Box>
@@ -538,12 +540,12 @@ const CollegeProfile = () => {
 
           <Box sx={{ marginTop: 5 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#8b5cf6' }}>
-              Social Media
+              {t('collegeAdminCollegeProfile.sectionSocialMedia')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                placeholder="Facebook Page URL"
+                placeholder={t('collegeAdminCollegeProfile.placeholderFacebook')}
                 value={collegeFormData.socialMedia.facebook}
                 onChange={(e) => handleCollegeFormChange('socialMedia.facebook', e.target.value)}
                 InputProps={{
@@ -552,7 +554,7 @@ const CollegeProfile = () => {
               />
               <TextField
                 fullWidth
-                placeholder="Twitter Handle"
+                placeholder={t('collegeAdminCollegeProfile.placeholderTwitter')}
                 value={collegeFormData.socialMedia.twitter}
                 onChange={(e) => handleCollegeFormChange('socialMedia.twitter', e.target.value)}
                 InputProps={{
@@ -563,7 +565,7 @@ const CollegeProfile = () => {
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                placeholder="Instagram Handle"
+                placeholder={t('collegeAdminCollegeProfile.placeholderInstagram')}
                 value={collegeFormData.socialMedia.instagram}
                 onChange={(e) => handleCollegeFormChange('socialMedia.instagram', e.target.value)}
                 InputProps={{
@@ -572,7 +574,7 @@ const CollegeProfile = () => {
               />
               <TextField
                 fullWidth
-                placeholder="LinkedIn Page URL"
+                placeholder={t('collegeAdminCollegeProfile.placeholderLinkedIn')}
                 value={collegeFormData.socialMedia.linkedin}
                 onChange={(e) => handleCollegeFormChange('socialMedia.linkedin', e.target.value)}
                 InputProps={{
@@ -583,7 +585,7 @@ const CollegeProfile = () => {
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                placeholder="YouTube Channel URL"
+                placeholder={t('collegeAdminCollegeProfile.placeholderYouTube')}
                 value={collegeFormData.socialMedia.youtube}
                 onChange={(e) => handleCollegeFormChange('socialMedia.youtube', e.target.value)}
                 InputProps={{
@@ -596,12 +598,12 @@ const CollegeProfile = () => {
 
           <Box sx={{ marginTop: 5 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#10b981' }}>
-              Departments
+              {t('collegeAdminCollegeProfile.sectionDepartments')}
             </Typography>
             <Box sx={{ marginBottom: 3 }}>
               <TextField
                 fullWidth
-                placeholder="Enter department name and press Enter"
+                placeholder={t('collegeAdminCollegeProfile.placeholderDepartment')}
                 value={tempInput}
                 onChange={(e) => setTempInput(e.target.value)}
                 onKeyPress={(e) => {
@@ -620,7 +622,7 @@ const CollegeProfile = () => {
                         onClick={addDepartment}
                         disabled={!tempInput.trim()}
                       >
-                        Add
+                        {t('collegeAdminCollegeProfile.buttonAdd')}
                       </Button>
                     </InputAdornment>
                   )
@@ -630,7 +632,7 @@ const CollegeProfile = () => {
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {collegeFormData.departments.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
-                  No departments added yet
+                  {t('collegeAdminCollegeProfile.noDepartmentsAdded')}
                 </Typography>
               ) : (
                 collegeFormData.departments.map((dept, index) => (
@@ -647,63 +649,63 @@ const CollegeProfile = () => {
 
           <Box sx={{ marginTop: 5 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 3, color: '#f97316' }}>
-              Student Life & Campus
+              {t('collegeAdminCollegeProfile.sectionStudentLife')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Total Student Enrollment"
+                label={t('collegeAdminCollegeProfile.labelTotalStudents')}
                 type="number"
                 value={collegeFormData.studentLife.totalStudents}
                 onChange={(e) => handleCollegeFormChange('studentLife.totalStudents', e.target.value)}
-                placeholder="e.g., 15000"
+                placeholder={t('collegeAdminCollegeProfile.placeholderTotalStudents')}
               />
               <TextField
                 fullWidth
-                label="International Students"
+                label={t('collegeAdminCollegeProfile.labelInternationalStudents')}
                 type="number"
                 value={collegeFormData.studentLife.internationalStudents}
                 onChange={(e) => handleCollegeFormChange('studentLife.internationalStudents', e.target.value)}
-                placeholder="e.g., 3000"
+                placeholder={t('collegeAdminCollegeProfile.placeholderInternationalStudents')}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Student-Faculty Ratio"
+                label={t('collegeAdminCollegeProfile.labelStudentFacultyRatio')}
                 value={collegeFormData.studentLife.studentToFacultyRatio}
                 onChange={(e) => handleCollegeFormChange('studentLife.studentToFacultyRatio', e.target.value)}
-                placeholder="e.g., 15:1"
+                placeholder={t('collegeAdminCollegeProfile.placeholderStudentFacultyRatio')}
               />
               <TextField
                 fullWidth
-                label="Number of Student Clubs"
+                label={t('collegeAdminCollegeProfile.labelNumberOfClubs')}
                 type="number"
                 value={collegeFormData.studentLife.clubs}
                 onChange={(e) => handleCollegeFormChange('studentLife.clubs', e.target.value)}
-                placeholder="e.g., 250"
+                placeholder={t('collegeAdminCollegeProfile.placeholderNumberOfClubs')}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
-                label="Campus Size"
+                label={t('collegeAdminCollegeProfile.labelCampusSize')}
                 type="number"
                 value={collegeFormData.campusSize.value}
                 onChange={(e) => handleCollegeFormChange('campusSize.value', e.target.value)}
-                placeholder="e.g., 168"
+                placeholder={t('collegeAdminCollegeProfile.placeholderCampusSize')}
               />
               <TextField
                 fullWidth
                 select
-                label="Unit"
+                label={t('collegeAdminCollegeProfile.labelUnit')}
                 value={collegeFormData.campusSize.unit}
                 onChange={(e) => handleCollegeFormChange('campusSize.unit', e.target.value)}
               >
-                <MenuItem value="acres">Acres</MenuItem>
-                <MenuItem value="hectares">Hectares</MenuItem>
-                <MenuItem value="sq ft">Square Feet</MenuItem>
-                <MenuItem value="sq meters">Square Meters</MenuItem>
+                <MenuItem value="acres">{t('collegeAdminCollegeProfile.unitAcres')}</MenuItem>
+                <MenuItem value="hectares">{t('collegeAdminCollegeProfile.unitHectares')}</MenuItem>
+                <MenuItem value="sq ft">{t('collegeAdminCollegeProfile.unitSquareFeet')}</MenuItem>
+                <MenuItem value="sq meters">{t('collegeAdminCollegeProfile.unitSquareMeters')}</MenuItem>
               </TextField>
             </Box>
           </Box>
@@ -726,7 +728,7 @@ const CollegeProfile = () => {
                 }
               }}
             >
-              {saveLoading ? 'Saving...' : 'Save Changes'}
+              {saveLoading ? t('collegeAdminCollegeProfile.buttonSaving') : t('collegeAdminCollegeProfile.buttonSave')}
             </Button>
           </Box>
         </Paper>

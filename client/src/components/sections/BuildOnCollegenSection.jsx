@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Stack, Button } from '@mui/material';
-import { 
-  Code, 
-  Rocket, 
-  School, 
+import {
+  Code,
+  Rocket,
+  School,
   AttachMoney,
   Security,
   Speed,
@@ -14,32 +14,34 @@ import {
   ArrowForward
 } from '@mui/icons-material';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import collegenIcon from '../../assets/collegen-icon-blue-transparent-bg.svg';
 
 const BuildOnCollegenSection = () => {
+  const { t } = useTranslation();
   const [hoveredCard, setHoveredCard] = useState(null);
 
   const features = [
     {
       icon: Code,
-      title: 'Deploy dApps on CollegenZ L2',
-      description: 'Students get access to our blockchain infrastructure with negligible gas costs. Build, test, and launch decentralized applications without financial barriers.',
+      title: t('buildOnCollegen.feature1Title'),
+      description: t('buildOnCollegen.feature1Desc'),
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
       image: '/images/blockchain-development-dark-purple-bg-vector.jpg'
     },
     {
       icon: AttachMoney,
-      title: 'Gas Manager Sponsorship',
-      description: 'We sponsor transaction fees for standout projects. Demonstrate innovation and impact; we cover your deployment costs.',
+      title: t('buildOnCollegen.feature2Title'),
+      description: t('buildOnCollegen.feature2Desc'),
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
       image: '/images/hero-digital-economy.jpg'
     },
     {
       icon: School,
-      title: 'Developer Resources',
-      description: 'Complete SDK, documentation, code templates, and integration guides. Regular campus hackathons with prize pools.',
+      title: t('buildOnCollegen.feature3Title'),
+      description: t('buildOnCollegen.feature3Desc'),
       color: '#06b6d4',
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
       image: '/images/students-working-study-group.jpg'
@@ -49,23 +51,23 @@ const BuildOnCollegenSection = () => {
   const resources = [
     {
       icon: Code,
-      title: 'Complete SDK and Documentation',
-      description: 'Everything you need to start building'
+      title: t('buildOnCollegen.resource1Title'),
+      description: t('buildOnCollegen.resource1Desc')
     },
     {
       icon: Lightbulb,
-      title: 'Code Templates and Integration Guides',
-      description: 'Jumpstart your development process'
+      title: t('buildOnCollegen.resource2Title'),
+      description: t('buildOnCollegen.resource2Desc')
     },
     {
       icon: Group,
-      title: 'Regular Campus Hackathons',
-      description: 'Compete for prize pools and recognition'
+      title: t('buildOnCollegen.resource3Title'),
+      description: t('buildOnCollegen.resource3Desc')
     },
     {
       icon: Rocket,
-      title: 'Project Grants for Transformative Ideas',
-      description: 'Funding for innovative student projects'
+      title: t('buildOnCollegen.resource4Title'),
+      description: t('buildOnCollegen.resource4Desc')
     }
   ];
 
@@ -105,7 +107,7 @@ const BuildOnCollegenSection = () => {
         >
           <Box sx={{ textAlign: 'center', mb: 8 }}>
             <Chip
-              label="For Developers & Community"
+              label={t('buildOnCollegen.chipLabel')}
               sx={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                 color: '#ffffff',
@@ -128,7 +130,7 @@ const BuildOnCollegenSection = () => {
                 mb: 3,
               }}
             >
-              Build on CollegenZ
+              {t('buildOnCollegen.title')}
             </Typography>
             <Typography
               sx={{
@@ -139,7 +141,7 @@ const BuildOnCollegenSection = () => {
                 mx: 'auto',
               }}
             >
-              Developer Access: Free Infrastructure for Innovation
+              {t('buildOnCollegen.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -258,7 +260,7 @@ const BuildOnCollegenSection = () => {
                 textAlign: 'center',
               }}
             >
-              Developer Resources
+              {t('buildOnCollegen.resourcesTitle')}
             </Typography>
             
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
@@ -376,7 +378,7 @@ const BuildOnCollegenSection = () => {
                   mb: 3,
                 }}
               >
-                Build The Next Big Thing
+                {t('buildOnCollegen.ctaTitle')}
               </Typography>
               <Typography
                 sx={{
@@ -386,7 +388,7 @@ const BuildOnCollegenSection = () => {
                   mb: 4,
                 }}
               >
-                Build your next project on CollegenZ with the help of your college and our gas sponsorship and take an early step towards a career that you control.
+                {t('buildOnCollegen.ctaDesc')}
               </Typography>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
@@ -410,7 +412,7 @@ const BuildOnCollegenSection = () => {
                     },
                   }}
                 >
-                  Start Building
+                  {t('buildOnCollegen.ctaButton')}
                 </Button>
               </motion.div>
             </Box>

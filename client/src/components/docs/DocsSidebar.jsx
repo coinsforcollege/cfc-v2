@@ -2,10 +2,12 @@ import React from 'react';
 import { Box, Typography, Chip, Button } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { colors, borderRadius } from '../../utils/designTokens';
 
 const DocsSidebar = ({ categories = [], currentCategorySlug = null, featuredArticles = [] }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -35,7 +37,7 @@ const DocsSidebar = ({ categories = [], currentCategorySlug = null, featuredArti
               fontSize: '1rem'
             }}
           >
-            Featured Articles
+            {t('auth.featuredArticles')}
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -90,10 +92,10 @@ const DocsSidebar = ({ categories = [], currentCategorySlug = null, featuredArti
                 '&:hover': {
                   background: 'rgba(139, 92, 246, 0.05)'
                 }
-              }}
-            >
-              View All
-            </Button>
+                }}
+              >
+                {t('auth.viewAll')}
+              </Button>
           )}
         </Box>
       )}
@@ -110,7 +112,7 @@ const DocsSidebar = ({ categories = [], currentCategorySlug = null, featuredArti
               fontSize: '1rem'
             }}
           >
-            Categories
+            {t('auth.categories')}
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

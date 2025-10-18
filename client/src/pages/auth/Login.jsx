@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { Box, TextField, Button, Typography, Alert, CircularProgress } from '@mui/material';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
 
@@ -9,6 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -120,52 +122,52 @@ const Login = () => {
                 WebkitTextFillColor: 'transparent'
               }}
             >
-              Welcome Back to Coins for College
+              {t('auth.loginTitle')}
             </Typography>
 
             <Typography variant="body1" sx={{ mb: 3, color: '#4a5568', lineHeight: 1.7 }}>
-              Continue building the future of college tokens. Your mining sessions and rewards are waiting.
+              {t('auth.loginSubtitle')}
             </Typography>
 
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#2d3748' }}>
-                What You Can Do
+                {t('auth.whatYouCanDo')}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    ⛏️ Mine College Tokens
+                    {t('auth.mineCollegeTokens')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Start mining sessions and earn tokens for up to 10 colleges simultaneously.
+                    {t('auth.mineCollegeTokensDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    📊 Track Your Earnings
+                    {t('auth.trackYourEarnings')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Monitor your token balance across all colleges from your dashboard.
+                    {t('auth.trackYourEarningsDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    🎯 Manage Your Portfolio
+                    {t('auth.manageYourPortfolio')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Add or remove colleges from your mining list and set your primary college.
+                    {t('auth.manageYourPortfolioDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    👥 Invite & Earn More
+                    {t('auth.inviteAndEarnMore')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Share your referral code and boost your earning rate with every successful invite.
+                    {t('auth.inviteAndEarnMoreDesc')}
                   </Typography>
                 </Box>
               </Box>
@@ -192,7 +194,7 @@ const Login = () => {
               color: '#2d3748'
             }}
           >
-            Login to Your Account
+            {t('auth.loginToYourAccount')}
           </Typography>
           
           <Typography
@@ -202,7 +204,7 @@ const Login = () => {
               mb: 3
             }}
           >
-            Access your dashboard and continue mining
+            {t('auth.accessYourDashboard')}
           </Typography>
 
           {error && (
@@ -214,7 +216,7 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Email"
+              label={t('auth.email')}
               name="email"
               type="email"
               value={formData.email}
@@ -225,7 +227,7 @@ const Login = () => {
 
             <TextField
               fullWidth
-              label="Password"
+              label={t('auth.password')}
               name="password"
               type="password"
               value={formData.password}
@@ -253,12 +255,12 @@ const Login = () => {
                 mb: 2
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.loginButton')}
             </Button>
 
             <Box sx={{ textAlign: 'center', mt: 3 }}>
               <Typography variant="body2" color="text.secondary">
-                Don't have an account?{' '}
+                {t('auth.dontHaveAccount')}{' '}
                 <Link
                   to="/auth/register/student"
                   style={{
@@ -267,7 +269,7 @@ const Login = () => {
                     fontWeight: 600
                   }}
                 >
-                  Register as Student
+                  {t('auth.registerAsStudent')}
                 </Link>
                 {' or '}
                 <Link
@@ -278,7 +280,7 @@ const Login = () => {
                     fontWeight: 600
                   }}
                 >
-                  College
+                  {t('auth.registerAsCollege')}
                 </Link>
               </Typography>
             </Box>

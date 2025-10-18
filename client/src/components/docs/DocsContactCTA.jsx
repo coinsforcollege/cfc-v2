@@ -2,10 +2,12 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { Email } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { colors, borderRadius } from '../../utils/designTokens';
 
-const DocsContactCTA = ({ message = "Can't find what you're looking for?" }) => {
+const DocsContactCTA = ({ message }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <Box
@@ -29,7 +31,7 @@ const DocsContactCTA = ({ message = "Can't find what you're looking for?" }) => 
           mb: 1
         }}
       >
-        {message}
+        {message || t('auth.cantFindWhatYoureLookingFor')}
       </Typography>
 
       <Typography
@@ -41,7 +43,7 @@ const DocsContactCTA = ({ message = "Can't find what you're looking for?" }) => 
           mx: 'auto'
         }}
       >
-        Our support team is here to help. Get in touch and we'll get back to you as soon as possible.
+        {t('auth.ourSupportTeamIsHere')}
       </Typography>
 
       <Button
@@ -64,7 +66,7 @@ const DocsContactCTA = ({ message = "Can't find what you're looking for?" }) => 
           transition: 'all 0.2s'
         }}
       >
-        Contact Support
+        {t('auth.contactSupport')}
       </Button>
     </Box>
   );

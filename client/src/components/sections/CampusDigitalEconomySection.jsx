@@ -1,49 +1,51 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Grid } from '@mui/material';
-import { 
-  AccountBalanceWallet, 
-  CreditCard, 
-  ShoppingCart, 
+import {
+  AccountBalanceWallet,
+  CreditCard,
+  ShoppingCart,
   School,
   Event,
   Sports,
   Store,
   Payment
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const CampusDigitalEconomySection = () => {
+  const { t } = useTranslation();
   const [hoveredCard, setHoveredCard] = useState(null);
 
   const features = [
     {
       icon: AccountBalanceWallet,
-      title: 'Campus Wallet System',
-      description: 'White-label wallet for students, faculty, and alumni. Send, receive, store tokens and digital credentials in one interface.',
+      title: t('campusDigitalEconomy.feature1Title'),
+      description: t('campusDigitalEconomy.feature1Desc'),
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
       image: '/images/blockchain-development-dark-purple-bg-vector.jpg'
     },
     {
       icon: Event,
-      title: 'Event & Sports Ticketing',
-      description: 'On-chain ticketing for campus events and sports. Secure, transparent, and fraud-proof ticket management.',
+      title: t('campusDigitalEconomy.feature2Title'),
+      description: t('campusDigitalEconomy.feature2Desc'),
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
       image: '/images/students-working-study-group.jpg'
     },
     {
       icon: ShoppingCart,
-      title: 'Campus Commerce',
-      description: 'Merchandise purchases with token discounts. Support for student-run businesses accepting campus currency.',
+      title: t('campusDigitalEconomy.feature3Title'),
+      description: t('campusDigitalEconomy.feature3Desc'),
       color: '#06b6d4',
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
       image: '/images/hero-digital-economy.jpg'
     },
     {
       icon: Payment,
-      title: 'Tuition & Fee Settlement',
-      description: 'Accept stablecoins or convert fiat to tokens. Reduce transaction costs and settlement delays.',
+      title: t('campusDigitalEconomy.feature4Title'),
+      description: t('campusDigitalEconomy.feature4Desc'),
       color: '#10b981',
       gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
       image: '/images/large-modern-office-building.jpg'
@@ -51,10 +53,10 @@ const CampusDigitalEconomySection = () => {
   ];
 
   const utilities = [
-    { icon: School, text: 'Integration with existing campus card systems' },
-    { icon: Sports, text: 'Sports ticketing with dynamic pricing' },
-    { icon: Store, text: 'Student business marketplace' },
-    { icon: CreditCard, text: 'Fiat-to-token conversion' }
+    { icon: School, text: t('campusDigitalEconomy.utility1') },
+    { icon: Sports, text: t('campusDigitalEconomy.utility2') },
+    { icon: Store, text: t('campusDigitalEconomy.utility3') },
+    { icon: CreditCard, text: t('campusDigitalEconomy.utility4') }
   ];
 
   return (
@@ -93,7 +95,7 @@ const CampusDigitalEconomySection = () => {
         >
           <Box sx={{ textAlign: 'center', mb: 8 }}>
             <Chip
-              label="Campus Digital Economy"
+              label={t('campusDigitalEconomy.chipLabel')}
               sx={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                 color: '#ffffff',
@@ -116,7 +118,7 @@ const CampusDigitalEconomySection = () => {
                 mb: 3,
               }}
             >
-              Payments, Commerce, Student Enterprise
+              {t('campusDigitalEconomy.title')}
             </Typography>
             <Typography
               sx={{
@@ -127,7 +129,7 @@ const CampusDigitalEconomySection = () => {
                 mx: 'auto',
               }}
             >
-              Transform campus life with integrated digital payments, commerce, and student entrepreneurship
+              {t('campusDigitalEconomy.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -254,7 +256,7 @@ const CampusDigitalEconomySection = () => {
                     mb: 4,
                   }}
                 >
-                  Complete Campus Integration
+                  {t('campusDigitalEconomy.integrationTitle')}
                 </Typography>
                 
                 <Box>

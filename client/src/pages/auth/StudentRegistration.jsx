@@ -10,6 +10,7 @@ import {
   Chip
 } from '@mui/material';
 import { School } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
 import { collegesApi } from '../../api/colleges.api';
@@ -19,6 +20,7 @@ const StudentRegistration = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [searchParams] = useSearchParams();
+  const { t, i18n } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -82,7 +84,8 @@ const StudentRegistration = () => {
         phone: formData.phone,
         password: formData.password,
         referralCode: formData.referralCode || undefined,
-        collegeId: collegeId || undefined
+        collegeId: collegeId || undefined,
+        language: i18n.language || 'en'
       };
 
       const response = await authApi.sendOTPStudent(otpData);
@@ -188,11 +191,11 @@ const StudentRegistration = () => {
                 WebkitTextFillColor: 'transparent'
               }}
             >
-              Join the Future of College Tokens
+              {t('auth.joinFutureCollegeTokens')}
             </Typography>
 
             <Typography variant="body1" sx={{ mb: 3, color: '#4a5568', lineHeight: 1.7 }}>
-              Start mining tokens for your favorite college and be part of a revolutionary digital economy. Whether you're a student, alumni, fan, or supporter - everyone can participate!
+              {t('auth.startMiningTokensDesc')}
             </Typography>
 
             <Box sx={{ mb: 3 }}>
@@ -201,37 +204,37 @@ const StudentRegistration = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    🎓 Mine College Tokens
+                    {t('auth.mineCollegeTokensStudent')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Earn tokens for your college community and build digital value together.
+                    {t('auth.mineCollegeTokensStudentDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    🚀 Early Adopter Benefits
+                    {t('auth.earlyAdopterBenefits')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Be among the first miners and earn higher rewards as an early participant.
+                    {t('auth.earlyAdopterBenefitsDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    🤝 Build Your Network
+                    {t('auth.buildYourNetwork')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Connect with community members across colleges and grow the decentralized education economy.
+                    {t('auth.buildYourNetworkDesc')}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8b5cf6', mb: 0.5 }}>
-                    💰 Referral Rewards
+                    {t('auth.referralRewards')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Invite friends and earn bonus mining rates for every successful referral.
+                    {t('auth.referralRewardsDesc')}
                   </Typography>
                 </Box>
               </Box>
@@ -258,7 +261,7 @@ const StudentRegistration = () => {
               color: '#2d3748'
             }}
           >
-            Create Your Account
+            {t('auth.createYourAccount')}
           </Typography>
           
           <Typography
@@ -268,7 +271,7 @@ const StudentRegistration = () => {
               mb: 3
             }}
           >
-            Start mining tokens in just 2 minutes
+            {t('auth.startMiningInMinutes')}
           </Typography>
 
           {error && (
@@ -292,10 +295,10 @@ const StudentRegistration = () => {
             >
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#2d3748', mb: 0.5 }}>
-                  You were invited to join {referralCollege.name}
+                  {t('auth.youWereInvitedToJoin', { college: referralCollege.name })}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#4a5568' }}>
-                  This college will be automatically added to your mining list
+                  {t('auth.collegeWillBeAdded')}
                 </Typography>
               </Box>
             </Alert>
@@ -304,7 +307,7 @@ const StudentRegistration = () => {
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Full Name"
+              label={t('auth.fullName')}
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -314,7 +317,7 @@ const StudentRegistration = () => {
 
             <TextField
               fullWidth
-              label="Email"
+              label={t('auth.email')}
               name="email"
               type="email"
               value={formData.email}
@@ -325,7 +328,7 @@ const StudentRegistration = () => {
 
             <TextField
               fullWidth
-              label="Phone"
+              label={t('auth.phone')}
               name="phone"
               value={formData.phone}
               onChange={handleChange}
@@ -335,7 +338,7 @@ const StudentRegistration = () => {
 
             <TextField
               fullWidth
-              label="Password"
+              label={t('auth.password')}
               name="password"
               type="password"
               value={formData.password}
@@ -346,7 +349,7 @@ const StudentRegistration = () => {
 
             <TextField
               fullWidth
-              label="Confirm Password"
+              label={t('auth.confirmPassword')}
               name="confirmPassword"
               type="password"
               value={formData.confirmPassword}
@@ -357,7 +360,7 @@ const StudentRegistration = () => {
 
             <TextField
               fullWidth
-              label="Referral Code (Optional)"
+              label={t('auth.referralCodeOptional')}
               name="referralCode"
               value={formData.referralCode}
               onChange={handleChange}
@@ -383,12 +386,12 @@ const StudentRegistration = () => {
                 mb: 2
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Continue'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.continue')}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                Already have an account?{' '}
+                {t('auth.alreadyHaveAccount')}{' '}
                 <Link
                   to="/auth/login"
                   style={{
@@ -397,7 +400,7 @@ const StudentRegistration = () => {
                     fontWeight: 600
                   }}
                 >
-                  Login
+                  {t('auth.loginLink')}
                 </Link>
               </Typography>
             </Box>

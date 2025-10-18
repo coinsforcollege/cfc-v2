@@ -16,6 +16,7 @@ import {
   Skeleton
 } from '@mui/material';
 import { Search, CalendarToday, Person, ArrowForward } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { blogApi } from '../../api/blog.api';
 import { colors, gradients, borderRadius } from '../../utils/designTokens';
 import SubscribeForm from '../../components/blog/SubscribeForm';
@@ -23,6 +24,7 @@ import SubscribeForm from '../../components/blog/SubscribeForm';
 const BlogList = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -158,10 +160,10 @@ const BlogList = () => {
             {/* Simple Header */}
             <Box sx={{ mb: 5, borderBottom: `1px solid ${colors.neutral[200]}`, pb: 4 }}>
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: colors.neutral[900] }}>
-                Latest Stories
+                {t('auth.latestStories')}
               </Typography>
               <Typography variant="body1" sx={{ color: colors.neutral[600] }}>
-                Insights and updates from Coins for College
+                {t('auth.insightsAndUpdates')}
               </Typography>
             </Box>
 
@@ -169,7 +171,7 @@ const BlogList = () => {
         <Box sx={{ mb: 4 }}>
           <TextField
             fullWidth
-            placeholder="Search articles..."
+            placeholder={t('auth.searchArticles')}
             value={search}
             onChange={handleSearchChange}
             InputProps={{
@@ -190,7 +192,7 @@ const BlogList = () => {
           {/* Category Filters */}
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
             <Chip
-              label="All"
+              label={t('auth.all')}
               onClick={() => handleCategoryClick('')}
               variant={!selectedCategory ? 'filled' : 'outlined'}
               sx={{
@@ -246,10 +248,10 @@ const BlogList = () => {
         ) : posts.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 8 }}>
             <Typography variant="h5" color="text.secondary">
-              No articles found
+              {t('auth.noArticlesFound')}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-              Try adjusting your search or filters
+              {t('auth.tryAdjustingSearch')}
             </Typography>
           </Box>
         ) : (
@@ -332,7 +334,7 @@ const BlogList = () => {
                       </Typography>
                       {post.readingTime && (
                         <Typography variant="caption" sx={{ color: colors.neutral[500], fontSize: '0.875rem' }}>
-                          {post.readingTime} min read
+                          {post.readingTime} {t('auth.minRead')}
                         </Typography>
                       )}
                     </Box>
@@ -394,7 +396,7 @@ const BlogList = () => {
             {latestPosts.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.neutral[900] }}>
-                  Latest Posts
+                  {t('auth.latestPosts')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {latestPosts.slice(0, 4).map((latestPost) => (
@@ -426,7 +428,7 @@ const BlogList = () => {
             {categories.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.neutral[900] }}>
-                  Categories
+                  {t('auth.categories')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {categories.slice(0, 6).map((category) => (

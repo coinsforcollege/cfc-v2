@@ -17,6 +17,7 @@ import {
   Schedule,
   ArrowBack
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { blogApi } from '../../api/blog.api';
 import { colors, borderRadius } from '../../utils/designTokens';
 
@@ -34,6 +35,7 @@ import ContactForm from '../../components/blog/ContactForm';
 const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [post, setPost] = useState(null);
   const [relatedPosts, setRelatedPosts] = useState([]);
@@ -157,7 +159,7 @@ const BlogPost = () => {
         px: 2
       }}>
         <Typography variant="h4" color="text.secondary" sx={{ mb: 2 }}>
-          {error || 'Post not found'}
+          {error || t('auth.postNotFound')}
         </Typography>
         <Button 
           startIcon={<ArrowBack />}
@@ -170,7 +172,7 @@ const BlogPost = () => {
             fontWeight: 600
           }}
         >
-          Back to Blog
+          {t('auth.backToBlog')}
         </Button>
       </Box>
     );
@@ -203,7 +205,7 @@ const BlogPost = () => {
             }
           }}
         >
-          Back to Blog
+          {t('auth.backToBlog')}
         </Button>
 
         {/* Two Column Layout */}
@@ -265,7 +267,7 @@ const BlogPost = () => {
                 <>
                   <Typography variant="body2" sx={{ color: colors.neutral[500] }}>•</Typography>
                   <Typography variant="body2" sx={{ color: colors.neutral[500] }}>
-                    {post.readingTime} min read
+                    {post.readingTime} {t('auth.minRead')}
                   </Typography>
                 </>
               )}
@@ -347,7 +349,7 @@ const BlogPost = () => {
             {relatedPosts.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.neutral[900] }}>
-                  Latest Posts
+                  {t('auth.latestPosts')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {relatedPosts.slice(0, 4).map((relatedPost) => (
@@ -379,7 +381,7 @@ const BlogPost = () => {
             {categoryPosts.length > 0 && post.categories && post.categories.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.neutral[900] }}>
-                  More in {post.categories[0].name}
+                  {t('auth.moreIn', { category: post.categories[0].name })}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {categoryPosts.slice(0, 3).map((catPost) => (
@@ -411,7 +413,7 @@ const BlogPost = () => {
             {allCategories.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.neutral[900] }}>
-                  Categories
+                  {t('auth.categories')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {allCategories.map((category) => (

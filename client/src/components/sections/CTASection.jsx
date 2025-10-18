@@ -4,10 +4,12 @@ import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const CTASection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const getDashboardPath = () => {
     if (!user) return '/auth/register/student';
@@ -73,7 +75,7 @@ const CTASection = () => {
                 mb: 3,
               }}
             >
-              Ready to Transform Alumni Engagement?
+              {t('cta.readyToTransform')}
             </Typography>
             <Typography
               sx={{
@@ -85,7 +87,7 @@ const CTASection = () => {
                 lineHeight: 1.6,
               }}
             >
-              Join the digital fundraising revolution. Increase transparency, build stronger relationships, and unlock new revenue streams.
+              {t('cta.joinRevolution')}
             </Typography>
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
@@ -115,7 +117,7 @@ const CTASection = () => {
                       },
                     }}
                   >
-                    Go to Dashboard
+                    {t('header.goToDashboard')}
                   </Button>
                 </motion.div>
               ) : (
@@ -141,7 +143,7 @@ const CTASection = () => {
                         },
                       }}
                     >
-                      Join Waitlist
+                      {t('hero.joinWaitlist')}
                     </Button>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -166,7 +168,7 @@ const CTASection = () => {
                         },
                       }}
                     >
-                      Start Mining
+                      {t('hero.startMining')}
                     </Button>
                   </motion.div>
                 </>

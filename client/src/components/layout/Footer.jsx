@@ -1,12 +1,12 @@
 import React from 'react';
 import { Box, Container, Typography, Grid, Link, IconButton, Divider } from '@mui/material';
-import { 
-  Facebook, 
-  Twitter, 
-  LinkedIn, 
-  GitHub, 
-  Email, 
-  Phone, 
+import {
+  Facebook,
+  Twitter,
+  LinkedIn,
+  GitHub,
+  Email,
+  Phone,
   LocationOn,
   ArrowForward,
   School,
@@ -16,29 +16,32 @@ import {
 } from '@mui/icons-material';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation();
+
   const footerLinks = {
     platform: [
-      { name: 'InTuition Exchange', href: '/exchange' },
-      { name: 'CollegenZ Blockchain', href: '/blockchain' },
-      { name: 'Gas Manager', href: '/gas-manager' }
+      { name: t('footer.intuitionExchange'), href: '/exchange' },
+      { name: t('footer.collegenzBlockchain'), href: '/blockchain' },
+      { name: t('footer.gasManager'), href: '/gas-manager' }
     ],
     resources: [
-      { name: 'Documentation', href: '/docs' },
-      { name: 'Campus Ambassador Portal', href: '/ambassador/apply' },
-      { name: 'Community Forum', href: '/community' },
-      { name: 'GitHub Repository', href: '/github' }
+      { name: t('footer.documentation'), href: '/docs' },
+      { name: t('footer.campusAmbassador'), href: '/ambassador/apply' },
+      { name: t('footer.communityForum'), href: '/community' },
+      { name: t('footer.githubRepo'), href: '/github' }
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Disclaimer', href: '/things-to-know' }
+      { name: t('footer.privacyPolicy'), href: '/privacy' },
+      { name: t('footer.termsOfService'), href: '/terms' },
+      { name: t('footer.disclaimer'), href: '/things-to-know' }
     ],
     contact: [
-      { name: 'Get Help', href: '/docs', icon: Email },
+      { name: t('footer.getHelp'), href: '/docs', icon: Email },
       { name: 'hello@coinsforcollege.com', href: 'mailto:hello@coinsforcollege.com', icon: Email },
-      { name: 'San Francisco, CA', href: '#', icon: LocationOn }
+      { name: t('footer.location'), href: '#', icon: LocationOn }
     ]
   };
 
@@ -68,12 +71,22 @@ const Footer = () => {
       }}
     >
 
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+      <Box sx={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto',
+        width: '100%', 
+        px: { xs: 2, md: 4 } 
+      }}>
         {/* Main Footer Content */}
         <Box sx={{ py: 8 }}>
-          <Grid container spacing={6}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 4, md: 6 },
+            width: '100%'
+          }}>
             {/* Brand Section */}
-            <Grid item xs={12} sm={4} md={2.4}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -124,10 +137,10 @@ const Footer = () => {
                   </Box>
                 </Box>
               </motion.div>
-            </Grid>
+            </Box>
 
             {/* Platform Links */}
-            <Grid item xs={12} sm={4} md={2.4}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -146,7 +159,7 @@ const Footer = () => {
                   }}
                 >
                   <Rocket sx={{ color: '#8b5cf6', fontSize: '20px' }} />
-                  Platform
+                  {t('footer.platform')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {footerLinks.platform.map((link, index) => (
@@ -176,10 +189,10 @@ const Footer = () => {
                   ))}
                 </Box>
               </motion.div>
-            </Grid>
+            </Box>
 
             {/* Resources Links */}
-            <Grid item xs={12} sm={4} md={2.4}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -198,7 +211,7 @@ const Footer = () => {
                   }}
                 >
                   <Code sx={{ color: '#ec4899', fontSize: '20px' }} />
-                  Resources
+                  {t('footer.resources')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {footerLinks.resources.map((link, index) => (
@@ -228,10 +241,10 @@ const Footer = () => {
                   ))}
                 </Box>
               </motion.div>
-            </Grid>
+            </Box>
 
             {/* Legal Links */}
-            <Grid item xs={12} sm={6} md={2.4}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -250,7 +263,7 @@ const Footer = () => {
                   }}
                 >
                   <Security sx={{ color: '#4ecdc4', fontSize: '20px' }} />
-                  Legal
+                  {t('footer.legal')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {footerLinks.legal.map((link, index) => (
@@ -280,10 +293,10 @@ const Footer = () => {
                   ))}
                 </Box>
               </motion.div>
-            </Grid>
+            </Box>
 
             {/* Contact Section */}
-            <Grid item xs={12} sm={6} md={2.4}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -302,7 +315,7 @@ const Footer = () => {
                   }}
                 >
                   <School sx={{ color: '#45b7d1', fontSize: '20px' }} />
-                  Contact
+                  {t('footer.contact')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {footerLinks.contact.map((link, index) => (
@@ -332,8 +345,8 @@ const Footer = () => {
                   ))}
                 </Box>
               </motion.div>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
 
         {/* Divider */}
@@ -341,57 +354,57 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <Box sx={{ py: 4 }}>
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' },
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 2
+          }}>
+            <Typography
+              sx={{
+                color: '#718096',
+                fontSize: '0.9rem',
+                lineHeight: 1.6
+              }}
+            >
+              {t('footer.copyright')}
+            </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: { xs: 'center', md: 'flex-end' },
+              alignItems: 'center',
+              gap: 2
+            }}>
               <Typography
                 sx={{
                   color: '#718096',
                   fontSize: '0.9rem',
-                  lineHeight: 1.6
+                  fontWeight: 500
                 }}
               >
-                © 2024 Coins For College. All rights reserved. Token release subject to KYC verification 
-                and proof of college association. Mining rates and conversion ratios determined by 
-                individual college allocation policies.
+                {t('footer.poweredBy')}
               </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: { xs: 'center', md: 'flex-end' },
-                alignItems: 'center',
-                gap: 2
-              }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box
+                  component="img"
+                  src="/images/collegen-icon.svg"
+                  sx={{ width: 24, height: 24 }}
+                />
                 <Typography
                   sx={{
-                    color: '#718096',
+                    color: '#8b5cf6',
                     fontSize: '0.9rem',
-                    fontWeight: 500
+                    fontWeight: 600
                   }}
                 >
-                  Powered by
+                  Collegen L2
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box
-                    component="img"
-                    src="/images/collegen-icon.svg"
-                    sx={{ width: 24, height: 24 }}
-                  />
-                  <Typography
-                    sx={{
-                      color: '#8b5cf6',
-                      fontSize: '0.9rem',
-                      fontWeight: 600
-                    }}
-                  >
-                    Collegen L2
-                  </Typography>
-                </Box>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
-      </Container>
+      </Box>
     </Box>
   );
 };

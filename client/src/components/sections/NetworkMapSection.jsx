@@ -4,8 +4,10 @@ import { Box, Container, Typography, Card, CardContent, Chip, Stack } from '@mui
 import { School, TrendingUp, People, LocationOn } from '@mui/icons-material';
 import * as d3 from 'd3';
 import { collegesApi } from '../../api/colleges.api';
+import { useTranslation } from 'react-i18next';
 
 const NetworkMapSection = () => {
+  const { t } = useTranslation();
   const [activeNode, setActiveNode] = useState(null);
   const [pulseNodes, setPulseNodes] = useState([]);
   const [colleges, setColleges] = useState([]);
@@ -67,7 +69,7 @@ const NetworkMapSection = () => {
     if (stats.topColleges?.byMiners?.[0]) {
       const top = stats.topColleges.byMiners[0];
       activityList.push({
-        text: `${top.name}: ${top.stats.totalMiners.toLocaleString()} total supporters`,
+        text: t('networkMap.totalSupporters', { college: top.name, count: top.stats.totalMiners.toLocaleString() }),
         icon: TrendingUp,
         color: '#68d391'
       });
@@ -75,7 +77,7 @@ const NetworkMapSection = () => {
 
     if (stats.recentColleges?.[0]) {
       activityList.push({
-        text: `${stats.recentColleges[0].name} joined the network`,
+        text: t('networkMap.joinedNetwork', { college: stats.recentColleges[0].name }),
         icon: School,
         color: '#a8c8ec'
       });
@@ -83,7 +85,7 @@ const NetworkMapSection = () => {
 
     if (stats.global?.activeMiners > 0) {
       activityList.push({
-        text: `${stats.global.activeMiners.toLocaleString()} students actively mining`,
+        text: t('networkMap.studentsActiveMining', { count: stats.global.activeMiners.toLocaleString() }),
         icon: People,
         color: '#fbbf24'
       });
@@ -92,7 +94,7 @@ const NetworkMapSection = () => {
     if (stats.topColleges?.byTokens?.[0]) {
       const top = stats.topColleges.byTokens[0];
       activityList.push({
-        text: `${top.name} reached ${Math.round(top.stats.totalTokensMined).toLocaleString()} tokens`,
+        text: t('networkMap.reachedTokens', { college: top.name, tokens: Math.round(top.stats.totalTokensMined).toLocaleString() }),
         icon: LocationOn,
         color: '#c4a8f2'
       });
@@ -448,7 +450,7 @@ const NetworkMapSection = () => {
                 mb: 3,
               }}
             >
-              Global Network Map
+              {t('networkMap.title')}
             </Typography>
             
           </Box>

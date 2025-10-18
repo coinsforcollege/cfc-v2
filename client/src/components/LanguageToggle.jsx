@@ -2,9 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
+import { useAuth } from '../contexts/AuthContext';
+import { authApi } from '../api/auth.api';
 
 const LanguageToggle = ({ isMobile = false }) => {
   const { i18n } = useTranslation();
+  const { user, updateUser } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -16,9 +19,23 @@ const LanguageToggle = ({ isMobile = false }) => {
     setAnchorEl(null);
   };
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-    handleClose();
+  const changeLanguage = async (lng) => {
+    try {
+      // Update frontend language immediately
+      i18n.changeLanguage(lng);
+      
+      // Update backend if user is logged in
+      if (user) {
+        await authApi.updateLanguagePreference(lng);
+        // Update user context with new language preference
+        updateUser({ ...user, languagePreference: lng });
+      }
+      
+      handleClose();
+    } catch (error) {
+      console.error('Failed to update language preference:', error);
+      // Still allow frontend language change even if backend fails
+    }
   };
 
   const currentLanguage = i18n.language || 'en';

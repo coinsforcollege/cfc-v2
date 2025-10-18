@@ -35,6 +35,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { collegeAdminApi } from '../../api/collegeAdmin.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import { useTranslation } from 'react-i18next';
 
 const getStatusChipStyle = (status) => {
   switch(status) {
@@ -52,6 +53,7 @@ const getStatusChipStyle = (status) => {
 };
 
 const Overview = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(null);
@@ -92,22 +94,22 @@ const Overview = () => {
   const stats = college?.stats || {};
 
   const timelineSteps = [
-    { label: 'College Registration', completed: true },
-    { label: 'Profile Setup', completed: true },
-    { label: 'Community Building', completed: false },
-    { label: 'Token Launch', completed: false },
+    { label: t('collegeAdminOverview.timelineCollegeRegistration'), completed: true },
+    { label: t('collegeAdminOverview.timelineProfileSetup'), completed: true },
+    { label: t('collegeAdminOverview.timelineCommunityBuilding'), completed: false },
+    { label: t('collegeAdminOverview.timelineTokenLaunch'), completed: false },
   ];
 
   const platformFeatures = [
-    { icon: <LocalGasStation />, title: 'Gas Sponsorship', description: 'Zero transaction fees', enabled: true },
-    { icon: <ShowChart />, title: 'Exchange Listing', description: 'InTuition Exchange', enabled: true },
-    { icon: <Code />, title: 'Smart Contracts', description: 'Pre-built & audited', enabled: true },
-    { icon: <Api />, title: 'API Access', description: 'Full platform API', enabled: true },
-    { icon: <Security />, title: 'Security Audits', description: 'Professional audits', enabled: true },
-    { icon: <CloudDone />, title: 'Cloud Infra', description: 'Scalable hosting', enabled: true },
-    { icon: <AttachMoney />, title: 'Fiat On-Ramp', description: 'Easy token purchase', enabled: true },
-    { icon: <Speed />, title: 'Fast Settlements', description: 'Instant transfers', enabled: true },
-    { icon: <AccountBalance />, title: 'Multi-sig Wallets', description: 'Enhanced security', enabled: true },
+    { icon: <LocalGasStation />, title: t('collegeAdminOverview.featureGasSponsorship'), description: t('collegeAdminOverview.featureGasSponsorshipDesc'), enabled: true },
+    { icon: <ShowChart />, title: t('collegeAdminOverview.featureExchangeListing'), description: t('collegeAdminOverview.featureExchangeListingDesc'), enabled: true },
+    { icon: <Code />, title: t('collegeAdminOverview.featureSmartContracts'), description: t('collegeAdminOverview.featureSmartContractsDesc'), enabled: true },
+    { icon: <Api />, title: t('collegeAdminOverview.featureApiAccess'), description: t('collegeAdminOverview.featureApiAccessDesc'), enabled: true },
+    { icon: <Security />, title: t('collegeAdminOverview.featureSecurityAudits'), description: t('collegeAdminOverview.featureSecurityAuditsDesc'), enabled: true },
+    { icon: <CloudDone />, title: t('collegeAdminOverview.featureCloudInfra'), description: t('collegeAdminOverview.featureCloudInfraDesc'), enabled: true },
+    { icon: <AttachMoney />, title: t('collegeAdminOverview.featureFiatOnRamp'), description: t('collegeAdminOverview.featureFiatOnRampDesc'), enabled: true },
+    { icon: <Speed />, title: t('collegeAdminOverview.featureFastSettlements'), description: t('collegeAdminOverview.featureFastSettlementsDesc'), enabled: true },
+    { icon: <AccountBalance />, title: t('collegeAdminOverview.featureMultiSigWallets'), description: t('collegeAdminOverview.featureMultiSigWalletsDesc'), enabled: true },
   ];
 
   const leaderboardData = [
@@ -138,10 +140,10 @@ const Overview = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <Box>
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                  Welcome to Coins For College, {college.name}!
+                  {t('collegeAdminOverview.welcomeMessage', { collegeName: college.name })}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                  You're part of something big. Your college token journey starts here.
+                  {t('collegeAdminOverview.welcomeSubtext')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -171,7 +173,7 @@ const Overview = () => {
                   <People sx={{ color: 'white', fontSize: 28 }} />
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Total Miners</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('collegeAdminOverview.statTotalMiners')}</Typography>
                   <Typography variant="h5" sx={{ fontWeight: 700 }}>{stats.totalMiners || 0}</Typography>
                 </Box>
               </Box>
@@ -190,7 +192,7 @@ const Overview = () => {
                   <TrendingUp sx={{ color: 'white', fontSize: 28 }} />
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Active Miners</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('collegeAdminOverview.statActiveMiners')}</Typography>
                   <Typography variant="h5" sx={{ fontWeight: 700 }}>{stats.activeMiners || 0}</Typography>
                 </Box>
               </Box>
@@ -209,7 +211,7 @@ const Overview = () => {
                   <EmojiEvents sx={{ color: 'white', fontSize: 28 }} />
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Tokens Mined</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('collegeAdminOverview.statTokensMined')}</Typography>
                   <Typography variant="h5" sx={{ fontWeight: 700 }}>
                     {stats.totalTokensMined ? stats.totalTokensMined.toFixed(2) : '0.00'}
                   </Typography>
@@ -224,7 +226,7 @@ const Overview = () => {
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
               <Rocket sx={{ color: '#667eea', fontSize: 28 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>Launch Timeline</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{t('collegeAdminOverview.launchTimeline')}</Typography>
             </Box>
             <Box sx={{ position: 'relative', px: 2 }}>
               <Box sx={{
@@ -302,7 +304,7 @@ const Overview = () => {
                     </Typography>
                     {!step.completed && timelineSteps[index - 1]?.completed && (
                       <Chip
-                        label="In Progress"
+                        label={t('collegeAdminOverview.statusInProgress')}
                         size="small"
                         sx={{
                           background: 'rgba(16, 185, 129, 0.1)',
@@ -324,7 +326,7 @@ const Overview = () => {
               textAlign: 'center'
             }}>
               <Typography variant="body2" sx={{ fontWeight: 600, color: '#667eea' }}>
-                Expected Token Launch: Q2 2026
+                {t('collegeAdminOverview.expectedTokenLaunch')}
               </Typography>
             </Box>
 
@@ -348,7 +350,7 @@ const Overview = () => {
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
               <Stars sx={{ color: '#667eea', fontSize: 28 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>Platform Features Enabled</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{t('collegeAdminOverview.platformFeaturesEnabled')}</Typography>
             </Box>
             <Grid container spacing={2.5}>
               {platformFeatures.map((feature, index) => (
@@ -380,7 +382,7 @@ const Overview = () => {
                         {feature.icon}
                       </Box>
                       <Chip
-                        label="Enabled"
+                        label={t('collegeAdminOverview.statusEnabled')}
                         size="small"
                         sx={{
                           background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
@@ -406,16 +408,16 @@ const Overview = () => {
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
               <EmojiEvents sx={{ color: '#f59e0b', fontSize: 28 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>Global Leaderboard</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{t('collegeAdminOverview.globalLeaderboard')}</Typography>
             </Box>
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Rank</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Miners</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Tokens</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('collegeAdminOverview.headerRank')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('collegeAdminOverview.headerCollege')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminOverview.headerMiners')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminOverview.headerTokens')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

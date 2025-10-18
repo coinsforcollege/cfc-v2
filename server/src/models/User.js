@@ -97,6 +97,11 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
     default: null
+  },
+  languagePreference: {
+    type: String,
+    enum: ['en', 'zh'],
+    default: 'en'
   }
 }, {
   timestamps: true

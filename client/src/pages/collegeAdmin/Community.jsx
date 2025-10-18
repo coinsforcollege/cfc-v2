@@ -28,8 +28,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { collegeAdminApi } from '../../api/collegeAdmin.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import { useTranslation } from 'react-i18next';
 
 const Community = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [community, setCommunity] = useState([]);
@@ -100,10 +102,10 @@ const Community = () => {
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-              Community Miners
+              {t('collegeAdminCommunity.pageTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              View all students mining for your college
+              {t('collegeAdminCommunity.pageDescription')}
             </Typography>
           </Box>
           <IconButton
@@ -126,7 +128,7 @@ const Community = () => {
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Total Miners</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('collegeAdminCommunity.statTotalMiners')}</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
                     {community.length}
                   </Typography>
@@ -139,7 +141,7 @@ const Community = () => {
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Active Mining</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('collegeAdminCommunity.statActiveMining')}</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#10b981' }}>
                     {activeMiners}
                   </Typography>
@@ -152,7 +154,7 @@ const Community = () => {
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Idle</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('collegeAdminCommunity.statIdle')}</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#64748b' }}>
                     {community.length - activeMiners}
                   </Typography>
@@ -167,7 +169,7 @@ const Community = () => {
           <CardContent sx={{ p: 3 }}>
             <TextField
               fullWidth
-              placeholder="Search by name or email..."
+              placeholder={t('collegeAdminCommunity.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyPress={handleSearchKeyPress}
@@ -196,9 +198,9 @@ const Community = () => {
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Miner</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">Tokens Mined</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('collegeAdminCommunity.headerMiner')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('collegeAdminCommunity.headerTokensMined')}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('collegeAdminCommunity.headerStatus')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -206,7 +208,7 @@ const Community = () => {
                     <TableRow>
                       <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
                         <Typography variant="body2" color="text.secondary">
-                          No miners found
+                          {t('collegeAdminCommunity.noMinersFound')}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -242,7 +244,7 @@ const Community = () => {
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={miner.status === 'active' ? 'Mining' : 'Idle'}
+                            label={miner.status === 'active' ? t('collegeAdminCommunity.statusMining') : t('collegeAdminCommunity.statusIdle')}
                             size="small"
                             sx={{
                               background: miner.status === 'active'

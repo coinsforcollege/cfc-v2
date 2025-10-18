@@ -44,10 +44,12 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { collegesApi } from '@/api/colleges.api';
 import NetworkMapSection from '@/components/sections/NetworkMapSection';
 
 const NetworkMap = () => {
+  const { t } = useTranslation();
   const [globalStats, setGlobalStats] = useState(null);
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -265,11 +267,11 @@ const NetworkMap = () => {
                 }}
               >
                 {[
-                  { icon: School, label: 'Total Colleges', value: globalStats?.global.totalColleges || 0, color: '#667eea' },
-                  { icon: People, label: 'Total Miners', value: globalStats?.global.totalMiners || 0, color: '#764ba2' },
-                  { icon: LocalFireDepartment, label: 'Active Sessions', value: globalStats?.global.activeMiningSessions || 0, color: '#f59e0b' },
-                  { icon: Token, label: 'Tokens Mined', value: Math.round(globalStats?.global.totalTokensMined || 0).toLocaleString(), color: '#10b981' },
-                  { icon: Speed, label: 'Active Miners', value: globalStats?.global.activeMiners || 0, color: '#ec4899' },
+                  { icon: School, label: t('auth.totalColleges'), value: globalStats?.global.totalColleges || 0, color: '#667eea' },
+                  { icon: People, label: t('auth.totalMiners'), value: globalStats?.global.totalMiners || 0, color: '#764ba2' },
+                  { icon: LocalFireDepartment, label: t('auth.activeSessions'), value: globalStats?.global.activeMiningSessions || 0, color: '#f59e0b' },
+                  { icon: Token, label: t('auth.tokensMined'), value: Math.round(globalStats?.global.totalTokensMined || 0).toLocaleString(), color: '#10b981' },
+                  { icon: Speed, label: t('auth.activeMiners'), value: globalStats?.global.activeMiners || 0, color: '#ec4899' },
                 ].map((stat, index) => (
                   <Card
                     key={index}
@@ -297,11 +299,11 @@ const NetworkMap = () => {
                 ))}
                 {/* Duplicate cards for seamless loop on mobile */}
                 {[
-                  { icon: School, label: 'Total Colleges', value: globalStats?.global.totalColleges || 0, color: '#667eea' },
-                  { icon: People, label: 'Total Miners', value: globalStats?.global.totalMiners || 0, color: '#764ba2' },
-                  { icon: LocalFireDepartment, label: 'Active Sessions', value: globalStats?.global.activeMiningSessions || 0, color: '#f59e0b' },
-                  { icon: Token, label: 'Tokens Mined', value: Math.round(globalStats?.global.totalTokensMined || 0).toLocaleString(), color: '#10b981' },
-                  { icon: Speed, label: 'Active Miners', value: globalStats?.global.activeMiners || 0, color: '#ec4899' },
+                  { icon: School, label: t('auth.totalColleges'), value: globalStats?.global.totalColleges || 0, color: '#667eea' },
+                  { icon: People, label: t('auth.totalMiners'), value: globalStats?.global.totalMiners || 0, color: '#764ba2' },
+                  { icon: LocalFireDepartment, label: t('auth.activeSessions'), value: globalStats?.global.activeMiningSessions || 0, color: '#f59e0b' },
+                  { icon: Token, label: t('auth.tokensMined'), value: Math.round(globalStats?.global.totalTokensMined || 0).toLocaleString(), color: '#10b981' },
+                  { icon: Speed, label: t('auth.activeMiners'), value: globalStats?.global.activeMiners || 0, color: '#ec4899' },
                 ].map((stat, index) => (
                   <Card
                     key={`duplicate-${index}`}
@@ -381,7 +383,7 @@ const NetworkMap = () => {
                 height: '100%'
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#2d3748' }}>
-                  Network Growth
+                  {t('auth.networkGrowth')}
                 </Typography>
                 {growthData.length > 0 ? (
                   <Box sx={{ height: '300px' }}>
@@ -395,14 +397,14 @@ const NetworkMap = () => {
                           border: '1px solid rgba(139, 92, 246, 0.2)',
                           borderRadius: '8px'
                         }} />
-                        <Area type="monotone" dataKey="total" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} name="Total Colleges" />
-                        <Area type="monotone" dataKey="new" stroke="#ec4899" fill="#ec4899" fillOpacity={0.4} name="New Colleges" />
+                        <Area type="monotone" dataKey="total" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} name={t('auth.totalCollegesLabel')} />
+                        <Area type="monotone" dataKey="new" stroke="#ec4899" fill="#ec4899" fillOpacity={0.4} name={t('auth.newColleges')} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </Box>
                 ) : (
                   <Box sx={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography color="text.secondary">No data available</Typography>
+                    <Typography color="text.secondary">{t('auth.noDataAvailable')}</Typography>
                   </Box>
                 )}
               </Card>
@@ -425,7 +427,7 @@ const NetworkMap = () => {
                 height: '100%'
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#2d3748' }}>
-                  Geographic Distribution
+                  {t('auth.geographicDistribution')}
                 </Typography>
                 {geoData.length > 0 ? (
                   <Box sx={{ height: '300px' }}>
@@ -455,7 +457,7 @@ const NetworkMap = () => {
                   </Box>
                 ) : (
                   <Box sx={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography color="text.secondary">No data available</Typography>
+                    <Typography color="text.secondary">{t('auth.noDataAvailable')}</Typography>
                   </Box>
                 )}
               </Card>
@@ -481,7 +483,7 @@ const NetworkMap = () => {
                 height: '100%'
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#2d3748' }}>
-                  College Status Breakdown
+                  {t('auth.collegeStatusBreakdown')}
                 </Typography>
                 {statusData.length > 0 ? (
                   <Box sx={{ height: '300px' }}>
@@ -511,7 +513,7 @@ const NetworkMap = () => {
                   </Box>
                 ) : (
                   <Box sx={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography color="text.secondary">No data available</Typography>
+                    <Typography color="text.secondary">{t('auth.noDataAvailable')}</Typography>
                   </Box>
                 )}
               </Card>
@@ -534,7 +536,7 @@ const NetworkMap = () => {
                 height: '100%'
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#2d3748' }}>
-                  Mining Activity
+                  {t('auth.miningActivity')}
                 </Typography>
                 {miningActivityData.length > 0 ? (
                   <Box sx={{ height: '300px' }}>
@@ -548,13 +550,13 @@ const NetworkMap = () => {
                           border: '1px solid rgba(139, 92, 246, 0.2)',
                           borderRadius: '8px'
                         }} />
-                        <Area type="monotone" dataKey="total" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Total Miners" />
+                        <Area type="monotone" dataKey="total" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name={t('auth.totalMinersLabel')} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </Box>
                 ) : (
                   <Box sx={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography color="text.secondary">No data available</Typography>
+                    <Typography color="text.secondary">{t('auth.noDataAvailable')}</Typography>
                   </Box>
                 )}
               </Card>
@@ -587,7 +589,7 @@ const NetworkMap = () => {
                   background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
                 }}>
                   <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: '#2d3748', flex: 1 }}>
-                    Top Performing Colleges
+                    {t('auth.topPerformingColleges')}
                   </Typography>
                 </Box>
 
@@ -601,16 +603,16 @@ const NetworkMap = () => {
                   background: '#f8fafc'
                 }}>
                   <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#475569', minWidth: '40px' }}>
-                    Rank
+                    {t('auth.rank')}
                   </Typography>
                   <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#475569', flex: 1, mx: 2 }}>
-                    College
+                    {t('auth.college')}
                   </Typography>
                   <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#475569', flex: 1, px: 2 }}>
-                    Supporters
+                    {t('auth.supporters')}
                   </Typography>
                   <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#475569', minWidth: '100px' }}>
-                    Status
+                    {t('auth.status')}
                   </Typography>
                 </Box>
 

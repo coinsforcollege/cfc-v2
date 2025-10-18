@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Box, Typography, CircularProgress } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { docsApi } from '../../api/docs.api';
 import { colors } from '../../utils/designTokens';
 import DocsBreadcrumbs from '../../components/docs/DocsBreadcrumbs';
@@ -10,6 +11,7 @@ import DocsContactCTA from '../../components/docs/DocsContactCTA';
 
 const DocsCategory = () => {
   const { categorySlug } = useParams();
+  const { t } = useTranslation();
 
   const [category, setCategory] = useState(null);
   const [allCategories, setAllCategories] = useState([]);
@@ -75,14 +77,14 @@ const DocsCategory = () => {
         }}
       >
         <Typography variant="h5" color="text.secondary">
-          Category not found
+          {t('auth.categoryNotFound')}
         </Typography>
       </Box>
     );
   }
 
   const breadcrumbs = [
-    { label: 'Docs', link: '/docs' },
+    { label: t('auth.docs'), link: '/docs' },
     { label: category.name, link: `/docs/${categorySlug}` }
   ];
 

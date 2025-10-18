@@ -19,8 +19,10 @@ import { useNavigate } from 'react-router';
 import { collegeAdminApi } from '../../api/collegeAdmin.api';
 import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import { useTranslation } from 'react-i18next';
 
 const TokenPreferences = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -58,7 +60,7 @@ const TokenPreferences = () => {
       }
     } catch (error) {
       console.error('Error fetching dashboard:', error);
-      showToast('Failed to load token preferences', 'error');
+      showToast(t('collegeAdminTokenPreferences.errorLoadFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -68,11 +70,11 @@ const TokenPreferences = () => {
     try {
       setSaveLoading(true);
       await collegeAdminApi.updateTokenPreferences(tokenFormData);
-      showToast('Token preferences updated successfully', 'success');
+      showToast(t('collegeAdminTokenPreferences.successUpdated'), 'success');
       fetchDashboard();
     } catch (error) {
       console.error('Error saving token preferences:', error);
-      showToast('Failed to update token preferences', 'error');
+      showToast(t('collegeAdminTokenPreferences.errorUpdateFailed'), 'error');
     } finally {
       setSaveLoading(false);
     }
@@ -103,11 +105,11 @@ const TokenPreferences = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
                   <TokenIcon sx={{ color: '#667eea', fontSize: 32 }} />
                   <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    Token Preferences
+                    {t('collegeAdminTokenPreferences.pageTitle')}
                   </Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary">
-                  Configure your college token details for future launch
+                  {t('collegeAdminTokenPreferences.pageDescription')}
                 </Typography>
               </Box>
             </Box>
@@ -125,10 +127,10 @@ const TokenPreferences = () => {
         }}>
           <CardContent>
             <Typography variant="body2" sx={{ fontWeight: 600, color: '#667eea', mb: 1 }}>
-              About Token Launch
+              {t('collegeAdminTokenPreferences.infoTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              These preferences will be used when your college token launches on the Collegen platform. You can update these settings at any time before the official launch date (Q2 2026).
+              {t('collegeAdminTokenPreferences.infoDescription')}
             </Typography>
           </CardContent>
         </Card>
@@ -137,57 +139,57 @@ const TokenPreferences = () => {
         <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#667eea' }}>
-              Token Configuration
+              {t('collegeAdminTokenPreferences.sectionTokenConfiguration')}
             </Typography>
 
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Token Name"
+                  label={t('collegeAdminTokenPreferences.labelTokenName')}
                   fullWidth
                   value={tokenFormData.name}
                   onChange={(e) => setTokenFormData({ ...tokenFormData, name: e.target.value })}
-                  placeholder="e.g., MIT Coin"
-                  helperText="The full name of your college token"
+                  placeholder={t('collegeAdminTokenPreferences.placeholderTokenName')}
+                  helperText={t('collegeAdminTokenPreferences.helperTokenName')}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Token Ticker/Symbol"
+                  label={t('collegeAdminTokenPreferences.labelTokenTicker')}
                   fullWidth
                   value={tokenFormData.ticker}
                   onChange={(e) => setTokenFormData({ ...tokenFormData, ticker: e.target.value.toUpperCase() })}
-                  placeholder="e.g., MITC"
-                  helperText="3-5 character ticker symbol (uppercase)"
+                  placeholder={t('collegeAdminTokenPreferences.placeholderTokenTicker')}
+                  helperText={t('collegeAdminTokenPreferences.helperTokenTicker')}
                   inputProps={{ maxLength: 5 }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Maximum Supply"
+                  label={t('collegeAdminTokenPreferences.labelMaximumSupply')}
                   type="number"
                   fullWidth
                   value={tokenFormData.maximumSupply}
                   onChange={(e) => setTokenFormData({ ...tokenFormData, maximumSupply: e.target.value })}
-                  placeholder="e.g., 1000000"
-                  helperText="Total number of tokens that will ever exist"
+                  placeholder={t('collegeAdminTokenPreferences.placeholderMaximumSupply')}
+                  helperText={t('collegeAdminTokenPreferences.helperMaximumSupply')}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Allocation for Early Miners (%)"
+                  label={t('collegeAdminTokenPreferences.labelAllocation')}
                   type="number"
                   fullWidth
                   value={tokenFormData.allocationForEarlyMiners}
                   onChange={(e) => setTokenFormData({ ...tokenFormData, allocationForEarlyMiners: e.target.value })}
-                  placeholder="e.g., 30"
-                  helperText="Percentage of total supply reserved for early miners"
+                  placeholder={t('collegeAdminTokenPreferences.placeholderAllocation')}
+                  helperText={t('collegeAdminTokenPreferences.helperAllocation')}
                   inputProps={{ min: 0, max: 100 }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Preferred Launch Date"
+                  label={t('collegeAdminTokenPreferences.labelLaunchDate')}
                   type="date"
                   fullWidth
                   value={tokenFormData.preferredLaunchDate}
@@ -195,18 +197,18 @@ const TokenPreferences = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  helperText="Your ideal token launch date (indicative)"
+                  helperText={t('collegeAdminTokenPreferences.helperLaunchDate')}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <Box>
                   <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>
-                    Exchange Listing Preference
+                    {t('collegeAdminTokenPreferences.labelExchangeListing')}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2">List on InTuition Exchange?</Typography>
+                    <Typography variant="body2">{t('collegeAdminTokenPreferences.questionExchangeListing')}</Typography>
                     <Chip
-                      label={tokenFormData.needExchangeListing ? 'Yes' : 'No'}
+                      label={tokenFormData.needExchangeListing ? t('collegeAdminTokenPreferences.yes') : t('collegeAdminTokenPreferences.no')}
                       onClick={() => setTokenFormData({ ...tokenFormData, needExchangeListing: !tokenFormData.needExchangeListing })}
                       sx={{
                         background: tokenFormData.needExchangeListing
@@ -222,7 +224,7 @@ const TokenPreferences = () => {
                     />
                   </Box>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                    InTuition Exchange provides liquidity and trading for college tokens
+                    {t('collegeAdminTokenPreferences.helperExchangeListing')}
                   </Typography>
                 </Box>
               </Grid>
@@ -245,7 +247,7 @@ const TokenPreferences = () => {
                   }
                 }}
               >
-                {saveLoading ? 'Saving...' : 'Save Token Preferences'}
+                {saveLoading ? t('collegeAdminTokenPreferences.buttonSaving') : t('collegeAdminTokenPreferences.buttonSave')}
               </Button>
             </Box>
           </CardContent>
@@ -261,43 +263,43 @@ const TokenPreferences = () => {
         }}>
           <CardContent>
             <Typography variant="body2" sx={{ fontWeight: 600, color: '#10b981', mb: 2 }}>
-              Future Token Utilities
+              {t('collegeAdminTokenPreferences.futureUtilitiesTitle')}
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Campus Payments</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('collegeAdminTokenPreferences.utilityCampusPayments')}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Use tokens for cafeteria, bookstore, and campus services
+                  {t('collegeAdminTokenPreferences.utilityCampusPaymentsDesc')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Event Tickets</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('collegeAdminTokenPreferences.utilityEventTickets')}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Purchase tickets for campus events and activities
+                  {t('collegeAdminTokenPreferences.utilityEventTicketsDesc')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Merchandise</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('collegeAdminTokenPreferences.utilityMerchandise')}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Buy official college merchandise with tokens
+                  {t('collegeAdminTokenPreferences.utilityMerchandiseDesc')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Scholarships</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('collegeAdminTokenPreferences.utilityScholarships')}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Earn scholarships and financial aid through tokens
+                  {t('collegeAdminTokenPreferences.utilityScholarshipsDesc')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Governance</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('collegeAdminTokenPreferences.utilityGovernance')}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Vote on college initiatives and decisions
+                  {t('collegeAdminTokenPreferences.utilityGovernanceDesc')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Alumni Benefits</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('collegeAdminTokenPreferences.utilityAlumniBenefits')}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Access exclusive alumni perks and networking
+                  {t('collegeAdminTokenPreferences.utilityAlumniBenefitsDesc')}
                 </Typography>
               </Grid>
             </Grid>

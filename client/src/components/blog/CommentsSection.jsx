@@ -10,12 +10,14 @@ import {
   Divider
 } from '@mui/material';
 import { Send, Reply, Person } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { blogApi } from '../../api/blog.api';
 import { colors, borderRadius } from '../../utils/designTokens';
 import { useToast } from '../../contexts/ToastContext';
 
 const CommentsSection = ({ postSlug }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -49,7 +51,7 @@ const CommentsSection = ({ postSlug }) => {
     e.preventDefault();
     
     if (!formData.content.trim() || !formData.authorName.trim() || !formData.authorEmail.trim()) {
-      showToast('Please fill in all fields', 'error');
+      showToast(t('auth.pleaseFillAllFields'), 'error');
       return;
     }
 
@@ -61,12 +63,12 @@ const CommentsSection = ({ postSlug }) => {
       });
       
       if (response.success) {
-        showToast('Comment submitted successfully! It will appear after approval.', 'success');
+        showToast(t('auth.commentPostedSuccessfully'), 'success');
         setFormData({ authorName: '', authorEmail: '', content: '' });
         setReplyingTo(null);
       }
     } catch (error) {
-      showToast(error.message || 'Failed to submit comment', 'error');
+      showToast(error.message || t('auth.failedToPostComment'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +110,7 @@ const CommentsSection = ({ postSlug }) => {
                   minWidth: 0
                 }}
               >
-                {isReplying ? 'Cancel' : 'Reply'}
+                {isReplying ? t('common.cancel') : t('auth.reply')}
               </Button>
             )}
 
@@ -118,7 +120,7 @@ const CommentsSection = ({ postSlug }) => {
                   fullWidth
                   multiline
                   rows={2}
-                  placeholder="Write your reply..."
+                  placeholder={t('auth.yourComment')}
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   sx={{ mb: 1.5 }}
@@ -126,7 +128,7 @@ const CommentsSection = ({ postSlug }) => {
                 />
                 <Box sx={{ display: 'flex', gap: 1.5 }}>
                   <TextField
-                    placeholder="Your name"
+                    placeholder={t('auth.yourName')}
                     value={formData.authorName}
                     onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
                     size="small"
@@ -134,7 +136,7 @@ const CommentsSection = ({ postSlug }) => {
                   />
                   <TextField
                     type="email"
-                    placeholder="Your email"
+                    placeholder={t('auth.yourEmail')}
                     value={formData.authorEmail}
                     onChange={(e) => setFormData({ ...formData, authorEmail: e.target.value })}
                     size="small"
@@ -152,7 +154,7 @@ const CommentsSection = ({ postSlug }) => {
                       }
                     }}
                   >
-                    {submitting ? <CircularProgress size={16} /> : 'Reply'}
+                    {submitting ? <CircularProgress size={16} /> : t('auth.reply')}
                   </Button>
                 </Box>
               </Box>
@@ -172,20 +174,20 @@ const CommentsSection = ({ postSlug }) => {
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
-        Comments ({comments.length})
+        {t('auth.comments')} ({comments.length})
       </Typography>
 
       {/* New Comment Form */}
       <Box sx={{ mb: 4, pb: 4, borderBottom: `1px solid ${colors.neutral[200]}` }}>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-          Leave a Comment
+          {t('auth.leaveAComment')}
         </Typography>
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
             fullWidth
             multiline
             rows={4}
-            placeholder="Share your thoughts..."
+            placeholder={t('auth.yourComment')}
             value={formData.content}
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
             sx={{ mb: 2 }}
@@ -193,7 +195,7 @@ const CommentsSection = ({ postSlug }) => {
           />
           <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
             <TextField
-              placeholder="Your name *"
+              placeholder={`${t('auth.yourName')} *`}
               value={formData.authorName}
               onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
               sx={{ flex: 1, minWidth: 200 }}
@@ -201,7 +203,7 @@ const CommentsSection = ({ postSlug }) => {
             />
             <TextField
               type="email"
-              placeholder="Your email *"
+              placeholder={`${t('auth.yourEmail')} *`}
               value={formData.authorEmail}
               onChange={(e) => setFormData({ ...formData, authorEmail: e.target.value })}
               sx={{ flex: 1, minWidth: 200 }}
@@ -226,7 +228,7 @@ const CommentsSection = ({ postSlug }) => {
               }
             }}
           >
-            {submitting ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Post Comment'}
+            {submitting ? <CircularProgress size={20} sx={{ color: 'white' }} /> : t('auth.postComment')}
           </Button>
         </Box>
       </Box>
@@ -239,7 +241,7 @@ const CommentsSection = ({ postSlug }) => {
       ) : comments.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="body1" color="text.secondary">
-            No comments yet. Be the first to comment!
+            {t('auth.noCommentsYet')}
           </Typography>
         </Box>
       ) : (

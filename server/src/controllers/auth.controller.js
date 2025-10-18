@@ -11,6 +11,52 @@ import { sendWelcomeEmail } from '../utils/emailService.js';
 // @desc    Register a new student
 // @route   POST /api/auth/register/student
 // @access  Public
+// @desc    Update user language preference
+// @route   PUT /api/auth/language
+// @access  Private
+export const updateLanguagePreference = async (req, res, next) => {
+  try {
+    const { language } = req.body;
+    const userId = req.user.id;
+
+    // Validate language
+    if (!language || !['en', 'zh'].includes(language)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid language. Supported languages: en, zh'
+      });
+    }
+
+    // Update user language preference
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { languagePreference: language },
+      { new: true, select: '-password' }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Language preference updated successfully',
+      data: {
+        languagePreference: user.languagePreference
+      }
+    });
+  } catch (error) {
+    console.error('Update language preference error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
 export const registerStudent = async (req, res, next) => {
   try {
     const { name, email, phone, password, referralCode, collegeId, verificationToken } = req.body;
@@ -242,7 +288,7 @@ export const registerStudent = async (req, res, next) => {
     const dashboardUrl = `${process.env.CLIENT_URL}/student/dashboard`;
     const emailLog = await EmailLog.logEmail(user._id, user.email, 'welcome', { dashboardUrl });
 
-    sendWelcomeEmail(user.email, user.name, dashboardUrl)
+    sendWelcomeEmail(user.email, user.name, dashboardUrl, user.languagePreference)
       .then(async (result) => {
         if (result.success) {
           await emailLog.markAsSent();

@@ -12,8 +12,10 @@ import {
 } from '@mui/material';
 import { Warning, School } from '@mui/icons-material';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
+  const { t } = useTranslation();
   const [confirmationText, setConfirmationText] = useState('');
   const [error, setError] = useState('');
 
@@ -21,7 +23,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
     if (confirmationText.trim().toLowerCase() === 'i represent a college') {
       onConfirm();
     } else {
-      setError('Please type the exact phrase to continue');
+      setError(t('auth.pleaseTypeExactPhrase'));
     }
   };
 
@@ -49,7 +51,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Warning sx={{ color: '#f59e0b', fontSize: 24 }} />
           <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>
-            ATTENTION
+            {t('auth.attention')}
           </Typography>
         </Box>
       </DialogTitle>
@@ -68,13 +70,13 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
           }}
         >
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2d3748', mb: 0.5 }}>
-            This registration is ONLY for official college representatives
+            {t('auth.collegeAdminOnly')}
           </Typography>
         </Alert>
 
         <Box sx={{ mb: 1 }}>
           <Typography variant="body2" sx={{ color: '#4a5568', mb: 1, lineHeight: 1.4 }}>
-            If you are a <strong>student, alumni, fan, or supporter</strong> who wants to mine tokens for your college, you should register through the Community Signup instead.
+            {t('auth.ifYouAreStudent')}
           </Typography>
 
           <Button
@@ -93,26 +95,26 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
               }
             }}
           >
-            Go to Community Signup
+            {t('auth.goToCommunitySignup')}
           </Button>
         </Box>
 
         <Box sx={{ mb: 1 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2d3748', mb: 1.5 }}>
-            College Admin Account Requirements:
+            {t('auth.collegeAdminAccountRequirements')}
           </Typography>
           <Box sx={{ pl: 2 }}>
             <Typography variant="body2" sx={{ color: '#4a5568', display: 'flex', alignItems: 'flex-start' }}>
               <Box component="span" sx={{ mr: 1, color: '#0EA5E9', fontWeight: 700 }}>•</Box>
-              You must be an official representative of a college or university
+              {t('auth.mustBeOfficialRepresentative')}
             </Typography>
             <Typography variant="body2" sx={{ color: '#4a5568', display: 'flex', alignItems: 'flex-start' }}>
               <Box component="span" sx={{ mr: 1, color: '#0EA5E9', fontWeight: 700 }}>•</Box>
-              You will be asked to provide proof of your official association
+              {t('auth.willBeAskedToProvideProof')}
             </Typography>
             <Typography variant="body2" sx={{ color: '#4a5568', display: 'flex', alignItems: 'flex-start' }}>
               <Box component="span" sx={{ mr: 1, color: '#0EA5E9', fontWeight: 700 }}>•</Box>
-              Your account will remain unverified until proof is approved
+              {t('auth.accountRemainsUnverified')}
             </Typography>
             
           </Box>
@@ -128,7 +130,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
           }}
         >
           <Typography variant="body2" sx={{ fontWeight: 600, color: '#2d3748', mb: 1.5 }}>
-            To proceed with College Admin registration, please type:
+            {t('auth.toProceedWithRegistration')}
           </Typography>
           <Typography
             variant="body2"
@@ -140,11 +142,11 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
               mb: 2
             }}
           >
-            I represent a college
+            {t('auth.iRepresentACollege')}
           </Typography>
           <TextField
             fullWidth
-            placeholder="Type here..."
+            placeholder={t('auth.typeHere')}
             value={confirmationText}
             onChange={handleTextChange}
             error={!!error}
@@ -174,7 +176,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
             fontWeight: 600
           }}
         >
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           onClick={handleConfirm}
@@ -194,7 +196,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
             }
           }}
         >
-          Continue to Registration
+          {t('auth.continueToRegistration')}
         </Button>
       </DialogActions>
     </Dialog>

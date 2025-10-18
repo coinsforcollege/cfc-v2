@@ -28,6 +28,7 @@ import {
   Logout,
   ExitToApp
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { authApi } from '../../api/auth.api';
@@ -36,6 +37,7 @@ import OTPDialog from '../../components/OTPDialog';
 
 const Settings = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, logout: logoutAuth, updateUser } = useAuth();
   const { showToast } = useToast();
 
@@ -76,7 +78,7 @@ const Settings = () => {
     setProfileSuccess('');
 
     if (!profileData.name || !profileData.phone) {
-      setProfileError('Please fill in all fields');
+      setProfileError(t('collegeAdminSettings.updateProfile.fillAllFields'));
       return;
     }
 
@@ -89,12 +91,12 @@ const Settings = () => {
 
       if (response.success) {
         updateUser(response.data);
-        setProfileSuccess('Profile updated successfully!');
-        showToast('Profile updated successfully!', 'success');
+        setProfileSuccess(t('collegeAdminSettings.updateProfile.profileUpdatedSuccess'));
+        showToast(t('collegeAdminSettings.updateProfile.profileUpdatedSuccess'), 'success');
       }
     } catch (err) {
-      setProfileError(err.message || 'Failed to update profile');
-      showToast(err.message || 'Failed to update profile', 'error');
+      setProfileError(err.message || t('collegeAdminSettings.updateProfile.profileUpdateError'));
+      showToast(err.message || t('collegeAdminSettings.updateProfile.profileUpdateError'), 'error');
     } finally {
       setProfileLoading(false);
     }
@@ -115,17 +117,17 @@ const Settings = () => {
     setPasswordSuccess('');
 
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      setPasswordError('Please fill in all fields');
+      setPasswordError(t('collegeAdminSettings.changePassword.fillAllFields'));
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setPasswordError('New password must be at least 6 characters');
+      setPasswordError(t('collegeAdminSettings.changePassword.passwordTooShort'));
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('New passwords do not match');
+      setPasswordError(t('collegeAdminSettings.changePassword.passwordsDoNotMatch'));
       return;
     }
 
@@ -139,8 +141,8 @@ const Settings = () => {
         setShowOTPDialog(true);
       }
     } catch (err) {
-      setPasswordError(err.message || 'Failed to send verification code');
-      showToast(err.message || 'Failed to send verification code', 'error');
+      setPasswordError(err.message || t('collegeAdminSettings.changePassword.sendVerificationError'));
+      showToast(err.message || t('collegeAdminSettings.changePassword.sendVerificationError'), 'error');
     } finally {
       setPasswordLoading(false);
     }
@@ -158,8 +160,8 @@ const Settings = () => {
       });
 
       if (response.success) {
-        setPasswordSuccess('Password changed successfully!');
-        showToast('Password changed successfully!', 'success');
+        setPasswordSuccess(t('collegeAdminSettings.changePassword.passwordChangedSuccess'));
+        showToast(t('collegeAdminSettings.changePassword.passwordChangedSuccess'), 'success');
         setPasswordData({
           currentPassword: '',
           newPassword: '',
@@ -167,8 +169,8 @@ const Settings = () => {
         });
       }
     } catch (err) {
-      setPasswordError(err.message || 'Failed to change password');
-      showToast(err.message || 'Failed to change password', 'error');
+      setPasswordError(err.message || t('collegeAdminSettings.changePassword.passwordChangeError'));
+      showToast(err.message || t('collegeAdminSettings.changePassword.passwordChangeError'), 'error');
     } finally {
       setPasswordLoading(false);
     }
@@ -196,10 +198,10 @@ const Settings = () => {
     <DashboardLayout stats={sidebarStats}>
       <Box sx={{ maxWidth: '900px', width: '100%', marginLeft: 'auto', marginRight: 'auto' }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b', marginBottom: 1 }}>
-          Account Settings
+          {t('collegeAdminSettings.title')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 4 }}>
-          Manage your account information and security
+          {t('collegeAdminSettings.subtitle')}
         </Typography>
 
         <Card sx={{ marginBottom: 4, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
@@ -218,10 +220,10 @@ const Settings = () => {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Account Information
+                  {t('collegeAdminSettings.accountInformation.title')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  View your basic account details
+                  {t('collegeAdminSettings.accountInformation.subtitle')}
                 </Typography>
               </Box>
             </Box>
@@ -242,16 +244,16 @@ const Settings = () => {
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <School sx={{ fontSize: 18, color: '#667eea' }} />
-                        Managed College
+                        {t('collegeAdminSettings.accountInformation.managedCollege')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
-                      {user?.managedCollegeName || 'Not set'}
+                      {user?.managedCollegeName || t('collegeAdminSettings.accountInformation.notSet')}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b' }}>
-                      Role
+                      {t('collegeAdminSettings.accountInformation.role')}
                     </TableCell>
                     <TableCell>
                       <Box sx={{
@@ -266,7 +268,7 @@ const Settings = () => {
                         fontWeight: 600,
                         fontSize: '0.85rem'
                       }}>
-                        College Admin
+                        {t('collegeAdminSettings.accountInformation.collegeAdmin')}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -292,10 +294,10 @@ const Settings = () => {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Update Profile
+                  {t('collegeAdminSettings.updateProfile.title')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Change your name and phone number
+                  {t('collegeAdminSettings.updateProfile.subtitle')}
                 </Typography>
               </Box>
             </Box>
@@ -314,7 +316,7 @@ const Settings = () => {
             <Box component="form" onSubmit={handleProfileSubmit}>
               <TextField
                 fullWidth
-                label="Full Name"
+                label={t('collegeAdminSettings.updateProfile.fullName')}
                 name="name"
                 value={profileData.name}
                 onChange={handleProfileChange}
@@ -323,7 +325,7 @@ const Settings = () => {
               />
               <TextField
                 fullWidth
-                label="Phone Number"
+                label={t('collegeAdminSettings.updateProfile.phoneNumber')}
                 name="phone"
                 value={profileData.phone}
                 onChange={handleProfileChange}
@@ -346,7 +348,7 @@ const Settings = () => {
                   }
                 }}
               >
-                {profileLoading ? 'Saving...' : 'Save Changes'}
+                {profileLoading ? t('collegeAdminSettings.updateProfile.saving') : t('collegeAdminSettings.updateProfile.saveChanges')}
               </Button>
             </Box>
           </CardContent>
@@ -368,10 +370,10 @@ const Settings = () => {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Change Password
+                  {t('collegeAdminSettings.changePassword.title')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Update your password to keep your account secure
+                  {t('collegeAdminSettings.changePassword.subtitle')}
                 </Typography>
               </Box>
             </Box>
@@ -391,7 +393,7 @@ const Settings = () => {
               <TextField
                 fullWidth
                 type="password"
-                label="Current Password"
+                label={t('collegeAdminSettings.changePassword.currentPassword')}
                 name="currentPassword"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordChange}
@@ -401,18 +403,18 @@ const Settings = () => {
               <TextField
                 fullWidth
                 type="password"
-                label="New Password"
+                label={t('collegeAdminSettings.changePassword.newPassword')}
                 name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
                 required
-                helperText="Must be at least 6 characters"
+                helperText={t('collegeAdminSettings.changePassword.passwordHelperText')}
                 sx={{ marginBottom: 2 }}
               />
               <TextField
                 fullWidth
                 type="password"
-                label="Confirm New Password"
+                label={t('collegeAdminSettings.changePassword.confirmNewPassword')}
                 name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
@@ -435,7 +437,7 @@ const Settings = () => {
                   }
                 }}
               >
-                {passwordLoading ? 'Changing...' : 'Change Password'}
+                {passwordLoading ? t('collegeAdminSettings.changePassword.changing') : t('collegeAdminSettings.changePassword.changePassword')}
               </Button>
             </Box>
           </CardContent>
@@ -457,10 +459,10 @@ const Settings = () => {
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Logout
+                  {t('collegeAdminSettings.logout.title')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Sign out of your account
+                  {t('collegeAdminSettings.logout.subtitle')}
                 </Typography>
               </Box>
               <Button
@@ -480,7 +482,7 @@ const Settings = () => {
                   }
                 }}
               >
-                Logout
+                {t('collegeAdminSettings.logout.logout')}
               </Button>
             </Box>
           </CardContent>
@@ -497,11 +499,11 @@ const Settings = () => {
           }}
         >
           <DialogTitle sx={{ fontWeight: 700 }}>
-            Confirm Logout
+            {t('collegeAdminSettings.logout.confirmLogout')}
           </DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to logout? You will need to login again to access your account.
+              {t('collegeAdminSettings.logout.confirmMessage')}
             </Typography>
           </DialogContent>
           <DialogActions sx={{ padding: 2.5 }}>
@@ -509,7 +511,7 @@ const Settings = () => {
               onClick={() => setShowLogoutDialog(false)}
               sx={{ color: '#64748b', fontWeight: 600 }}
             >
-              Cancel
+              {t('collegeAdminSettings.logout.cancel')}
             </Button>
             <Button
               onClick={handleLogout}
@@ -522,7 +524,7 @@ const Settings = () => {
                 }
               }}
             >
-              Logout
+              {t('collegeAdminSettings.logout.logout')}
             </Button>
           </DialogActions>
         </Dialog>

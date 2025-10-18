@@ -2,10 +2,12 @@ import React from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { Schedule, Visibility } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../utils/designTokens';
 
 const ArticleListItem = ({ article, showCategory = true }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -92,7 +94,7 @@ const ArticleListItem = ({ article, showCategory = true }) => {
 
         {article.readingTime && (
           <Typography variant="caption" sx={{ color: colors.neutral[500] }}>
-            {article.readingTime} min read
+            {article.readingTime} {t('auth.minRead')}
           </Typography>
         )}
 
@@ -100,7 +102,7 @@ const ArticleListItem = ({ article, showCategory = true }) => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Visibility sx={{ fontSize: 14, color: colors.neutral[400] }} />
             <Typography variant="caption" sx={{ color: colors.neutral[500] }}>
-              {article.viewCount} views
+              {article.viewCount} {t('auth.views')}
             </Typography>
           </Box>
         )}

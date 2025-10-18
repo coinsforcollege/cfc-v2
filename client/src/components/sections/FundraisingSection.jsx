@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Stack, IconButton } from '@mui/material';
-import { 
-  TrendingUp, 
-  Layers, 
-  AccountBalance, 
+import {
+  TrendingUp,
+  Layers,
+  AccountBalance,
   ArrowForward,
   ArrowBack,
   Star,
@@ -14,16 +14,18 @@ import {
   Security,
   Visibility
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const FundraisingSection = () => {
+  const { t } = useTranslation();
   const [activeSlide, setActiveSlide] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
 
   const features = [
     {
       icon: TrendingUp,
-      title: 'Alumni Giving Portal',
-      description: 'Direct blockchain donations with real-time fund tracking. Donors see exactly how their contributions are deployed.',
+      title: t('fundraising.alumniGivingPortal'),
+      description: t('fundraising.alumniGivingPortalDesc'),
       color: '#8b5cf6',
       gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
       stats: { amount: '$2.4M', donors: '1,247', projects: '23' },
@@ -31,8 +33,8 @@ const FundraisingSection = () => {
     },
     {
       icon: Layers,
-      title: 'NFT-Backed Endowments',
-      description: 'Create digital legacy collectibles for major gifts. Build prestige while strengthening long-term alumni relationships.',
+      title: t('fundraising.nftBackedEndowments'),
+      description: t('fundraising.nftBackedEndowmentsDesc'),
       color: '#ec4899',
       gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
       stats: { nfts: '156', value: '$890K', collectors: '89' },
@@ -40,8 +42,8 @@ const FundraisingSection = () => {
     },
     {
       icon: AccountBalance,
-      title: 'InTuition Exchange Listing',
-      description: 'Every college token automatically lists on our exchange. Enable liquidity, fundraising, and secondary market activity from day one.',
+      title: t('fundraising.exchangeListing'),
+      description: t('fundraising.exchangeListingDesc'),
       color: '#06b6d4',
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
       stats: { volume: '$1.2M', trades: '3,456', liquidity: '98%' },
@@ -51,25 +53,25 @@ const FundraisingSection = () => {
 
   const testimonials = [
     {
-      name: 'Dr. Sarah Chen',
-      role: 'VP Development, MIT',
-      quote: 'The transparency in our alumni giving has increased donations by 340%. Donors love seeing exactly where their money goes.',
+      name: t('fundraising.testimonial1Name'),
+      role: t('fundraising.testimonial1Role'),
+      quote: t('fundraising.testimonial1Quote'),
       avatar: 'SC',
-      amount: '$2.4M raised'
+      amount: t('fundraising.testimonial1Amount')
     },
     {
-      name: 'Michael Rodriguez',
-      role: 'Alumni Relations, Stanford',
-      quote: 'NFT endowments have created a new generation of digital philanthropists. Our major gift program has never been stronger.',
+      name: t('fundraising.testimonial2Name'),
+      role: t('fundraising.testimonial2Role'),
+      quote: t('fundraising.testimonial2Quote'),
       avatar: 'MR',
-      amount: '$890K in NFTs'
+      amount: t('fundraising.testimonial2Amount')
     },
     {
-      name: 'Dr. Priya Patel',
-      role: 'CFO, IIT Bombay',
-      quote: 'The exchange listing gave us instant liquidity and credibility. Our token became a legitimate asset class overnight.',
+      name: t('fundraising.testimonial3Name'),
+      role: t('fundraising.testimonial3Role'),
+      quote: t('fundraising.testimonial3Quote'),
       avatar: 'PP',
-      amount: '$1.2M volume'
+      amount: t('fundraising.testimonial3Amount')
     }
   ];
 
@@ -260,7 +262,7 @@ const FundraisingSection = () => {
           {/* Right: Existing Text */}
           <Box sx={{ flex: 1, textAlign: { xs: 'center', lg: 'left' } }}>
             <Chip
-              label="Fundraising & Alumni Engagement"
+              label={t('fundraising.chipLabel')}
               sx={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                 color: '#ffffff',
@@ -283,7 +285,7 @@ const FundraisingSection = () => {
                 mb: 3,
               }}
             >
-              Transparent Capital, Digital Legacy
+              {t('fundraising.title')}
             </Typography>
             <Typography
               sx={{
@@ -294,7 +296,7 @@ const FundraisingSection = () => {
                 mx: { xs: 'auto', lg: 0 },
               }}
             >
-              Revolutionize alumni engagement with blockchain transparency and digital collectibles
+              {t('fundraising.subtitle')}
             </Typography>
           </Box>
         </Box>
@@ -311,15 +313,15 @@ const FundraisingSection = () => {
               textAlign: 'center',
             }}
           >
-            Simple 3-Step Implementation
+            {t('fundraising.implementationTitle')}
           </Typography>
-          
+
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 4 }}>
             {[
               {
                 step: '01',
-                title: 'Connect Your Systems',
-                description: 'Integrate with existing alumni databases and payment systems in under 24 hours.',
+                title: t('fundraising.step1Title'),
+                description: t('fundraising.step1Desc'),
                 icon: Security,
                 color: '#8b5cf6',
                 gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
@@ -327,8 +329,8 @@ const FundraisingSection = () => {
               },
               {
                 step: '02',
-                title: 'Launch Token Economy',
-                description: 'Deploy your custom token with smart contracts and governance structures.',
+                title: t('fundraising.step2Title'),
+                description: t('fundraising.step2Desc'),
                 icon: Timeline,
                 color: '#ec4899',
                 gradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
@@ -336,8 +338,8 @@ const FundraisingSection = () => {
               },
               {
                 step: '03',
-                title: 'Engage Alumni',
-                description: 'Start fundraising campaigns and watch real-time impact tracking.',
+                title: t('fundraising.step3Title'),
+                description: t('fundraising.step3Desc'),
                 icon: People,
                 color: '#06b6d4',
                 gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
@@ -494,7 +496,7 @@ const FundraisingSection = () => {
               textAlign: 'center',
             }}
           >
-            What Leaders Are Saying
+            {t('fundraising.testimonialsTitle')}
           </Typography>
           
           <Box sx={{ display: 'flex', gap: 4, overflowX: 'auto', pb: 2, alignItems: 'stretch', '&::-webkit-scrollbar': { display: 'none' } }}>

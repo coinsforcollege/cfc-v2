@@ -22,6 +22,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { Search, School, People, TrendingUp, LocationOn, Add, Close, CloudUpload, Link as LinkIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { collegesApi } from '../../api/colleges.api';
 import { studentApi } from '../../api/student.api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -62,6 +63,7 @@ const getStatusChipStyle = (status) => {
 const CollegeSelection = () => {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
+  const { t } = useTranslation();
   
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -268,13 +270,13 @@ const CollegeSelection = () => {
               mb: 2
             }}
           >
-            Select Your College
+            {t('auth.selectYourCollege')}
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-            Choose your college to start mining tokens
+            {t('auth.chooseCollegeToStartMining')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            You can add more colleges later from your dashboard
+            {t('auth.canAddMoreCollegesLater')}
           </Typography>
         </Box>
 
@@ -288,7 +290,7 @@ const CollegeSelection = () => {
         <Box sx={{ maxWidth: '800px', mx: 'auto', mb: 4 }}>
           <TextField
             fullWidth
-            placeholder="Search colleges by name, country, or city..."
+            placeholder={t('auth.searchCollegesPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             sx={{
@@ -316,7 +318,7 @@ const CollegeSelection = () => {
               fontWeight: 600
             }}
           >
-            + Can't find your college? Add it here
+            {t('auth.cantFindCollege')}
           </Button>
         </Box>
 
@@ -431,7 +433,7 @@ const CollegeSelection = () => {
                             }
                           }}
                         >
-                          {addingCollege === college._id ? 'Adding...' : 'Add College'}
+                          {addingCollege === college._id ? t('auth.adding') : t('auth.addCollege')}
                         </Button>
                       </Box>
                     </Box>
@@ -445,10 +447,10 @@ const CollegeSelection = () => {
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <School sx={{ fontSize: 80, color: '#e2e8f0', mb: 2 }} />
                 <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                  No colleges found
+                  {t('auth.noCollegesFound')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Try a different search term or add your college manually
+                  {t('auth.tryDifferentSearch')}
                 </Typography>
               </Box>
             )}
@@ -481,7 +483,7 @@ const CollegeSelection = () => {
           }}
         >
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#2d3748' }}>
-            Add New College
+            {t('auth.addNewCollege')}
           </Typography>
           <IconButton onClick={handleCloseDialog} size="small">
             <Close />
@@ -499,7 +501,7 @@ const CollegeSelection = () => {
           {/* College Name */}
           <TextField
             fullWidth
-            label="College Name"
+            label={t('auth.collegeName')}
             value={newCollege.name}
             onChange={(e) => setNewCollege({ ...newCollege, name: e.target.value })}
             required
@@ -515,7 +517,7 @@ const CollegeSelection = () => {
           <TextField
             fullWidth
             select
-            label="Country"
+            label={t('auth.country')}
             value={newCollege.country}
             onChange={(e) => setNewCollege({ ...newCollege, country: e.target.value })}
             required
@@ -536,7 +538,7 @@ const CollegeSelection = () => {
           {/* Logo Upload Section */}
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#2d3748' }}>
-              College Logo (Optional)
+              {t('auth.collegeLogoOptional')}
             </Typography>
 
             {/* Toggle between File and URL */}
@@ -562,7 +564,7 @@ const CollegeSelection = () => {
                 }}
               >
                 <CloudUpload sx={{ mr: 1, fontSize: 20 }} />
-                Upload File
+                {t('auth.uploadFile')}
               </ToggleButton>
               <ToggleButton 
                 value="url"
@@ -573,7 +575,7 @@ const CollegeSelection = () => {
                 }}
               >
                 <LinkIcon sx={{ mr: 1, fontSize: 20 }} />
-                Enter URL
+                {t('auth.enterUrl')}
               </ToggleButton>
             </ToggleButtonGroup>
 
@@ -596,7 +598,7 @@ const CollegeSelection = () => {
                     }
                   }}
                 >
-                  Choose Image
+                  {t('auth.chooseImage')}
                   <input
                     type="file"
                     hidden
@@ -606,7 +608,7 @@ const CollegeSelection = () => {
                 </Button>
                 {logoFile && (
                   <Typography variant="body2" color="text.secondary">
-                    Selected: {logoFile.name}
+                    {t('auth.selected')}: {logoFile.name}
                   </Typography>
                 )}
               </Box>
@@ -616,7 +618,7 @@ const CollegeSelection = () => {
             {logoInputType === 'url' && (
               <TextField
                 fullWidth
-                label="Logo URL"
+                label={t('auth.logoUrl')}
                 value={newCollege.logo}
                 onChange={(e) => handleLogoUrlChange(e.target.value)}
                 placeholder="https://example.com/logo.png"
@@ -632,7 +634,7 @@ const CollegeSelection = () => {
             {logoPreview && (
               <Box sx={{ mt: 3 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: '#2d3748' }}>
-                  Preview:
+                  {t('auth.preview')}
                 </Typography>
                 <Avatar
                   src={logoPreview}
@@ -671,7 +673,7 @@ const CollegeSelection = () => {
               }
             }}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleCreateAndAddCollege}
@@ -693,7 +695,7 @@ const CollegeSelection = () => {
               }
             }}
           >
-            {addingCollege === 'new' ? <CircularProgress size={20} color="inherit" /> : 'Add College'}
+            {addingCollege === 'new' ? <CircularProgress size={20} color="inherit" /> : t('auth.addCollege')}
           </Button>
         </DialogActions>
       </Dialog>

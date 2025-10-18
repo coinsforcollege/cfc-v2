@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Card, CardContent, Chip, Avatar } from '@mui/material';
 import { collegesApi } from '../../api/colleges.api';
+import { useTranslation } from 'react-i18next';
 
 const TractionProofSection = () => {
+  const { t } = useTranslation();
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,14 +37,14 @@ const TractionProofSection = () => {
   };
 
   const getStatusText = (status) => {
-    if (!status) return 'Coming Soon';
+    if (!status) return t('tractionProof.comingSoon');
     const statusLower = status.toLowerCase();
     switch (statusLower) {
-      case 'live': return 'Live';
-      case 'waitlist': return 'Waitlist';
-      case 'building': return 'Building';
-      case 'unaffiliated': return 'Unaffiliated';
-      default: return 'Coming Soon';
+      case 'live': return t('tractionProof.live');
+      case 'waitlist': return t('tractionProof.waitlist');
+      case 'building': return t('tractionProof.building');
+      case 'unaffiliated': return t('tractionProof.unaffiliated');
+      default: return t('tractionProof.comingSoon');
     }
   };
 
@@ -94,7 +96,7 @@ const TractionProofSection = () => {
         >
           <Box sx={{ textAlign: 'center', mb: 8 }}>
             <Chip
-              label="Traction Proof"
+              label={t('tractionProof.chipLabel')}
               sx={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                 color: '#ffffff',
@@ -117,7 +119,7 @@ const TractionProofSection = () => {
                 mb: 3,
               }}
             >
-              Communities Already Moving
+              {t('tractionProof.title')}
             </Typography>
             <Typography
               sx={{
@@ -128,7 +130,7 @@ const TractionProofSection = () => {
                 mx: 'auto',
               }}
             >
-              Top universities worldwide are already building their digital economies with us
+              {t('tractionProof.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -170,7 +172,7 @@ const TractionProofSection = () => {
                     flex: 1,
                   }}
                 >
-                  Institution
+                  {t('tractionProof.institution')}
                 </Typography>
                 <Typography
                   sx={{
@@ -181,7 +183,7 @@ const TractionProofSection = () => {
                     textAlign: 'center',
                   }}
                 >
-                  Early Supporters
+                  {t('tractionProof.earlySupporters')}
                 </Typography>
                 <Typography
                   sx={{
@@ -192,7 +194,7 @@ const TractionProofSection = () => {
                     textAlign: 'center',
                   }}
                 >
-                  Status
+                  {t('tractionProof.status')}
                 </Typography>
               </Box>
 

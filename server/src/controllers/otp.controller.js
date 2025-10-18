@@ -23,7 +23,7 @@ const generateVerificationToken = (email, role) => {
 // @access  Public
 export const sendOTPForStudent = async (req, res, next) => {
   try {
-    const { name, email, phone, password, referralCode, collegeId } = req.body;
+    const { name, email, phone, password, referralCode, collegeId, language } = req.body;
 
     // Validation
     if (!name || !email || !phone || !password) {
@@ -100,7 +100,7 @@ export const sendOTPForStudent = async (req, res, next) => {
     });
 
     // Send OTP email
-    const emailResult = await sendOTPEmail(email, name, otp);
+    const emailResult = await sendOTPEmail(email, name, otp, language || 'en');
 
     if (!emailResult.success) {
       // Clean up if email fails
@@ -129,7 +129,7 @@ export const sendOTPForStudent = async (req, res, next) => {
 // @access  Public
 export const sendOTPForCollege = async (req, res, next) => {
   try {
-    const { name, email, phone, password, collegeId, newCollege } = req.body;
+    const { name, email, phone, password, collegeId, newCollege, language } = req.body;
 
     // Validation
     if (!name || !email || !phone || !password) {
@@ -221,7 +221,7 @@ export const sendOTPForCollege = async (req, res, next) => {
     });
 
     // Send OTP email
-    const emailResult = await sendOTPEmail(email, name, otp);
+    const emailResult = await sendOTPEmail(email, name, otp, language || 'en');
 
     if (!emailResult.success) {
       // Clean up if email fails

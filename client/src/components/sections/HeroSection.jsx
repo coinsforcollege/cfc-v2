@@ -8,17 +8,23 @@ import { useAuth } from '../../contexts/AuthContext';
 import { collegesApi } from '../../api/colleges.api';
 import { blogApi } from '../../api/blog.api';
 import collegenIcon from '../../assets/collegen-icon-blue-transparent-bg.svg';
+import { useTranslation } from 'react-i18next';
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [currentActivity, setCurrentActivity] = useState(0);
   const [globalStats, setGlobalStats] = useState(null);
   const [activities, setActivities] = useState([]);
   const [featuredPosts, setFeaturedPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  const rotatingTexts = ['Digital Economy', 'Alumni Network', 'Blockchain Gateway'];
+  const rotatingTexts = [
+    t('hero.digitalEconomy'),
+    t('hero.alumniNetwork'),
+    t('hero.blockchainGateway')
+  ];
 
   const getDashboardPath = () => {
     if (!user) return '/auth/register/student';
@@ -75,7 +81,7 @@ const HeroSection = () => {
     if (stats.topColleges?.byMiners?.[0]) {
       const top = stats.topColleges.byMiners[0];
       activityList.push({
-        text: `${top.name}: ${top.stats.totalMiners.toLocaleString()} early supporters`,
+        text: t('hero.earlySupporters', { college: top.name, count: top.stats.totalMiners.toLocaleString() }),
         type: 'supporters',
         college: top.name
       });
@@ -83,7 +89,7 @@ const HeroSection = () => {
 
     if (stats.recentColleges?.[0]) {
       activityList.push({
-        text: `${stats.recentColleges[0].name} joined waitlist`,
+        text: t('hero.joinedWaitlist', { college: stats.recentColleges[0].name }),
         type: 'waitlist',
         college: stats.recentColleges[0].name
       });
@@ -91,7 +97,7 @@ const HeroSection = () => {
 
     if (stats.global?.activeMiners > 0) {
       activityList.push({
-        text: `${stats.global.activeMiners.toLocaleString()} students actively mining`,
+        text: t('hero.studentsActiveMining', { count: stats.global.activeMiners.toLocaleString() }),
         type: 'mining',
         college: 'Global'
       });
@@ -100,7 +106,7 @@ const HeroSection = () => {
     if (stats.topColleges?.byTokens?.[0]) {
       const top = stats.topColleges.byTokens[0];
       activityList.push({
-        text: `${top.name} mined ${Math.round(top.stats.totalTokensMined).toLocaleString()} tokens`,
+        text: t('hero.tokensMined', { college: top.name, tokens: Math.round(top.stats.totalTokensMined).toLocaleString() }),
         type: 'tokens',
         college: top.name
       });
@@ -108,7 +114,7 @@ const HeroSection = () => {
 
     if (stats.global?.totalColleges > 0) {
       activityList.push({
-        text: `${stats.global.totalColleges} institutions building digital economies`,
+        text: t('hero.institutionsBuilding', { count: stats.global.totalColleges }),
         type: 'growth',
         college: 'Network'
       });
@@ -117,7 +123,7 @@ const HeroSection = () => {
     if (stats.topColleges?.byMiners?.[1]) {
       const second = stats.topColleges.byMiners[1];
       activityList.push({
-        text: `${second.name} reaching ${second.stats.totalMiners.toLocaleString()} supporters`,
+        text: t('hero.reachingSupporters', { college: second.name, count: second.stats.totalMiners.toLocaleString() }),
         type: 'milestone',
         college: second.name
       });
@@ -125,7 +131,7 @@ const HeroSection = () => {
 
     if (stats.global?.activeMiningSessions > 0) {
       activityList.push({
-        text: `${stats.global.activeMiningSessions.toLocaleString()} active mining sessions now`,
+        text: t('hero.activeSessionsNow', { count: stats.global.activeMiningSessions.toLocaleString() }),
         type: 'sessions',
         college: 'Platform'
       });
@@ -134,14 +140,14 @@ const HeroSection = () => {
     if (stats.topColleges?.byTokens?.[1]) {
       const second = stats.topColleges.byTokens[1];
       activityList.push({
-        text: `${second.name} distributed ${Math.round(second.stats.totalTokensMined).toLocaleString()} tokens to students`,
+        text: t('hero.tokensDistributed', { college: second.name, tokens: Math.round(second.stats.totalTokensMined).toLocaleString() }),
         type: 'distribution',
         college: second.name
       });
     }
 
     setActivities(activityList.length > 0 ? activityList : [{
-      text: 'Platform launching soon - Join the waitlist',
+      text: t('hero.platformLaunching'),
       type: 'announcement',
       college: 'Platform'
     }]);
@@ -246,7 +252,7 @@ const HeroSection = () => {
                       position: 'relative',
                     }}
                   >
-                    Launch Your College's{' '}
+                    {t('hero.launchYourCollege')}{' '}
                     <Box
                       component="span"
                       sx={{
@@ -333,11 +339,11 @@ const HeroSection = () => {
                   maxWidth: '500px',
                 }}
               >
-                Turnkey token infrastructure, smart contracts, and full ecosystem deployment on{' '}
+                {t('hero.turnkeyInfrastructure')}{' '}
                 <Box component="span" sx={{ color: '#8b5cf6', fontWeight: 600 }}>
                   CollegenZ L2
                 </Box>
-                . From configuration to go-live in weeks, not months.
+                . {t('hero.weeksNotMonths')}
               </Typography>
 
               <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
@@ -362,10 +368,10 @@ const HeroSection = () => {
                     }}
                   >
                     <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.9, lineHeight: 1 }}>
-                      {user ? (user.role === 'student' ? 'Continue' : 'Go to') : 'Community'}
+                      {user ? (user.role === 'student' ? t('hero.continue') : t('hero.goTo')) : t('hero.community')}
                     </Box>
                     <Box sx={{ lineHeight: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      {user ? (user.role === 'student' ? 'Mining' : 'Dashboard') : 'Start Mining'}
+                      {user ? (user.role === 'student' ? t('hero.mining') : t('header.dashboard')) : t('hero.startMining')}
                       <ArrowForward sx={{ fontSize: '1rem' }} />
                     </Box>
                   </Button>
@@ -398,10 +404,10 @@ const HeroSection = () => {
                       }}
                     >
                       <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.8, lineHeight: 1 }}>
-                        Colleges
+                        {t('hero.colleges')}
                       </Box>
                       <Box sx={{ lineHeight: 1 }}>
-                        Join Waitlist
+                        {t('hero.joinWaitlist')}
                       </Box>
                     </Button>
                   </motion.div>
@@ -431,7 +437,7 @@ const HeroSection = () => {
                     }}
                   />
                   <Typography sx={{ color: '#059669', fontSize: '1rem', fontWeight: 500 }}>
-                    {globalStats.global.activeMiningSessions.toLocaleString()} mining sessions active now
+                    {t('hero.miningSessionsActive', { count: globalStats.global.activeMiningSessions.toLocaleString() })}
                   </Typography>
                 </Box>
               )}
@@ -561,11 +567,11 @@ const HeroSection = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                           <School sx={{ color: '#9bb8e0', fontSize: '2rem' }} />
                           <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
-                            500+ Colleges
+                            {t('hero.collegesCount')}
                           </Typography>
                         </Box>
                         <Typography sx={{ color: '#718096' }}>
-                          Leading institutions already building their digital economies
+                          {t('hero.leadingInstitutions')}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -583,11 +589,11 @@ const HeroSection = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                           <TrendingUp sx={{ color: '#b39ae8', fontSize: '2rem' }} />
                           <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
-                            $2M+ Deployed
+                            {t('hero.tokensDeployed')}
                           </Typography>
                         </Box>
                         <Typography sx={{ color: '#718096' }}>
-                          Tokens already in circulation across campus networks
+                          {t('hero.tokensInCirculation')}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -605,11 +611,11 @@ const HeroSection = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                           <Security sx={{ color: '#e69bb8', fontSize: '2rem' }} />
                           <Typography variant="h6" sx={{ color: '#2d3748', fontWeight: 600 }}>
-                            Enterprise Grade
+                            {t('hero.enterpriseGrade')}
                           </Typography>
                         </Box>
                         <Typography sx={{ color: '#718096' }}>
-                          Audited smart contracts and institutional infrastructure
+                          {t('hero.auditedContracts')}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -666,7 +672,7 @@ const HeroSection = () => {
                 }}
               />
               <Typography sx={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>
-                LIVE
+                {t('hero.live')}
               </Typography>
             </Box>
             

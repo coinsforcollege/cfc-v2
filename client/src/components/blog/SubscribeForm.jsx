@@ -7,12 +7,14 @@ import {
   CircularProgress
 } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { blogApi } from '../../api/blog.api';
 import { colors, borderRadius } from '../../utils/designTokens';
 import { useToast } from '../../contexts/ToastContext';
 
 const SubscribeForm = () => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -21,7 +23,7 @@ const SubscribeForm = () => {
     e.preventDefault();
     
     if (!email.trim()) {
-      showToast('Please enter your email', 'error');
+      showToast(t('auth.pleaseEnterYourEmail'), 'error');
       return;
     }
 
@@ -30,12 +32,12 @@ const SubscribeForm = () => {
       const response = await blogApi.subscribe({ email });
       
       if (response.success) {
-        showToast('Successfully subscribed to our newsletter!', 'success');
+        showToast(t('auth.successfullySubscribed'), 'success');
         setSubscribed(true);
         setEmail('');
       }
     } catch (error) {
-      showToast(error.message || 'Failed to subscribe', 'error');
+      showToast(error.message || t('auth.failedToSubscribe'), 'error');
     } finally {
       setLoading(false);
     }
@@ -49,11 +51,11 @@ const SubscribeForm = () => {
       background: colors.neutral[50]
     }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: colors.neutral[900], fontSize: '1rem' }}>
-        Subscribe to Newsletter
+        {t('auth.subscribeToNewsletter')}
       </Typography>
       
       <Typography variant="body2" sx={{ mb: 2, color: colors.neutral[600], fontSize: '0.875rem' }}>
-        Get new articles via email
+        {t('auth.getNewArticlesViaEmail')}
       </Typography>
 
       {subscribed ? (
@@ -66,7 +68,7 @@ const SubscribeForm = () => {
         }}>
           <CheckCircle sx={{ fontSize: 40, color: colors.success[500] }} />
           <Typography variant="body2" sx={{ fontWeight: 600, color: colors.neutral[900], textAlign: 'center' }}>
-            Thanks for subscribing!
+            {t('auth.thanksForSubscribing')}
           </Typography>
         </Box>
       ) : (
@@ -74,7 +76,7 @@ const SubscribeForm = () => {
           <TextField
             fullWidth
             type="email"
-            placeholder="Your email"
+            placeholder={t('auth.yourEmail')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -99,7 +101,7 @@ const SubscribeForm = () => {
               }
             }}
           >
-            {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Subscribe'}
+            {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : t('auth.subscribe')}
           </Button>
         </Box>
       )}

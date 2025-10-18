@@ -29,5 +29,8 @@ export const authApi = {
   // Change password
   changePassword: (data) => apiClient.put('/auth/change-password', data),
   changePasswordWithOTP: (data) => apiClient.put('/auth/change-password-with-otp', data),
+
+  // Language preference
+  updateLanguagePreference: (language) => apiClient.put('/auth/language', { language }),
 };
 

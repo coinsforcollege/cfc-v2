@@ -7,7 +7,8 @@ import {
   logout,
   updateProfile,
   changePassword,
-  changePasswordWithOTP
+  changePasswordWithOTP,
+  updateLanguagePreference
 } from '../controllers/auth.controller.js';
 import {
   sendOTPForStudent,
@@ -45,6 +46,7 @@ router.post('/logout', protect, logout);
 router.put('/profile', protect, updateProfile);
 router.put('/change-password', protect, changePassword);
 router.put('/change-password-with-otp', protect, changePasswordWithOTP);
+router.put('/language', protect, updateLanguagePreference);
 
 export default router;
 

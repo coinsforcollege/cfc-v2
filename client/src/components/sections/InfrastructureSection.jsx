@@ -13,32 +13,34 @@ import {
   Token
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 const InfrastructureSection = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const controlItems = [
     {
       icon: Token,
-      title: 'Token Configuration',
-      description: 'Token name, ticker, and supply',
+      title: t('infrastructure.tokenConfiguration'),
+      description: t('infrastructure.tokenConfigurationDesc'),
       color: '#a8c8ec'
     },
     {
       icon: Analytics,
-      title: 'Mining Allocation',
-      description: 'Mining allocation for early supporters',
+      title: t('infrastructure.miningAllocation'),
+      description: t('infrastructure.miningAllocationDesc'),
       color: '#c4a8f2'
     },
     {
       icon: Settings,
-      title: 'Utility Design',
-      description: 'Payments, perks, access rights',
+      title: t('infrastructure.utilityDesign'),
+      description: t('infrastructure.utilityDesignDesc'),
       color: '#f2a8c8'
     },
     {
       icon: AccountBalance,
-      title: 'DAO Structure',
-      description: 'Governance rules and frameworks',
+      title: t('infrastructure.daoStructure'),
+      description: t('infrastructure.daoStructureDesc'),
       color: '#a8e6cf'
     }
   ];
@@ -46,26 +48,26 @@ const InfrastructureSection = () => {
   const deliveryItems = [
     {
       icon: Security,
-      title: 'Audited Smart Contracts',
-      description: 'From our comprehensive library',
+      title: t('infrastructure.auditedSmartContracts'),
+      description: t('infrastructure.auditedSmartContractsDesc'),
       color: '#68d391'
     },
     {
       icon: Api,
-      title: 'Interoperability Layer',
-      description: 'For campus systems integration',
+      title: t('infrastructure.interoperabilityLayer'),
+      description: t('infrastructure.interoperabilityLayerDesc'),
       color: '#fbbf24'
     },
     {
       icon: Build,
-      title: 'API Integrations',
-      description: 'Student portals and ERP systems',
+      title: t('infrastructure.apiIntegrations'),
+      description: t('infrastructure.apiIntegrationsDesc'),
       color: '#ffd3a5'
     },
     {
       icon: Analytics,
-      title: 'Tokenomics Modeling',
-      description: 'Based on your specific goals',
+      title: t('infrastructure.tokenomicsModeling'),
+      description: t('infrastructure.tokenomicsModelingDesc'),
       color: '#a8c8ec'
     }
   ];
@@ -105,7 +107,7 @@ const InfrastructureSection = () => {
         >
           <Box sx={{ textAlign: 'center', mb: 8 }}>
             <Chip
-              label="For Colleges"
+              label={t('infrastructure.forColleges')}
               sx={{
                 background: 'linear-gradient(135deg, #a8c8ec 0%, #c4a8f2 100%)',
                 color: '#ffffff',
@@ -128,7 +130,7 @@ const InfrastructureSection = () => {
                 mb: 3,
               }}
             >
-              Infrastructure & Execution
+              {t('infrastructure.title')}
             </Typography>
             <Typography
               sx={{
@@ -140,7 +142,7 @@ const InfrastructureSection = () => {
                 mb: 4,
               }}
             >
-              We Build It. You Launch It.
+              {t('infrastructure.subtitle')}
             </Typography>
             <Typography
               sx={{
@@ -151,8 +153,7 @@ const InfrastructureSection = () => {
                 mx: 'auto',
               }}
             >
-              Your college gets a complete digital economy without the technical overhead. 
-              Custom tokens, governance frameworks, and payment rails deployed on CollegenZ's Ethereum L2.
+              {t('infrastructure.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -193,10 +194,10 @@ const InfrastructureSection = () => {
                     }}
                   >
                     <CheckCircle sx={{ color: '#68d391', fontSize: '2rem' }} />
-                    What You Control
+                    {t('infrastructure.whatYouControl')}
                   </Typography>
                   <Typography sx={{ color: '#718096', fontSize: '1rem' }}>
-                    Complete ownership and customization of your college's digital economy
+                    {t('infrastructure.whatYouControlDesc')}
                   </Typography>
                 </Box>
 
@@ -303,10 +304,10 @@ const InfrastructureSection = () => {
                     }}
                   >
                     <Build sx={{ color: '#fbbf24', fontSize: '2rem' }} />
-                    What We Deliver
+                    {t('infrastructure.whatWeDeliver')}
                   </Typography>
                   <Typography sx={{ color: '#718096', fontSize: '1rem' }}>
-                    Complete technical infrastructure and implementation support
+                    {t('infrastructure.whatWeDeliverDesc')}
                   </Typography>
                 </Box>
 
@@ -404,7 +405,7 @@ const InfrastructureSection = () => {
                 mb: 3,
               }}
             >
-              Ready to Launch Your Digital Economy?
+              {t('infrastructure.ctaTitle')}
             </Typography>
             <Typography
               sx={{
@@ -415,8 +416,7 @@ const InfrastructureSection = () => {
                 mx: 'auto',
               }}
             >
-              Join the waitlist and configure your token economy before your peers. 
-              From configuration to go-live in weeks, not months.
+              {t('infrastructure.ctaDescription')}
             </Typography>
             <Box
               onClick={() => navigate('/auth/register/college')}
@@ -437,7 +437,7 @@ const InfrastructureSection = () => {
                 },
               }}
             >
-              Join Waitlist
+              {t('hero.joinWaitlist')}
             </Box>
           </Box>
         </motion.div>

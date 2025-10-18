@@ -1,11 +1,13 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import * as MuiIcons from '@mui/icons-material';
 import { colors, borderRadius } from '../../utils/designTokens';
 
 const CategoryCard = ({ category }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Map icon string to MUI icon component
   const IconComponent = MuiIcons[category.icon] || MuiIcons.HelpOutline;
@@ -81,7 +83,7 @@ const CategoryCard = ({ category }) => {
                 fontWeight: 500
               }}
             >
-              {category.articleCount} {category.articleCount === 1 ? 'article' : 'articles'}
+              {category.articleCount} {category.articleCount === 1 ? t('auth.article') : t('auth.articles')}
             </Typography>
           </Box>
         </Box>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Container,
@@ -34,59 +35,63 @@ import {
   CheckCircle,
 } from '@mui/icons-material';
 
-const steps = [
+const getSteps = (t) => [
   {
-    label: 'Create Your Account',
-    description: 'Sign up with your email and get started',
-    details: 'Enter your basic information including name, email, and phone number. You\'ll receive verification codes to confirm your identity.',
+    label: t('howItWorksStudents.steps.createAccount.label'),
+    description: t('howItWorksStudents.steps.createAccount.description'),
+    details: t('howItWorksStudents.steps.createAccount.details'),
   },
   {
-    label: 'Select Your College',
-    description: 'Choose your college from our comprehensive list',
-    details: 'Search for your college in our database. If it\'s not listed, you can add it and be the first miner from your institution!',
+    label: t('howItWorksStudents.steps.selectCollege.label'),
+    description: t('howItWorksStudents.steps.selectCollege.description'),
+    details: t('howItWorksStudents.steps.selectCollege.details'),
   },
   {
-    label: 'Verify Your Identity',
-    description: 'Complete email and phone verification',
-    details: 'We send verification codes to your email and phone to ensure account security and prevent fraud.',
+    label: t('howItWorksStudents.steps.verifyIdentity.label'),
+    description: t('howItWorksStudents.steps.verifyIdentity.description'),
+    details: t('howItWorksStudents.steps.verifyIdentity.details'),
   },
   {
-    label: 'Start Mining',
-    description: 'Begin earning tokens every 24 hours',
-    details: 'Click the "Mine Now" button daily to earn tokens for your college. Build your streak for bonus rewards!',
+    label: t('howItWorksStudents.steps.startMining.label'),
+    description: t('howItWorksStudents.steps.startMining.description'),
+    details: t('howItWorksStudents.steps.startMining.details'),
   },
 ];
 
-const faqs = [
+const getFaqs = (t) => [
   {
-    question: 'How often can I mine tokens?',
-    answer: 'You can mine tokens once every 24 hours. The more consecutive days you mine, the higher your mining streak and potential bonuses.',
+    question: t('howItWorksStudents.faq.questions.howOftenCanIMine.question'),
+    answer: t('howItWorksStudents.faq.questions.howOftenCanIMine.answer'),
   },
   {
-    question: 'Are these real cryptocurrency tokens?',
-    answer: 'Currently, these are interest tokens that represent community engagement. When your college admin configures the token and launches it, these may be converted to actual blockchain tokens.',
+    question: t('howItWorksStudents.faq.questions.areTheseRealTokens.question'),
+    answer: t('howItWorksStudents.faq.questions.areTheseRealTokens.answer'),
   },
   {
-    question: 'Can I switch to a different college?',
-    answer: 'Yes, but switching colleges will reset your mining progress and tokens. We recommend staying with your favorite college for the best experience.',
+    question: t('howItWorksStudents.faq.questions.canISwitchCollege.question'),
+    answer: t('howItWorksStudents.faq.questions.canISwitchCollege.answer'),
   },
   {
-    question: 'Is there a cost to participate?',
-    answer: 'No! Mining tokens is completely free. We never ask for payment or credit card information from participants.',
+    question: t('howItWorksStudents.faq.questions.isThereACost.question'),
+    answer: t('howItWorksStudents.faq.questions.isThereACost.answer'),
   },
   {
-    question: 'What happens if I miss a day of mining?',
-    answer: 'Your streak will reset, but you won\'t lose your accumulated tokens. You can start building your streak again from day one.',
+    question: t('howItWorksStudents.faq.questions.whatIfIMissDay.question'),
+    answer: t('howItWorksStudents.faq.questions.whatIfIMissDay.answer'),
   },
   {
-    question: 'How secure is my information?',
-    answer: 'We use industry-standard encryption and security practices. We never share your personal information without your consent.',
+    question: t('howItWorksStudents.faq.questions.howSecureIsInfo.question'),
+    answer: t('howItWorksStudents.faq.questions.howSecureIsInfo.answer'),
   },
 ];
 
 function HowItWorksStudents() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
+  
+  const steps = getSteps(t);
+  const faqs = getFaqs(t);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -123,7 +128,7 @@ function HowItWorksStudents() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            How It Works for Community Members
+            {t('howItWorksStudents.title')}
           </Typography>
           <Typography
             variant="h6"
@@ -131,7 +136,7 @@ function HowItWorksStudents() {
             color="text.secondary"
             sx={{ maxWidth: '700px', mx: 'auto' }}
           >
-            Everything you need to know about mining college tokens - for students, alumni, fans, and supporters
+            {t('howItWorksStudents.subtitle')}
           </Typography>
         </Container>
       </Box>
@@ -149,7 +154,7 @@ function HowItWorksStudents() {
             }
           }}
         >
-          Step-by-Step Process
+          {t('howItWorksStudents.stepByStepProcess')}
         </Typography>
 
         <Grid container spacing={4} alignContent={'center'} >
@@ -173,14 +178,14 @@ function HowItWorksStudents() {
                         sx={{ mt: 1, mr: 1, textTransform: 'none' }}
                       // disabled={index === steps.length - 1}
                       >
-                        {index === steps.length - 1 ? 'Finish' : 'Continue'}
+                        {index === steps.length - 1 ? t('howItWorksStudents.buttons.finish') : t('howItWorksStudents.buttons.continue')}
                       </Button>
                       <Button
                         disabled={index === 0}
                         onClick={handleBack}
                         sx={{ mt: 1, mr: 1, textTransform: 'none' }}
                       >
-                        Back
+                        {t('howItWorksStudents.buttons.back')}
                       </Button>
                     </Box>
                   </StepContent>
@@ -190,10 +195,10 @@ function HowItWorksStudents() {
             {activeStep === steps.length && (
               <Paper square elevation={0} sx={{ p: 3 }}>
                 <Typography sx={{ mb: 2 }}>
-                  All steps completed - you&apos;re ready to start mining!
+                  {t('howItWorksStudents.buttons.allStepsCompleted')}
                 </Typography>
                 <Button onClick={handleReset} sx={{ textTransform: 'none' }}>
-                  Reset
+                  {t('howItWorksStudents.buttons.reset')}
                 </Button>
               </Paper>
             )}
@@ -216,33 +221,33 @@ function HowItWorksStudents() {
             }}
             gutterBottom
           >
-            What is Token Mining?
+            {t('howItWorksStudents.whatIsTokenMining.title')}
           </Typography>
           <Typography color="text.secondary" align="center" sx={{ mb: 6, maxWidth: '800px', mx: 'auto', fontSize: '1.1rem' }}>
-            Token mining is your way to earn and support your college&apos;s cryptocurrency
+            {t('howItWorksStudents.whatIsTokenMining.subtitle')}
           </Typography>
 
           <Grid container spacing={4}>
             {[
               {
                 icon: Token,
-                title: 'Daily Mining',
-                description: 'Mine tokens once every 24 hours by clicking the "Mine Now" button. It takes just seconds!',
+                title: t('howItWorksStudents.whatIsTokenMining.dailyMining.title'),
+                description: t('howItWorksStudents.whatIsTokenMining.dailyMining.description'),
               },
               {
                 icon: TrendingUp,
-                title: 'Build Your Streak',
-                description: 'Consecutive days of mining increase your rewards. The longer your streak, the more you earn!',
+                title: t('howItWorksStudents.whatIsTokenMining.buildStreak.title'),
+                description: t('howItWorksStudents.whatIsTokenMining.buildStreak.description'),
               },
               {
                 icon: EmojiEvents,
-                title: 'Compete & Earn',
-                description: 'Climb the leaderboard and earn bonus tokens. Top miners get special recognition and rewards.',
+                title: t('howItWorksStudents.whatIsTokenMining.competeEarn.title'),
+                description: t('howItWorksStudents.whatIsTokenMining.competeEarn.description'),
               },
               {
                 icon: Security,
-                title: 'Secure & Safe',
-                description: 'Your tokens are tracked securely. When your college launches, you\'ll be first in line to receive real tokens.',
+                title: t('howItWorksStudents.whatIsTokenMining.secureSafe.title'),
+                description: t('howItWorksStudents.whatIsTokenMining.secureSafe.description'),
               },
             ].map((item, index) => (
               <Grid size={{ xs: 12, md: 6 }} key={index}>
@@ -296,30 +301,30 @@ function HowItWorksStudents() {
           }}
           gutterBottom
         >
-          What Can I Do with Tokens?
+          {t('howItWorksStudents.whatCanIDoWithTokens.title')}
         </Typography>
         <Typography color="text.secondary" align="center" sx={{ mb: 6, maxWidth: '800px', mx: 'auto', fontSize: '1.1rem' }}>
-          Your tokens have real value and utility on your campus
+          {t('howItWorksStudents.whatCanIDoWithTokens.subtitle')}
         </Typography>
 
         <Grid container spacing={4}>
           {[
             {
               icon: AccountBalance,
-              title: 'Campus Purchases',
-              description: 'Use tokens at campus dining halls, bookstores, and vending machines.',
+              title: t('howItWorksStudents.whatCanIDoWithTokens.campusPurchases.title'),
+              description: t('howItWorksStudents.whatCanIDoWithTokens.campusPurchases.description'),
               color: 'primary',
             },
             {
               icon: EmojiEvents,
-              title: 'Event Access',
-              description: 'Get priority access to sports events, concerts, and exclusive campus activities.',
+              title: t('howItWorksStudents.whatCanIDoWithTokens.eventAccess.title'),
+              description: t('howItWorksStudents.whatCanIDoWithTokens.eventAccess.description'),
               color: 'secondary',
             },
             {
               icon: Share,
-              title: 'Trade & Share',
-              description: 'Trade tokens with other students or gift them to friends on campus.',
+              title: t('howItWorksStudents.whatCanIDoWithTokens.tradeShare.title'),
+              description: t('howItWorksStudents.whatCanIDoWithTokens.tradeShare.description'),
               color: 'success',
             },
           ].map((item, index) => (
@@ -361,10 +366,10 @@ function HowItWorksStudents() {
             }}
             gutterBottom
           >
-            How Do Referrals Work?
+            {t('howItWorksStudents.howReferralsWork.title')}
           </Typography>
           <Typography variant="h6" color="text.secondary" align="center" sx={{ mb: 6, maxWidth: '800px', mx: 'auto', fontSize: '1.1rem' }}>
-            Earn bonus tokens by inviting your friends to join
+            {t('howItWorksStudents.howReferralsWork.subtitle')}
           </Typography>
 
           <Grid container spacing={4} alignItems="center">
@@ -374,23 +379,23 @@ function HowItWorksStudents() {
                   {[
                     {
                       step: '1',
-                      title: 'Get Your Referral Code',
-                      desc: 'Find your unique referral code in your dashboard',
+                      title: t('howItWorksStudents.howReferralsWork.steps.getReferralCode.title'),
+                      desc: t('howItWorksStudents.howReferralsWork.steps.getReferralCode.description'),
                     },
                     {
                       step: '2',
-                      title: 'Share with Friends',
-                      desc: 'Send your code via text, social media, or email',
+                      title: t('howItWorksStudents.howReferralsWork.steps.shareWithFriends.title'),
+                      desc: t('howItWorksStudents.howReferralsWork.steps.shareWithFriends.description'),
                     },
                     {
                       step: '3',
-                      title: 'They Sign Up',
-                      desc: 'Your friend creates an account using your code',
+                      title: t('howItWorksStudents.howReferralsWork.steps.theySignUp.title'),
+                      desc: t('howItWorksStudents.howReferralsWork.steps.theySignUp.description'),
                     },
                     {
                       step: '4',
-                      title: 'Both Earn Bonus',
-                      desc: 'You and your friend both receive bonus tokens!',
+                      title: t('howItWorksStudents.howReferralsWork.steps.bothEarnBonus.title'),
+                      desc: t('howItWorksStudents.howReferralsWork.steps.bothEarnBonus.description'),
                     },
                   ].map((item) => (
                     <Box key={item.step} sx={{ display: 'flex', gap: 2 }}>
@@ -433,10 +438,10 @@ function HowItWorksStudents() {
                   }}
                   gutterBottom
                 >
-                  Unlimited Referrals
+                  {t('howItWorksStudents.howReferralsWork.unlimitedReferrals.title')}
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  There&apos;s no limit to how many friends you can invite. The more you share, the more you earn!
+                  {t('howItWorksStudents.howReferralsWork.unlimitedReferrals.description')}
                 </Typography>
                 <Button
                   component={Link}
@@ -446,7 +451,7 @@ function HowItWorksStudents() {
                   endIcon={<ArrowForward />}
                   sx={{ textTransform: 'none', py: 1.5, px: 4 }}
                 >
-                  Get Started Now
+                  {t('howItWorksStudents.howReferralsWork.getStartedNow')}
                 </Button>
               </Box>
             </Grid>
@@ -467,7 +472,7 @@ function HowItWorksStudents() {
             mb: 6,
           }}
         >
-          Frequently Asked Questions
+          {t('howItWorksStudents.faq.title')}
         </Typography>
 
         <div>
@@ -514,10 +519,10 @@ function HowItWorksStudents() {
             }}
             gutterBottom
           >
-            Ready to Start Mining?
+            {t('howItWorksStudents.cta.title')}
           </Typography>
           <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-            Join thousands of students already earning tokens for their college
+            {t('howItWorksStudents.cta.subtitle')}
           </Typography>
           <Button
             component={Link}
@@ -538,7 +543,7 @@ function HowItWorksStudents() {
               },
             }}
           >
-            Create Your Account
+            {t('howItWorksStudents.cta.createAccount')}
           </Button>
         </Container>
       </Box>

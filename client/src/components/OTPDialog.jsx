@@ -12,8 +12,10 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Email, CheckCircle } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
+  const { t } = useTranslation();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,7 +88,7 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
     const otpCode = otp.join('');
 
     if (otpCode.length !== 6) {
-      setError('Please enter all 6 digits');
+      setError(t('auth.enterAllSixDigits'));
       return;
     }
 
@@ -113,7 +115,7 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
         onVerified(response.data.verificationToken);
       }
     } catch (err) {
-      setError(err.message || 'Invalid OTP. Please try again.');
+      setError(err.message || t('auth.invalidOTPTryAgain'));
       if (err.attemptsRemaining !== undefined) {
         setAttemptsRemaining(err.attemptsRemaining);
       }
@@ -147,9 +149,9 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
     } catch (err) {
       if (err.waitTime) {
         setResendTimer(err.waitTime);
-        setError(err.message || 'Please wait before requesting a new OTP');
+        setError(err.message || t('auth.pleaseWaitBeforeRequesting'));
       } else {
-        setError(err.message || 'Failed to resend OTP. Please try again.');
+        setError(err.message || t('auth.failedToResendOTP'));
       }
     } finally {
       setResendLoading(false);
@@ -185,10 +187,10 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
           <Email sx={{ fontSize: 32, color: '#8b5cf6' }} />
         </Box>
         <Typography variant="h5" sx={{ fontWeight: 700, color: '#2d3748' }}>
-          Verify Your Email
+          {t('auth.verifyYourEmail')}
         </Typography>
         <Typography variant="body2" sx={{ color: '#718096', mt: 1 }}>
-          We sent a 6-digit code to
+          {t('auth.sentSixDigitCode')}
         </Typography>
         <Typography variant="body2" sx={{ color: '#8b5cf6', fontWeight: 600 }}>
           {email}
@@ -201,7 +203,7 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
             {error}
             {attemptsRemaining < 5 && attemptsRemaining > 0 && (
               <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-                Attempts remaining: {attemptsRemaining}
+                {t('auth.attemptsRemaining', { count: attemptsRemaining })}
               </Typography>
             )}
           </Alert>
@@ -248,7 +250,7 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
 
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Did not receive the code?
+            {t('auth.didNotReceiveCode')}
           </Typography>
           <Button
             onClick={handleResend}
@@ -265,9 +267,9 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
             {resendLoading ? (
               <CircularProgress size={20} />
             ) : resendTimer > 0 ? (
-              `Resend in ${resendTimer}s`
+              t('auth.resendIn', { seconds: resendTimer })
             ) : (
-              'Resend Code'
+              t('auth.resendCode')
             )}
           </Button>
         </Box>
@@ -283,7 +285,7 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
         >
           <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <CheckCircle sx={{ fontSize: 14, color: '#8b5cf6' }} />
-            Code expires in 10 minutes
+            {t('auth.codeExpiresIn')}
           </Typography>
         </Box>
       </DialogContent>
@@ -311,7 +313,7 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
             }
           }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Verify Code'}
+          {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.verifyCode')}
         </Button>
 
         <Button
@@ -323,7 +325,7 @@ const OTPDialog = ({ open, email, role, onVerified, onClose }) => {
             fontWeight: 600
           }}
         >
-          Cancel
+          {t('common.cancel')}
         </Button>
       </DialogActions>
     </Dialog>

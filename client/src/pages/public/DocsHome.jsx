@@ -10,6 +10,7 @@ import {
   Grid
 } from '@mui/material';
 import { Search, ArrowForward } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { docsApi } from '../../api/docs.api';
 import { colors, borderRadius } from '../../utils/designTokens';
 import CategoryCard from '../../components/docs/CategoryCard';
@@ -18,6 +19,7 @@ import DocsContactCTA from '../../components/docs/DocsContactCTA';
 
 const DocsHome = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [categories, setCategories] = useState([]);
   const [featuredArticles, setFeaturedArticles] = useState([]);
@@ -101,7 +103,7 @@ const DocsHome = () => {
             fontSize: { xs: '2rem', md: '2.5rem' }
           }}
         >
-          Help & Documentation
+          {t('auth.helpAndDocumentation')}
         </Typography>
 
         <Typography
@@ -112,7 +114,7 @@ const DocsHome = () => {
             lineHeight: 1.6
           }}
         >
-          Find answers, guides, and resources to help you get the most out of Coins For College
+          {t('auth.findAnswersGuides')}
         </Typography>
 
         <Box
@@ -122,7 +124,7 @@ const DocsHome = () => {
         >
           <TextField
             fullWidth
-            placeholder="Search documentation..."
+            placeholder={t('auth.searchDocumentation')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
@@ -155,7 +157,7 @@ const DocsHome = () => {
               mb: 4
             }}
           >
-            Browse by Category
+            {t('auth.browseByCategory')}
           </Typography>
 
           <Box
@@ -193,7 +195,7 @@ const DocsHome = () => {
                   color: colors.neutral[900]
                 }}
               >
-                Featured Articles
+                {t('auth.featuredArticles')}
               </Typography>
 
               {featuredArticles.length > 6 && (
@@ -206,7 +208,7 @@ const DocsHome = () => {
                     textTransform: 'none'
                   }}
                 >
-                  View All
+                  {t('auth.viewAll')}
                 </Button>
               )}
             </Box>

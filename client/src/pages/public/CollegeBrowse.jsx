@@ -38,6 +38,7 @@ import {
   ExpandMore,
   ExpandLess
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/apiClient';
 import { getImageUrl } from '../../utils/imageUtils';
 
@@ -75,6 +76,7 @@ const getStatusChipStyle = (status) => {
 const CollegeBrowse = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   
   const [colleges, setColleges] = useState([]);
   const [allCountries, setAllCountries] = useState([]);
@@ -241,10 +243,10 @@ const CollegeBrowse = () => {
               color: '#000',
               mb: 1
             }}>
-              Explore Colleges
+              {t('auth.exploreColleges')}
             </Typography>
             <Typography variant={{ xs: 'body1', md: 'h6' }} color="text.secondary">
-              Join the future of college tokens and start mining today
+              {t('auth.joinFutureCollegeTokens')}
             </Typography>
           </Box>
 
@@ -255,7 +257,7 @@ const CollegeBrowse = () => {
                 {globalStats.totalColleges || 0}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Colleges
+                {t('auth.colleges')}
               </Typography>
             </Box>
 
@@ -264,7 +266,7 @@ const CollegeBrowse = () => {
                 {globalStats.totalMiners || 0}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Total Miners
+                {t('auth.totalMiners')}
               </Typography>
             </Box>
 
@@ -276,7 +278,7 @@ const CollegeBrowse = () => {
                 })()}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Tokens Mined
+                {t('auth.tokensMined')}
               </Typography>
             </Box>
           </Box>
@@ -309,7 +311,7 @@ const CollegeBrowse = () => {
             </IconButton>
             <InputBase
               sx={{ ml: 1, flex: 1 }}
-              placeholder="Search by name, city, country..."
+              placeholder={t('auth.searchByNameCityCountry')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -326,7 +328,7 @@ const CollegeBrowse = () => {
                 }
               }}
             >
-              Search
+              {t('auth.search')}
             </Typography>
           </Paper>
         </Box>
@@ -354,7 +356,7 @@ const CollegeBrowse = () => {
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              Filters
+              {t('auth.filters')}
               {getActiveFilterCount() > 0 && (
                 <Chip
                   label={getActiveFilterCount()}
@@ -399,20 +401,20 @@ const CollegeBrowse = () => {
                       }
                     }}
                   >
-                    Clear All Filters
+                    {t('auth.clearAllFilters')}
                   </Button>
                 )}
 
                 {/* Sort By - Compact */}
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
-                    SORT BY
+                    {t('auth.sortBy').toUpperCase()}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     {[
-                      { value: 'miners', label: 'Miners', icon: People },
-                      { value: 'tokens', label: 'Tokens', icon: TrendingUp },
-                      { value: 'name', label: 'Name', icon: School }
+                      { value: 'miners', label: t('auth.miners'), icon: People },
+                      { value: 'tokens', label: t('auth.tokens'), icon: TrendingUp },
+                      { value: 'name', label: t('auth.name'), icon: School }
                     ].map(({ value, label, icon: Icon }) => (
                       <Chip
                         key={value}
@@ -446,13 +448,13 @@ const CollegeBrowse = () => {
                 {/* Status Filter - Compact */}
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
-                    STATUS
+                    {t('auth.status').toUpperCase()}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     {['all', 'Unaffiliated', 'Waitlist', 'Building', 'Live'].map(status => (
                       <Chip
                         key={status}
-                        label={status === 'all' ? 'All' : status}
+                        label={status === 'all' ? t('auth.all') : status}
                         size="small"
                         onClick={() => updateFilters({ status: status })}
                         sx={{
@@ -483,7 +485,7 @@ const CollegeBrowse = () => {
                   {/* Country Filter */}
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
-                      COUNTRY
+                      {t('auth.country').toUpperCase()}
                     </Typography>
                     <FormControl fullWidth size="small">
                       <Select
@@ -497,7 +499,7 @@ const CollegeBrowse = () => {
                         }}
                       >
                         <MenuItem value="">
-                          <em>All</em>
+                          <em>{t('auth.all')}</em>
                         </MenuItem>
                         {allCountries.map(country => (
                           <MenuItem key={country} value={country} sx={{ fontSize: '0.875rem' }}>
@@ -511,7 +513,7 @@ const CollegeBrowse = () => {
                   {/* Type Filter */}
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, mb: 1, display: 'block', color: '#64748b' }}>
-                      TYPE
+                      {t('auth.institutionType').toUpperCase()}
                     </Typography>
                     <FormControl fullWidth size="small">
                       <Select
@@ -525,7 +527,7 @@ const CollegeBrowse = () => {
                         }}
                       >
                         <MenuItem value="">
-                          <em>All</em>
+                          <em>{t('auth.all')}</em>
                         </MenuItem>
                         {allTypes.map(type => (
                           <MenuItem key={type} value={type} sx={{ fontSize: '0.875rem' }}>
@@ -577,7 +579,7 @@ const CollegeBrowse = () => {
                       }
                     }}
                   >
-                    Clear All Filters
+                    {t('auth.clearAllFilters')}
                   </Button>
                 )}
 
@@ -585,7 +587,7 @@ const CollegeBrowse = () => {
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Sort sx={{ fontSize: 18, color: '#667eea' }} />
-                    Sort By
+                    {t('auth.sortBy')}
                   </Typography>
                   <FormControl fullWidth size="small">
                     <Select
@@ -602,19 +604,19 @@ const CollegeBrowse = () => {
                       <MenuItem value="miners">
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <People sx={{ fontSize: 18 }} />
-                          Most Miners
+                          {t('auth.mostMiners')}
                         </Box>
                       </MenuItem>
                       <MenuItem value="tokens">
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <TrendingUp sx={{ fontSize: 18 }} />
-                          Most Tokens
+                          {t('auth.mostTokens')}
                         </Box>
                       </MenuItem>
                       <MenuItem value="name">
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <School sx={{ fontSize: 18 }} />
-                          Name (A-Z)
+                          {t('auth.nameAZ')}
                         </Box>
                       </MenuItem>
                     </Select>
@@ -627,13 +629,13 @@ const CollegeBrowse = () => {
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <CheckCircle sx={{ fontSize: 18, color: '#667eea' }} />
-                    Status
+                    {t('auth.status')}
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {['all', 'Unaffiliated', 'Waitlist', 'Building', 'Live'].map(status => (
                       <Chip
                         key={status}
-                        label={status === 'all' ? 'All' : status}
+                        label={status === 'all' ? t('auth.all') : status}
                         onClick={() => updateFilters({ status: status })}
                         sx={{
                           cursor: 'pointer',
@@ -664,7 +666,7 @@ const CollegeBrowse = () => {
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Public sx={{ fontSize: 18, color: '#667eea' }} />
-                    Country
+                    {t('auth.country')}
                   </Typography>
                   <FormControl fullWidth size="small">
                     <Select
@@ -680,7 +682,7 @@ const CollegeBrowse = () => {
                       }}
                     >
                       <MenuItem value="">
-                        <em>All Countries</em>
+                        <em>{t('auth.allCountries')}</em>
                       </MenuItem>
                       {allCountries.map(country => (
                         <MenuItem key={country} value={country}>
@@ -697,7 +699,7 @@ const CollegeBrowse = () => {
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <School sx={{ fontSize: 18, color: '#667eea' }} />
-                    Institution Type
+                    {t('auth.institutionType')}
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {allTypes.map(type => (
@@ -739,7 +741,11 @@ const CollegeBrowse = () => {
             {/* Results Summary */}
             {colleges.length > 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Showing {((pagination.currentPage - 1) * collegesPerPage) + 1}-{Math.min(pagination.currentPage * collegesPerPage, pagination.totalCount)} of {pagination.totalCount} colleges
+                {t('auth.showingResults', { 
+                  start: ((pagination.currentPage - 1) * collegesPerPage) + 1,
+                  end: Math.min(pagination.currentPage * collegesPerPage, pagination.totalCount),
+                  total: pagination.totalCount
+                })}
               </Typography>
             )}
 
@@ -819,7 +825,7 @@ const CollegeBrowse = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <People sx={{ fontSize: 18, color: '#667eea' }} />
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {college.stats?.totalMiners || 0} miners
+                              {college.stats?.totalMiners || 0} {t('auth.minersLabel')}
                             </Typography>
                           </Box>
                           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
@@ -829,12 +835,12 @@ const CollegeBrowse = () => {
                                 (college.stats.totalTokensMined < 1 ?
                                   college.stats.totalTokensMined.toFixed(2) :
                                   college.stats.totalTokensMined.toFixed(0))
-                                : 0} tokens
+                                : 0} {t('auth.tokensLabel')}
                             </Typography>
                           </Box>
                           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
                             <Chip
-                              label={`${college.baseRate || 0.25} Token/hr`}
+                              label={`${college.baseRate || 0.25} ${t('auth.tokenPerHour')}`}
                               size="small"
                               sx={{
                                 background: 'rgba(16, 185, 129, 0.1)',
@@ -845,7 +851,7 @@ const CollegeBrowse = () => {
                             />
                             {college.referralBonusRate && (
                               <Chip
-                                label={`+${college.referralBonusRate} Token/hr/ref`}
+                                label={t('auth.tokenPerHourPerRef', { rate: college.referralBonusRate })}
                                 size="small"
                                 sx={{
                                   background: 'rgba(59, 130, 246, 0.1)',
@@ -873,10 +879,10 @@ const CollegeBrowse = () => {
                   onClick={() => updateFilters({ page: currentPage - 1 })}
                   sx={{ minWidth: 100 }}
                 >
-                  Previous
+                  {t('auth.previous')}
                 </Button>
                 <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
-                  Page {pagination.currentPage} of {pagination.totalPages}
+                  {t('auth.pageOf', { current: pagination.currentPage, total: pagination.totalPages })}
                 </Typography>
                 <Button
                   variant="outlined"
@@ -884,7 +890,7 @@ const CollegeBrowse = () => {
                   onClick={() => updateFilters({ page: currentPage + 1 })}
                   sx={{ minWidth: 100 }}
                 >
-                  Next
+                  {t('auth.next')}
                 </Button>
               </Box>
             )}
@@ -894,10 +900,10 @@ const CollegeBrowse = () => {
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <School sx={{ fontSize: 80, color: '#e2e8f0', mb: 2 }} />
                 <Typography variant="h6" color="text.secondary">
-                  No colleges found
+                  {t('auth.noCollegesFound')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Try adjusting your filters
+                  {t('auth.tryAdjustingFilters')}
                 </Typography>
               </Box>
             )}
