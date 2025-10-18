@@ -35,10 +35,12 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { ambassadorApi } from '../../api/ambassador.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import { useTranslation } from 'react-i18next';
 
 const Ambassador = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [application, setApplication] = useState(null);
 
@@ -73,24 +75,24 @@ const Ambassador = () => {
           icon: HourglassEmpty,
           color: '#f59e0b',
           bg: 'rgba(245, 158, 11, 0.1)',
-          text: 'Application Under Review',
-          description: 'Our team is reviewing your application. We\'ll get back to you soon!'
+          text: t('ambassador.applicationUnderReview'),
+          description: t('ambassador.reviewingDescription')
         };
       case 'approved':
         return {
           icon: CheckCircle,
           color: '#22c55e',
           bg: 'rgba(34, 197, 94, 0.1)',
-          text: 'Application Approved',
-          description: 'Congratulations! You are now an official Campus Ambassador.'
+          text: t('ambassador.applicationApproved'),
+          description: t('ambassador.approvedDescription')
         };
       case 'rejected':
         return {
           icon: Cancel,
           color: '#ef4444',
           bg: 'rgba(239, 68, 68, 0.1)',
-          text: 'Application Not Approved',
-          description: 'Unfortunately, your application was not approved this time.'
+          text: t('ambassador.applicationNotApproved'),
+          description: t('ambassador.rejectedDescription')
         };
       default:
         return null;
@@ -118,10 +120,10 @@ const Ambassador = () => {
       <DashboardLayout stats={sidebarStats} searchPlaceholder="Search...">
         <Box sx={{ maxWidth: '1000px', width: '100%', mx: 'auto' }}>
           <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-            Campus Ambassador Program
+            {t('ambassador.campusAmbassadorProgram')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-            Lead the future of campus digital economies and earn exclusive rewards
+            {t('ambassador.leadFuture')}
           </Typography>
 
           {/* Hero Card */}
@@ -150,10 +152,10 @@ const Ambassador = () => {
                 </Box>
                 <Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-                    Become a Campus Ambassador
+                    {t('ambassador.becomeAmbassador')}
                   </Typography>
                   <Typography sx={{ opacity: 0.95, fontSize: '0.95rem' }}>
-                    Join an elite network of student leaders
+                    {t('ambassador.joinEliteNetwork')}
                   </Typography>
                 </Box>
               </Box>
@@ -177,7 +179,7 @@ const Ambassador = () => {
                   }
                 }}
               >
-                Apply Now
+                {t('ambassador.applyNow')}
               </Button>
             </CardContent>
           </Card>
@@ -192,29 +194,29 @@ const Ambassador = () => {
             {[
               {
                 icon: EmojiEvents,
-                title: 'Exclusive Perks',
-                description: 'Early access to features, special events, and ambassador-only rewards',
+                title: t('ambassador.exclusivePerks'),
+                description: t('ambassador.exclusivePerksDesc'),
                 color: '#f59e0b',
                 bg: 'rgba(245, 158, 11, 0.1)'
               },
               {
                 icon: TrendingUp,
-                title: 'Build Your Resume',
-                description: 'Gain valuable leadership experience and professional development',
+                title: t('ambassador.buildResume'),
+                description: t('ambassador.buildResumeDesc'),
                 color: '#8b5cf6',
                 bg: 'rgba(139, 92, 246, 0.1)'
               },
               {
                 icon: Groups,
-                title: 'Growing Network',
-                description: 'Connect with ambassadors from colleges across the country',
+                title: t('ambassador.growingNetwork'),
+                description: t('ambassador.growingNetworkDesc'),
                 color: '#ec4899',
                 bg: 'rgba(236, 72, 153, 0.1)'
               },
               {
                 icon: AutoAwesome,
-                title: 'Extra Token Rewards',
-                description: 'Earn bonus tokens and special mining rate boosts',
+                title: t('ambassador.extraTokenRewards'),
+                description: t('ambassador.extraTokenRewardsDesc'),
                 color: '#06b6d4',
                 bg: 'rgba(6, 182, 212, 0.1)'
               }
@@ -256,15 +258,15 @@ const Ambassador = () => {
           <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent sx={{ p: 4 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1e293b' }}>
-                What We're Looking For
+                {t('ambassador.whatWereLookingFor')}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {[
-                  'Active student with strong campus presence',
-                  'Leadership experience in clubs, organizations, or events',
-                  'Passionate about blockchain and student empowerment',
-                  'Excellent communication and social media skills',
-                  'Available for 5-20 hours per week'
+                  t('ambassador.requirement1'),
+                  t('ambassador.requirement2'),
+                  t('ambassador.requirement3'),
+                  t('ambassador.requirement4'),
+                  t('ambassador.requirement5')
                 ].map((requirement, index) => (
                   <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <CheckCircleOutline sx={{ color: '#22c55e', fontSize: 24 }} />
@@ -289,10 +291,10 @@ const Ambassador = () => {
     <DashboardLayout stats={sidebarStats} searchPlaceholder="Search...">
       <Box sx={{ maxWidth: '900px', width: '100%', mx: 'auto' }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-          Ambassador Program
+          {t('ambassador.ambassadorProgram')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Your application status and details
+          {t('ambassador.applicationStatusDetails')}
         </Typography>
 
         {/* Status Card */}
@@ -327,7 +329,7 @@ const Ambassador = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
               <Chip
                 icon={<Schedule />}
-                label={`Submitted ${new Date(application.submittedAt).toLocaleDateString()}`}
+                label={`${t('ambassador.submitted')} ${new Date(application.submittedAt).toLocaleDateString()}`}
                 sx={{
                   background: 'white',
                   border: `1px solid ${statusConfig.color}30`,
@@ -337,7 +339,7 @@ const Ambassador = () => {
               {application.reviewedAt && (
                 <Chip
                   icon={<CheckCircle />}
-                  label={`Reviewed ${new Date(application.reviewedAt).toLocaleDateString()}`}
+                  label={`${t('ambassador.reviewed')} ${new Date(application.reviewedAt).toLocaleDateString()}`}
                   sx={{
                     background: 'white',
                     border: `1px solid ${statusConfig.color}30`,
@@ -353,26 +355,26 @@ const Ambassador = () => {
         <Card sx={{ mb: 4, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1e293b' }}>
-              Application Details
+              {t('ambassador.applicationDetails')}
             </Typography>
             <TableContainer>
               <Table>
                 <TableBody>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                      Name
+                      {t('ambassador.name')}
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>{application.name}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                      Email
+                      {t('auth.email')}
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>{application.email}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                      College
+                      {t('ambassador.college')}
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
                       {application.college?.name || 'N/A'}
@@ -380,19 +382,19 @@ const Ambassador = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                      Year of Study
+                      {t('ambassador.yearOfStudy')}
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>{application.yearOfStudy}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                      Major
+                      {t('ambassador.major')}
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>{application.major}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                      Availability
+                      {t('ambassador.availability')}
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
                       {application.availability.hoursPerWeek}
@@ -400,7 +402,7 @@ const Ambassador = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                      Preferred Activities
+                      {t('ambassador.preferredActivities')}
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -424,7 +426,7 @@ const Ambassador = () => {
                     application.socialMediaHandles?.linkedin) && (
                     <TableRow>
                       <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                        Social Media
+                        {t('ambassador.socialMedia')}
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
                         <Box sx={{ display: 'flex', gap: 1.5 }}>
@@ -467,7 +469,7 @@ const Ambassador = () => {
           <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#667eea' }}>
-                Leadership Experience
+                {t('ambassador.leadershipExperience')}
               </Typography>
               <Typography variant="body2" sx={{ color: '#64748b', whiteSpace: 'pre-wrap' }}>
                 {application.leadershipExperience}
@@ -478,7 +480,7 @@ const Ambassador = () => {
           <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#667eea' }}>
-                Campus Involvement
+                {t('ambassador.campusInvolvement')}
               </Typography>
               <Typography variant="body2" sx={{ color: '#64748b', whiteSpace: 'pre-wrap' }}>
                 {application.campusInvolvement}
@@ -489,7 +491,7 @@ const Ambassador = () => {
           <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', gridColumn: { md: 'span 2' } }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#667eea' }}>
-                Why Ambassador
+                {t('ambassador.whyAmbassador')}
               </Typography>
               <Typography variant="body2" sx={{ color: '#64748b', whiteSpace: 'pre-wrap' }}>
                 {application.whyAmbassador}
@@ -503,7 +505,7 @@ const Ambassador = () => {
           <Card sx={{ mt: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#ec4899' }}>
-                Review Notes
+                {t('ambassador.reviewNotes')}
               </Typography>
               <Typography variant="body2" sx={{ color: '#64748b', whiteSpace: 'pre-wrap' }}>
                 {application.reviewNotes}

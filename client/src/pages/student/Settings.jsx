@@ -33,11 +33,13 @@ import { useToast } from '../../contexts/ToastContext';
 import { authApi } from '../../api/auth.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import OTPDialog from '../../components/OTPDialog';
+import { useTranslation } from 'react-i18next';
 
 const Settings = () => {
   const navigate = useNavigate();
   const { user, logout: logoutAuth, updateUser } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   // Profile update state
   const [profileData, setProfileData] = useState({
@@ -80,7 +82,7 @@ const Settings = () => {
     setProfileSuccess('');
 
     if (!profileData.name || !profileData.phone) {
-      setProfileError('Please fill in all fields');
+      setProfileError(t('settings.fillAllFields'));
       return;
     }
 
@@ -93,12 +95,12 @@ const Settings = () => {
 
       if (response.success) {
         updateUser(response.data);
-        setProfileSuccess('Profile updated successfully!');
-        showToast('Profile updated successfully!', 'success');
+        setProfileSuccess(t('settings.profileUpdatedSuccess'));
+        showToast(t('settings.profileUpdatedSuccess'), 'success');
       }
     } catch (err) {
-      setProfileError(err.message || 'Failed to update profile');
-      showToast(err.message || 'Failed to update profile', 'error');
+      setProfileError(err.message || t('settings.failedToUpdateProfile'));
+      showToast(err.message || t('settings.failedToUpdateProfile'), 'error');
     } finally {
       setProfileLoading(false);
     }
@@ -119,17 +121,17 @@ const Settings = () => {
     setPasswordSuccess('');
 
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      setPasswordError('Please fill in all fields');
+      setPasswordError(t('settings.fillAllFields'));
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setPasswordError('New password must be at least 6 characters');
+      setPasswordError(t('settings.passwordMinLength'));
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('New passwords do not match');
+      setPasswordError(t('settings.passwordsDoNotMatch'));
       return;
     }
 
@@ -143,8 +145,8 @@ const Settings = () => {
         setShowOTPDialog(true);
       }
     } catch (err) {
-      setPasswordError(err.message || 'Failed to send verification code');
-      showToast(err.message || 'Failed to send verification code', 'error');
+      setPasswordError(err.message || t('settings.failedToSendVerification'));
+      showToast(err.message || t('settings.failedToSendVerification'), 'error');
     } finally {
       setPasswordLoading(false);
     }
@@ -162,8 +164,8 @@ const Settings = () => {
       });
 
       if (response.success) {
-        setPasswordSuccess('Password changed successfully!');
-        showToast('Password changed successfully!', 'success');
+        setPasswordSuccess(t('settings.passwordChangedSuccess'));
+        showToast(t('settings.passwordChangedSuccess'), 'success');
         setPasswordData({
           currentPassword: '',
           newPassword: '',
@@ -171,8 +173,8 @@ const Settings = () => {
         });
       }
     } catch (err) {
-      setPasswordError(err.message || 'Failed to change password');
-      showToast(err.message || 'Failed to change password', 'error');
+      setPasswordError(err.message || t('settings.failedToChangePassword'));
+      showToast(err.message || t('settings.failedToChangePassword'), 'error');
     } finally {
       setPasswordLoading(false);
     }
@@ -203,10 +205,10 @@ const Settings = () => {
     <DashboardLayout stats={sidebarStats} searchPlaceholder="Search...">
       <Box sx={{ maxWidth: '900px', width: '100%', mx: 'auto' }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-          Account Settings
+          {t('settings.accountSettings')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Manage your account information and security
+          {t('settings.manageAccountInfo')}
         </Typography>
 
         {/* Account Information */}
@@ -226,10 +228,10 @@ const Settings = () => {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Account Information
+                  {t('settings.accountInformation')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  View your basic account details
+                  {t('settings.viewAccountDetails')}
                 </Typography>
               </Box>
             </Box>
@@ -241,7 +243,7 @@ const Settings = () => {
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9', width: '30%' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Email sx={{ fontSize: 18, color: '#667eea' }} />
-                        Email
+                        {t('auth.email')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>{user?.email}</TableCell>
@@ -250,16 +252,16 @@ const Settings = () => {
                     <TableCell sx={{ fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <School sx={{ fontSize: 18, color: '#667eea' }} />
-                        Primary College
+                        {t('settings.primaryCollege')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
-                      {user?.college?.name || 'Not set'}
+                      {user?.college?.name || t('settings.notSet')}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#64748b' }}>
-                      Role
+                      {t('settings.role')}
                     </TableCell>
                     <TableCell>
                       <Box sx={{
@@ -272,7 +274,7 @@ const Settings = () => {
                         fontWeight: 600,
                         fontSize: '0.85rem'
                       }}>
-                        {user?.role === 'student' ? 'Student' : user?.role}
+                        {user?.role === 'student' ? t('settings.student') : user?.role}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -299,10 +301,10 @@ const Settings = () => {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Update Profile
+                  {t('settings.updateProfile')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Change your name and phone number
+                  {t('settings.changeNamePhone')}
                 </Typography>
               </Box>
             </Box>
@@ -321,7 +323,7 @@ const Settings = () => {
             <Box component="form" onSubmit={handleProfileSubmit}>
               <TextField
                 fullWidth
-                label="Full Name"
+                label={t('auth.fullName')}
                 name="name"
                 value={profileData.name}
                 onChange={handleProfileChange}
@@ -330,7 +332,7 @@ const Settings = () => {
               />
               <TextField
                 fullWidth
-                label="Phone Number"
+                label={t('auth.phoneNumber')}
                 name="phone"
                 value={profileData.phone}
                 onChange={handleProfileChange}
@@ -352,7 +354,7 @@ const Settings = () => {
                   }
                 }}
               >
-                {profileLoading ? 'Saving...' : 'Save Changes'}
+                {profileLoading ? t('settings.saving') : t('settings.saveChanges')}
               </Button>
             </Box>
           </CardContent>
@@ -375,10 +377,10 @@ const Settings = () => {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Change Password
+                  {t('settings.changePassword')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Update your password to keep your account secure
+                  {t('settings.updatePasswordSecure')}
                 </Typography>
               </Box>
             </Box>
@@ -398,7 +400,7 @@ const Settings = () => {
               <TextField
                 fullWidth
                 type="password"
-                label="Current Password"
+                label={t('settings.currentPassword')}
                 name="currentPassword"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordChange}
@@ -408,18 +410,18 @@ const Settings = () => {
               <TextField
                 fullWidth
                 type="password"
-                label="New Password"
+                label={t('settings.newPassword')}
                 name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
                 required
-                helperText="Must be at least 6 characters"
+                helperText={t('settings.passwordHelperText')}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
                 type="password"
-                label="Confirm New Password"
+                label={t('settings.confirmNewPassword')}
                 name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
@@ -441,7 +443,7 @@ const Settings = () => {
                   }
                 }}
               >
-                {passwordLoading ? 'Changing...' : 'Change Password'}
+                {passwordLoading ? t('settings.changing') : t('settings.changePassword')}
               </Button>
             </Box>
           </CardContent>
@@ -464,10 +466,10 @@ const Settings = () => {
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Logout
+                  {t('header.logout')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Sign out of your account
+                  {t('settings.signOutAccount')}
                 </Typography>
               </Box>
               <Button
@@ -486,7 +488,7 @@ const Settings = () => {
                   }
                 }}
               >
-                Logout
+                {t('header.logout')}
               </Button>
             </Box>
           </CardContent>
@@ -504,11 +506,11 @@ const Settings = () => {
           }}
         >
           <DialogTitle sx={{ fontWeight: 700 }}>
-            Confirm Logout
+            {t('settings.confirmLogout')}
           </DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to logout? You will need to login again to access your account.
+              {t('settings.confirmLogoutMessage')}
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 2.5 }}>
@@ -516,7 +518,7 @@ const Settings = () => {
               onClick={() => setShowLogoutDialog(false)}
               sx={{ color: '#64748b', fontWeight: 600 }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleLogout}
@@ -529,7 +531,7 @@ const Settings = () => {
                 }
               }}
             >
-              Logout
+              {t('header.logout')}
             </Button>
           </DialogActions>
         </Dialog>

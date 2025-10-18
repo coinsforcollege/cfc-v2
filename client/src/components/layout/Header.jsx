@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router';
 import { AppBar, Button, Box, Dialog, DialogTitle, DialogContent, IconButton, Typography, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
 import { Close as CloseIcon, Menu as MenuIcon, School as SchoolIcon, Business as BusinessIcon } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageToggle from '../LanguageToggle';
 
 const Header = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [popupOpen, setPopupOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -131,20 +134,20 @@ const Header = () => {
                 onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
                 onMouseLeave={(e) => e.target.style.color = '#111827'}
               >
-                How it Works
+                {t('header.howItWorks')}
               </Link>
-              <Link 
-                to="/colleges" 
-                style={{ 
-                  textDecoration: 'none', 
-                  color: '#111827', 
+              <Link
+                to="/colleges"
+                style={{
+                  textDecoration: 'none',
+                  color: '#111827',
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
                 onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
                 onMouseLeave={(e) => e.target.style.color = '#111827'}
               >
-                Colleges
+                {t('header.colleges')}
               </Link>
               <Link
                 to="/network"
@@ -157,34 +160,35 @@ const Header = () => {
                 onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
                 onMouseLeave={(e) => e.target.style.color = '#111827'}
               >
-                Network Map
+                {t('header.networkMap')}
               </Link>
-              <Link 
-                to="/blog" 
-                style={{ 
-                  textDecoration: 'none', 
-                  color: '#111827', 
+              <Link
+                to="/blog"
+                style={{
+                  textDecoration: 'none',
+                  color: '#111827',
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
                 onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
                 onMouseLeave={(e) => e.target.style.color = '#111827'}
               >
-                Updates
+                {t('header.updates')}
               </Link>
             </Box>
           )}
 
           {/* Desktop Auth Buttons */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: '12px' }}>
+            <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <LanguageToggle />
               {user ? (
                 <>
                   <Button
                     variant="outlined"
                     component={Link}
                     to={getDashboardPath()}
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       borderColor: 'rgba(14, 165, 233, 0.5)',
@@ -195,12 +199,12 @@ const Header = () => {
                       },
                     }}
                   >
-                    Dashboard
+                    {t('header.dashboard')}
                   </Button>
                   <Button
                     variant="contained"
                     onClick={handleLogout}
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
@@ -214,7 +218,7 @@ const Header = () => {
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    Logout
+                    {t('header.logout')}
                   </Button>
                 </>
               ) : (
@@ -223,7 +227,7 @@ const Header = () => {
                     variant="outlined"
                     component={Link}
                     to="/auth/login"
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       borderColor: 'rgba(255, 255, 255, 0.3)',
@@ -236,7 +240,7 @@ const Header = () => {
                       },
                     }}
                   >
-                    Login
+                    {t('header.login')}
                   </Button>
                   <Button
                     variant="contained"
@@ -255,7 +259,7 @@ const Header = () => {
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    {user ? 'Go to Dashboard' : 'Get Started'}
+                    {user ? t('header.goToDashboard') : t('header.getStarted')}
                   </Button>
                 </>
               )}
@@ -305,42 +309,46 @@ const Header = () => {
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6" sx={{ fontWeight: '700', textTransform: 'uppercase' }}>
-                Menu
+                {t('header.menu')}
               </Typography>
               <IconButton onClick={toggleMobileMenu}>
                 <CloseIcon />
               </IconButton>
             </Box>
-            
+
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Link
                 to="/how-it-works/colleges"
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
               >
-                How it Works
+                {t('header.howItWorks')}
               </Link>
-              <Link 
-                to="/colleges" 
+              <Link
+                to="/colleges"
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
               >
-                Colleges
+                {t('header.colleges')}
               </Link>
               <Link
                 to="/network"
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
               >
-                Network Map
+                {t('header.networkMap')}
               </Link>
-              <Link 
-                to="/blog" 
+              <Link
+                to="/blog"
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
               >
-                Updates
+                {t('header.updates')}
               </Link>
+            </Box>
+
+            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
+              <LanguageToggle isMobile={true} />
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: 'auto' }}>
@@ -351,7 +359,7 @@ const Header = () => {
                     component={Link}
                     to={getDashboardPath()}
                     fullWidth
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       borderColor: '#0EA5E9',
@@ -359,7 +367,7 @@ const Header = () => {
                     }}
                     onClick={toggleMobileMenu}
                   >
-                    Dashboard
+                    {t('header.dashboard')}
                   </Button>
                   <Button
                     variant="contained"
@@ -368,14 +376,14 @@ const Header = () => {
                       toggleMobileMenu();
                     }}
                     fullWidth
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
                       color: '#ffffff',
                     }}
                   >
-                    Logout
+                    {t('header.logout')}
                   </Button>
                 </>
               ) : (
@@ -385,7 +393,7 @@ const Header = () => {
                     component={Link}
                     to="/auth/login"
                     fullWidth
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: '12px',
                       borderColor: 'rgba(255, 255, 255, 0.3)',
@@ -393,7 +401,7 @@ const Header = () => {
                     }}
                     onClick={toggleMobileMenu}
                   >
-                    Login
+                    {t('header.login')}
                   </Button>
                   <Button
                     variant="contained"
@@ -409,7 +417,7 @@ const Header = () => {
                       color: '#ffffff',
                     }}
                   >
-                    {user ? 'Go to Dashboard' : 'Get Started'}
+                    {user ? t('header.goToDashboard') : t('header.getStarted')}
                   </Button>
                 </>
               )}
@@ -433,9 +441,9 @@ const Header = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <DialogTitle sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           background: 'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
           WebkitBackgroundClip: 'text',
@@ -443,7 +451,7 @@ const Header = () => {
           backgroundClip: 'text',
           fontWeight: '700',
         }}>
-          Join Our Community
+          {t('auth.joinOurCommunity')}
           <IconButton onClick={handleClosePopup} size="small">
             <CloseIcon />
           </IconButton>
@@ -484,11 +492,11 @@ const Header = () => {
                   <BusinessIcon sx={{ color: 'white', fontSize: '24px' }} />
                 </Box>
                 <Typography variant="h5" sx={{ color: '#0EA5E9', fontWeight: '700' }}>
-                  For Colleges
+                  {t('auth.forColleges')}
                 </Typography>
               </Box>
               <Typography variant="body1" sx={{ color: '#374151', lineHeight: 1.6, fontSize: '1rem' }}>
-                Join our waitlist for free and start building your campus economy with blockchain technology.
+                {t('auth.collegesDescription')}
               </Typography>
               <Box sx={{ 
                 position: 'absolute', 
@@ -537,11 +545,11 @@ const Header = () => {
                   <SchoolIcon sx={{ color: 'white', fontSize: '24px' }} />
                 </Box>
                 <Typography variant="h5" sx={{ color: '#8B5CF6', fontWeight: '700' }}>
-                  For Community Members
+                  {t('auth.forCommunityMembers')}
                 </Typography>
               </Box>
               <Typography variant="body1" sx={{ color: '#374151', lineHeight: 1.6, fontSize: '1rem' }}>
-                Join as a student, alumni, fan, or supporter. Mine your favorite college tokens and be part of building their digital economy.
+                {t('auth.communityDescription')}
               </Typography>
               <Box sx={{ 
                 position: 'absolute', 
@@ -600,7 +608,7 @@ const Header = () => {
               }} 
             />
             <Typography variant="body1" sx={{ color: '#374151', fontWeight: '500' }}>
-              Redirecting you...
+              {t('header.redirecting')}
             </Typography>
           </Box>
         </Box>

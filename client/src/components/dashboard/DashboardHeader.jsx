@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Menu, X, Search, Bell, LogOut, Settings as SettingsIcon, Home, School, BookOpen, Map } from 'lucide-react';
+import { Menu, X, Search, Bell, LogOut, Settings as SettingsIcon, Home, School, BookOpen, Map, Languages } from 'lucide-react';
 import { IconButton, Avatar, Menu as MuiMenu, MenuItem, ListItemIcon, Divider, Badge, Box, Tooltip, Fade } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import NotificationDropdown from '../notifications/NotificationDropdown';
+import { useTranslation } from 'react-i18next';
 
-const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholder = "Search..." }) => {
+const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholder }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
   const { unreadCount, showTooltip, hideTooltip } = useNotifications();
   const [searchQuery, setSearchQuery] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -41,13 +43,13 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
   const getRoleLabel = (role) => {
     switch (role) {
       case 'student':
-        return 'Student';
+        return t('common.student');
       case 'college_admin':
-        return 'College Admin';
+        return t('common.collegeAdmin');
       case 'platform_admin':
-        return 'Platform Admin';
+        return t('common.platformAdmin');
       default:
-        return 'User';
+        return t('common.user');
     }
   };
 
@@ -168,7 +170,7 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
             />
             <input
               type="search"
-              placeholder={searchPlaceholder}
+              placeholder={t('common.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -218,7 +220,7 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
           {/* Notifications */}
           <Box sx={{ position: 'relative' }}>
             <Tooltip
-              title="You have unread notifications"
+              title={t('notifications.unreadNotifications')}
               open={showTooltip}
               TransitionComponent={Fade}
               TransitionProps={{ timeout: 300 }}
@@ -361,33 +363,90 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
               <ListItemIcon>
                 <Home size={18} />
               </ListItemIcon>
-              Home
+              {t('header.home')}
             </MenuItem>
             <MenuItem onClick={() => { setAnchorEl(null); navigate('/colleges'); }}>
               <ListItemIcon>
                 <School size={18} />
               </ListItemIcon>
-              Browse Colleges
+              {t('header.browseColleges')}
             </MenuItem>
             <MenuItem onClick={() => { setAnchorEl(null); navigate('/blog'); }}>
               <ListItemIcon>
                 <BookOpen size={18} />
               </ListItemIcon>
-              Blog
+              {t('header.blog')}
             </MenuItem>
             <MenuItem onClick={() => { setAnchorEl(null); navigate('/#network-map'); }}>
               <ListItemIcon>
                 <Map size={18} />
               </ListItemIcon>
-              Network Map
+              {t('header.networkMap')}
             </MenuItem>
             <Divider />
             <MenuItem onClick={() => { setAnchorEl(null); navigate(getSettingsPath()); }}>
               <ListItemIcon>
                 <SettingsIcon size={18} />
               </ListItemIcon>
-              Settings
+              {t('dashboard.settings')}
             </MenuItem>
+            <Box sx={{ px: 2, py: 1 }}>
+              <Box sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {t('common.language')}
+              </Box>
+              <Box sx={{ display: 'flex', gap: 0.75 }}>
+                <Box
+                  onClick={() => i18n.changeLanguage('en')}
+                  sx={{
+                    flex: 1,
+                    px: 1.5,
+                    py: 0.75,
+                    borderRadius: 1,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    background: i18n.language === 'en'
+                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      : 'rgba(102, 126, 234, 0.08)',
+                    color: i18n.language === 'en' ? '#ffffff' : '#475569',
+                    '&:hover': {
+                      background: i18n.language === 'en'
+                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                        : 'rgba(102, 126, 234, 0.15)',
+                    },
+                  }}
+                >
+                  EN
+                </Box>
+                <Box
+                  onClick={() => i18n.changeLanguage('zh')}
+                  sx={{
+                    flex: 1,
+                    px: 1.5,
+                    py: 0.75,
+                    borderRadius: 1,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    background: i18n.language === 'zh'
+                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      : 'rgba(102, 126, 234, 0.08)',
+                    color: i18n.language === 'zh' ? '#ffffff' : '#475569',
+                    '&:hover': {
+                      background: i18n.language === 'zh'
+                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                        : 'rgba(102, 126, 234, 0.15)',
+                    },
+                  }}
+                >
+                  中文
+                </Box>
+              </Box>
+            </Box>
             <Divider />
             <MenuItem
               onClick={() => {
@@ -399,7 +458,7 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
               <ListItemIcon sx={{ color: '#ef4444 !important' }}>
                 <LogOut size={18} />
               </ListItemIcon>
-              Logout
+              {t('common.logout')}
             </MenuItem>
           </MuiMenu>
         </Box>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Box, Typography, Paper, Dialog, DialogContent, DialogActions, Button } from '@mui/material';
 import { CheckCircle, ArrowForward, Celebration } from '@mui/icons-material';
 import { useTour } from '../contexts/TourContext';
+import { useTranslation } from 'react-i18next';
 
 const GuidedTour = ({ targetElement, step }) => {
   const { tourActive, tourStep, nextStep } = useTour();
@@ -98,6 +99,8 @@ const GuidedTour = ({ targetElement, step }) => {
 
 // Welcome Dialog Component
 export const WelcomeDialog = ({ open, onNext, studentName, isMobile = false }) => {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       open={open}
@@ -137,7 +140,7 @@ export const WelcomeDialog = ({ open, onNext, studentName, isMobile = false }) =
             mb: 2,
           }}
         >
-          Welcome, {studentName}!
+          {t('tour.welcomeTitle', { name: studentName })}
         </Typography>
 
         <Typography
@@ -145,7 +148,7 @@ export const WelcomeDialog = ({ open, onNext, studentName, isMobile = false }) =
           color="text.secondary"
           sx={{ mb: isMobile ? 2 : 3, lineHeight: 1.8, fontSize: isMobile ? '0.9rem' : '1rem' }}
         >
-          Your college has been successfully added. Let's take a quick tour to get you started with mining tokens.
+          {t('tour.welcomeMessage')}
         </Typography>
 
         {!isMobile && (
@@ -158,22 +161,22 @@ export const WelcomeDialog = ({ open, onNext, studentName, isMobile = false }) =
             }}
           >
             <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.8 }}>
-              This tour will show you how to:
+              {t('tour.tourWillShow')}
             </Typography>
             <Box component="ul" sx={{ textAlign: 'left', pl: 2, mt: 1, mb: 0 }}>
               <li>
                 <Typography variant="body2" color="text.secondary">
-                  Navigate to your colleges page
+                  {t('tour.navigateToColleges')}
                 </Typography>
               </li>
               <li>
                 <Typography variant="body2" color="text.secondary">
-                  Start your first mining session
+                  {t('tour.startFirstMining')}
                 </Typography>
               </li>
               <li>
                 <Typography variant="body2" color="text.secondary">
-                  Understand how to earn tokens
+                  {t('tour.understandEarning')}
                 </Typography>
               </li>
             </Box>
@@ -205,7 +208,7 @@ export const WelcomeDialog = ({ open, onNext, studentName, isMobile = false }) =
             },
           }}
         >
-          Start Tour
+          {t('tour.startTour')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -215,6 +218,7 @@ export const WelcomeDialog = ({ open, onNext, studentName, isMobile = false }) =
 // Tooltip Component
 export const TourTooltip = ({ targetElement, title, description, onNext }) => {
   const { tourActive } = useTour();
+  const { t } = useTranslation();
   const [targetRect, setTargetRect] = useState(null);
   const [position, setPosition] = useState('bottom');
 
@@ -310,7 +314,7 @@ export const TourTooltip = ({ targetElement, title, description, onNext }) => {
             },
           }}
         >
-          Got it!
+          {t('tour.gotIt')}
         </Button>
       </Box>
     </Paper>
@@ -319,6 +323,8 @@ export const TourTooltip = ({ targetElement, title, description, onNext }) => {
 
 // Success Dialog Component
 export const SuccessDialog = ({ open, onComplete, isMobile = false }) => {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       open={open}
@@ -358,7 +364,7 @@ export const SuccessDialog = ({ open, onComplete, isMobile = false }) => {
             mb: 2,
           }}
         >
-          You're All Set!
+          {t('tour.allSetTitle')}
         </Typography>
 
         <Typography
@@ -366,7 +372,7 @@ export const SuccessDialog = ({ open, onComplete, isMobile = false }) => {
           color="text.secondary"
           sx={{ mb: isMobile ? 2 : 3, lineHeight: 1.8, fontSize: isMobile ? '0.9rem' : '1rem' }}
         >
-          Your mining session has started successfully. Here are some tips to maximize your earnings:
+          {t('tour.miningStartedMessage')}
         </Typography>
 
         <Box
@@ -380,22 +386,22 @@ export const SuccessDialog = ({ open, onComplete, isMobile = false }) => {
           <Box component="ul" sx={{ textAlign: 'left', pl: 2, m: 0 }}>
             <li>
               <Typography variant="body2" color="text.primary" sx={{ mb: 1.5, fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
-                <strong>Come back daily</strong> - Mining sessions last 24 hours, restart them regularly
+                <strong>{t('tour.tipComeBackDaily')}</strong> - {t('tour.tipComeBackDailyDesc')}
               </Typography>
             </li>
             <li>
               <Typography variant="body2" color="text.primary" sx={{ mb: 1.5, fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
-                <strong>Add more colleges</strong> - Mine for up to 10 colleges simultaneously
+                <strong>{t('tour.tipAddMoreColleges')}</strong> - {t('tour.tipAddMoreCollegesDesc')}
               </Typography>
             </li>
             <li>
               <Typography variant="body2" color="text.primary" sx={{ mb: 1.5, fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
-                <strong>Invite friends</strong> - Share your referral code to boost your earning rate
+                <strong>{t('tour.tipInviteFriends')}</strong> - {t('tour.tipInviteFriendsDesc')}
               </Typography>
             </li>
             <li>
               <Typography variant="body2" color="text.primary" sx={{ fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
-                <strong>Set your primary</strong> - Choose a primary college to show your main affiliation
+                <strong>{t('tour.tipSetPrimary')}</strong> - {t('tour.tipSetPrimaryDesc')}
               </Typography>
             </li>
           </Box>
@@ -425,7 +431,7 @@ export const SuccessDialog = ({ open, onComplete, isMobile = false }) => {
             },
           }}
         >
-          Go to Dashboard
+          {t('tour.goToDashboard')}
         </Button>
       </DialogActions>
     </Dialog>

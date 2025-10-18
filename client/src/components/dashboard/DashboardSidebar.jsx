@@ -17,9 +17,11 @@ import {
 import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTour } from '../../contexts/TourContext';
+import { useTranslation } from 'react-i18next';
 
 const DashboardSidebar = ({ stats = {}, onNavigate }) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
   const { tourActive, tourStep, nextStep } = useTour();
 
@@ -34,25 +36,25 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
 
   const navigationConfig = {
     student: [
-      { id: 'dashboard', label: 'Overview', icon: LayoutDashboard, path: '/student/dashboard' },
-      { id: 'colleges', label: 'My Colleges', icon: School, badge: stats.collegesCount, path: '/student/colleges' },
-      { id: 'community', label: 'Community', icon: Users, badge: stats.referralsCount, path: '/student/community' },
-      { id: 'ambassador', label: 'Ambassador', icon: Megaphone, path: '/student/ambassador' },
-      { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, path: '/student/leaderboard', disabled: true, comingSoon: true },
+      { id: 'dashboard', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/student/dashboard' },
+      { id: 'colleges', label: t('dashboard.myColleges'), icon: School, badge: stats.collegesCount, path: '/student/colleges' },
+      { id: 'community', label: t('dashboard.community'), icon: Users, badge: stats.referralsCount, path: '/student/community' },
+      { id: 'ambassador', label: t('dashboard.ambassador'), icon: Megaphone, path: '/student/ambassador' },
+      { id: 'leaderboard', label: t('dashboard.leaderboard'), icon: Trophy, path: '/student/leaderboard', disabled: true, comingSoon: true },
     ],
     college_admin: [
-      { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/college-admin/dashboard' },
-      { id: 'community', label: 'Community', icon: Users, badge: stats.communityCount, path: '/college-admin/community' },
-      { id: 'college', label: 'College Profile', icon: School, path: '/college-admin/college' },
-      { id: 'token', label: 'Token Preferences', icon: Coins, path: '/college-admin/token' },
-      { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, path: '/college-admin/leaderboard' },
+      { id: 'overview', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/college-admin/dashboard' },
+      { id: 'community', label: t('dashboard.community'), icon: Users, badge: stats.communityCount, path: '/college-admin/community' },
+      { id: 'college', label: t('collegeAdmin.collegeProfile'), icon: School, path: '/college-admin/college' },
+      { id: 'token', label: t('collegeAdmin.tokenPreferences'), icon: Coins, path: '/college-admin/token' },
+      { id: 'leaderboard', label: t('dashboard.leaderboard'), icon: Trophy, path: '/college-admin/leaderboard' },
     ],
     platform_admin: [
-      { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/platform-admin/dashboard' },
-      { id: 'users', label: 'Users', icon: Users, badge: (stats.studentsCount || 0) + (stats.collegeAdminsCount || 0), path: '/platform-admin/users' },
-      { id: 'colleges', label: 'Colleges', icon: School, badge: stats.collegesCount, path: '/platform-admin/colleges' },
-      { id: 'ambassadors', label: 'Ambassadors', icon: Megaphone, badge: stats.ambassadorsCount, path: '/platform-admin/ambassadors' },
-      { id: 'subscribers', label: 'Subscribers', icon: Mail, badge: stats.subscribersCount, path: '/platform-admin/subscribers' },
+      { id: 'overview', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/platform-admin/dashboard' },
+      { id: 'users', label: t('platformAdmin.users'), icon: Users, badge: (stats.studentsCount || 0) + (stats.collegeAdminsCount || 0), path: '/platform-admin/users' },
+      { id: 'colleges', label: t('header.colleges'), icon: School, badge: stats.collegesCount, path: '/platform-admin/colleges' },
+      { id: 'ambassadors', label: t('platformAdmin.ambassadors'), icon: Megaphone, badge: stats.ambassadorsCount, path: '/platform-admin/ambassadors' },
+      { id: 'subscribers', label: t('platformAdmin.subscribers'), icon: Mail, badge: stats.subscribersCount, path: '/platform-admin/subscribers' },
     ],
   };
 
@@ -61,13 +63,13 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
   const getRoleTitle = (role) => {
     switch (role) {
       case 'student':
-        return 'Student Dashboard';
+        return t('student.dashboard');
       case 'college_admin':
-        return 'College Admin';
+        return t('collegeAdmin.dashboard');
       case 'platform_admin':
-        return 'Platform Admin';
+        return t('platformAdmin.dashboard');
       default:
-        return 'Dashboard';
+        return t('header.dashboard');
     }
   };
 
@@ -198,7 +200,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
               </Typography>
               {item.comingSoon && (
                 <Chip
-                  label="Coming Soon"
+                  label={t('common.comingSoon')}
                   size="small"
                   sx={{
                     height: 22,
@@ -276,7 +278,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
               whiteSpace: 'nowrap',
             }}
           >
-            Settings
+            {t('dashboard.settings')}
           </Typography>
         </Box>
 
@@ -315,7 +317,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
               whiteSpace: 'nowrap',
             }}
           >
-            Return to Home
+            {t('common.returnToHome')}
           </Typography>
         </Box>
       </Box>
@@ -347,7 +349,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <HelpCircle size={18} style={{ color: 'white', flexShrink: 0 }} />
               <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: 'white' }}>
-                Need Help?
+                {t('common.needHelp')}
               </Typography>
             </Box>
             <Typography
@@ -359,7 +361,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
                 overflowWrap: 'break-word',
               }}
             >
-              Check our documentation or contact support
+              {t('common.checkDocs')}
             </Typography>
             <Box
               component={Link}
@@ -393,7 +395,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
                   textOverflow: 'ellipsis',
                 }}
               >
-                Get Support
+                {t('common.getSupport')}
               </Typography>
             </Box>
           </Box>

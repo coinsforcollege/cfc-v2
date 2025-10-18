@@ -42,12 +42,14 @@ import { BorderBeam } from '@/components/ui/border-beam';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import GuidedTour, { WelcomeDialog } from '../../components/GuidedTour';
 import { useTour } from '../../contexts/TourContext';
+import { useTranslation } from 'react-i18next';
 
 const Overview = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery('(max-width:1200px)');
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { showToast } = useToast();
   const { miningStatus: wsMiningStatus } = useMiningWebSocket();
   const { tourActive, tourStep, startTour, nextStep, isMobileTour } = useTour();
@@ -68,7 +70,7 @@ const Overview = () => {
         setDashboard(response.data);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load dashboard');
+      setError(err.message || t('student.failedToLoadDashboard'));
     } finally {
       if (isInitialLoadRef.current) {
         setLoading(false);
@@ -82,13 +84,13 @@ const Overview = () => {
       setActionLoading(`start-${collegeId}`);
       const response = await miningApi.startMining(collegeId);
       if (response.success) {
-        showToast('Mining started successfully!', 'success');
+        showToast(t('student.miningStartedSuccess'), 'success');
         fetchDashboard();
         navigate('/student/colleges');
       }
     } catch (err) {
       console.error('Failed to start mining:', err);
-      showToast(err.message || 'Failed to start mining', 'error');
+      showToast(err.message || t('student.failedToStartMining'), 'error');
     } finally {
       setActionLoading('');
     }
@@ -99,12 +101,12 @@ const Overview = () => {
       setActionLoading(`stop-${collegeId}`);
       const response = await miningApi.stopMining(collegeId);
       if (response.success) {
-        showToast('Mining stopped successfully!', 'success');
+        showToast(t('student.miningStoppedSuccess'), 'success');
         fetchDashboard();
       }
     } catch (err) {
       console.error('Failed to stop mining:', err);
-      showToast(err.message || 'Failed to stop mining', 'error');
+      showToast(err.message || t('student.failedToStopMining'), 'error');
     } finally {
       setActionLoading('');
     }
@@ -214,10 +216,10 @@ const Overview = () => {
         {/* Header */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-            Welcome, {dashboard?.student.name}
+            {t('student.welcome')}, {dashboard?.student.name}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {dashboard?.student.college?.name || 'No college assigned'}
+            {dashboard?.student.college?.name || t('student.noCollegeAssigned')}
           </Typography>
         </Box>
 
@@ -238,7 +240,7 @@ const Overview = () => {
             <CardContent>
               <AccountBalanceWallet sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                Total Balance
+                {t('student.totalBalance')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {totalBalance.toFixed(4)}
@@ -282,7 +284,7 @@ const Overview = () => {
             <CardContent sx={{ position: 'relative', zIndex: 1 }}>
               <TrendingUp sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {hasActiveMiner ? 'Miner Running' : 'All Miners Inactive'}
+                {hasActiveMiner ? t('student.minerRunning') : t('student.allMinersInactive')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {totalMiningTokens.toFixed(4)}
@@ -309,7 +311,7 @@ const Overview = () => {
             <CardContent>
               <People sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                Active Friends
+                {t('student.activeFriends')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {dashboard?.summary?.activeFriendsCount?.active || 0} / {dashboard?.summary?.activeFriendsCount?.total || 0}
@@ -336,11 +338,11 @@ const Overview = () => {
             <CardContent>
               <Refresh sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                Current Rate
+                {t('student.currentRate')}
               </Typography>
-              <Tooltip title="Total tokens earned per hour from all active mining sessions">
+              <Tooltip title={t('student.totalRateTooltip')}>
                 <Typography variant="h5" sx={{ fontWeight: 700, cursor: 'help' }}>
-                  {currentEarningRate.toFixed(2)} Token/hr
+                  {currentEarningRate.toFixed(2)} {t('student.tokenPerHr')}
                 </Typography>
               </Tooltip>
             </CardContent>
@@ -363,7 +365,7 @@ const Overview = () => {
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Token Miners
+                  {t('student.tokenMiners')}
                 </Typography>
                 <Button
                   variant="outlined"
@@ -386,19 +388,19 @@ const Overview = () => {
                     }
                   }}
                 >
-                  View Colleges
+                  {t('student.viewColleges')}
                 </Button>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Mining status for all your colleges
+                {t('student.miningStatus')}
               </Typography>
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 700, color: '#475569' }}>Action</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>Progress</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('student.college')}</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700, color: '#475569' }}>{t('student.action')}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>{t('student.progress')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -425,12 +427,12 @@ const Overview = () => {
                                   {miningCollege.college.name}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
-                                  {isMining ? 'Mining active' : 'Not mining'}
+                                  {isMining ? t('student.miningActive') : t('student.notMining')}
                                 </Typography>
                               </Box>
                             </TableCell>
                             <TableCell align="center">
-                              <Tooltip title={isMining ? 'Stop mining' : 'Start mining'} arrow>
+                              <Tooltip title={isMining ? t('student.stopMining') : t('student.startMining')} arrow>
                                 <span>
                                   <Button
                                     variant="contained"
@@ -461,7 +463,7 @@ const Overview = () => {
                                   >
                                     {actionLoading === `start-${miningCollege.college._id}` || actionLoading === `stop-${miningCollege.college._id}`
                                       ? <CircularProgress size={16} sx={{ color: 'white' }} />
-                                      : isMining ? 'Stop' : 'Start'
+                                      : isMining ? t('student.stop') : t('student.start')
                                     }
                                   </Button>
                                 </span>
@@ -499,7 +501,7 @@ const Overview = () => {
                       <TableRow>
                         <TableCell colSpan={3} align="center">
                           <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                            No colleges added yet
+                            {t('student.noCollegesAdded')}
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -545,10 +547,10 @@ const Overview = () => {
                   </Box>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
-                      Token Wallet
+                      {t('student.tokenWallet')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                      Multi-College Portfolio
+                      {t('student.multiCollegePortfolio')}
                     </Typography>
                   </Box>
                 </Box>
@@ -564,7 +566,7 @@ const Overview = () => {
                 border: '1px solid rgba(102, 126, 234, 0.2)'
               }}>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1 }}>
-                  TOTAL PORTFOLIO VALUE
+                  {t('student.totalPortfolioValue')}
                 </Typography>
                 <Typography variant="h4" sx={{
                   fontWeight: 700,
@@ -572,13 +574,13 @@ const Overview = () => {
                   fontFamily: 'Monaco, Courier, monospace',
                   letterSpacing: '-0.5px'
                 }}>
-                  {totalBalance.toFixed(4)} <Typography component="span" variant="h6" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>TOKENS</Typography>
+                  {totalBalance.toFixed(4)} <Typography component="span" variant="h6" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{t('student.tokens')}</Typography>
                 </Typography>
               </Box>
 
               {/* Token Holdings */}
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                Holdings
+                {t('student.holdings')}
               </Typography>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -650,7 +652,7 @@ const Overview = () => {
                                     }} />
                                   )}
                                   <Typography variant="caption" sx={{ color: isMining ? '#22d3ee' : 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>
-                                    {isMining ? 'Mining Active' : 'Inactive'} • {wallet.college?.country || '-'}
+                                    {isMining ? t('student.miningActiveStatus') : t('student.inactive')} • {wallet.college?.country || '-'}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -696,10 +698,10 @@ const Overview = () => {
                   <Box sx={{ textAlign: 'center', py: 4 }}>
                     <AccountBalanceWallet sx={{ fontSize: 48, color: 'rgba(255,255,255,0.2)', mb: 1 }} />
                     <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                      No balance data available
+                      {t('student.noBalanceData')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>
-                      Start mining to earn tokens
+                      {t('student.startMiningToEarn')}
                     </Typography>
                   </Box>
                 )}

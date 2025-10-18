@@ -4,8 +4,10 @@ import { Check, Trash2, ChevronDown, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '../../contexts/NotificationContext';
 import NotificationCard from './NotificationCard';
+import { useTranslation } from 'react-i18next';
 
 const NotificationDropdown = ({ anchorEl, open, onClose }) => {
+  const { t } = useTranslation();
   const {
     notifications,
     isLoading,
@@ -65,10 +67,10 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
           >
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
               <Box sx={{ fontSize: '1rem', fontWeight: 700, color: '#2d3748' }}>
-                Notifications
+                {t('notifications.notifications')}
               </Box>
               <Box sx={{ fontSize: '0.8rem', color: '#718096' }}>
-                {notifications.filter(n => !n.isRead).length} unread
+                {t('notifications.unreadCount', { count: notifications.filter(n => !n.isRead).length })}
               </Box>
             </Box>
 
@@ -84,7 +86,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                     background: 'rgba(102, 126, 234, 0.08)',
                   },
                 }}
-                title="Mark all as read"
+                title={t('notifications.markAllAsRead')}
               >
                 <Check size={18} />
               </IconButton>
@@ -99,7 +101,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                     background: 'rgba(102, 126, 234, 0.08)',
                   },
                 }}
-                title="Clear read notifications"
+                title={t('notifications.clearRead')}
               >
                 <Trash2 size={18} />
               </IconButton>
@@ -112,7 +114,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                     background: 'rgba(102, 126, 234, 0.08)',
                   },
                 }}
-                title="Close"
+                title={t('common.close')}
               >
                 <X size={18} />
               </IconButton>
@@ -150,10 +152,10 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
               >
                 <Box sx={{ fontSize: '2rem', marginBottom: 1 }}>🔔</Box>
                 <Box sx={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                  No notifications yet
+                  {t('notifications.noNotifications')}
                 </Box>
                 <Box sx={{ fontSize: '0.8rem', marginTop: 0.5 }}>
-                  You'll be notified about important updates here
+                  {t('notifications.notificationsDesc')}
                 </Box>
               </Box>
             )}
@@ -201,7 +203,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                   }}
                   endIcon={<ChevronDown size={16} />}
                 >
-                  Load 5 More
+                  {t('notifications.loadMore')}
                 </Button>
               </Box>
             </>
