@@ -3,12 +3,16 @@
   "info": {
     "displayName": "Text Block",
     "icon": "align-left",
-    "description": "Text content with visual editor"
+    "description": "Text content with CKEditor (HTML support)"
   },
   "options": {},
   "attributes": {
     "body": {
-      "type": "blocks",
+      "type": "customField",
+      "customField": "plugin::ckeditor5.CKEditor",
+      "options": {
+        "preset": "defaultHtml"
+      },
       "required": true
     }
   }

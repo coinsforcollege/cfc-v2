@@ -1,166 +1,216 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useMemo } from 'react';
+import { Box } from '@mui/material';
 import { colors } from '../../utils/designTokens';
 
 const RichTextBlock = ({ data }) => {
   console.log('RichTextBlock data:', data);
-  
-  const renderBlock = (block) => {
-    if (!block || !block.type) return null;
 
-    const renderChildren = (children) => {
-      if (!children) return null;
-      return children.map((child, idx) => {
-        if (child.type === 'text') {
-          let text = child.text;
-          if (child.bold) text = <strong key={idx}>{text}</strong>;
-          if (child.italic) text = <em key={idx}>{text}</em>;
-          if (child.underline) text = <u key={idx}>{text}</u>;
-          if (child.strikethrough) text = <s key={idx}>{text}</s>;
-          if (child.code) text = <code key={idx}>{text}</code>;
-          return text;
-        }
-        if (child.type === 'link') {
-          return (
-            <a key={idx} href={child.url} target="_blank" rel="noopener noreferrer">
-              {renderChildren(child.children)}
-            </a>
-          );
-        }
-        return null;
-      });
-    };
+  // Parse HTML and wrap in a styled container
+  const renderHTML = useMemo(() => {
+    if (!data?.body) return null;
 
-    switch (block.type) {
-      case 'paragraph':
-        return (
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              fontSize: '1.125rem', 
-              lineHeight: 1.8, 
-              color: colors.neutral[700], 
-              mb: 2 
-            }}
-          >
-            {renderChildren(block.children)}
-          </Typography>
-        );
-      
-      case 'heading':
-        const level = block.level || 1;
-        const headingStyles = {
-          1: { fontSize: '2.5rem', fontWeight: 700, mt: 5, mb: 2 },
-          2: { fontSize: '2rem', fontWeight: 700, mt: 4, mb: 2 },
-          3: { fontSize: '1.5rem', fontWeight: 600, mt: 3, mb: 1.5 },
-          4: { fontSize: '1.25rem', fontWeight: 600, mt: 2.5, mb: 1 },
-          5: { fontSize: '1.125rem', fontWeight: 600, mt: 2, mb: 1 },
-          6: { fontSize: '1rem', fontWeight: 600, mt: 1.5, mb: 0.5 }
-        };
-        return (
-          <Typography 
-            variant={`h${level}`}
-            sx={{ 
-              ...headingStyles[level],
-              color: colors.neutral[900]
-            }}
-          >
-            {renderChildren(block.children)}
-          </Typography>
-        );
-      
-      case 'list':
-        const ListComponent = block.format === 'ordered' ? 'ol' : 'ul';
-        return (
-          <Box 
-            component={ListComponent}
-            sx={{ 
-              pl: 3, 
-              mb: 2,
-              '& li': {
-                fontSize: '1.125rem',
-                lineHeight: 1.8,
-                color: colors.neutral[700],
-                mb: 0.5
-              }
-            }}
-          >
-            {block.children?.map((item, idx) => (
-              <li key={idx}>
-                {renderChildren(item.children)}
-              </li>
-            ))}
-          </Box>
-        );
-      
-      case 'quote':
-        return (
-          <Box 
-            component="blockquote"
-            sx={{ 
-              borderLeft: `4px solid ${colors.primary[500]}`,
-              pl: 3,
-              py: 1,
-              my: 2,
-              background: colors.primary[50],
+    // If body is a string (CKEditor HTML), render it directly
+    if (typeof data.body === 'string') {
+      return (
+        <Box
+          sx={{
+            mb: 4,
+            // Typography styles
+            '& p': {
+              fontSize: '1.125rem',
+              lineHeight: 1.8,
+              color: colors.neutral[700],
+              marginBottom: '1rem',
+              marginTop: 0,
+            },
+            // Heading styles
+            '& h1': {
+              fontSize: '2.5rem',
+              fontWeight: 700,
+              marginTop: '2.5rem',
+              marginBottom: '1rem',
+              color: colors.neutral[900],
+              lineHeight: 1.2,
+            },
+            '& h2': {
+              fontSize: '2rem',
+              fontWeight: 700,
+              marginTop: '2rem',
+              marginBottom: '1rem',
+              color: colors.neutral[900],
+              lineHeight: 1.2,
+            },
+            '& h3': {
+              fontSize: '1.5rem',
+              fontWeight: 600,
+              marginTop: '1.5rem',
+              marginBottom: '0.75rem',
+              color: colors.neutral[900],
+              lineHeight: 1.3,
+            },
+            '& h4': {
+              fontSize: '1.25rem',
+              fontWeight: 600,
+              marginTop: '1.25rem',
+              marginBottom: '0.5rem',
+              color: colors.neutral[900],
+              lineHeight: 1.4,
+            },
+            '& h5': {
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              marginTop: '1rem',
+              marginBottom: '0.5rem',
+              color: colors.neutral[900],
+              lineHeight: 1.4,
+            },
+            '& h6': {
+              fontSize: '1rem',
+              fontWeight: 600,
+              marginTop: '0.75rem',
+              marginBottom: '0.25rem',
+              color: colors.neutral[900],
+              lineHeight: 1.4,
+            },
+            // List styles
+            '& ul, & ol': {
+              paddingLeft: '1.5rem',
+              marginBottom: '1rem',
+              marginTop: 0,
+            },
+            '& li': {
+              fontSize: '1.125rem',
+              lineHeight: 1.8,
+              color: colors.neutral[700],
+              marginBottom: '0.5rem',
+            },
+            '& li p': {
+              marginBottom: '0.5rem',
+            },
+            // Link styles
+            '& a': {
+              color: '#8b5cf6',
+              textDecoration: 'none',
+              fontWeight: 500,
+              transition: 'color 0.2s',
+              '&:hover': {
+                color: '#ec4899',
+                textDecoration: 'underline',
+              },
+            },
+            // Blockquote styles
+            '& blockquote': {
+              borderLeft: `4px solid #8b5cf6`,
+              paddingLeft: '1.5rem',
+              paddingTop: '0.5rem',
+              paddingBottom: '0.5rem',
+              marginTop: '1rem',
+              marginBottom: '1rem',
+              marginLeft: 0,
+              marginRight: 0,
+              background: 'rgba(139, 92, 246, 0.05)',
               fontStyle: 'italic',
-              color: colors.neutral[700]
-            }}
-          >
-            <Typography variant="body1" sx={{ fontSize: '1.125rem', lineHeight: 1.8 }}>
-              {renderChildren(block.children)}
-            </Typography>
-          </Box>
-        );
-      
-      case 'code':
-        return (
-          <Box 
-            component="pre"
-            sx={{ 
+              color: colors.neutral[700],
+            },
+            '& blockquote p': {
+              marginBottom: '0.5rem',
+              '&:last-child': {
+                marginBottom: 0,
+              },
+            },
+            // Code styles
+            '& code': {
+              background: colors.neutral[100],
+              color: colors.neutral[900],
+              padding: '0.2rem 0.4rem',
+              borderRadius: '4px',
+              fontSize: '0.9em',
+              fontFamily: 'monospace',
+            },
+            '& pre': {
               background: colors.neutral[900],
               color: colors.neutral[50],
-              p: 2,
-              borderRadius: 2,
+              padding: '1rem',
+              borderRadius: '8px',
               overflow: 'auto',
-              mb: 2,
+              marginBottom: '1rem',
+              marginTop: '1rem',
+            },
+            '& pre code': {
+              background: 'transparent',
+              color: 'inherit',
+              padding: 0,
               fontSize: '0.9rem',
-              fontFamily: 'monospace'
-            }}
-          >
-            <code>{block.children?.[0]?.text || ''}</code>
-          </Box>
-        );
-      
-      case 'image':
-        return (
-          <Box sx={{ mb: 2, textAlign: 'center' }}>
-            <img 
-              src={block.image?.url} 
-              alt={block.image?.alternativeText || ''} 
-              style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}
-            />
-          </Box>
-        );
-      
-      default:
-        return null;
+            },
+            // Image styles
+            '& img': {
+              maxWidth: '100%',
+              height: 'auto',
+              borderRadius: '8px',
+              marginTop: '1rem',
+              marginBottom: '1rem',
+              display: 'block',
+            },
+            // Table styles
+            '& table': {
+              width: '100%',
+              borderCollapse: 'collapse',
+              marginTop: '1rem',
+              marginBottom: '1rem',
+              fontSize: '1rem',
+            },
+            '& th': {
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
+              padding: '0.75rem',
+              textAlign: 'left',
+              fontWeight: 600,
+              color: colors.neutral[900],
+              borderBottom: `2px solid ${colors.neutral[200]}`,
+            },
+            '& td': {
+              padding: '0.75rem',
+              borderBottom: `1px solid ${colors.neutral[200]}`,
+              color: colors.neutral[700],
+            },
+            '& tr:hover': {
+              background: 'rgba(139, 92, 246, 0.02)',
+            },
+            // Horizontal rule
+            '& hr': {
+              border: 'none',
+              borderTop: `1px solid ${colors.neutral[200]}`,
+              marginTop: '2rem',
+              marginBottom: '2rem',
+            },
+            // Strong and emphasis
+            '& strong': {
+              fontWeight: 600,
+              color: colors.neutral[900],
+            },
+            '& em': {
+              fontStyle: 'italic',
+            },
+            // First paragraph no top margin
+            '& > p:first-of-type': {
+              marginTop: 0,
+            },
+            // Last element no bottom margin
+            '& > *:last-child': {
+              marginBottom: 0,
+            },
+          }}
+          dangerouslySetInnerHTML={{ __html: data.body }}
+        />
+      );
     }
-  };
 
-  if (!data.body || !Array.isArray(data.body)) {
+    // Legacy support: If body is still in blocks format (array), handle it
+    // This ensures backward compatibility with existing content
+    console.warn('RichTextBlock: Received blocks format instead of HTML. Consider migrating to CKEditor.');
     return null;
-  }
+  }, [data?.body]);
 
-  return (
-    <Box sx={{ mb: 4 }}>
-      {data.body.map((block, index) => (
-        <React.Fragment key={index}>
-          {renderBlock(block)}
-        </React.Fragment>
-      ))}
-    </Box>
-  );
+  return renderHTML;
 };
 
 export default RichTextBlock;

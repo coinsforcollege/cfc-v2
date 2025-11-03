@@ -35,8 +35,6 @@ export const getPosts = async (req, res) => {
 
     const response = await strapiClient.get('/blog-posts', { params });
     
-    console.log('Strapi response:', JSON.stringify(response.data, null, 2));
-    
     res.json({
       success: true,
       data: response.data.results || response.data.data || [],
@@ -85,9 +83,6 @@ export const getPostBySlug = async (req, res) => {
         message: 'Blog post not found'
       });
     }
-    
-    // Debug: Log the content blocks to see their structure
-    console.log('Post content blocks:', JSON.stringify(results[0].content, null, 2));
     
     res.json({
       success: true,
@@ -376,8 +371,6 @@ export const getSubscribers = async (req, res) => {
         'sort': 'createdAt:desc'
       }
     });
-
-    console.log('Strapi subscribers response:', JSON.stringify(response.data, null, 2));
 
     // Strapi v4+ returns data in response.data.data format
     // Each item has { id, attributes: { email, name, active, createdAt, ... } }
