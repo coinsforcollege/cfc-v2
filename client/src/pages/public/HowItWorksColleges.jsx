@@ -41,7 +41,6 @@ import {
   BusinessCenter,
   Public,
   Star,
-  EmojiEvents,
   Code,
   Security as SecurityIcon,
   Speed,
@@ -133,30 +132,6 @@ const getBenefits = (t) => [
   },
 ];
 
-const getCaseStudies = (t) => [
-  {
-    college: 'MIT',
-    students: 2847,
-    status: t('howItWorksColleges.caseStudy1Status'),
-    achievement: t('howItWorksColleges.caseStudy1Achievement'),
-    quote: t('howItWorksColleges.caseStudy1Quote'),
-  },
-  {
-    college: 'Stanford University',
-    students: 2653,
-    status: t('howItWorksColleges.caseStudy2Status'),
-    achievement: t('howItWorksColleges.caseStudy2Achievement'),
-    quote: t('howItWorksColleges.caseStudy2Quote'),
-  },
-  {
-    college: 'UC Berkeley',
-    students: 2287,
-    status: t('howItWorksColleges.caseStudy3Status'),
-    achievement: t('howItWorksColleges.caseStudy3Achievement'),
-    quote: t('howItWorksColleges.caseStudy3Quote'),
-  },
-];
-
 const getFaqs = (t) => [
   {
     question: t('howItWorksColleges.faq1Question'),
@@ -190,7 +165,6 @@ function HowItWorksColleges() {
 
   const signupSteps = getSignupSteps(t);
   const benefits = getBenefits(t);
-  const caseStudies = getCaseStudies(t);
   const faqs = getFaqs(t);
 
   return (
@@ -1053,169 +1027,6 @@ function HowItWorksColleges() {
                 ))}
               </Grid>
             </Container>
-          </Box>
-        </motion.div>
-
-        {/* Case Studies */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.0 }}
-          viewport={{ once: true }}
-        >
-          <Box sx={{ mb: 8 }}>
-            <Typography
-              variant="h3"
-              sx={{
-                fontSize: { xs: '2rem', md: '2rem' },
-                fontWeight: 700,
-                color: '#2d3748',
-                mb: 4,
-                textAlign: 'center',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-                <EmojiEvents sx={{ color: '#ff6b6b', fontSize: '2rem' }} />
-                {t('howItWorksColleges.successStoriesTitle')}
-              </Box>
-            </Typography>
-            <Typography
-              sx={{
-                color: '#718096',
-                fontSize: { xs: '1.1rem', md: '1.3rem' },
-                textAlign: 'center',
-                mb: 6,
-                maxWidth: '800px',
-                mx: 'auto',
-                lineHeight: 1.6,
-              }}
-            >
-              {t('howItWorksColleges.successStoriesSubtitle')}
-            </Typography>
-
-            <Grid container spacing={4}>
-              {caseStudies.map((study, index) => (
-                <Grid size={{ xs: 12, md: 4 }} key={index}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    whileHover={{ scale: 1.05, y: -8 }}
-                  >
-                    <Card
-                      elevation={0}
-                      sx={{
-                        height: '100%',
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(20px)',
-                        border: '2px solid rgba(255, 107, 107, 0.2)',
-                        borderRadius: '24px',
-                        p: 4,
-                        position: 'relative',
-                        overflow: 'hidden',
-                        boxShadow: '0 20px 40px rgba(255, 107, 107, 0.1)',
-                        transition: 'all 0.3s ease',
-                      }}
-                    >
-                      {/* Visual Image Element */}
-                      <Box
-                        component="img"
-                        src="/images/join-offwhite-bg.jpg"
-                        sx={{
-                          width: '100%',
-                          height: '200px',
-                          objectFit: 'cover',
-                          borderRadius: '16px',
-                          mb: 3,
-                          boxShadow: '0 8px 24px rgba(255, 107, 107, 0.2)',
-                        }}
-                      />
-                      
-                      <Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontWeight: 700,
-                              color: '#2d3748',
-                              fontSize: '1.5rem',
-                            }}
-                          >
-                            {study.college}
-                          </Typography>
-                          <Chip
-                            label={study.status}
-                            sx={{
-                              background: 'linear-gradient(135deg, #4ecdc4 0%, #6ee7b7 100%)',
-                              color: 'white',
-                              fontWeight: 600,
-                              fontSize: '0.8rem',
-                            }}
-                          />
-                        </Box>
-                        
-                        <Typography
-                          variant="h2"
-                          sx={{
-                            fontWeight: 800,
-                            color: '#ff6b6b',
-                            mb: 1,
-                            fontSize: '2rem',
-                          }}
-                        >
-                          {study.students.toLocaleString()}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            color: '#718096',
-                            mb: 3,
-                            fontSize: '1rem',
-                            fontWeight: 500,
-                          }}
-                        >
-                          {t('howItWorksColleges.studentsMiningLabel')}
-                        </Typography>
-                        
-                        <Divider sx={{ my: 3, borderColor: 'rgba(255, 107, 107, 0.2)' }} />
-                        
-                        <Typography
-                          sx={{
-                            color: '#4ecdc4',
-                            fontWeight: 600,
-                            mb: 3,
-                            fontSize: '1rem',
-                          }}
-                        >
-                          {study.achievement}
-                        </Typography>
-                        
-                        <Box
-                          sx={{
-                            p: 3,
-                            background: 'rgba(255, 107, 107, 0.05)',
-                            borderRadius: '16px',
-                            border: '1px solid rgba(255, 107, 107, 0.2)',
-                            borderLeft: '4px solid #ff6b6b',
-                          }}
-                        >
-                          <Typography
-                            sx={{
-                              color: '#718096',
-                              fontStyle: 'italic',
-                              lineHeight: 1.6,
-                              fontSize: '0.95rem',
-                            }}
-                          >
-                            &quot;{study.quote}&quot;
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Card>
-                  </motion.div>
-                </Grid>
-              ))}
-            </Grid>
           </Box>
         </motion.div>
 

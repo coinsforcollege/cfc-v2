@@ -61,7 +61,7 @@ const Header = () => {
 
   const getDashboardPath = () => {
     if (!user) return '/';
-    if (user.role === 'student') return '/student/dashboard';
+    if (user.role === 'user') return '/user/dashboard';
     if (user.role === 'college_admin') return '/college-admin/dashboard';
     if (user.role === 'platform_admin') return '/platform-admin/dashboard';
     return '/';
@@ -529,7 +529,7 @@ const Header = () => {
                   border: '1px solid rgba(139, 92, 246, 0.4)',
                 }
               }}
-              onClick={() => handleNavigation('/auth/register/student')}
+              onClick={() => handleNavigation('/auth/register/user')}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
                 <Box sx={{ 

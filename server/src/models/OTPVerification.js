@@ -13,7 +13,7 @@ const otpVerificationSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['student', 'college_admin', 'password_change'],
+    enum: ['user', 'college_admin', 'password_change'],
     required: true
   },
   isVerified: {

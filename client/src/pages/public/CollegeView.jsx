@@ -36,8 +36,9 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
 import { useToast } from '../../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/apiClient';
-import { studentApi } from '../../api/student.api';
+import { userApi } from '../../api/user.api';
 import { miningApi } from '../../api/mining.api';
 import { getImageUrl } from '../../utils/imageUtils';
 
@@ -73,6 +74,7 @@ const getStatusChipStyle = (status) => {
 };
 
 const CollegeView = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -84,11 +86,11 @@ const CollegeView = () => {
   const [isActivelyMining, setIsActivelyMining] = useState(false);
   const [miningStatus, setMiningStatus] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [statusLoading, setStatusLoading] = useState(user?.role === 'student');
+  const [statusLoading, setStatusLoading] = useState(user?.role === 'user');
 
   useEffect(() => {
     fetchCollege();
-    if (user && user.role === 'student') {
+    if (user && user.role === 'user') {
       checkMiningStatus();
     }
   }, [id, user]);
@@ -123,7 +125,7 @@ const CollegeView = () => {
 
   const checkMiningStatus = async () => {
     try {
-      const response = await studentApi.getDashboard();
+      const response = await userApi.getDashboard();
       if (response.success) {
         const miningColleges = response.data.miningColleges || [];
         const inList = miningColleges.some(mc => mc.college && (mc.college._id === id || mc.college === id));
@@ -145,7 +147,7 @@ const CollegeView = () => {
   const handleAddToMiningList = async () => {
     try {
       setActionLoading(true);
-      await studentApi.addCollege({ collegeId: id });
+      await userApi.addCollege({ collegeId: id });
       showToast('College added to mining list!', 'success');
       await checkMiningStatus();
     } catch (error) {
@@ -161,7 +163,7 @@ const CollegeView = () => {
       setActionLoading(true);
       // First add to mining list if not already
       if (!inMiningList) {
-        await studentApi.addCollege({ collegeId: id });
+        await userApi.addCollege({ collegeId: id });
       }
       // Then start mining
       await miningApi.startMining(id);
@@ -208,7 +210,7 @@ const CollegeView = () => {
 
   const isCollegeAdmin = user && user.role === 'college_admin' && user.managedCollege === id;
   const isPlatformAdmin = user && user.role === 'platform_admin';
-  const isStudent = user && user.role === 'student';
+  const isStudent = user && user.role === 'user';
 
   return (
     <Box sx={{ minHeight: '100vh', background: 'white', pt: { xs: 12, md: 14 }, pb: 8 }}>
@@ -337,7 +339,7 @@ const CollegeView = () => {
                 />
                 {college.referralBonusRate && (
                   <Chip
-                    label={`+${college.referralBonusRate} Token/hr per referral`}
+                    label={t('auth.tokenPerHourPerRef', { rate: college.referralBonusRate })}
                     size="medium"
                     sx={{
                       background: 'rgba(59, 130, 246, 0.15)',
@@ -358,7 +360,7 @@ const CollegeView = () => {
               <>
                 <Button
                   variant="contained"
-                  onClick={() => navigate('/auth/register/student')}
+                  onClick={() => navigate('/auth/register/user')}
                   sx={{ 
                     background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                     borderRadius: 3,

@@ -20,7 +20,7 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
 
   const getDashboardPath = () => {
     if (!user) return '/';
-    if (user.role === 'student') return '/student/dashboard';
+    if (user.role === 'user') return '/user/dashboard';
     if (user.role === 'college_admin') return '/college-admin/dashboard';
     if (user.role === 'platform_admin') return '/platform-admin/dashboard';
     return '/';
@@ -42,8 +42,8 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
 
   const getRoleLabel = (role) => {
     switch (role) {
-      case 'student':
-        return t('common.student');
+      case 'user':
+        return t('common.user');
       case 'college_admin':
         return t('common.collegeAdmin');
       case 'platform_admin':
@@ -54,7 +54,7 @@ const DashboardHeader = ({ onMenuClick, mobileMenuOpen = false, searchPlaceholde
   };
 
   const getSettingsPath = () => {
-    if (user?.role === 'student') return '/student/settings';
+    if (user?.role === 'user') return '/user/settings';
     if (user?.role === 'college_admin') return '/college-admin/settings';
     if (user?.role === 'platform_admin') return '/platform-admin/settings';
     return '/settings';

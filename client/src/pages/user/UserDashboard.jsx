@@ -44,7 +44,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
 import { useToast } from '../../contexts/ToastContext';
-import { studentApi } from '../../api/student.api';
+import { userApi } from '../../api/user.api';
 import { miningApi } from '../../api/mining.api';
 import { collegesApi } from '../../api/colleges.api';
 import { BorderBeam } from '@/components/ui/border-beam';
@@ -95,7 +95,7 @@ const StudentDashboard = () => {
       if (isInitialLoadRef.current) {
         setLoading(true);
       }
-      const response = await studentApi.getDashboard();
+      const response = await userApi.getDashboard();
       if (response.success) {
         setDashboard(response.data);
       }
@@ -145,7 +145,7 @@ const StudentDashboard = () => {
   }, [wsError, showToast]);
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
+    if (!user || user.role !== 'user') {
       navigate('/auth/login');
       return;
     }
@@ -206,7 +206,7 @@ const StudentDashboard = () => {
   const handleSetPrimaryCollege = async (collegeId) => {
     try {
       setActionLoading(`primary-${collegeId}`);
-      const response = await studentApi.setPrimaryCollege(collegeId);
+      const response = await userApi.setPrimaryCollege(collegeId);
       if (response.success) {
         fetchDashboard();
         setJustSetPrimary(collegeId);
@@ -290,7 +290,7 @@ const StudentDashboard = () => {
         }
       }
 
-      const response = await studentApi.addCollege(formData);
+      const response = await userApi.addCollege(formData);
       if (response.success) {
         setShowAddCollegeDialog(false);
         setSelectedCollege(null);
@@ -321,22 +321,22 @@ const StudentDashboard = () => {
   };
 
   const copyReferralCode = useCallback(() => {
-    if (dashboard?.student?.referralCode) {
-      navigator.clipboard.writeText(dashboard.student.referralCode);
+    if (dashboard?.user?.referralCode) {
+      navigator.clipboard.writeText(dashboard.user.referralCode);
       setCopiedReferral(true);
       setTimeout(() => setCopiedReferral(false), 2000);
     }
-  }, [dashboard?.student?.referralCode]);
+  }, [dashboard?.user?.referralCode]);
 
   const copyCollegeReferralLink = useCallback((collegeId) => {
-    if (dashboard?.student?.referralCode) {
+    if (dashboard?.user?.referralCode) {
       const baseUrl = window.location.origin;
-      const referralLink = `${baseUrl}/auth/register/student?ref=${dashboard.student.referralCode}&college=${collegeId}`;
+      const referralLink = `${baseUrl}/auth/register/user?ref=${dashboard.user.referralCode}&college=${collegeId}`;
       navigator.clipboard.writeText(referralLink);
       setCopiedCollegeReferral(collegeId);
       setTimeout(() => setCopiedCollegeReferral(null), 2000);
     }
-  }, [dashboard?.student?.referralCode]);
+  }, [dashboard?.user?.referralCode]);
 
   // Memoize calculated values to prevent unnecessary re-renders
   const totalMiningTokens = useMemo(() => {
@@ -358,16 +358,16 @@ const StudentDashboard = () => {
 
   // Calculate total referral bonus across all mining colleges
   const totalReferralBonus = useMemo(() => {
-    if (!dashboard?.miningColleges || !dashboard?.student?.totalReferrals) return 0;
+    if (!dashboard?.miningColleges || !dashboard?.user?.totalReferrals) return 0;
     // Sum up referral bonus rates from all mining colleges
     const totalBonus = dashboard.miningColleges.reduce((sum, mc) => {
       if (mc.college && mc.college.referralBonusRate) {
-        return sum + (mc.college.referralBonusRate * dashboard.student.totalReferrals);
+        return sum + (mc.college.referralBonusRate * dashboard.user.totalReferrals);
       }
       return sum;
     }, 0);
     return totalBonus;
-  }, [dashboard?.miningColleges, dashboard?.student?.totalReferrals]);
+  }, [dashboard?.miningColleges, dashboard?.user?.totalReferrals]);
 
   if (loading) {
     return (
@@ -388,7 +388,7 @@ const StudentDashboard = () => {
   // Calculate stats for sidebar badges
   const sidebarStats = {
     collegesCount: dashboard?.miningColleges?.filter(mc => mc.college).length || 0,
-    referralsCount: dashboard?.student?.totalReferrals || 0,
+    referralsCount: dashboard?.user?.totalReferrals || 0,
   };
 
   return (
@@ -407,10 +407,10 @@ const StudentDashboard = () => {
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 3 }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-              Welcome, {dashboard?.student.name}
+              Welcome, {dashboard?.user.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {dashboard?.student.college?.name || 'No college assigned'}
+              {dashboard?.user.college?.name || 'No college assigned'}
             </Typography>
           </Box>
 
@@ -661,7 +661,7 @@ const StudentDashboard = () => {
                 borderRadius: 2
               }}>
                 <Typography variant="body1" sx={{ flex: 1, fontWeight: 600 }}>
-                  {dashboard?.student.referralCode}
+                  {dashboard?.user.referralCode}
                 </Typography>
                 <IconButton 
                   size="small" 
@@ -676,7 +676,7 @@ const StudentDashboard = () => {
                 </IconButton>
               </Box>
               <Typography variant="body2" sx={{ opacity: 0.95, mb: 0.5 }}>
-                Referrals: <strong>{dashboard?.student.totalReferrals || 0}</strong>
+                Referrals: <strong>{dashboard?.user.totalReferrals || 0}</strong>
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.95 }}>
                 Potential Bonus: <strong>+{totalReferralBonus.toFixed(2)}/hr</strong>
@@ -726,14 +726,16 @@ const StudentDashboard = () => {
           // Calculate user's actual earning rate for this college
           const baseRate = mc.college.baseRate || 0.25;
           const referralBonusRate = mc.college.referralBonusRate || 0.1;
-          const currentReferralsCount = mc.referredStudents?.length || 0;
+          const REFERRAL_LIMIT_PER_COLLEGE = 10;
+          const currentReferralsCount = mc.referredUsers?.length || 0;
+          const cappedReferralsCount = Math.min(currentReferralsCount, REFERRAL_LIMIT_PER_COLLEGE);
 
           // When mining is active, earning rate is locked. Calculate how many referrals were counted at session start
           const effectiveReferralsForRate = isActive && session.earningRate
             ? Math.round((session.earningRate - baseRate) / referralBonusRate)
-            : currentReferralsCount;
+            : cappedReferralsCount;
 
-          const userEarningRate = isActive ? session.earningRate : (baseRate + (currentReferralsCount * referralBonusRate));
+          const userEarningRate = isActive ? session.earningRate : (baseRate + (cappedReferralsCount * referralBonusRate));
 
           return (
             <Card
@@ -813,7 +815,7 @@ const StudentDashboard = () => {
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {dashboard?.student.college?._id === mc.college._id ? (
+                    {dashboard?.user.college?._id === mc.college._id ? (
                       <Chip
                         label="PRIMARY"
                         size="small"
@@ -923,7 +925,13 @@ const StudentDashboard = () => {
                 {/* Rates */}
                 <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                   <Tooltip
-                    title={`Your earning rate: ${baseRate} base + ${(effectiveReferralsForRate * referralBonusRate).toFixed(2)} referral bonus${isActive && currentReferralsCount > effectiveReferralsForRate ? ' (restart mining to apply new referrals)' : ''}`}
+                    title={t('user.earningRateTooltip', {
+                      baseRate: baseRate,
+                      bonusRate: (effectiveReferralsForRate * referralBonusRate).toFixed(2),
+                      cappedCount: cappedReferralsCount,
+                      totalCount: currentReferralsCount,
+                      restart: isActive && cappedReferralsCount > effectiveReferralsForRate ? t('user.restartMiningToApply') : ''
+                    })}
                     arrow
                     placement="top"
                   >
@@ -944,18 +952,29 @@ const StudentDashboard = () => {
                   </Tooltip>
                   {currentReferralsCount > 0 && (
                     <Tooltip
-                      title={`${currentReferralsCount} referral${currentReferralsCount > 1 ? 's' : ''} for this college${isActive && currentReferralsCount > effectiveReferralsForRate ? ` (${effectiveReferralsForRate} counted in current rate)` : ''}`}
+                      title={t('user.referralsTooltip', {
+                        count: currentReferralsCount,
+                        cappedCount: cappedReferralsCount,
+                        plural: currentReferralsCount > 1 ? 's' : '',
+                        active: isActive && cappedReferralsCount > effectiveReferralsForRate ? t('user.referralActive', { effectiveCount: effectiveReferralsForRate }) : ''
+                      })}
                       arrow
                       placement="top"
                     >
                       <Chip
-                        label={`${currentReferralsCount} REF`}
+                        label={`${cappedReferralsCount}/10 REF${currentReferralsCount > REFERRAL_LIMIT_PER_COLLEGE ? ' (max)' : ''}`}
                         size="small"
                         sx={{
                           height: 18,
-                          background: 'rgba(96, 165, 250, 0.15)',
-                          border: '1px solid rgba(96, 165, 250, 0.3)',
-                          color: '#60a5fa',
+                          background: currentReferralsCount >= REFERRAL_LIMIT_PER_COLLEGE 
+                            ? 'rgba(251, 191, 36, 0.15)' 
+                            : 'rgba(96, 165, 250, 0.15)',
+                          border: currentReferralsCount >= REFERRAL_LIMIT_PER_COLLEGE
+                            ? '1px solid rgba(251, 191, 36, 0.3)'
+                            : '1px solid rgba(96, 165, 250, 0.3)',
+                          color: currentReferralsCount >= REFERRAL_LIMIT_PER_COLLEGE 
+                            ? '#fbbf24' 
+                            : '#60a5fa',
                           fontSize: '0.65rem',
                           fontWeight: 700,
                           '& .MuiChip-label': { px: 0.75 },

@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  registerStudent,
+  registerUser,
   registerCollegeAdmin,
   login,
   getMe,
@@ -11,7 +11,7 @@ import {
   updateLanguagePreference
 } from '../controllers/auth.controller.js';
 import {
-  sendOTPForStudent,
+  sendOTPForUser,
   sendOTPForCollege,
   verifyOTP,
   resendOTP,
@@ -25,7 +25,7 @@ import upload from '../middlewares/upload.js';
 const router = express.Router();
 
 // OTP routes (public)
-router.post('/otp/send/student', sendOTPForStudent);
+router.post('/otp/send/user', sendOTPForUser);
 router.post('/otp/send/college', sendOTPForCollege);
 router.post('/otp/verify', verifyOTP);
 router.post('/otp/resend', resendOTP);
@@ -36,7 +36,7 @@ router.post('/otp/verify/password-change', protect, verifyOTPForPasswordChange);
 router.post('/otp/resend/password-change', protect, resendOTPForPasswordChange);
 
 // Public routes
-router.post('/register/student', registerStudent);
+router.post('/register/user', registerUser);
 router.post('/register/college', upload.single('logoFile'), registerCollegeAdmin);
 router.post('/login', login);
 

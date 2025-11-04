@@ -34,13 +34,13 @@ router.use(protect, authorize('platform_admin'));
 router.get('/stats', getPlatformStats);
 router.put('/default-rates', updateDefaultRates);
 
-// Student routes
-router.get('/students', getAllStudents);
-router.get('/students/:id', getStudentDetails);
-router.put('/students/:id', updateStudent);
-router.delete('/students/:id', deleteStudent);
-router.put('/students/:id/reset-password', resetStudentPassword);
-router.post('/students/:id/add-balance', addStudentBalance);
+// User routes
+router.get('/users', getAllStudents);
+router.get('/users/:id', getStudentDetails);
+router.put('/users/:id', updateStudent);
+router.delete('/users/:id', deleteStudent);
+router.put('/users/:id/reset-password', resetStudentPassword);
+router.post('/users/:id/add-balance', addStudentBalance);
 
 // College Admin routes
 router.get('/college-admins', getAllCollegeAdmins);

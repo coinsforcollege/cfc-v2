@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const miningSessionSchema = new mongoose.Schema({
-  student: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
@@ -47,13 +47,13 @@ const miningSessionSchema = new mongoose.Schema({
 });
 
 // Compound index for finding active mining sessions
-miningSessionSchema.index({ student: 1, college: 1, isActive: 1 });
+miningSessionSchema.index({ user: 1, college: 1, isActive: 1 });
 
 // Index for expired session queries
 miningSessionSchema.index({ endTime: 1, isActive: 1 });
 
 // Compound index for efficient expired session cleanup and status checks
-miningSessionSchema.index({ student: 1, isActive: 1, endTime: 1 });
+miningSessionSchema.index({ user: 1, isActive: 1, endTime: 1 });
 
 const MiningSession = mongoose.model('MiningSession', miningSessionSchema);
 

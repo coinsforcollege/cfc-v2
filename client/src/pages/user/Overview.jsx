@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router';
 import {
   Box,
@@ -36,7 +36,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
 import { useToast } from '../../contexts/ToastContext';
-import { studentApi } from '../../api/student.api';
+import { userApi } from '../../api/user.api';
 import { miningApi } from '../../api/mining.api';
 import { BorderBeam } from '@/components/ui/border-beam';
 import DashboardLayout from '../../layouts/DashboardLayout';
@@ -65,12 +65,12 @@ const Overview = () => {
       if (isInitialLoadRef.current) {
         setLoading(true);
       }
-      const response = await studentApi.getDashboard();
+      const response = await userApi.getDashboard();
       if (response.success) {
         setDashboard(response.data);
       }
     } catch (err) {
-      setError(err.message || t('student.failedToLoadDashboard'));
+      setError(err.message || t('user.failedToLoadDashboard'));
     } finally {
       if (isInitialLoadRef.current) {
         setLoading(false);
@@ -79,61 +79,86 @@ const Overview = () => {
     }
   };
 
-  const handleStartMining = async (collegeId) => {
+  const handleStartMining = useCallback(async (collegeId) => {
     try {
       setActionLoading(`start-${collegeId}`);
       const response = await miningApi.startMining(collegeId);
       if (response.success) {
-        showToast(t('student.miningStartedSuccess'), 'success');
+        showToast(t('user.miningStartedSuccess'), 'success');
         fetchDashboard();
-        navigate('/student/colleges');
+        navigate('/user/colleges');
       }
     } catch (err) {
       console.error('Failed to start mining:', err);
-      showToast(err.message || t('student.failedToStartMining'), 'error');
+      showToast(err.message || t('user.failedToStartMining'), 'error');
     } finally {
       setActionLoading('');
     }
-  };
+  }, [t, showToast, navigate]);
 
-  const handleStopMining = async (collegeId) => {
+  const handleStopMining = useCallback(async (collegeId) => {
     try {
       setActionLoading(`stop-${collegeId}`);
       const response = await miningApi.stopMining(collegeId);
       if (response.success) {
-        showToast(t('student.miningStoppedSuccess'), 'success');
+        showToast(t('user.miningStoppedSuccess'), 'success');
         fetchDashboard();
       }
     } catch (err) {
       console.error('Failed to stop mining:', err);
-      showToast(err.message || t('student.failedToStopMining'), 'error');
+      showToast(err.message || t('user.failedToStopMining'), 'error');
     } finally {
       setActionLoading('');
     }
-  };
+  }, [t, showToast]);
 
 
   useEffect(() => {
     if (wsMiningStatus) {
+      console.log('🔍 Processing WebSocket mining status:', wsMiningStatus);
       const statusMap = {};
       wsMiningStatus.activeSessions?.forEach(session => {
         if (session.college) {
+          console.log('📌 Active session for college:', session.college._id, 'isActive:', session.isActive, 'remainingHours:', session.remainingHours);
           statusMap[session.college._id] = session;
         }
       });
-      setMiningStatus(statusMap);
+      console.log('📊 Mining status map:', statusMap);
 
-      // Only update activeSessions, NOT miningColleges or wallets
-      // This prevents WebSocket from overwriting user actions (add/delete)
-      setDashboard(prev => ({
-        ...prev,
-        activeSessions: wsMiningStatus.activeSessions
-      }));
+      // Only update if mining status actually changed (prevent unnecessary re-renders)
+      setMiningStatus(prevStatus => {
+        const prevKeys = Object.keys(prevStatus).sort().join(',');
+        const newKeys = Object.keys(statusMap).sort().join(',');
+        const prevActive = Object.values(prevStatus).map(s => `${s.sessionId}-${s.isActive}`).sort().join(',');
+        const newActive = Object.values(statusMap).map(s => `${s.sessionId}-${s.isActive}`).sort().join(',');
+
+        if (prevKeys === newKeys && prevActive === newActive) {
+          return prevStatus; // No change, don't trigger re-render
+        }
+        return statusMap;
+      });
+
+      // Only update activeSessions if they actually changed
+      setDashboard(prev => {
+        if (!prev) return prev;
+
+        const prevSessionIds = prev.activeSessions?.map(s => s.sessionId).sort().join(',') || '';
+        const newSessionIds = wsMiningStatus.activeSessions?.map(s => s.sessionId).sort().join(',') || '';
+
+        if (prevSessionIds === newSessionIds) {
+          return prev; // No change, don't trigger re-render
+        }
+
+        return {
+          ...prev,
+          activeSessions: wsMiningStatus.activeSessions
+        };
+      });
     }
   }, [wsMiningStatus]);
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
+    if (!user || user.role !== 'user') {
       navigate('/auth/login');
       return;
     }
@@ -142,7 +167,7 @@ const Overview = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    if (dashboard && !loading && dashboard.student?.onboardingCompleted === false) {
+    if (dashboard && !loading && dashboard.user?.onboardingCompleted === false) {
       startTour(isMobile);
     }
   }, [dashboard, loading, isMobile]);
@@ -204,7 +229,7 @@ const Overview = () => {
 
   const sidebarStats = {
     collegesCount: dashboard?.miningColleges?.filter(mc => mc.college).length || 0,
-    referralsCount: dashboard?.student?.totalReferrals || 0,
+    referralsCount: dashboard?.user?.totalReferrals || 0,
   };
 
   return (
@@ -216,10 +241,10 @@ const Overview = () => {
         {/* Header */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-            {t('student.welcome')}, {dashboard?.student.name}
+            {t('user.welcome')}, {dashboard?.user.name}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {dashboard?.student.college?.name || t('student.noCollegeAssigned')}
+            {dashboard?.user.college?.name || t('user.noCollegeAssigned')}
           </Typography>
         </Box>
 
@@ -240,7 +265,7 @@ const Overview = () => {
             <CardContent>
               <AccountBalanceWallet sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {t('student.totalBalance')}
+                {t('user.totalBalance')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {totalBalance.toFixed(4)}
@@ -249,7 +274,7 @@ const Overview = () => {
           </Card>
 
           <Card
-            onClick={() => navigate('/student/colleges')}
+            onClick={() => navigate('/user/colleges')}
             sx={{
               flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
               background: hasActiveMiner
@@ -284,7 +309,7 @@ const Overview = () => {
             <CardContent sx={{ position: 'relative', zIndex: 1 }}>
               <TrendingUp sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {hasActiveMiner ? t('student.minerRunning') : t('student.allMinersInactive')}
+                {hasActiveMiner ? t('user.minerRunning') : t('user.allMinersInactive')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {totalMiningTokens.toFixed(4)}
@@ -293,7 +318,7 @@ const Overview = () => {
           </Card>
 
           <Card
-            onClick={() => navigate('/student/community')}
+            onClick={() => navigate('/user/community')}
             sx={{
               flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
               background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
@@ -311,7 +336,7 @@ const Overview = () => {
             <CardContent>
               <People sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {t('student.activeFriends')}
+                {t('user.activeFriends')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {dashboard?.summary?.activeFriendsCount?.active || 0} / {dashboard?.summary?.activeFriendsCount?.total || 0}
@@ -320,7 +345,7 @@ const Overview = () => {
           </Card>
 
           <Card
-            onClick={() => navigate('/student/colleges')}
+            onClick={() => navigate('/user/colleges')}
             sx={{
               flex: { xs: 'calc(50% - 8px)', md: 'calc(25% - 12px)' },
               background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
@@ -338,11 +363,11 @@ const Overview = () => {
             <CardContent>
               <Refresh sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {t('student.currentRate')}
+                {t('user.currentRate')}
               </Typography>
-              <Tooltip title={t('student.totalRateTooltip')}>
+              <Tooltip title={t('user.totalRateTooltip')}>
                 <Typography variant="h5" sx={{ fontWeight: 700, cursor: 'help' }}>
-                  {currentEarningRate.toFixed(2)} {t('student.tokenPerHr')}
+                  {currentEarningRate.toFixed(2)} {t('user.tokenPerHr')}
                 </Typography>
               </Tooltip>
             </CardContent>
@@ -365,7 +390,7 @@ const Overview = () => {
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  {t('student.tokenMiners')}
+                  {t('user.tokenMiners')}
                 </Typography>
                 <Button
                   variant="outlined"
@@ -374,7 +399,7 @@ const Overview = () => {
                     if (tourActive && (tourStep === 'navigate-mobile' || tourStep === 'navigate')) {
                       nextStep();
                     }
-                    navigate('/student/colleges');
+                    navigate('/user/colleges');
                   }}
                   data-tour={tourActive && tourStep === 'navigate-mobile' && isMobileTour ? 'view-colleges-mobile-button' : undefined}
                   sx={{
@@ -388,19 +413,19 @@ const Overview = () => {
                     }
                   }}
                 >
-                  {t('student.viewColleges')}
+                  {t('user.viewColleges')}
                 </Button>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                {t('student.miningStatus')}
+                {t('user.miningStatus')}
               </Typography>
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('student.college')}</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 700, color: '#475569' }}>{t('student.action')}</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>{t('student.progress')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('user.college')}</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700, color: '#475569' }}>{t('user.action')}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>{t('user.progress')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -419,6 +444,8 @@ const Overview = () => {
                         const isMining = session?.isActive && session?.remainingHours > 0;
                         const progress = isMining ? Math.round(((24 - session.remainingHours) / 24) * 100) : 0;
 
+                        console.log('🎯 College:', miningCollege.college.name, 'ID:', miningCollege.college._id, 'Session found:', !!session, 'isMining:', isMining);
+
                         return (
                           <TableRow key={index} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
                             <TableCell>
@@ -427,12 +454,12 @@ const Overview = () => {
                                   {miningCollege.college.name}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
-                                  {isMining ? t('student.miningActive') : t('student.notMining')}
+                                  {isMining ? t('user.miningActive') : t('user.notMining')}
                                 </Typography>
                               </Box>
                             </TableCell>
                             <TableCell align="center">
-                              <Tooltip title={isMining ? t('student.stopMining') : t('student.startMining')} arrow>
+                              <Tooltip title={isMining ? t('user.stopMining') : t('user.startMining')} arrow>
                                 <span>
                                   <Button
                                     variant="contained"
@@ -463,7 +490,7 @@ const Overview = () => {
                                   >
                                     {actionLoading === `start-${miningCollege.college._id}` || actionLoading === `stop-${miningCollege.college._id}`
                                       ? <CircularProgress size={16} sx={{ color: 'white' }} />
-                                      : isMining ? t('student.stop') : t('student.start')
+                                      : isMining ? t('user.stop') : t('user.start')
                                     }
                                   </Button>
                                 </span>
@@ -501,7 +528,7 @@ const Overview = () => {
                       <TableRow>
                         <TableCell colSpan={3} align="center">
                           <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                            {t('student.noCollegesAdded')}
+                            {t('user.noCollegesAdded')}
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -547,10 +574,10 @@ const Overview = () => {
                   </Box>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
-                      {t('student.tokenWallet')}
+                      {t('user.tokenWallet')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                      {t('student.multiCollegePortfolio')}
+                      {t('user.multiCollegePortfolio')}
                     </Typography>
                   </Box>
                 </Box>
@@ -566,7 +593,7 @@ const Overview = () => {
                 border: '1px solid rgba(102, 126, 234, 0.2)'
               }}>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1 }}>
-                  {t('student.totalPortfolioValue')}
+                  {t('user.totalPortfolioValue')}
                 </Typography>
                 <Typography variant="h4" sx={{
                   fontWeight: 700,
@@ -574,13 +601,13 @@ const Overview = () => {
                   fontFamily: 'Monaco, Courier, monospace',
                   letterSpacing: '-0.5px'
                 }}>
-                  {totalBalance.toFixed(4)} <Typography component="span" variant="h6" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{t('student.tokens')}</Typography>
+                  {totalBalance.toFixed(4)} <Typography component="span" variant="h6" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{t('user.tokens')}</Typography>
                 </Typography>
               </Box>
 
               {/* Token Holdings */}
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                {t('student.holdings')}
+                {t('user.holdings')}
               </Typography>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -652,7 +679,7 @@ const Overview = () => {
                                     }} />
                                   )}
                                   <Typography variant="caption" sx={{ color: isMining ? '#22d3ee' : 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>
-                                    {isMining ? t('student.miningActiveStatus') : t('student.inactive')} • {wallet.college?.country || '-'}
+                                    {isMining ? t('user.miningActiveStatus') : t('user.inactive')} • {wallet.college?.country || '-'}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -698,10 +725,10 @@ const Overview = () => {
                   <Box sx={{ textAlign: 'center', py: 4 }}>
                     <AccountBalanceWallet sx={{ fontSize: 48, color: 'rgba(255,255,255,0.2)', mb: 1 }} />
                     <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                      {t('student.noBalanceData')}
+                      {t('user.noBalanceData')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>
-                      {t('student.startMiningToEarn')}
+                      {t('user.startMiningToEarn')}
                     </Typography>
                   </Box>
                 )}
@@ -719,7 +746,7 @@ const Overview = () => {
           <WelcomeDialog
             open={tourStep === 'welcome'}
             onNext={nextStep}
-            studentName={dashboard?.student?.name || 'Student'}
+            userName={dashboard?.user?.name || 'User'}
             isMobile={isMobileTour}
           />
 

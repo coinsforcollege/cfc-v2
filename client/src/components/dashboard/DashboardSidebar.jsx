@@ -35,12 +35,12 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
   };
 
   const navigationConfig = {
-    student: [
-      { id: 'dashboard', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/student/dashboard' },
-      { id: 'colleges', label: t('dashboard.myColleges'), icon: School, badge: stats.collegesCount, path: '/student/colleges' },
-      { id: 'community', label: t('dashboard.community'), icon: Users, badge: stats.referralsCount, path: '/student/community' },
-      { id: 'ambassador', label: t('dashboard.ambassador'), icon: Megaphone, path: '/student/ambassador' },
-      { id: 'leaderboard', label: t('dashboard.leaderboard'), icon: Trophy, path: '/student/leaderboard', disabled: true, comingSoon: true },
+    user: [
+      { id: 'dashboard', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/user/dashboard' },
+      { id: 'colleges', label: t('dashboard.myColleges'), icon: School, badge: stats.collegesCount, path: '/user/colleges' },
+      { id: 'community', label: t('dashboard.community'), icon: Users, badge: stats.referralsCount, path: '/user/community' },
+      { id: 'ambassador', label: t('dashboard.ambassador'), icon: Megaphone, path: '/user/ambassador' },
+      { id: 'leaderboard', label: t('dashboard.leaderboard'), icon: Trophy, path: '/user/leaderboard', disabled: true, comingSoon: true },
     ],
     college_admin: [
       { id: 'overview', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/college-admin/dashboard' },
@@ -62,8 +62,8 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
 
   const getRoleTitle = (role) => {
     switch (role) {
-      case 'student':
-        return t('student.dashboard');
+      case 'user':
+        return t('user.dashboard');
       case 'college_admin':
         return t('collegeAdmin.dashboard');
       case 'platform_admin':
@@ -74,7 +74,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
   };
 
   const getSettingsPath = () => {
-    if (user?.role === 'student') return '/student/settings';
+    if (user?.role === 'user') return '/user/settings';
     if (user?.role === 'college_admin') return '/college-admin/settings';
     if (user?.role === 'platform_admin') return '/platform-admin/settings';
     return '/settings';

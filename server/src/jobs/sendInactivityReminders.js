@@ -9,43 +9,43 @@ export const sendInactivityReminders = async () => {
   try {
     console.log(`[Inactivity Reminders] Starting job at ${now.toISOString()}`);
 
-    // Find all students
-    const students = await User.find({
-      role: 'student',
+    // Find all users
+    const users = await User.find({
+      role: 'user',
       isActive: true
     }).select('_id name email');
 
-    if (students.length === 0) {
-      console.log('[Inactivity Reminders] No students found');
+    if (users.length === 0) {
+      console.log('[Inactivity Reminders] No users found');
       return { sent: 0 };
     }
 
-    console.log(`[Inactivity Reminders] Checking ${students.length} students`);
+    console.log(`[Inactivity Reminders] Checking ${users.length} users`);
 
     let emailsSent = 0;
     let emailsFailed = 0;
     let skippedCount = 0;
 
-    for (const student of students) {
+    for (const user of users) {
       try {
-        // Check if student has any active mining sessions
+        // Check if user has any active mining sessions
         const activeSessions = await MiningSession.find({
-          student: student._id,
+          user: user._id,
           isActive: true,
           endTime: { $gt: now }
         });
 
-        // If student has active sessions, skip
+        // If user has active sessions, skip
         if (activeSessions.length > 0) {
           continue;
         }
 
         // Find the most recent mining session (active or inactive)
         const lastSession = await MiningSession.findOne({
-          student: student._id
+          user: user._id
         }).sort({ endTime: -1 });
 
-        // If no session found at all, this student never mined, skip
+        // If no session found at all, this user never mined, skip
         if (!lastSession) {
           continue;
         }
@@ -74,7 +74,7 @@ export const sendInactivityReminders = async () => {
         } else if (daysSinceLastSession >= 14) {
           // Check if it's been 7 days since last weekly reminder
           const lastWeeklyEmail = await EmailLog.findOne({
-            recipient: student._id,
+            recipient: user._id,
             emailType: 'inactivity_weekly',
             status: 'sent'
           }).sort({ sentAt: -1 });
@@ -93,25 +93,25 @@ export const sendInactivityReminders = async () => {
           }
         }
 
-        // If no email type determined, skip this student
+        // If no email type determined, skip this user
         if (!emailType || !duration) {
           continue;
         }
 
         // Check if we already sent this specific type of email
-        const alreadySent = await EmailLog.wasRecentlySent(student._id, emailType, 24);
+        const alreadySent = await EmailLog.wasRecentlySent(user._id, emailType, 24);
         if (alreadySent) {
           skippedCount++;
           continue;
         }
 
         // Create dashboard URL
-        const dashboardUrl = `${process.env.CLIENT_URL}/student/dashboard`;
+        const dashboardUrl = `${process.env.CLIENT_URL}/user/dashboard`;
 
         // Log email attempt
         const emailLog = await EmailLog.logEmail(
-          student._id,
-          student.email,
+          user._id,
+          user.email,
           emailType,
           {
             dashboardUrl,
@@ -122,8 +122,8 @@ export const sendInactivityReminders = async () => {
 
         // Send email
         const result = await sendInactivityReminderEmail(
-          student.email,
-          student.name,
+          user.email,
+          user.name,
           duration,
           dashboardUrl
         );
@@ -131,15 +131,15 @@ export const sendInactivityReminders = async () => {
         if (result.success) {
           await emailLog.markAsSent();
           emailsSent++;
-          console.log(`[Inactivity Reminders] Sent ${duration} reminder to ${student.email} (inactive ${daysSinceLastSession.toFixed(1)} days)`);
+          console.log(`[Inactivity Reminders] Sent ${duration} reminder to ${user.email} (inactive ${daysSinceLastSession.toFixed(1)} days)`);
         } else {
           await emailLog.markAsFailed(result.error);
           emailsFailed++;
-          console.error(`[Inactivity Reminders] Failed to send to ${student.email}:`, result.error);
+          console.error(`[Inactivity Reminders] Failed to send to ${user.email}:`, result.error);
         }
       } catch (error) {
         emailsFailed++;
-        console.error(`[Inactivity Reminders] Error processing student ${student._id}:`, error.message);
+        console.error(`[Inactivity Reminders] Error processing user ${user._id}:`, error.message);
       }
     }
 
@@ -149,7 +149,7 @@ export const sendInactivityReminders = async () => {
       sent: emailsSent,
       failed: emailsFailed,
       skipped: skippedCount,
-      total: students.length
+      total: users.length
     };
   } catch (error) {
     console.error('[Inactivity Reminders] Fatal error:', error);

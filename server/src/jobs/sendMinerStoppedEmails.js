@@ -21,9 +21,9 @@ export const sendMinerStoppedEmails = async () => {
       },
       tokensEarned: { $gt: 0 }
     })
-      .populate('student', 'name email')
+      .populate('user', 'name email')
       .populate('college', 'name')
-      .sort({ student: 1, endTime: -1 });
+      .sort({ user: 1, endTime: -1 });
 
     if (recentlyStoppedSessions.length === 0) {
       console.log('[Miner Stopped Emails] No recently stopped sessions found');
@@ -32,36 +32,36 @@ export const sendMinerStoppedEmails = async () => {
 
     console.log(`[Miner Stopped Emails] Found ${recentlyStoppedSessions.length} recently stopped sessions`);
 
-    // Group sessions by student
-    const sessionsByStudent = {};
+    // Group sessions by user
+    const sessionsByUser = {};
     for (const session of recentlyStoppedSessions) {
-      const studentId = session.student._id.toString();
-      if (!sessionsByStudent[studentId]) {
-        sessionsByStudent[studentId] = {
-          student: session.student,
+      const userId = session.user._id.toString();
+      if (!sessionsByUser[userId]) {
+        sessionsByUser[userId] = {
+          user: session.user,
           sessions: []
         };
       }
-      sessionsByStudent[studentId].sessions.push(session);
+      sessionsByUser[userId].sessions.push(session);
     }
 
     let emailsSent = 0;
     let emailsFailed = 0;
 
-    // Process each student
-    for (const [studentId, data] of Object.entries(sessionsByStudent)) {
+    // Process each user
+    for (const [userId, data] of Object.entries(sessionsByUser)) {
       try {
         // Check if we already sent this email recently (within 12 hours)
-        const alreadySent = await EmailLog.wasRecentlySent(studentId, 'miner_stopped', 12);
+        const alreadySent = await EmailLog.wasRecentlySent(userId, 'miner_stopped', 12);
         if (alreadySent) {
-          console.log(`[Miner Stopped Emails] Already sent to student ${studentId} recently, skipping`);
+          console.log(`[Miner Stopped Emails] Already sent to user ${userId} recently, skipping`);
           continue;
         }
 
         // Get wallet balances for each college
         const collegeIds = data.sessions.map(s => s.college._id);
         const wallets = await Wallet.find({
-          student: studentId,
+          user: userId,
           college: { $in: collegeIds }
         });
 
@@ -83,12 +83,12 @@ export const sendMinerStoppedEmails = async () => {
         });
 
         // Create dashboard URL
-        const dashboardUrl = `${process.env.CLIENT_URL}/student/dashboard`;
+        const dashboardUrl = `${process.env.CLIENT_URL}/user/dashboard`;
 
         // Log email attempt
         const emailLog = await EmailLog.logEmail(
-          studentId,
-          data.student.email,
+          userId,
+          data.user.email,
           'miner_stopped',
           {
             dashboardUrl,
@@ -99,8 +99,8 @@ export const sendMinerStoppedEmails = async () => {
 
         // Send email
         const result = await sendMinerStoppedEmail(
-          data.student.email,
-          data.student.name,
+          data.user.email,
+          data.user.name,
           sessionsData,
           dashboardUrl
         );
@@ -108,15 +108,15 @@ export const sendMinerStoppedEmails = async () => {
         if (result.success) {
           await emailLog.markAsSent();
           emailsSent++;
-          console.log(`[Miner Stopped Emails] Sent to ${data.student.email} (${sessionsData.length} sessions)`);
+          console.log(`[Miner Stopped Emails] Sent to ${data.user.email} (${sessionsData.length} sessions)`);
         } else {
           await emailLog.markAsFailed(result.error);
           emailsFailed++;
-          console.error(`[Miner Stopped Emails] Failed to send to ${data.student.email}:`, result.error);
+          console.error(`[Miner Stopped Emails] Failed to send to ${data.user.email}:`, result.error);
         }
       } catch (error) {
         emailsFailed++;
-        console.error(`[Miner Stopped Emails] Error processing student ${studentId}:`, error.message);
+        console.error(`[Miner Stopped Emails] Error processing user ${userId}:`, error.message);
       }
     }
 
@@ -125,7 +125,7 @@ export const sendMinerStoppedEmails = async () => {
     return {
       sent: emailsSent,
       failed: emailsFailed,
-      total: Object.keys(sessionsByStudent).length
+      total: Object.keys(sessionsByUser).length
     };
   } catch (error) {
     console.error('[Miner Stopped Emails] Fatal error:', error);

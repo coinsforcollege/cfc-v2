@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import MiningSession from '../models/Mining.js';
 import Wallet from '../models/Wallet.js';
 import User from '../models/User.js';
@@ -9,10 +10,53 @@ const userConnections = new Map();
 // Track users with active mining sessions
 const usersWithActiveMining = new Set();
 // Cache mining sessions data to avoid repeated DB queries
-// Structure: Map<userId, { sessions: Array, wallets: Array, miningColleges: Array, earningRate: Object, lastFetched: Date }>
+// Structure: Map<userId, { sessions: Array, wallets: Array, miningColleges: Array, earningRate: Object, lastFetched: Date, cacheExpiry: Number }>
 const userMiningCache = new Map();
+// Store last sent data hash for delta updates
+// Structure: Map<userId, { dataHash: String, lastSent: Number }>
+const lastSentDataHash = new Map();
 // Store socket.io instance for room-based broadcasting
 let ioInstance = null;
+
+// Helper function to generate hash for data comparison (delta updates)
+const generateDataHash = (miningStatus) => {
+  // Only hash the parts that matter for meaningful updates
+  // Don't include currentTokens in hash since they change every second
+  const relevantData = {
+    activeSessionsCount: miningStatus.activeSessions?.length || 0,
+    sessionIds: miningStatus.activeSessions?.map(s => s.sessionId?.toString()).sort().join(',') || '',
+    isActiveStates: miningStatus.activeSessions?.map(s => s.isActive).join(',') || '',
+    walletsCount: miningStatus.wallets?.length || 0,
+    walletBalances: miningStatus.wallets?.map(w => w.balance).join(',') || ''
+  };
+  return JSON.stringify(relevantData);
+};
+
+// Check if data has changed significantly (for delta updates)
+const hasSignificantChange = (userId, miningStatus) => {
+  const currentHash = generateDataHash(miningStatus);
+  const lastSent = lastSentDataHash.get(userId.toString());
+
+  if (!lastSent || lastSent.dataHash !== currentHash) {
+    // Update hash
+    lastSentDataHash.set(userId.toString(), {
+      dataHash: currentHash,
+      lastSent: Date.now()
+    });
+    return true;
+  }
+
+  // Even if hash is same, send update every 30 seconds to keep client in sync
+  if (Date.now() - lastSent.lastSent > 30000) {
+    lastSentDataHash.set(userId.toString(), {
+      dataHash: currentHash,
+      lastSent: Date.now()
+    });
+    return true;
+  }
+
+  return false;
+};
 
 // Authenticate WebSocket connection
 const authenticateSocket = async (socket, next) => {
@@ -77,24 +121,25 @@ export const setupWebSocketHandlers = (io) => {
     // Handle disconnect
     socket.on('disconnect', () => {
       console.log(`🔌 User ${socket.userId} disconnected from mining WebSocket (socket: ${socket.id})`);
-      
+
       // Remove this specific socket from user's connections
       const userSockets = userConnections.get(socket.userId);
       if (userSockets) {
         userSockets.delete(socket.id);
-        
+
         // If user has no more connections, clean up completely
         if (userSockets.size === 0) {
           userConnections.delete(socket.userId);
           usersWithActiveMining.delete(socket.userId);
           userMiningCache.delete(socket.userId);
+          lastSentDataHash.delete(socket.userId.toString());
         }
       }
     });
   });
 
   // Send periodic updates every 5 seconds to users with active mining sessions
-  // Using batched processing to prevent overwhelming the server
+  // Using optimized parallel batch processing
   setInterval(async () => {
     const now = Date.now();
     const usersArray = Array.from(usersWithActiveMining);
@@ -102,22 +147,25 @@ export const setupWebSocketHandlers = (io) => {
     // If no users, skip processing
     if (usersArray.length === 0) return;
 
-    // Process users in batches to prevent overwhelming the server
-    const BATCH_SIZE = 50; // Process 50 users at a time
-    const BATCH_DELAY = Math.floor(5000 / Math.ceil(usersArray.length / BATCH_SIZE)); // Spread batches across 5 seconds
+    // Process users in larger batches for better performance
+    const BATCH_SIZE = 1000; // Process 1000 users at a time
 
     for (let i = 0; i < usersArray.length; i += BATCH_SIZE) {
       const batch = usersArray.slice(i, i + BATCH_SIZE);
 
-      // Process batch in parallel
+      // Process entire batch in parallel using allSettled to prevent one failure from stopping others
       const batchPromises = batch.map(async (userId) => {
         const userSockets = userConnections.get(userId);
         if (userSockets && userSockets.size > 0) {
           try {
             const miningStatus = await getMiningStatusForUserOptimized(userId, now);
 
-            // Broadcast to all devices of this user using room
-            ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
+            // Only broadcast if data has changed significantly (delta updates)
+            // This reduces unnecessary network traffic for unchanged data
+            if (hasSignificantChange(userId, miningStatus)) {
+              // Broadcast to all devices of this user using room
+              ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
+            }
 
             // Check if user still has active sessions
             const hasActiveSessions = miningStatus.activeSessions?.some(session =>
@@ -127,24 +175,22 @@ export const setupWebSocketHandlers = (io) => {
             if (!hasActiveSessions) {
               usersWithActiveMining.delete(userId);
               userMiningCache.delete(userId);
+              lastSentDataHash.delete(userId.toString());
             }
           } catch (error) {
             console.error(`Error sending periodic update to user ${userId}:`, error);
+            // Don't remove user from tracking on temporary errors
           }
         } else {
           // Clean up tracking for disconnected users
           usersWithActiveMining.delete(userId);
           userMiningCache.delete(userId);
+          lastSentDataHash.delete(userId.toString());
         }
       });
 
-      // Wait for current batch to complete before starting next batch
-      await Promise.all(batchPromises);
-
-      // Add delay between batches if there are more users (except for last batch)
-      if (i + BATCH_SIZE < usersArray.length && BATCH_DELAY > 0) {
-        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
-      }
+      // Use allSettled to handle all promises even if some fail
+      await Promise.allSettled(batchPromises);
     }
   }, 5000); // Update every 5 seconds
 };
@@ -153,9 +199,9 @@ export const setupWebSocketHandlers = (io) => {
 const getMiningStatusForUserOptimized = async (userId, currentTime) => {
   try {
     const cached = userMiningCache.get(userId);
-    
-    // If cache is missing or stale (>30 seconds), refresh from DB
-    if (!cached || (Date.now() - cached.lastFetched) > 30000) {
+
+    // If cache is missing or expired (uses staggered expiry), refresh from DB
+    if (!cached || Date.now() > cached.cacheExpiry) {
       return await getMiningStatusForUser(userId, true);
     }
     
@@ -198,33 +244,124 @@ const getMiningStatusForUserOptimized = async (userId, currentTime) => {
   }
 };
 
-// Get mining status for a specific user
+// Get mining status for a specific user using optimized aggregation pipeline
 const getMiningStatusForUser = async (userId, updateCache = true) => {
   try {
-    // Get student info
-    const student = await User.findById(userId)
-      .populate('studentProfile.miningColleges.college', 'name country logo baseRate referralBonusRate');
-
-    // Get all active mining sessions
-    const activeSessions = await MiningSession.find({
-      student: userId,
-      isActive: true
-    }).populate('college', 'name country logo baseRate referralBonusRate');
-
-    // Get all wallets
-    const wallets = await Wallet.find({ student: userId })
-      .populate('college', 'name country logo baseRate referralBonusRate');
-
-    // Calculate current tokens for each active session
     const now = new Date();
-    const sessionsWithCurrentTokens = activeSessions.map(session => {
-      const miningDuration = (now - session.startTime) / (1000 * 60 * 60); // in hours
+
+    // Convert userId to ObjectId if it's a string
+    const userObjectId = typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId;
+
+    // Use aggregation pipeline to fetch all data in a single query
+    // This replaces 3 separate queries with 1 optimized query
+    const result = await User.aggregate([
+      // Match the specific user
+      { $match: { _id: userObjectId } },
+
+      // Lookup mining colleges
+      {
+        $lookup: {
+          from: 'colleges',
+          localField: 'userProfile.miningColleges.college',
+          foreignField: '_id',
+          as: 'collegeDetails'
+        }
+      },
+
+      // Lookup active mining sessions
+      {
+        $lookup: {
+          from: 'miningsessions',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$user', '$$userId'] },
+                    { $eq: ['$isActive', true] }
+                  ]
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: 'colleges',
+                localField: 'college',
+                foreignField: '_id',
+                as: 'collegeData'
+              }
+            },
+            { $unwind: { path: '$collegeData', preserveNullAndEmptyArrays: true } }
+          ],
+          as: 'activeSessions'
+        }
+      },
+
+      // Lookup wallets
+      {
+        $lookup: {
+          from: 'wallets',
+          let: { userId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$user', '$$userId'] } } },
+            {
+              $lookup: {
+                from: 'colleges',
+                localField: 'college',
+                foreignField: '_id',
+                as: 'collegeData'
+              }
+            },
+            { $unwind: { path: '$collegeData', preserveNullAndEmptyArrays: true } }
+          ],
+          as: 'wallets'
+        }
+      },
+
+      // Project only needed fields
+      {
+        $project: {
+          'userProfile.miningColleges': 1,
+          collegeDetails: 1,
+          activeSessions: 1,
+          wallets: 1
+        }
+      }
+    ]);
+
+    if (!result || result.length === 0) {
+      return {
+        miningColleges: [],
+        activeSessions: [],
+        wallets: []
+      };
+    }
+
+    const userData = result[0];
+
+    // Map college details back to miningColleges structure
+    const collegeMap = new Map();
+    userData.collegeDetails?.forEach(college => {
+      collegeMap.set(college._id.toString(), college);
+    });
+
+    const validMiningColleges = userData.userProfile?.miningColleges
+      ?.map(mc => {
+        const college = collegeMap.get(mc.college?.toString());
+        return college ? { ...mc, college } : null;
+      })
+      .filter(mc => mc !== null) || [];
+
+    // Process active sessions with current token calculations
+    const sessionsWithCurrentTokens = userData.activeSessions?.map(session => {
+      const miningDuration = (now - new Date(session.startTime)) / (1000 * 60 * 60);
       const currentTokens = miningDuration * session.earningRate;
-      const remainingTime = session.endTime - now; // in milliseconds
+      const remainingTime = new Date(session.endTime) - now;
       const remainingHours = Math.max(0, remainingTime / (1000 * 60 * 60));
 
       return {
-        college: session.college,
+        college: session.collegeData || null,
         startTime: session.startTime,
         endTime: session.endTime,
         earningRate: session.earningRate,
@@ -233,36 +370,41 @@ const getMiningStatusForUser = async (userId, updateCache = true) => {
         isActive: remainingHours > 0,
         sessionId: session._id
       };
-    });
+    }).filter(session => session.college) || [];
 
-    // Filter out null colleges (deleted colleges)
-    const validMiningColleges = student.studentProfile.miningColleges.filter(mc => mc.college !== null);
-    const validWallets = wallets.filter(w => w.college !== null);
+    // Process wallets
+    const validWallets = userData.wallets?.map(wallet => ({
+      _id: wallet._id,
+      balance: wallet.balance,
+      college: wallet.collegeData || null
+    })).filter(w => w.college !== null) || [];
 
-    const result = {
+    const finalResult = {
       miningColleges: validMiningColleges,
       activeSessions: sessionsWithCurrentTokens,
       wallets: validWallets
-      // Note: Earning rates are now per-college, available in each session's earningRate field
     };
 
-    // Update cache if requested
+    // Update cache with staggered TTL to prevent thundering herd
     if (updateCache) {
+      // Add random jitter (0-10 seconds) to cache TTL to stagger refreshes
+      const jitter = Math.floor(Math.random() * 10000);
       userMiningCache.set(userId, {
-        sessions: activeSessions.map(session => ({
+        sessions: sessionsWithCurrentTokens.map(session => ({
           college: session.college,
           startTime: session.startTime,
           endTime: session.endTime,
           earningRate: session.earningRate,
-          sessionId: session._id
+          sessionId: session.sessionId
         })),
-        wallets: result.wallets,
-        miningColleges: result.miningColleges,
-        lastFetched: Date.now()
+        wallets: finalResult.wallets,
+        miningColleges: finalResult.miningColleges,
+        lastFetched: Date.now(),
+        cacheExpiry: Date.now() + 45000 + jitter // 45s base + jitter
       });
     }
 
-    return result;
+    return finalResult;
   } catch (error) {
     console.error('Error getting mining status for user:', error);
     throw error;

@@ -8,8 +8,8 @@ import { createNotification } from '../services/notification.service.js';
 import { verifyRecaptcha } from '../utils/recaptcha.js';
 import { sendWelcomeEmail } from '../utils/emailService.js';
 
-// @desc    Register a new student
-// @route   POST /api/auth/register/student
+// @desc    Register a new user
+// @route   POST /api/auth/register/user
 // @access  Public
 // @desc    Update user language preference
 // @route   PUT /api/auth/language
@@ -57,7 +57,7 @@ export const updateLanguagePreference = async (req, res, next) => {
   }
 };
 
-export const registerStudent = async (req, res, next) => {
+export const registerUser = async (req, res, next) => {
   try {
     const { name, email, phone, password, referralCode, collegeId, verificationToken } = req.body;
 
@@ -88,7 +88,7 @@ export const registerStudent = async (req, res, next) => {
     }
 
     // Verify token type and data
-    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'student') {
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'user') {
       return res.status(400).json({
         success: false,
         message: 'Invalid verification token'
@@ -106,7 +106,7 @@ export const registerStudent = async (req, res, next) => {
     // Check if OTP was verified
     const otpDoc = await OTPVerification.findOne({
       email: email.toLowerCase(),
-      role: 'student',
+      role: 'user',
       isVerified: true
     }).sort({ createdAt: -1 });
 
@@ -142,8 +142,8 @@ export const registerStudent = async (req, res, next) => {
     let referredByUser = null;
     if (referralCode) {
       referredByUser = await User.findOne({
-        'studentProfile.referralCode': referralCode,
-        role: 'student'
+        'userProfile.referralCode': referralCode,
+        role: 'user'
       });
 
       if (!referredByUser) {
@@ -154,8 +154,8 @@ export const registerStudent = async (req, res, next) => {
       }
     }
 
-    // Prepare student profile
-    const studentProfile = {
+    // Prepare user profile
+    const userProfile = {
       miningColleges: [],
       referredBy: referredByUser ? referredByUser._id : null,
       referredForCollege: null
@@ -163,69 +163,69 @@ export const registerStudent = async (req, res, next) => {
 
     // If college is provided, add it to mining list
     if (college) {
-      studentProfile.miningColleges.push({
+      userProfile.miningColleges.push({
         college: college._id,
         addedAt: new Date(),
-        referredStudents: []
+        referredUsers: []
       });
 
       // If there's also a referral code, set referredForCollege
       if (referredByUser) {
-        studentProfile.referredForCollege = college._id;
+        userProfile.referredForCollege = college._id;
       }
     }
 
-    // Create student user
+    // Create user
     const user = await User.create({
       name,
       email,
       phone,
       password,
-      role: 'student',
+      role: 'user',
       college: college ? college._id : null, // Set primary college if provided
-      studentProfile
+      userProfile
     });
 
     // Delete OTP verification record after successful registration
-    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'student' });
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'user' });
 
     // Update referrer's data if applicable
     if (referredByUser && college) {
       // Increment total referrals count
       await User.findByIdAndUpdate(referredByUser._id, {
-        $inc: { 'studentProfile.totalReferrals': 1 }
+        $inc: { 'userProfile.totalReferrals': 1 }
       });
 
-      // Add this student to the referrer's referredStudents for the specific college
-      const referrerCollegeIndex = referredByUser.studentProfile.miningColleges.findIndex(
+      // Add this user to the referrer's referredUsers for the specific college
+      const referrerCollegeIndex = referredByUser.userProfile.miningColleges.findIndex(
         mc => mc.college.toString() === college._id.toString()
       );
 
       if (referrerCollegeIndex !== -1) {
-        // Referrer has this college in their list, add to referredStudents
+        // Referrer has this college in their list, add to referredUsers
         await User.findOneAndUpdate(
           {
             _id: referredByUser._id,
-            'studentProfile.miningColleges.college': college._id
+            'userProfile.miningColleges.college': college._id
           },
           {
             $push: {
-              'studentProfile.miningColleges.$.referredStudents': {
-                student: user._id,
+              'userProfile.miningColleges.$.referredUsers': {
+                user: user._id,
                 referredAt: new Date()
               }
             }
           }
         );
       } else {
-        // Referrer doesn't have this college yet, add it with the referred student
+        // Referrer doesn't have this college yet, add it with the referred user
         await User.findByIdAndUpdate(referredByUser._id, {
           $push: {
-            'studentProfile.miningColleges': {
+            'userProfile.miningColleges': {
               college: college._id,
               addedAt: new Date(),
-              referredStudents: [{
-                student: user._id,
+              referredUsers: [{
+                user: user._id,
                 referredAt: new Date()
               }]
             }
@@ -240,14 +240,14 @@ export const registerStudent = async (req, res, next) => {
         title: 'Your referral code was used!',
         message: `${name} just signed up using your referral code for ${college.name}. You'll earn bonus tokens when they mine!`,
         data: {
-          newStudentId: user._id,
-          newStudentName: name,
+          newUserId: user._id,
+          newUserName: name,
           collegeId: college._id,
           collegeName: college.name
         },
         category: 'referral',
         priority: 'high',
-        actionUrl: '/student/community'
+        actionUrl: '/user/community'
       });
     }
 
@@ -257,7 +257,7 @@ export const registerStudent = async (req, res, next) => {
     // Populate college data for response
     if (college) {
       await user.populate('college', 'name country logo stats baseRate referralBonusRate');
-      await user.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+      await user.populate('userProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
     }
 
     // Return user data (without password)
@@ -268,24 +268,24 @@ export const registerStudent = async (req, res, next) => {
       phone: user.phone,
       role: user.role,
       college: user.college,
-      studentProfile: {
-        miningColleges: user.studentProfile.miningColleges,
-        referredBy: user.studentProfile.referredBy,
-        referredForCollege: user.studentProfile.referredForCollege,
-        totalReferrals: user.studentProfile.totalReferrals,
-        referralCode: user.studentProfile.referralCode
+      userProfile: {
+        miningColleges: user.userProfile.miningColleges,
+        referredBy: user.userProfile.referredBy,
+        referredForCollege: user.userProfile.referredForCollege,
+        totalReferrals: user.userProfile.totalReferrals,
+        referralCode: user.userProfile.referralCode
       }
     };
 
     res.status(201).json({
       success: true,
-      message: 'Student registered successfully',
+      message: 'User registered successfully',
       data: userData,
       token
     });
 
     // Send welcome email asynchronously (don't wait for it)
-    const dashboardUrl = `${process.env.CLIENT_URL}/student/dashboard`;
+    const dashboardUrl = `${process.env.CLIENT_URL}/user/dashboard`;
     const emailLog = await EmailLog.logEmail(user._id, user.email, 'welcome', { dashboardUrl });
 
     sendWelcomeEmail(user.email, user.name, dashboardUrl, user.languagePreference)
@@ -499,7 +499,7 @@ export const registerCollegeAdmin = async (req, res, next) => {
   }
 };
 
-// @desc    Login user (student, college admin, or platform admin)
+// @desc    Login user (user, college admin, or platform admin)
 // @route   POST /api/auth/login
 // @access  Public
 export const login = async (req, res, next) => {
@@ -583,20 +583,20 @@ export const login = async (req, res, next) => {
     };
 
     // Populate college/managed college data
-    if (user.role === 'student') {
+    if (user.role === 'user') {
       await user.populate('college', 'name country logo stats baseRate referralBonusRate');
-      await user.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+      await user.populate('userProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
 
       // Filter out null colleges (deleted colleges)
-      const validMiningColleges = user.studentProfile.miningColleges.filter(mc => mc.college !== null);
+      const validMiningColleges = user.userProfile.miningColleges.filter(mc => mc.college !== null);
 
       userData.college = user.college;
-      userData.studentProfile = {
+      userData.userProfile = {
         miningColleges: validMiningColleges,
-        referredBy: user.studentProfile.referredBy,
-        referredForCollege: user.studentProfile.referredForCollege,
-        totalReferrals: user.studentProfile.totalReferrals,
-        referralCode: user.studentProfile.referralCode
+        referredBy: user.userProfile.referredBy,
+        referredForCollege: user.userProfile.referredForCollege,
+        totalReferrals: user.userProfile.totalReferrals,
+        referralCode: user.userProfile.referralCode
       };
     } else if (user.role === 'college_admin') {
       await user.populate('managedCollege');
@@ -638,20 +638,20 @@ export const getMe = async (req, res, next) => {
     };
 
     // Populate college/managed college data
-    if (user.role === 'student') {
+    if (user.role === 'user') {
       await user.populate('college', 'name country logo stats baseRate referralBonusRate');
-      await user.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+      await user.populate('userProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
 
       // Filter out null colleges (deleted colleges)
-      const validMiningColleges = user.studentProfile.miningColleges.filter(mc => mc.college !== null);
+      const validMiningColleges = user.userProfile.miningColleges.filter(mc => mc.college !== null);
 
       userData.college = user.college;
-      userData.studentProfile = {
+      userData.userProfile = {
         miningColleges: validMiningColleges,
-        referredBy: user.studentProfile.referredBy,
-        referredForCollege: user.studentProfile.referredForCollege,
-        totalReferrals: user.studentProfile.totalReferrals,
-        referralCode: user.studentProfile.referralCode
+        referredBy: user.userProfile.referredBy,
+        referredForCollege: user.userProfile.referredForCollege,
+        totalReferrals: user.userProfile.totalReferrals,
+        referralCode: user.userProfile.referralCode
       };
     } else if (user.role === 'college_admin') {
       await user.populate('managedCollege');
@@ -727,12 +727,12 @@ export const updateProfile = async (req, res, next) => {
       role: user.role
     };
 
-    if (user.role === 'student') {
+    if (user.role === 'user') {
       await user.populate('college', 'name country logo');
       userData.college = user.college;
-      userData.studentProfile = {
-        referralCode: user.studentProfile.referralCode,
-        totalReferrals: user.studentProfile.totalReferrals
+      userData.userProfile = {
+        referralCode: user.userProfile.referralCode,
+        totalReferrals: user.userProfile.totalReferrals
       };
     }
 

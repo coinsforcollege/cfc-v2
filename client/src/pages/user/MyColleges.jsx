@@ -48,7 +48,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
 import { useToast } from '../../contexts/ToastContext';
-import { studentApi } from '../../api/student.api';
+import { userApi } from '../../api/user.api';
 import { miningApi } from '../../api/mining.api';
 import { collegesApi } from '../../api/colleges.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
@@ -91,12 +91,15 @@ const MyColleges = () => {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const response = await studentApi.getDashboard();
+      const response = await userApi.getDashboard();
+      console.log('Dashboard API Response:', response);
       if (response.success) {
+        console.log('Dashboard Data:', response.data);
         setDashboard(response.data);
       }
     } catch (err) {
-      setError(err.message || t('student.failedToLoadDashboard'));
+      console.error('Dashboard Error:', err);
+      setError(err.message || t('user.failedToLoadDashboard'));
     } finally {
       setLoading(false);
     }
@@ -122,7 +125,7 @@ const MyColleges = () => {
   }, [wsMiningStatus]);
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
+    if (!user || user.role !== 'user') {
       navigate('/auth/login');
       return;
     }
@@ -135,7 +138,7 @@ const MyColleges = () => {
       setActionLoading(`start-${collegeId}`);
       const response = await miningApi.startMining(collegeId);
       if (response.success) {
-        showToast(t('student.miningStartedSuccess'), 'success');
+        showToast(t('user.miningStartedSuccess'), 'success');
         fetchDashboard();
 
         if (tourActive && tourStep === 'mining') {
@@ -144,7 +147,7 @@ const MyColleges = () => {
       }
     } catch (err) {
       console.error('Failed to start mining:', err);
-      showToast(err.message || t('student.failedToStartMining'), 'error');
+      showToast(err.message || t('user.failedToStartMining'), 'error');
     } finally {
       setActionLoading('');
     }
@@ -155,12 +158,12 @@ const MyColleges = () => {
       setActionLoading(`stop-${collegeId}`);
       const response = await miningApi.stopMining(collegeId);
       if (response.success) {
-        showToast(t('student.miningStoppedSuccess'), 'success');
+        showToast(t('user.miningStoppedSuccess'), 'success');
         fetchDashboard();
       }
     } catch (err) {
       console.error('Failed to stop mining:', err);
-      showToast(err.message || t('student.failedToStopMining'), 'error');
+      showToast(err.message || t('user.failedToStopMining'), 'error');
     } finally {
       setActionLoading('');
     }
@@ -168,9 +171,9 @@ const MyColleges = () => {
 
   const handleCompleteTour = async () => {
     try {
-      await studentApi.completeOnboarding();
+      await userApi.completeOnboarding();
       completeTour();
-      navigate('/student/overview');
+      navigate('/user/colleges');
     } catch (err) {
       console.error('Failed to complete onboarding:', err);
     }
@@ -179,14 +182,14 @@ const MyColleges = () => {
   const handleSetPrimaryCollege = async (collegeId) => {
     try {
       setActionLoading(`primary-${collegeId}`);
-      const response = await studentApi.setPrimaryCollege(collegeId);
+      const response = await userApi.setPrimaryCollege(collegeId);
       if (response.success) {
         fetchDashboard();
-        showToast(t('student.primaryCollegeUpdated'), 'success');
+        showToast(t('user.primaryCollegeUpdated'), 'success');
       }
     } catch (err) {
       console.error('Failed to set primary college:', err);
-      showToast(err.message || t('student.failedToSetPrimaryCollege'), 'error');
+      showToast(err.message || t('user.failedToSetPrimaryCollege'), 'error');
     } finally {
       setActionLoading('');
     }
@@ -208,12 +211,12 @@ const MyColleges = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        showToast(t('student.pleaseSelectImage'), 'error');
+        showToast(t('user.pleaseSelectImage'), 'error');
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        showToast(t('student.fileSizeLimit'), 'error');
+        showToast(t('user.fileSizeLimit'), 'error');
         return;
       }
 
@@ -257,7 +260,7 @@ const MyColleges = () => {
         }
       }
 
-      const response = await studentApi.addCollege(formData);
+      const response = await userApi.addCollege(formData);
       if (response.success) {
         setShowAddCollegeDialog(false);
         setSelectedCollege(null);
@@ -267,11 +270,11 @@ const MyColleges = () => {
         setLogoPreview('');
         setLogoInputType('url');
         fetchDashboard();
-        showToast(t('student.collegeAddedSuccess'), 'success');
+        showToast(t('user.collegeAddedSuccess'), 'success');
       }
     } catch (err) {
       console.error('Failed to add college:', err);
-      showToast(err.message || t('student.failedToAddCollege'), 'error');
+      showToast(err.message || t('user.failedToAddCollege'), 'error');
     } finally {
       setActionLoading('');
     }
@@ -288,14 +291,14 @@ const MyColleges = () => {
   };
 
   const copyCollegeReferralLink = useCallback((collegeId) => {
-    if (dashboard?.student?.referralCode) {
+    if (dashboard?.user?.referralCode) {
       const baseUrl = window.location.origin;
-      const referralLink = `${baseUrl}/auth/register/student?ref=${dashboard.student.referralCode}&college=${collegeId}`;
+      const referralLink = `${baseUrl}/auth/register/user?ref=${dashboard.user.referralCode}&college=${collegeId}`;
       navigator.clipboard.writeText(referralLink);
       setCopiedCollegeReferral(collegeId);
       setTimeout(() => setCopiedCollegeReferral(null), 2000);
     }
-  }, [dashboard?.student?.referralCode]);
+  }, [dashboard?.user?.referralCode]);
 
   const handleShareCollege = useCallback((college) => {
     const wallet = dashboard?.wallets?.find(w => w.college && w.college._id === college._id);
@@ -307,7 +310,7 @@ const MyColleges = () => {
       balance: wallet?.balance || 0,
       isGeneral: false,
       text: `I'm building my portfolio on Coins For College with ${college.name}. Join me!`,
-      url: `${baseUrl}/auth/register/student?ref=${dashboard?.student?.referralCode}&college=${college._id}`
+      url: `${baseUrl}/auth/register/user?ref=${dashboard?.user?.referralCode}&college=${college._id}`
     });
     setShowShareDialog(true);
   }, [dashboard]);
@@ -342,17 +345,17 @@ const MyColleges = () => {
         await miningApi.stopMining(collegeToDelete._id);
       }
 
-      const response = await studentApi.removeCollege(collegeToDelete._id);
+      const response = await userApi.removeCollege(collegeToDelete._id);
 
       if (response.success) {
-        showToast(t('student.collegeRemovedSuccess'), 'success');
+        showToast(t('user.collegeRemovedSuccess'), 'success');
         fetchDashboard();
         handleCloseDeleteDialog();
         setDeleteMode(false);
       }
     } catch (err) {
       console.error('Failed to remove college:', err);
-      showToast(err.message || t('student.failedToRemoveCollege'), 'error');
+      showToast(err.message || t('user.failedToRemoveCollege'), 'error');
     } finally {
       setActionLoading('');
     }
@@ -378,7 +381,7 @@ const MyColleges = () => {
 
   const sidebarStats = {
     collegesCount: dashboard?.miningColleges?.filter(mc => mc.college).length || 0,
-    referralsCount: dashboard?.student?.totalReferrals || 0,
+    referralsCount: dashboard?.user?.totalReferrals || 0,
   };
 
   return (
@@ -392,33 +395,33 @@ const MyColleges = () => {
           {/* Title & Tagline - 50% */}
           <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: { xs: 'center', md: 'flex-start' }, textAlign: { xs: 'center', md: 'left' } }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-              {t('student.myColleges')}
+              {t('user.myColleges')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {t('student.myCollegesDesc')}
+              {t('user.myCollegesDesc')}
             </Typography>
           </Box>
 
           {/* Mining Stats - 50% */}
           <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', gap: 4, justifyContent: { xs: 'center', md: 'flex-end' }, alignItems: 'center' }}>
-            <Tooltip title={t('student.baseRateTooltip')}>
+            <Tooltip title={t('user.baseRateTooltip')}>
               <Box sx={{ textAlign: 'center', cursor: 'help' }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#06b6d4', mb: 0.5 }}>
                   0.25
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
-                  {t('student.baseRate')}
+                  {t('user.baseRate')}
                 </Typography>
               </Box>
             </Tooltip>
 
-            <Tooltip title={t('student.referralBonusTooltip')}>
+            <Tooltip title={t('user.referralBonusTooltip')}>
               <Box sx={{ textAlign: 'center', cursor: 'help' }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#8b5cf6', mb: 0.5 }}>
                   +0.10
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
-                  {t('student.referralBonus')}
+                  {t('user.referralBonus')}
                 </Typography>
               </Box>
             </Tooltip>
@@ -428,7 +431,7 @@ const MyColleges = () => {
                 24
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
-                {t('student.sessionHours')}
+                {t('user.sessionHours')}
               </Typography>
             </Box>
           </Box>
@@ -437,7 +440,7 @@ const MyColleges = () => {
         {/* Active Colleges Header */}
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.875rem', sm: '1.25rem' } }}>
-            {t('student.activeColleges')} ({dashboard?.miningColleges.filter(mc => mc.college).length}/10)
+            {t('user.activeColleges')} ({dashboard?.miningColleges.filter(mc => mc.college).length}/10)
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {dashboard?.miningColleges.filter(mc => mc.college).length > 0 && (
@@ -471,7 +474,7 @@ const MyColleges = () => {
                   }
                 }}
               >
-                {deleteMode ? t('student.cancel') : t('student.removeCollege')}
+                {deleteMode ? t('user.cancel') : t('user.removeCollege')}
               </Button>
             )}
             {dashboard?.miningColleges.filter(mc => mc.college).length < 10 && (
@@ -501,7 +504,7 @@ const MyColleges = () => {
                   }
                 }}
               >
-                {t('student.addCollege')}
+                {t('user.addCollege')}
               </Button>
             )}
           </Box>
@@ -522,7 +525,7 @@ const MyColleges = () => {
             gridTemplateColumns: 'repeat(4, 1fr)',
           }
         }}>
-          {dashboard?.miningColleges.filter(mc => mc.college).sort((a, b) => {
+          {dashboard?.miningColleges?.filter(mc => mc.college).sort((a, b) => {
             const sessionA = miningStatus[a.college._id];
             const sessionB = miningStatus[b.college._id];
             const isMiningA = sessionA?.isActive && sessionA?.remainingHours > 0;
@@ -539,13 +542,15 @@ const MyColleges = () => {
 
             const baseRate = mc.college.baseRate || 0.25;
             const referralBonusRate = mc.college.referralBonusRate || 0.1;
-            const currentReferralsCount = mc.referredStudents?.length || 0;
+            const REFERRAL_LIMIT_PER_COLLEGE = 10;
+            const currentReferralsCount = mc.referredUsers?.length || 0;
+            const cappedReferralsCount = Math.min(currentReferralsCount, REFERRAL_LIMIT_PER_COLLEGE);
 
             const effectiveReferralsForRate = isActive && session.earningRate
               ? Math.round((session.earningRate - baseRate) / referralBonusRate)
-              : currentReferralsCount;
+              : cappedReferralsCount;
 
-            const userEarningRate = isActive ? session.earningRate : (baseRate + (currentReferralsCount * referralBonusRate));
+            const userEarningRate = isActive ? session.earningRate : (baseRate + (cappedReferralsCount * referralBonusRate));
 
             return (
               <Card
@@ -648,13 +653,13 @@ const MyColleges = () => {
                           fontFamily: 'Monaco, monospace'
                         }}
                       >
-                        {isActive ? t('student.mining') : t('student.offline')}
+                        {isActive ? t('user.mining') : t('user.offline')}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      {dashboard?.student.college?._id === mc.college._id ? (
+                      {dashboard?.user.college?._id === mc.college._id ? (
                         <Chip
-                          label={t('student.primary')}
+                          label={t('user.primary')}
                           size="small"
                           sx={{
                             height: 18,
@@ -668,7 +673,7 @@ const MyColleges = () => {
                         />
                       ) : (
                         <Chip
-                          label={t('student.setPrimary')}
+                          label={t('user.setPrimary')}
                           size="small"
                           onClick={() => handleSetPrimaryCollege(mc.college._id)}
                           disabled={actionLoading === `primary-${mc.college._id}`}
@@ -693,9 +698,9 @@ const MyColleges = () => {
                           }}
                         />
                       )}
-                      <Tooltip title={t('student.shareCollegeTooltip')} arrow>
+                      <Tooltip title={t('user.shareCollegeTooltip')} arrow>
                         <Chip
-                          label={t('student.share')}
+                          label={t('user.share')}
                           size="small"
                           icon={<Share sx={{ fontSize: '0.8rem' }} />}
                           onClick={() => handleShareCollege(mc.college)}
@@ -754,16 +759,18 @@ const MyColleges = () => {
                   {/* Rates */}
                   <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                     <Tooltip
-                      title={t('student.earningRateTooltip', {
+                      title={t('user.earningRateTooltip', {
                         baseRate: baseRate,
                         bonusRate: (effectiveReferralsForRate * referralBonusRate).toFixed(2),
-                        restart: isActive && currentReferralsCount > effectiveReferralsForRate ? t('student.restartMiningToApply') : ''
+                        cappedCount: cappedReferralsCount,
+                        totalCount: currentReferralsCount,
+                        restart: isActive && cappedReferralsCount > effectiveReferralsForRate ? t('user.restartMiningToApply') : ''
                       })}
                       arrow
                       placement="top"
                     >
                       <Chip
-                        label={`${userEarningRate.toFixed(2)} ${t('student.tokenPerHr')}`}
+                        label={`${userEarningRate.toFixed(2)} ${t('user.tokenPerHr')}`}
                         size="small"
                         sx={{
                           height: 18,
@@ -779,22 +786,29 @@ const MyColleges = () => {
                     </Tooltip>
                     {currentReferralsCount > 0 && (
                       <Tooltip
-                        title={t('student.referralsTooltip', {
+                        title={t('user.referralsTooltip', {
                           count: currentReferralsCount,
+                          cappedCount: cappedReferralsCount,
                           plural: currentReferralsCount > 1 ? 's' : '',
-                          active: isActive && currentReferralsCount > effectiveReferralsForRate ? t('student.referralActive', { effectiveCount: effectiveReferralsForRate }) : ''
+                          active: isActive && cappedReferralsCount > effectiveReferralsForRate ? t('user.referralActive', { effectiveCount: effectiveReferralsForRate }) : ''
                         })}
                         arrow
                         placement="top"
                       >
                         <Chip
-                          label={`${currentReferralsCount} REF`}
+                          label={`${cappedReferralsCount}/10 REF${currentReferralsCount > REFERRAL_LIMIT_PER_COLLEGE ? ' (max)' : ''}`}
                           size="small"
                           sx={{
                             height: 18,
-                            background: 'rgba(96, 165, 250, 0.15)',
-                            border: '1px solid rgba(96, 165, 250, 0.3)',
-                            color: '#60a5fa',
+                            background: currentReferralsCount >= REFERRAL_LIMIT_PER_COLLEGE 
+                              ? 'rgba(251, 191, 36, 0.15)' 
+                              : 'rgba(96, 165, 250, 0.15)',
+                            border: currentReferralsCount >= REFERRAL_LIMIT_PER_COLLEGE
+                              ? '1px solid rgba(251, 191, 36, 0.3)'
+                              : '1px solid rgba(96, 165, 250, 0.3)',
+                            color: currentReferralsCount >= REFERRAL_LIMIT_PER_COLLEGE 
+                              ? '#fbbf24' 
+                              : '#60a5fa',
                             fontSize: '0.65rem',
                             fontWeight: 700,
                             '& .MuiChip-label': { px: 0.75 },
@@ -821,7 +835,7 @@ const MyColleges = () => {
                     <>
                       <Box sx={{ mb: 1.5, mt: 0.5 }}>
                         <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem', mb: 0.75, display: 'block' }}>
-                          {t('student.currentYield')}
+                          {t('user.currentYield')}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                           <Typography variant="h5" sx={{
@@ -837,7 +851,7 @@ const MyColleges = () => {
                             fontSize: '0.65rem',
                             fontWeight: 700
                           }}>
-                            @ {userEarningRate.toFixed(2)} {t('student.tokenPerHr')}
+                            @ {userEarningRate.toFixed(2)} {t('user.tokenPerHr')}
                           </Typography>
                         </Box>
                       </Box>
@@ -845,10 +859,10 @@ const MyColleges = () => {
                       <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                           <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem' }}>
-                            {t('student.progressLabel')}
+                            {t('user.progressLabel')}
                           </Typography>
                           <Typography variant="caption" sx={{ color: '#22d3ee', fontSize: '0.65rem', fontWeight: 700 }}>
-                            {session.remainingHours.toFixed(1)}H {t('student.leftShort')}
+                            {session.remainingHours.toFixed(1)}H {t('user.leftShort')}
                           </Typography>
                         </Box>
                         <Box sx={{
@@ -878,10 +892,10 @@ const MyColleges = () => {
                   ) : (
                     <Box sx={{ textAlign: 'center', py: 2 }}>
                       <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem' }}>
-                        {t('student.miningOffline')}
+                        {t('user.miningOffline')}
                       </Typography>
                       <Typography variant="body2" sx={{ color: '#475569', mt: 1, fontSize: '0.7rem' }}>
-                        {t('student.startMiningToEarnTokens')}
+                        {t('user.startMiningToEarnTokens')}
                       </Typography>
                     </Box>
                   )}
@@ -907,7 +921,7 @@ const MyColleges = () => {
                     mb: 1.5
                   }}>
                     <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
-                      {isActive ? t('student.totalValue') : t('student.walletBalance')}
+                      {isActive ? t('user.totalValue') : t('user.walletBalance')}
                     </Typography>
                     <Typography variant="h6" sx={{
                       color: isActive ? '#22d3ee' : '#f1f5f9',
@@ -922,7 +936,7 @@ const MyColleges = () => {
                     </Typography>
                     {isActive && (
                       <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.6rem', display: 'block', mt: 0.5 }}>
-                        {t('student.wallet')}: {wallet?.balance.toFixed(4) || '0.0000'} + Mining: {session.currentTokens.toFixed(4)}
+                        {t('user.wallet')}: {wallet?.balance.toFixed(4) || '0.0000'} + Mining: {session.currentTokens.toFixed(4)}
                       </Typography>
                     )}
                   </Box>
@@ -969,7 +983,7 @@ const MyColleges = () => {
                     >
                       {actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`
                         ? <CircularProgress size={20} sx={{ color: 'white' }} />
-                        : isActive ? t('student.stop') : t('student.start')
+                        : isActive ? t('user.stop') : t('user.start')
                       }
                     </Button>
 
@@ -994,7 +1008,7 @@ const MyColleges = () => {
                         }
                       }}
                     >
-                      {t('student.view')}
+                      {t('user.view')}
                     </Button>
                   </Box>
                 </Box>
@@ -1027,7 +1041,7 @@ const MyColleges = () => {
             }}
           >
             <Typography variant="h5" sx={{ fontWeight: 700, color: '#2d3748' }}>
-              {t('student.addCollegeToMiningList')}
+              {t('user.addCollegeToMiningList')}
             </Typography>
             <IconButton onClick={handleCloseAddCollegeDialog} size="small">
               <Close />
@@ -1045,8 +1059,8 @@ const MyColleges = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label={t('student.searchCollege')}
-                      placeholder={t('student.startTypingCollegeName')}
+                      label={t('user.searchCollege')}
+                      placeholder={t('user.startTypingCollegeName')}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2
@@ -1067,14 +1081,14 @@ const MyColleges = () => {
                     }
                   }}
                 >
-                  {t('student.collegeNotFound')}
+                  {t('user.collegeNotFound')}
                 </Button>
               </>
             ) : (
               <>
                 <TextField
                   fullWidth
-                  label={t('student.collegeName')}
+                  label={t('user.collegeName')}
                   value={newCollege.name}
                   onChange={(e) => setNewCollege({ ...newCollege, name: e.target.value })}
                   required
@@ -1087,7 +1101,7 @@ const MyColleges = () => {
                 />
                 <TextField
                   fullWidth
-                  label={t('student.country')}
+                  label={t('user.country')}
                   value={newCollege.country}
                   onChange={(e) => setNewCollege({ ...newCollege, country: e.target.value })}
                   required
@@ -1102,7 +1116,7 @@ const MyColleges = () => {
                 {/* Logo Upload Section */}
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#2d3748' }}>
-                    {t('student.collegeLogo')}
+                    {t('user.collegeLogo')}
                   </Typography>
 
                   <ToggleButtonGroup
@@ -1127,7 +1141,7 @@ const MyColleges = () => {
                       }}
                     >
                       <CloudUpload sx={{ mr: 1, fontSize: 20 }} />
-                      {t('student.uploadFile')}
+                      {t('user.uploadFile')}
                     </ToggleButton>
                     <ToggleButton
                       value="url"
@@ -1138,7 +1152,7 @@ const MyColleges = () => {
                       }}
                     >
                       <LinkIcon sx={{ mr: 1, fontSize: 20 }} />
-                      {t('student.enterUrl')}
+                      {t('user.enterUrl')}
                     </ToggleButton>
                   </ToggleButtonGroup>
 
@@ -1160,7 +1174,7 @@ const MyColleges = () => {
                           }
                         }}
                       >
-                        {t('student.chooseImage')}
+                        {t('user.chooseImage')}
                         <input
                           type="file"
                           hidden
@@ -1170,7 +1184,7 @@ const MyColleges = () => {
                       </Button>
                       {logoFile && (
                         <Typography variant="body2" color="text.secondary">
-                          {t('student.selected')}: {logoFile.name}
+                          {t('user.selected')}: {logoFile.name}
                         </Typography>
                       )}
                     </Box>
@@ -1179,7 +1193,7 @@ const MyColleges = () => {
                   {logoInputType === 'url' && (
                     <TextField
                       fullWidth
-                      label={t('student.logoUrl')}
+                      label={t('user.logoUrl')}
                       value={newCollege.logo}
                       onChange={(e) => handleLogoUrlChange(e.target.value)}
                       placeholder="https://example.com/logo.png"
@@ -1194,7 +1208,7 @@ const MyColleges = () => {
                   {logoPreview && (
                     <Box sx={{ mt: 3 }}>
                       <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: '#2d3748' }}>
-                        {t('student.preview')}
+                        {t('user.preview')}
                       </Typography>
                       <Avatar
                         src={logoPreview}
@@ -1227,7 +1241,7 @@ const MyColleges = () => {
                     }
                   }}
                 >
-                  {t('student.backToSearch')}
+                  {t('user.backToSearch')}
                 </Button>
               </>
             )}
@@ -1275,7 +1289,7 @@ const MyColleges = () => {
                 }
               }}
             >
-              {actionLoading === 'add-college' ? <CircularProgress size={20} color="inherit" /> : t('student.addCollege')}
+              {actionLoading === 'add-college' ? <CircularProgress size={20} color="inherit" /> : t('user.addCollege')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1304,7 +1318,7 @@ const MyColleges = () => {
             }}
           >
             <Typography variant="h5" sx={{ fontWeight: 700, color: '#dc2626' }}>
-              {t('student.removeCollegeTitle')}
+              {t('user.removeCollegeTitle')}
             </Typography>
             <IconButton onClick={handleCloseDeleteDialog} size="small">
               <Close />
@@ -1329,25 +1343,25 @@ const MyColleges = () => {
                 <Delete sx={{ fontSize: 32, color: '#dc2626' }} />
               </Box>
               <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', mb: 1 }}>
-                {t('student.areYouSure')}
+                {t('user.areYouSure')}
               </Typography>
               <Typography
                 variant="body2"
                 color="text.secondary"
                 dangerouslySetInnerHTML={{
-                  __html: t('student.removeCollegeMessage', { name: collegeToDelete?.name || '' })
+                  __html: t('user.removeCollegeMessage', { name: collegeToDelete?.name || '' })
                 }}
               />
             </Box>
 
             <Alert severity="warning" sx={{ mb: 3 }}>
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                {t('student.warningBalanceLost')}
+                {t('user.warningBalanceLost')}
               </Typography>
               <Typography
                 variant="body2"
                 dangerouslySetInnerHTML={{
-                  __html: t('student.balanceLostMessage', { balance: collegeToDelete?.balance?.toFixed(4) || '0.0000' })
+                  __html: t('user.balanceLostMessage', { balance: collegeToDelete?.balance?.toFixed(4) || '0.0000' })
                 }}
               />
             </Alert>
@@ -1367,7 +1381,7 @@ const MyColleges = () => {
               }
               label={
                 <Typography variant="body2" sx={{ color: '#475569' }}>
-                  {t('student.understandBalanceLost')}
+                  {t('user.understandBalanceLost')}
                 </Typography>
               }
             />
@@ -1415,7 +1429,7 @@ const MyColleges = () => {
                 }
               }}
             >
-              {actionLoading.startsWith('delete-') ? <CircularProgress size={20} color="inherit" /> : t('student.removeCollege')}
+              {actionLoading.startsWith('delete-') ? <CircularProgress size={20} color="inherit" /> : t('user.removeCollege')}
             </Button>
           </DialogActions>
         </Dialog>

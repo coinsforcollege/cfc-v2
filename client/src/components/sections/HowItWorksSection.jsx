@@ -388,7 +388,7 @@ const HowItWorksSection = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Box
                   component="button"
-                  onClick={() => navigate('/auth/register/student')}
+                  onClick={() => navigate('/auth/register/user')}
                   sx={{
                     background: gradients.primary,
                     color: 'white',

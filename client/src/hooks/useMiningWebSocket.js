@@ -10,8 +10,8 @@ export const useMiningWebSocket = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Only connect if user is authenticated and is a student
-    if (!user || !token || user.role !== 'student') {
+    // Only connect if user is authenticated and is a user
+    if (!user || !token || user.role !== 'user') {
       return;
     }
 

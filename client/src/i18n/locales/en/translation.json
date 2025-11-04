@@ -18,7 +18,7 @@
     "next": "Next",
     "previous": "Previous",
     "poweredBy": "Powered by",
-    "collegenL2": "Collegen L2",
+    "collegenL2": "CollegenZ L2",
     "comingSoon": "Coming Soon",
     "needHelp": "Need Help?",
     "getSupport": "Get Support",
@@ -97,7 +97,7 @@
     "signUp": "Sign Up",
     "signIn": "Sign In",
     "or": "Or",
-    "studentRegistration": "Student Registration",
+    "studentRegistration": "User Registration",
     "collegeRegistration": "College Registration",
     "fullName": "Full Name",
     "confirmPassword": "Confirm Password",
@@ -219,7 +219,7 @@
     "minersLabel": "miners",
     "tokensLabel": "tokens",
     "tokenPerHour": "Token/hr",
-    "tokenPerHourPerRef": "+{{rate}} Token/hr/ref",
+    "tokenPerHourPerRef": "+{{rate}} Token/hr/ref (up to 10 per college)",
     "previous": "Previous",
     "next": "Next",
     "pageOf": "Page {{current}} of {{total}}",
@@ -475,8 +475,8 @@
         }
       },
       "unlimitedReferrals": {
-        "title": "Unlimited Referrals",
-        "description": "There's no limit to how many friends you can invite. The more you share, the more you earn!"
+        "title": "Up to 10 Referrals Per College",
+        "description": "You can refer unlimited friends, but bonus rates are calculated based on up to 10 referrals per college. Referrals beyond 10 still count toward your total community, but won't increase your mining rate."
       },
       "getStartedNow": "Get Started Now"
     },
@@ -506,6 +506,10 @@
         "howSecureIsInfo": {
           "question": "How secure is my information?",
           "answer": "We use industry-standard encryption and security practices. We never share your personal information without your consent."
+        },
+        "referralLimit": {
+          "question": "Is there a limit to how many referrals I can make?",
+          "answer": "You can refer unlimited friends, but bonus rates are calculated based on up to 10 referrals per college. Referrals beyond 10 still count toward your total community, but won't increase your mining rate."
         }
       }
     },
@@ -524,7 +528,7 @@
     "referrals": "Referrals",
     "ambassador": "Ambassador",
     "settings": "Settings",
-    "buildOnCollegen": "Build on Collegen",
+    "buildOnCollegen": "Build on CollegenZ",
     "welcome": "Welcome",
     "miningStatus": "Mining Status",
     "totalEarnings": "Total Earnings",
@@ -539,8 +543,8 @@
     "notifications": "Notifications",
     "profile": "Profile"
   },
-  "student": {
-    "dashboard": "Student Dashboard",
+  "user": {
+    "dashboard": "User Dashboard",
     "welcome": "Welcome",
     "noCollegeAssigned": "No college assigned",
     "totalBalance": "Total Balance",
@@ -596,7 +600,7 @@
     "myCollegesDesc": "Manage your college mining portfolio. Add up to 10 colleges and start earning tokens.",
     "baseRateTooltip": "Base tokens earned per hour (default rate for all students)",
     "baseRate": "Base Rate",
-    "referralBonusTooltip": "Additional tokens earned per hour for each successful referral",
+    "referralBonusTooltip": "Additional tokens earned per hour for each successful referral (up to 10 referrals per college count toward bonus)",
     "sessionHours": "Session Hours",
     "activeColleges": "Active Colleges",
     "cancel": "Cancel",
@@ -642,9 +646,9 @@
     "failedToSetPrimaryCollege": "Failed to set primary college",
     "pleaseSelectImage": "Please select an image file",
     "fileSizeLimit": "File size should be less than 5MB",
-    "earningRateTooltip": "Your earning rate: {{baseRate}} tokens per hour (base) + {{bonusRate}} tokens per hour (referral bonus){{restart}}",
+    "earningRateTooltip": "Your earning rate: {{baseRate}} tokens per hour (base) + {{bonusRate}} tokens per hour (referral bonus, capped at {{cappedCount}}/10 referrals){{restart}}",
     "restartMiningToApply": " (restart mining to apply new referrals)",
-    "referralsTooltip": "{{count}} referral{{plural}} for this college{{active}}",
+    "referralsTooltip": "{{count}} referral{{plural}} for this college ({{cappedCount}}/10 count toward bonus){{active}}",
     "referralActive": " ({{effectiveCount}} counted in current rate)",
     "community": "Community",
     "communityDesc": "Grow your community and earn bonus tokens for every friend who joins with your code",
@@ -664,9 +668,9 @@
     "earnBonusRates": "Earn Bonus Rates",
     "earnBonusRatesDesc": "When someone signs up with your code for a college, you earn extra tokens per hour for that college.",
     "collegeSpecific": "College-Specific",
-    "collegeSpecificDesc": "Each college sets its own bonus rate per referral (usually 0.10 tokens/hour).",
+    "collegeSpecificDesc": "Each college sets its own bonus rate per referral (usually 0.10 tokens/hour). Up to 10 referrals per college count toward bonus rates.",
     "compoundEarnings": "Compound Earnings",
-    "compoundEarningsDesc": "More referrals = higher mining rate for each college.",
+    "compoundEarningsDesc": "More referrals = higher mining rate for each college (up to 10 referrals per college count toward bonus).",
     "yourCommunityMembers": "Your Community Members",
     "peopleJoined": "{{count}} {{plural}} joined using your code",
     "personHas": "person has",
@@ -1094,7 +1098,7 @@
     "primaryCollege": "Primary College",
     "notSet": "Not set",
     "role": "Role",
-    "student": "Student",
+    "student": "User",
     "updateProfile": "Update Profile",
     "changeNamePhone": "Change your name and phone number",
     "fillAllFields": "Please fill in all fields",
@@ -1217,7 +1221,7 @@
     "live": "LIVE",
     "earlySupporters": "{{college}}: {{count}} early supporters",
     "joinedWaitlist": "{{college}} joined waitlist",
-    "studentsActiveMining": "{{count}} students actively mining",
+    "studentsActiveMining": "{{count}} users actively mining",
     "tokensMined": "{{college}} mined {{tokens}} tokens",
     "institutionsBuilding": "{{count}} institutions building digital economies",
     "reachingSupporters": "{{college}} reaching {{count}} supporters",
@@ -1233,7 +1237,7 @@
     "title": "Global Network",
     "totalSupporters": "{{college}}: {{count}} early supporters",
     "joinedNetwork": "{{college}} joined network",
-    "studentsActiveMining": "{{count}} students actively mining",
+    "studentsActiveMining": "{{count}} users actively mining",
     "reachedTokens": "{{college}} reached {{tokens}} tokens"
   },
   "infrastructure": {
@@ -1262,7 +1266,7 @@
     "whatWeDeliver": "What We Deliver",
     "whatWeDeliverDesc": "Enterprise-grade infrastructure deployed for you",
     "ctaTitle": "Ready to Launch Your Token?",
-    "ctaDescription": "Join leading institutions building their digital economies on Collegen"
+    "ctaDescription": "Join leading institutions building their digital economies on CollegenZ"
   },
   "fundraising": {
     "chipLabel": "Alumni & Fundraising",
@@ -1344,12 +1348,12 @@
   },
   "buildOnCollegen": {
     "chipLabel": "For Developers",
-    "title": "Build on Collegen L2",
+    "title": "Build on CollegenZ L2",
     "description": "Create innovative applications on our education-focused blockchain layer",
     "feature1Title": "Developer SDK",
     "feature1Desc": "Comprehensive tools and libraries for building college token applications",
     "feature2Title": "Revenue Sharing",
-    "feature2Desc": "Earn from applications built on the Collegen ecosystem",
+    "feature2Desc": "Earn from applications built on the CollegenZ ecosystem",
     "feature3Title": "Education Focus",
     "feature3Desc": "Purpose-built blockchain optimized for educational institutions",
     "resourcesTitle": "Developer Resources",

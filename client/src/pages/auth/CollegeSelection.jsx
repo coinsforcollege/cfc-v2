@@ -24,7 +24,7 @@ import {
 import { Search, School, People, TrendingUp, LocationOn, Add, Close, CloudUpload, Link as LinkIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { collegesApi } from '../../api/colleges.api';
-import { studentApi } from '../../api/student.api';
+import { userApi } from '../../api/user.api';
 import { useAuth } from '../../contexts/AuthContext';
 import { getImageUrl } from '../../utils/imageUtils';
 import { COUNTRIES } from '../../constants/countries';
@@ -123,21 +123,21 @@ const CollegeSelection = () => {
       const formData = new FormData();
       formData.append('collegeId', collegeId);
 
-      const response = await studentApi.addCollege(formData);
+      const response = await userApi.addCollege(formData);
 
       if (response.success) {
         // Update user context with new college data
         const updatedUser = {
           ...user,
           studentProfile: {
-            ...user.studentProfile,
+            ...user.userProfile,
             miningColleges: response.data.miningColleges
           }
         };
         updateUser(updatedUser);
 
         // Redirect to overview page
-        navigate('/student/overview');
+        navigate('/user/overview');
       }
     } catch (err) {
       setError(err.message || 'Failed to add college');
@@ -206,14 +206,14 @@ const CollegeSelection = () => {
         formData.append('logoFile', logoFile);
       }
 
-      const response = await studentApi.addCollege(formData);
+      const response = await userApi.addCollege(formData);
 
       if (response.success) {
         // Update user context
         const updatedUser = {
           ...user,
           studentProfile: {
-            ...user.studentProfile,
+            ...user.userProfile,
             miningColleges: response.data.miningColleges
           }
         };
@@ -221,7 +221,7 @@ const CollegeSelection = () => {
 
         // Close dialog and redirect to overview
         setShowAddDialog(false);
-        navigate('/student/overview');
+        navigate('/user/overview');
       }
     } catch (err) {
       setError(err.message || 'Failed to add college');

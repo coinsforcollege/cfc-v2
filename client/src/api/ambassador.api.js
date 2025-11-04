@@ -7,7 +7,7 @@ export const ambassadorApi = {
     return response;
   },
 
-  // Get student's own application
+  // Get user's own application
   getMyApplication: async () => {
     const response = await apiClient.get('/ambassador/my-application');
     return response;

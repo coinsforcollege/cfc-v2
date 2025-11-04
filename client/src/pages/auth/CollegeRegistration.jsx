@@ -118,7 +118,7 @@ const CollegeRegistration = () => {
   };
 
   const handleCancelConfirmation = () => {
-    navigate('/auth/student-registration');
+    navigate('/auth/register/user');
   };
 
   if (!confirmedAsAdmin) {

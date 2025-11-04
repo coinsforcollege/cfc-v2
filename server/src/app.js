@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 import authRoutes from './routes/auth.routes.js';
 import collegeRoutes from './routes/college.routes.js';
 import miningRoutes from './routes/mining.routes.js';
-import studentRoutes from './routes/student.routes.js';
+import userRoutes from './routes/user.routes.js';
 import collegeAdminRoutes from './routes/collegeAdmin.routes.js';
 import platformAdminRoutes from './routes/platformAdmin.routes.js';
 import ambassadorRoutes from './routes/ambassador.routes.js';
@@ -100,7 +100,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/colleges', collegeRoutes);
 app.use('/api/mining', miningRoutes);
-app.use('/api/student', studentRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/college-admin', collegeAdminRoutes);
 app.use('/api/platform-admin', platformAdminRoutes);
 app.use('/api/ambassador', ambassadorRoutes);

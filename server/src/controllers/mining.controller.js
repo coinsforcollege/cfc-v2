@@ -4,19 +4,20 @@ import User from '../models/User.js';
 import College from '../models/College.js';
 import { broadcastMiningUpdate } from '../websocket/miningSocket.js';
 import { createNotification, checkTokenMilestone, checkAdminTokenMilestone, notifyAdminAboutTokenMilestone } from '../services/notification.service.js';
+import { REFERRAL_LIMIT_PER_COLLEGE, getCappedReferralCount, calculateReferralBonus } from '../utils/referrals.js';
 
 // @desc    Start mining for a college
 // @route   POST /api/mining/start/:collegeId
-// @access  Private (Student only)
+// @access  Private (User only)
 export const startMining = async (req, res, next) => {
   try {
     const { collegeId } = req.params;
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
-    // First, auto-stop any expired sessions for this student
+    // First, auto-stop any expired sessions for this user
     const now = new Date();
     const expiredSessions = await MiningSession.find({
-      student: studentId,
+      user: userId,
       isActive: true,
       endTime: { $lte: now }
     });
@@ -49,7 +50,7 @@ export const startMining = async (req, res, next) => {
 
       // We successfully stopped the session - proceed with wallet and stats updates
       await Wallet.findOneAndUpdate(
-        { student: session.student, college: session.college },
+        { user: session.user, college: session.college },
         {
           $inc: {
             balance: tokensEarned,
@@ -78,9 +79,9 @@ export const startMining = async (req, res, next) => {
       });
     }
 
-    // Check if student has this college in their mining list
-    const student = await User.findById(studentId);
-    const hasCollege = student.studentProfile.miningColleges.some(
+    // Check if user has this college in their mining list
+    const user = await User.findById(userId);
+    const hasCollege = user.userProfile.miningColleges.some(
       mc => mc.college.toString() === collegeId
     );
 
@@ -93,7 +94,7 @@ export const startMining = async (req, res, next) => {
 
     // Check if already mining for this college (active AND unexpired session)
     const existingSession = await MiningSession.findOne({
-      student: studentId,
+      user: userId,
       college: collegeId,
       isActive: true,
       endTime: { $gt: now }
@@ -111,21 +112,23 @@ export const startMining = async (req, res, next) => {
     const referralBonusRate = college.referralBonusRate || 0.1;
 
     // Count active referrals for this specific college
-    const miningCollege = student.studentProfile.miningColleges.find(
+    const miningCollege = user.userProfile.miningColleges.find(
       mc => mc.college.toString() === collegeId
     );
 
-    // Calculate referral bonus: number of referred students * bonus rate per referral
-    const activeReferrals = miningCollege?.referredStudents?.length || 0;
-    const referralBonus = activeReferrals * referralBonusRate;
+    // Calculate referral bonus: number of referred users * bonus rate per referral
+    // Cap at 10 referrals per college for bonus calculation
+    const totalReferrals = miningCollege?.referredUsers?.length || 0;
+    const activeReferrals = getCappedReferralCount(miningCollege?.referredUsers);
+    const referralBonus = calculateReferralBonus(totalReferrals, referralBonusRate);
 
     const earningRate = baseRate + referralBonus;
 
     console.log(`\n=== EARNING RATE CALCULATION ===`);
     console.log(`College: ${college.name}`);
-    console.log(`Student: ${student.name}`);
+    console.log(`User: ${user.name}`);
     console.log(`Base Rate: ${baseRate} t/h`);
-    console.log(`Active Referrals: ${activeReferrals}`);
+    console.log(`Total Referrals: ${totalReferrals} (capped at ${activeReferrals} for bonus)`);
     console.log(`Referral Bonus Rate: ${referralBonusRate} t/h per referral`);
     console.log(`Total Referral Bonus: ${referralBonus} t/h`);
     console.log(`Final Earning Rate: ${earningRate} t/h`);
@@ -136,7 +139,7 @@ export const startMining = async (req, res, next) => {
     const endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000); // 24 hours
 
     const miningSession = await MiningSession.create({
-      student: studentId,
+      user: userId,
       college: collegeId,
       startTime,
       endTime,
@@ -145,12 +148,12 @@ export const startMining = async (req, res, next) => {
       lastCalculatedAt: startTime
     });
 
-    // Create or get wallet for this student-college pair
-    let wallet = await Wallet.findOne({ student: studentId, college: collegeId });
+    // Create or get wallet for this user-college pair
+    let wallet = await Wallet.findOne({ user: userId, college: collegeId });
     const isFirstTime = !wallet;
     if (!wallet) {
       wallet = await Wallet.create({
-        student: studentId,
+        user: userId,
         college: collegeId,
         balance: 0,
         totalMined: 0
@@ -160,7 +163,7 @@ export const startMining = async (req, res, next) => {
     // Update college stats
     const statsUpdate = { 'stats.activeMiners': 1 };
     if (isFirstTime) {
-      // If this is the first time this student is mining for this college, increment totalMiners
+      // If this is the first time this user is mining for this college, increment totalMiners
       statsUpdate['stats.totalMiners'] = 1;
     }
     await College.findByIdAndUpdate(collegeId, {
@@ -177,7 +180,7 @@ export const startMining = async (req, res, next) => {
     });
 
     // Broadcast mining update via WebSocket
-    await broadcastMiningUpdate(studentId);
+    await broadcastMiningUpdate(userId);
   } catch (error) {
     next(error);
   }
@@ -185,15 +188,15 @@ export const startMining = async (req, res, next) => {
 
 // @desc    Stop mining for a college (manual stop or auto after 24h)
 // @route   POST /api/mining/stop/:collegeId
-// @access  Private (Student only)
+// @access  Private (User only)
 export const stopMining = async (req, res, next) => {
   try {
     const { collegeId } = req.params;
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
     // Find active mining session
     const session = await MiningSession.findOne({
-      student: studentId,
+      user: userId,
       college: collegeId,
       isActive: true
     });
@@ -206,7 +209,7 @@ export const stopMining = async (req, res, next) => {
     }
 
     // Defense-in-depth: Explicitly validate session belongs to authenticated user
-    if (session.student.toString() !== studentId) {
+    if (session.user.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: Session does not belong to you'
@@ -220,7 +223,7 @@ export const stopMining = async (req, res, next) => {
 
     // Log calculation details for debugging
     console.log(`\n=== STOP MINING CALCULATION ===`);
-    console.log(`Student: ${studentId}`);
+    console.log(`User: ${userId}`);
     console.log(`College: ${collegeId}`);
     console.log(`Start Time: ${session.startTime.toISOString()}`);
     console.log(`Stop Time (now): ${now.toISOString()}`);
@@ -256,7 +259,7 @@ export const stopMining = async (req, res, next) => {
     }
 
     // Find wallet and validate ownership before updating
-    let wallet = await Wallet.findOne({ student: studentId, college: collegeId });
+    let wallet = await Wallet.findOne({ user: userId, college: collegeId });
 
     if (!wallet) {
       return res.status(404).json({
@@ -266,7 +269,7 @@ export const stopMining = async (req, res, next) => {
     }
 
     // Defense-in-depth: Explicitly validate wallet belongs to authenticated user
-    if (wallet.student.toString() !== studentId) {
+    if (wallet.user.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: Wallet does not belong to you'
@@ -294,7 +297,7 @@ export const stopMining = async (req, res, next) => {
 
     // Create mining completion notification
     await createNotification({
-      recipient: studentId,
+      recipient: userId,
       type: 'mining_completed',
       title: 'Mining session completed!',
       message: `You earned ${tokensEarned.toFixed(2)} tokens from ${college?.name || 'your college'}. Keep mining to earn more!`,
@@ -306,14 +309,14 @@ export const stopMining = async (req, res, next) => {
       },
       category: 'mining',
       priority: 'medium',
-      actionUrl: '/student/colleges'
+      actionUrl: '/user/colleges'
     });
 
     // Check for token milestone
-    const milestone = await checkTokenMilestone(studentId, collegeId, wallet.balance);
+    const milestone = await checkTokenMilestone(userId, collegeId, wallet.balance);
     if (milestone) {
       await createNotification({
-        recipient: studentId,
+        recipient: userId,
         type: 'token_milestone',
         title: `${milestone.toLocaleString()} tokens milestone!`,
         message: `Congratulations! You've mined ${milestone.toLocaleString()} tokens for ${college?.name || 'your college'}. Keep up the great work!`,
@@ -325,7 +328,7 @@ export const stopMining = async (req, res, next) => {
         },
         category: 'milestone',
         priority: 'high',
-        actionUrl: '/student/colleges'
+        actionUrl: '/user/colleges'
       });
     }
 
@@ -348,31 +351,31 @@ export const stopMining = async (req, res, next) => {
     });
 
     // Broadcast mining update via WebSocket
-    await broadcastMiningUpdate(studentId);
+    await broadcastMiningUpdate(userId);
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Get mining status for all colleges student is mining
+// @desc    Get mining status for all colleges user is mining
 // @route   GET /api/mining/status
-// @access  Private (Student only)
+// @access  Private (User only)
 export const getMiningStatus = async (req, res, next) => {
   try {
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
-    // Get student info
-    const student = await User.findById(studentId)
-      .populate('studentProfile.miningColleges.college', 'name country logo baseRate referralBonusRate');
+    // Get user info
+    const user = await User.findById(userId)
+      .populate('userProfile.miningColleges.college', 'name country logo baseRate referralBonusRate');
 
     // Get all active mining sessions
     const activeSessions = await MiningSession.find({
-      student: studentId,
+      user: userId,
       isActive: true
     }).populate('college', 'name country logo baseRate referralBonusRate');
 
     // Get all wallets
-    const wallets = await Wallet.find({ student: studentId })
+    const wallets = await Wallet.find({ user: userId })
       .populate('college', 'name country logo baseRate referralBonusRate');
 
     // Calculate current tokens for each active session
@@ -396,7 +399,7 @@ export const getMiningStatus = async (req, res, next) => {
     });
 
     // Filter out null colleges (deleted colleges)
-    const validMiningColleges = student.studentProfile.miningColleges.filter(mc => mc.college !== null);
+    const validMiningColleges = user.userProfile.miningColleges.filter(mc => mc.college !== null);
     const validWallets = wallets.filter(w => w.college !== null);
 
     res.status(200).json({
@@ -415,22 +418,22 @@ export const getMiningStatus = async (req, res, next) => {
 
 // @desc    Get mining status for a specific college
 // @route   GET /api/mining/status/:collegeId
-// @access  Private (Student only)
+// @access  Private (User only)
 export const getMiningStatusForCollege = async (req, res, next) => {
   try {
     const { collegeId } = req.params;
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
     // Get active session for this college
     const session = await MiningSession.findOne({
-      student: studentId,
+      user: userId,
       college: collegeId,
       isActive: true
     }).populate('college', 'name country logo baseRate referralBonusRate');
 
     // Get wallet for this college
     const wallet = await Wallet.findOne({
-      student: studentId,
+      user: userId,
       college: collegeId
     }).populate('college', 'name country logo baseRate referralBonusRate');
 
@@ -510,7 +513,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
 
       // We successfully stopped the session - proceed with wallet and stats updates
       const wallet = await Wallet.findOneAndUpdate(
-        { student: session.student, college: session.college },
+        { user: session.user, college: session.college },
         {
           $inc: {
             balance: tokensEarned,
@@ -531,7 +534,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
 
       // Create mining completion notification
       await createNotification({
-        recipient: session.student,
+        recipient: session.user,
         type: 'mining_completed',
         title: 'Mining session completed!',
         message: `You earned ${tokensEarned.toFixed(2)} tokens from ${session.college?.name || 'your college'}. Keep mining to earn more!`,
@@ -543,14 +546,14 @@ export const autoStopExpiredSessions = async (req, res, next) => {
         },
         category: 'mining',
         priority: 'medium',
-        actionUrl: '/student/colleges'
+        actionUrl: '/user/colleges'
       });
 
       // Check for token milestone
-      const milestone = await checkTokenMilestone(session.student, session.college._id, wallet.balance);
+      const milestone = await checkTokenMilestone(session.user, session.college._id, wallet.balance);
       if (milestone) {
         await createNotification({
-          recipient: session.student,
+          recipient: session.user,
           type: 'token_milestone',
           title: `${milestone.toLocaleString()} tokens milestone!`,
           message: `Congratulations! You've mined ${milestone.toLocaleString()} tokens for ${session.college?.name || 'your college'}. Keep up the great work!`,
@@ -562,7 +565,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
           },
           category: 'milestone',
           priority: 'high',
-          actionUrl: '/student/colleges'
+          actionUrl: '/user/colleges'
         });
       }
 

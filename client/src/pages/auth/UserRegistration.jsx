@@ -88,7 +88,7 @@ const StudentRegistration = () => {
         language: i18n.language || 'en'
       };
 
-      const response = await authApi.sendOTPStudent(otpData);
+      const response = await authApi.sendOTPUser(otpData);
 
       if (response.success) {
         setShowOTPDialog(true);
@@ -118,15 +118,15 @@ const StudentRegistration = () => {
         verificationToken: token
       };
 
-      const response = await authApi.registerStudent(registrationData);
+      const response = await authApi.registerUser(registrationData);
 
       if (response.success) {
         login(response.data, response.token);
 
-        const hasColleges = response.data.studentProfile?.miningColleges?.length > 0;
+        const hasColleges = response.data.userProfile?.miningColleges?.length > 0;
 
         if (hasColleges) {
-          navigate('/student/dashboard');
+          navigate('/user/dashboard');
         } else {
           navigate('/auth/college-selection');
         }
@@ -411,7 +411,7 @@ const StudentRegistration = () => {
       <OTPDialog
         open={showOTPDialog}
         email={formData.email}
-        role="student"
+        role="user"
         onVerified={handleOTPVerified}
         onClose={handleCloseOTPDialog}
       />

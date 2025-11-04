@@ -26,18 +26,18 @@ function HeroSection({ theme, studentCount, setStudentCount }) {
             Start Mining Your College Token Today
           </Typography>
           <Typography variant="h5" color="text.secondary" sx={{ mb: 4, maxWidth: '800px', mx: 'auto' }}>
-            Join thousands of students building the future of college tokens
+            Join thousands of community members building the future of college tokens
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" sx={{ mb: 6 }}>
             <Button
               component={Link}
-              to="/auth/register/student"
+              to="/auth/register/user"
               variant="contained"
               size="large"
               endIcon={<ArrowForward />}
               sx={{ py: 1.5, px: 4, fontSize: '1.1rem', textTransform: 'none', fontWeight: 600 }}
             >
-              Join as Student
+              Join as Community Member
             </Button>
             <Button
               component={Link}
@@ -70,7 +70,7 @@ function HeroSection({ theme, studentCount, setStudentCount }) {
                 animation: 'pulse 2s infinite', '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } }
               }} />
             <Typography variant="body1" fontWeight={600}>
-              {studentCount.toLocaleString()} students mining now
+              {studentCount.toLocaleString()} users mining now
             </Typography>
           </Box>
         </Box>

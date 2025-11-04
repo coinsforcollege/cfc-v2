@@ -10,9 +10,9 @@ import { protect, authorize } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-// Student routes
-router.post('/apply', protect, authorize('student'), submitApplication);
-router.get('/my-application', protect, authorize('student'), getMyApplication);
+// User routes
+router.post('/apply', protect, authorize('user'), submitApplication);
+router.get('/my-application', protect, authorize('user'), getMyApplication);
 
 // Platform Admin routes
 router.get('/applications', protect, authorize('platform_admin'), getAllApplications);

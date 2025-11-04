@@ -33,7 +33,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { studentApi } from '../../api/student.api';
+import { userApi } from '../../api/user.api';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import ShareDialog from '../../components/ShareDialog';
 import { useTranslation } from 'react-i18next';
@@ -54,19 +54,19 @@ const Community = () => {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const response = await studentApi.getDashboard();
+      const response = await userApi.getDashboard();
       if (response.success) {
         setDashboard(response.data);
       }
     } catch (err) {
-      setError(err.message || t('student.failedToLoadData'));
+      setError(err.message || t('user.failedToLoadData'));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
+    if (!user || user.role !== 'user') {
       navigate('/auth/login');
       return;
     }
@@ -75,38 +75,40 @@ const Community = () => {
   }, [user, navigate]);
 
   const copyReferralCode = () => {
-    if (dashboard?.student?.referralCode) {
-      navigator.clipboard.writeText(dashboard.student.referralCode);
+    if (dashboard?.user?.referralCode) {
+      navigator.clipboard.writeText(dashboard.user.referralCode);
       setCopiedCode(true);
-      showToast(t('student.referralCodeCopied'), 'success');
+      showToast(t('user.referralCodeCopied'), 'success');
       setTimeout(() => setCopiedCode(false), 2000);
     }
   };
 
   const copyReferralLink = () => {
-    if (dashboard?.student?.referralCode) {
+    if (dashboard?.user?.referralCode) {
       const baseUrl = window.location.origin;
-      const referralLink = `${baseUrl}/auth/register/student?ref=${dashboard.student.referralCode}`;
+      const referralLink = `${baseUrl}/auth/register/user?ref=${dashboard.user.referralCode}`;
       navigator.clipboard.writeText(referralLink);
       setCopiedLink(true);
-      showToast(t('student.referralLinkCopied'), 'success');
+      showToast(t('user.referralLinkCopied'), 'success');
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
   const getTotalReferralBonus = () => {
-    if (!dashboard?.miningColleges || !dashboard?.student?.totalReferrals) return 0;
+    if (!dashboard?.miningColleges || !dashboard?.user?.totalReferrals) return 0;
+    const REFERRAL_LIMIT_PER_COLLEGE = 10;
     return dashboard.miningColleges.reduce((sum, mc) => {
       if (mc.college && mc.college.referralBonusRate) {
-        const collegeReferrals = mc.referredStudents?.length || 0;
-        return sum + (mc.college.referralBonusRate * collegeReferrals);
+        const collegeReferrals = mc.referredUsers?.length || 0;
+        const cappedReferrals = Math.min(collegeReferrals, REFERRAL_LIMIT_PER_COLLEGE);
+        return sum + (mc.college.referralBonusRate * cappedReferrals);
       }
       return sum;
     }, 0);
   };
 
   const handleShareGeneral = () => {
-    const primaryCollege = dashboard?.student?.college;
+    const primaryCollege = dashboard?.user?.college;
     const totalBalance = dashboard?.summary?.totalBalance || 0;
     const baseUrl = window.location.origin;
 
@@ -116,37 +118,37 @@ const Community = () => {
       balance: totalBalance,
       isGeneral: true,
       text: "I'm earning tokens on Coins For College. Join the community!",
-      url: `${baseUrl}/auth/register/student?ref=${dashboard?.student?.referralCode}`
+      url: `${baseUrl}/auth/register/user?ref=${dashboard?.user?.referralCode}`
     });
     setShowShareDialog(true);
   };
 
   const getAllReferredStudents = () => {
     if (!dashboard?.miningColleges) return [];
-    const studentsMap = new Map();
+    const usersMap = new Map();
 
     dashboard.miningColleges.forEach(mc => {
-      if (mc.referredStudents && mc.referredStudents.length > 0) {
-        mc.referredStudents.forEach(ref => {
-          if (ref.student) {
-            const studentId = ref.student._id || ref.student;
-            if (!studentsMap.has(studentId)) {
-              studentsMap.set(studentId, {
-                student: ref.student,
+      if (mc.referredUsers && mc.referredUsers.length > 0) {
+        mc.referredUsers.forEach(ref => {
+          if (ref.user) {
+            const userId = ref.user._id || ref.user;
+            if (!usersMap.has(userId)) {
+              usersMap.set(userId, {
+                user: ref.user,
                 referredAt: ref.referredAt,
                 colleges: [mc.college],
                 activeMiningCount: ref.activeMiningCount || 0,
                 totalTokens: ref.totalTokens || 0
               });
             } else {
-              studentsMap.get(studentId).colleges.push(mc.college);
+              usersMap.get(userId).colleges.push(mc.college);
             }
           }
         });
       }
     });
 
-    return Array.from(studentsMap.values()).sort((a, b) =>
+    return Array.from(usersMap.values()).sort((a, b) =>
       new Date(b.referredAt) - new Date(a.referredAt)
     );
   };
@@ -171,11 +173,11 @@ const Community = () => {
 
   const sidebarStats = {
     collegesCount: dashboard?.miningColleges?.filter(mc => mc.college).length || 0,
-    referralsCount: dashboard?.student?.totalReferrals || 0,
+    referralsCount: dashboard?.user?.totalReferrals || 0,
   };
 
   const totalBonus = getTotalReferralBonus();
-  const referredStudents = getAllReferredStudents();
+  const referredUsers = getAllReferredStudents();
 
   return (
     <DashboardLayout
@@ -184,10 +186,10 @@ const Community = () => {
     >
       <Box sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
         <Typography variant="h5" sx={{ fontWeight: 600, color: '#1e293b', mb: 1 }}>
-          {t('student.community')}
+          {t('user.community')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          {t('student.communityDesc')}
+          {t('user.communityDesc')}
         </Typography>
 
         {/* Summary Cards */}
@@ -207,10 +209,10 @@ const Community = () => {
             <CardContent>
               <People sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {t('student.totalCommunityMembers')}
+                {t('user.totalCommunityMembers')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                {dashboard?.student?.totalReferrals || 0}
+                {dashboard?.user?.totalReferrals || 0}
               </Typography>
             </CardContent>
           </Card>
@@ -225,10 +227,10 @@ const Community = () => {
             <CardContent>
               <TrendingUp sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {t('student.totalBonusRate')}
+                {t('user.totalBonusRate')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                +{totalBonus.toFixed(2)} {t('student.tokenPerHr')}
+                +{totalBonus.toFixed(2)} {t('user.tokenPerHr')}
               </Typography>
             </CardContent>
           </Card>
@@ -243,7 +245,7 @@ const Community = () => {
             <CardContent>
               <EmojiEvents sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {t('student.activeColleges')}
+                {t('user.activeColleges')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {dashboard?.miningColleges?.filter(mc => mc.college).length || 0}
@@ -261,12 +263,12 @@ const Community = () => {
             <CardContent>
               <PersonAdd sx={{ color: 'white', fontSize: 24, mb: 1 }} />
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', display: 'block', mb: 0.5 }}>
-                {t('student.avgBonusPerCollege')}
+                {t('user.avgBonusPerCollege')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 +{dashboard?.miningColleges?.length > 0
                   ? (totalBonus / dashboard.miningColleges.filter(mc => mc.college).length).toFixed(2)
-                  : '0.00'} {t('student.tokenPerHr')}
+                  : '0.00'} {t('user.tokenPerHr')}
               </Typography>
             </CardContent>
           </Card>
@@ -315,10 +317,10 @@ const Community = () => {
                   </Box>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
-                      {t('student.communityCode')}
+                      {t('user.communityCode')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                      {t('student.growYourNetwork')}
+                      {t('user.growYourNetwork')}
                     </Typography>
                   </Box>
                 </Box>
@@ -327,7 +329,7 @@ const Community = () => {
               {/* Referral Code and Share Button - Side by Side */}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                  {t('student.yourUniqueCode')}
+                  {t('user.yourUniqueCode')}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   {/* Code Box */}
@@ -361,7 +363,7 @@ const Community = () => {
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
                       }}>
-                        {dashboard?.student?.referralCode}
+                        {dashboard?.user?.referralCode}
                       </Typography>
                       <IconButton
                         size="small"
@@ -405,7 +407,7 @@ const Community = () => {
                         transition: 'all 0.3s ease'
                       }}
                     >
-                      {t('student.shareWithFriends')}
+                      {t('user.shareWithFriends')}
                     </Button>
                   </Box>
                 </Box>
@@ -414,7 +416,7 @@ const Community = () => {
               {/* Share Link */}
               <Box>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                  {t('student.quickShareLink')}
+                  {t('user.quickShareLink')}
                 </Typography>
                 <Box sx={{
                   p: 2,
@@ -439,7 +441,7 @@ const Community = () => {
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                   }}>
-                    {`${window.location.origin}/auth/register/student?ref=${dashboard?.student?.referralCode}`}
+                    {`${window.location.origin}/auth/register/user?ref=${dashboard?.user?.referralCode}`}
                   </Typography>
                   <IconButton
                     size="small"
@@ -463,20 +465,20 @@ const Community = () => {
           {/* How It Works */}
           <Card sx={{ flex: 1, p: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 2 }}>
-              {t('student.howCommunityRewardsWork')}
+              {t('user.howCommunityRewardsWork')}
             </Typography>
             <Box component="ul" sx={{ m: 0, pl: 2.5, '& li': { mb: 1.5, color: '#64748b', fontSize: '0.9rem' } }}>
               <li>
-                <strong>{t('student.shareYourCode')}:</strong> {t('student.shareYourCodeDesc')}
+                <strong>{t('user.shareYourCode')}:</strong> {t('user.shareYourCodeDesc')}
               </li>
               <li>
-                <strong>{t('student.earnBonusRates')}:</strong> {t('student.earnBonusRatesDesc')}
+                <strong>{t('user.earnBonusRates')}:</strong> {t('user.earnBonusRatesDesc')}
               </li>
               <li>
-                <strong>{t('student.collegeSpecific')}:</strong> {t('student.collegeSpecificDesc')}
+                <strong>{t('user.collegeSpecific')}:</strong> {t('user.collegeSpecificDesc')}
               </li>
               <li>
-                <strong>{t('student.compoundEarnings')}:</strong> {t('student.compoundEarningsDesc')}
+                <strong>{t('user.compoundEarnings')}:</strong> {t('user.compoundEarningsDesc')}
               </li>
             </Box>
           </Card>
@@ -486,19 +488,19 @@ const Community = () => {
         <Card sx={{ mb: 4, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-              {t('student.yourCommunityMembers')}
+              {t('user.yourCommunityMembers')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              {t('student.peopleJoined', { count: referredStudents.length, plural: referredStudents.length === 1 ? t('student.personHas') : t('student.peopleHave') })}
+              {t('user.peopleJoined', { count: referredUsers.length, plural: referredUsers.length === 1 ? t('user.personHas') : t('user.peopleHave') })}
             </Typography>
-            {referredStudents.length === 0 ? (
+            {referredUsers.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 6 }}>
                 <People style={{ fontSize: 64, color: '#cbd5e1', marginBottom: 16 }} />
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#475569', mb: 1 }}>
-                  {t('student.noCommunityMembers')}
+                  {t('user.noCommunityMembers')}
                 </Typography>
                 <Typography color="text.secondary">
-                  {t('student.sharReferralToStart')}
+                  {t('user.sharReferralToStart')}
                 </Typography>
               </Box>
             ) : (
@@ -506,15 +508,15 @@ const Community = () => {
                 <Table>
                   <TableHead>
                     <TableRow sx={{ background: '#f8fafc' }}>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('student.member')}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('student.joinedDate')}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('student.colleges')}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="center">{t('student.miningStatus')}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('student.totalTokens')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('user.member')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('user.joinedDate')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('user.colleges')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="center">{t('user.miningStatus')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('user.totalTokens')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {referredStudents.map((ref, index) => (
+                    {referredUsers.map((ref, index) => (
                       <TableRow
                         key={index}
                         sx={{
@@ -532,14 +534,14 @@ const Community = () => {
                               fontSize: '0.9rem',
                               fontWeight: 700
                             }}>
-                              {ref.student?.name?.charAt(0).toUpperCase() || '?'}
+                              {ref.user?.name?.charAt(0).toUpperCase() || '?'}
                             </Avatar>
                             <Box>
                               <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
-                                {ref.student?.name || 'Unknown User'}
+                                {ref.user?.name || 'Unknown User'}
                               </Typography>
                               <Typography variant="caption" sx={{ color: '#64748b' }}>
-                                {ref.student?.email || ''}
+                                {ref.user?.email || ''}
                               </Typography>
                             </Box>
                           </Box>
@@ -575,7 +577,7 @@ const Community = () => {
                           {ref.activeMiningCount > 0 ? (
                             <Chip
                               icon={<FiberManualRecord sx={{ fontSize: 12 }} />}
-                              label={`${ref.activeMiningCount} ${t('student.active')}`}
+                              label={`${ref.activeMiningCount} ${t('user.active')}`}
                               size="small"
                               sx={{
                                 background: 'rgba(34, 197, 94, 0.1)',
@@ -590,7 +592,7 @@ const Community = () => {
                             />
                           ) : (
                             <Chip
-                              label={t('student.inactive')}
+                              label={t('user.inactive')}
                               size="small"
                               sx={{
                                 background: '#f1f5f9',
@@ -620,15 +622,15 @@ const Community = () => {
         <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
-              {t('student.communityEarningsByCollege')}
+              {t('user.communityEarningsByCollege')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              {t('student.communityEarningsByCollegeDesc')}
+              {t('user.communityEarningsByCollegeDesc')}
             </Typography>
             {dashboard?.miningColleges?.filter(mc => mc.college).length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 4 }}>
                 <Typography color="text.secondary">
-                  {t('student.noCollegesAddedYet')}
+                  {t('user.noCollegesAddedYet')}
                 </Typography>
               </Box>
             ) : (
@@ -636,17 +638,19 @@ const Community = () => {
                 <Table>
                   <TableHead>
                     <TableRow sx={{ background: '#f8fafc' }}>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('student.college')}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="center">{t('student.members')}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="center">{t('student.rateMember')}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('student.yourBonus')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }}>{t('user.college')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="center">{t('user.members')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="center">{t('user.rateMember')}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569' }} align="right">{t('user.yourBonus')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {dashboard?.miningColleges?.filter(mc => mc.college).map((mc) => {
-                      const collegeReferrals = mc.referredStudents?.length || 0;
+                      const REFERRAL_LIMIT_PER_COLLEGE = 10;
+                      const collegeReferrals = mc.referredUsers?.length || 0;
+                      const cappedReferrals = Math.min(collegeReferrals, REFERRAL_LIMIT_PER_COLLEGE);
                       const bonusRate = mc.college.referralBonusRate || 0.1;
-                      const totalCollegeBonus = bonusRate * collegeReferrals;
+                      const totalCollegeBonus = bonusRate * cappedReferrals;
 
                       return (
                         <TableRow
@@ -672,12 +676,12 @@ const Community = () => {
                           </TableCell>
                           <TableCell align="center">
                             <Typography variant="body2" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                              {collegeReferrals}
+                              {cappedReferrals}/10{collegeReferrals > REFERRAL_LIMIT_PER_COLLEGE ? ` (${collegeReferrals} total)` : ''}
                             </Typography>
                           </TableCell>
                           <TableCell align="center">
                             <Typography variant="body2" sx={{ fontWeight: 600, color: '#667eea' }}>
-                              {bonusRate.toFixed(2)} {t('student.tokenPerHr')}
+                              {bonusRate.toFixed(2)} {t('user.tokenPerHr')}
                             </Typography>
                           </TableCell>
                           <TableCell align="right">
@@ -685,7 +689,7 @@ const Community = () => {
                               fontWeight: 700,
                               color: collegeReferrals > 0 ? '#22c55e' : '#94a3b8'
                             }}>
-                              +{totalCollegeBonus.toFixed(2)} {t('student.tokenPerHr')}
+                              +{totalCollegeBonus.toFixed(2)} {t('user.tokenPerHr')}
                             </Typography>
                           </TableCell>
                         </TableRow>

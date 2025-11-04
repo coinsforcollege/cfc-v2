@@ -83,6 +83,10 @@ const getFaqs = (t) => [
     question: t('howItWorksStudents.faq.questions.howSecureIsInfo.question'),
     answer: t('howItWorksStudents.faq.questions.howSecureIsInfo.answer'),
   },
+  {
+    question: t('howItWorksStudents.faq.questions.referralLimit.question'),
+    answer: t('howItWorksStudents.faq.questions.referralLimit.answer'),
+  },
 ];
 
 function HowItWorksStudents() {
@@ -445,7 +449,7 @@ function HowItWorksStudents() {
                 </Typography>
                 <Button
                   component={Link}
-                  to="/auth/register/student"
+                  to="/auth/register/user"
                   variant="contained"
                   size="large"
                   endIcon={<ArrowForward />}
@@ -526,7 +530,7 @@ function HowItWorksStudents() {
           </Typography>
           <Button
             component={Link}
-            to="/auth/register/student"
+            to="/auth/register/user"
             variant="contained"
             size="large"
             endIcon={<ArrowForward />}

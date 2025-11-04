@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const walletSchema = new mongoose.Schema({
-  student: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
@@ -30,8 +30,8 @@ const walletSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound unique index - one wallet per student per college
-walletSchema.index({ student: 1, college: 1 }, { unique: true });
+// Compound unique index - one wallet per user per college
+walletSchema.index({ user: 1, college: 1 }, { unique: true });
 
 const Wallet = mongoose.model('Wallet', walletSchema);
 

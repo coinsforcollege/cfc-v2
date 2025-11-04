@@ -21,8 +21,8 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
     // Redirect to appropriate dashboard based on user's actual role
-    if (user?.role === 'student') {
-      return <Navigate to="/student/colleges" replace />;
+    if (user?.role === 'user') {
+      return <Navigate to="/user/colleges" replace />;
     } else if (user?.role === 'college_admin') {
       return <Navigate to="/college-admin/dashboard" replace />;
     } else if (user?.role === 'platform_admin') {
@@ -31,10 +31,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     return <Navigate to="/" replace />;
   }
 
-  // Enforce prerequisites for students - must have at least one college selected
+  // Enforce prerequisites for users - must have at least one college selected
   // Skip this check if already on college-selection page
-  if (user?.role === 'student' && location.pathname !== '/auth/college-selection') {
-    const hasColleges = user?.studentProfile?.miningColleges?.length > 0;
+  if (user?.role === 'user' && location.pathname !== '/auth/college-selection') {
+    const hasColleges = user?.userProfile?.miningColleges?.length > 0;
     if (!hasColleges) {
       return <Navigate to="/auth/college-selection" replace />;
     }

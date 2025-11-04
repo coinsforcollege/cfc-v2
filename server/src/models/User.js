@@ -29,10 +29,10 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['student', 'college_admin', 'platform_admin'],
+    enum: ['user', 'college_admin', 'platform_admin'],
     required: true
   },
-  // For students
+  // For users (miners)
   college: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'College',
@@ -44,8 +44,8 @@ const userSchema = new mongoose.Schema({
     ref: 'College',
     default: null
   },
-  // Student-specific fields
-  studentProfile: {
+  // User-specific fields (for miners)
+  userProfile: {
     miningColleges: [{
       college: {
         type: mongoose.Schema.Types.ObjectId,
@@ -55,8 +55,8 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
       },
-      referredStudents: [{
-        student: {
+      referredUsers: [{
+        user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User'
         },
@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema({
     referralCode: {
       type: String,
       unique: true,
-      sparse: true // Only students have referral codes
+      sparse: true // Only users have referral codes
     },
     referredBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -110,6 +110,12 @@ const userSchema = new mongoose.Schema({
 // Index for role-based queries
 userSchema.index({ role: 1 });
 
+// Index for mining colleges lookup (critical for WebSocket queries)
+userSchema.index({ 'userProfile.miningColleges.college': 1 });
+
+// Compound index for active user queries with role filter
+userSchema.index({ role: 1, isActive: 1 });
+
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   // Only hash if password is modified
@@ -127,11 +133,11 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Generate referral code for students
+// Generate referral code for users (miners)
 userSchema.pre('save', function(next) {
-  if (this.role === 'student' && !this.studentProfile.referralCode) {
-    // Generate unique referral code (e.g., STUDENT_ID_TIMESTAMP)
-    this.studentProfile.referralCode = `REF${this._id.toString().slice(-8).toUpperCase()}${Date.now().toString().slice(-4)}`;
+  if (this.role === 'user' && !this.userProfile.referralCode) {
+    // Generate unique referral code (e.g., USER_ID_TIMESTAMP)
+    this.userProfile.referralCode = `REF${this._id.toString().slice(-8).toUpperCase()}${Date.now().toString().slice(-4)}`;
   }
   next();
 });

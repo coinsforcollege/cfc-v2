@@ -4,10 +4,10 @@ import { createNotification } from '../services/notification.service.js';
 
 // @desc    Submit ambassador application
 // @route   POST /api/ambassador/apply
-// @access  Private (Student only)
+// @access  Private (User only)
 export const submitApplication = async (req, res, next) => {
   try {
-    const studentId = req.user.id;
+    const userId = req.user.id;
     const {
       name,
       email,
@@ -23,18 +23,18 @@ export const submitApplication = async (req, res, next) => {
       additionalComments
     } = req.body;
 
-    // Get student's college
-    const student = await User.findById(studentId);
-    if (!student.college) {
+    // Get user's college
+    const user = await User.findById(userId);
+    if (!user.college) {
       return res.status(400).json({
         success: false,
         message: 'You must be associated with a college to apply'
       });
     }
 
-    // Check if student already has a pending or approved application
+    // Check if user already has a pending or approved application
     const existingApplication = await AmbassadorApplication.findOne({
-      student: studentId,
+      user: userId,
       status: { $in: ['pending', 'under_review', 'approved'] }
     });
 
@@ -47,11 +47,11 @@ export const submitApplication = async (req, res, next) => {
 
     // Create new application
     const application = await AmbassadorApplication.create({
-      student: studentId,
+      user: userId,
       name,
       email,
       phone,
-      college: student.college,
+      college: user.college,
       yearOfStudy,
       major,
       leadershipExperience,
@@ -75,12 +75,12 @@ export const submitApplication = async (req, res, next) => {
   }
 };
 
-// @desc    Get student's own application
+// @desc    Get user's own application
 // @route   GET /api/ambassador/my-application
-// @access  Private (Student only)
+// @access  Private (User only)
 export const getMyApplication = async (req, res, next) => {
   try {
-    const application = await AmbassadorApplication.findOne({ student: req.user.id })
+    const application = await AmbassadorApplication.findOne({ user: req.user.id })
       .populate('college', 'name country logo')
       .sort({ createdAt: -1 });
 
@@ -110,7 +110,7 @@ export const getAllApplications = async (req, res, next) => {
 
     // Get applications
     const applications = await AmbassadorApplication.find(query)
-      .populate('student', 'name email')
+      .populate('user', 'name email')
       .populate('college', 'name country logo')
       .populate('reviewedBy', 'name')
       .sort({ submittedAt: -1 })
@@ -164,7 +164,7 @@ export const getAllApplications = async (req, res, next) => {
 export const getApplication = async (req, res, next) => {
   try {
     const application = await AmbassadorApplication.findById(req.params.id)
-      .populate('student', 'name email phone')
+      .populate('user', 'name email phone')
       .populate('college', 'name country logo')
       .populate('reviewedBy', 'name email');
 
@@ -200,7 +200,7 @@ export const updateApplicationStatus = async (req, res, next) => {
         reviewedBy: req.user.id
       },
       { new: true, runValidators: true }
-    ).populate('student', 'name email')
+    ).populate('user', 'name email')
      .populate('college', 'name country');
 
     if (!application) {
@@ -210,7 +210,7 @@ export const updateApplicationStatus = async (req, res, next) => {
       });
     }
 
-    // Notify student about application status change
+    // Notify user about application status change
     let notificationTitle, notificationMessage, notificationType, notificationPriority;
 
     if (status === 'approved') {
@@ -232,7 +232,7 @@ export const updateApplicationStatus = async (req, res, next) => {
 
     if (notificationTitle) {
       await createNotification({
-        recipient: application.student._id,
+        recipient: application.user._id,
         type: notificationType,
         title: notificationTitle,
         message: notificationMessage,
@@ -245,7 +245,7 @@ export const updateApplicationStatus = async (req, res, next) => {
         },
         category: 'ambassador',
         priority: notificationPriority,
-        actionUrl: '/student/ambassador/application'
+        actionUrl: '/user/ambassador/application'
       });
     }
 

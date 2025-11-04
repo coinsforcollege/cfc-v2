@@ -45,7 +45,7 @@ const Ambassador = () => {
   const [application, setApplication] = useState(null);
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
+    if (!user || user.role !== 'user') {
       navigate('/auth/login');
       return;
     }

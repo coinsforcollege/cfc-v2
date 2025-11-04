@@ -4,7 +4,6 @@ import {
   Facebook,
   Twitter,
   LinkedIn,
-  GitHub,
   Email,
   Phone,
   LocationOn,
@@ -23,15 +22,13 @@ const Footer = () => {
 
   const footerLinks = {
     platform: [
-      { name: t('footer.intuitionExchange'), href: '/exchange' },
+      { name: t('footer.intuitionExchange'), href: 'https://www.intuitionexchange.com/' },
       { name: t('footer.collegenzBlockchain'), href: '/blockchain' },
       { name: t('footer.gasManager'), href: '/gas-manager' }
     ],
     resources: [
       { name: t('footer.documentation'), href: '/docs' },
-      { name: t('footer.campusAmbassador'), href: '/ambassador/apply' },
-      { name: t('footer.communityForum'), href: '/community' },
-      { name: t('footer.githubRepo'), href: '/github' }
+      { name: t('footer.campusAmbassador'), href: '/ambassador/apply' }
     ],
     legal: [
       { name: t('footer.privacyPolicy'), href: '/privacy' },
@@ -40,16 +37,15 @@ const Footer = () => {
     ],
     contact: [
       { name: t('footer.getHelp'), href: '/docs', icon: Email },
-      { name: 'hello@coinsforcollege.com', href: 'mailto:hello@coinsforcollege.com', icon: Email },
+      { name: 'info@coinsforcollege.org', href: 'mailto:info@coinsforcollege.org', icon: Email },
       { name: t('footer.location'), href: '#', icon: LocationOn }
     ]
   };
 
   const socialLinks = [
-    { name: 'Facebook', icon: Facebook, href: '#' },
-    { name: 'Twitter', icon: Twitter, href: '#' },
-    { name: 'LinkedIn', icon: LinkedIn, href: '#' },
-    { name: 'GitHub', icon: GitHub, href: '#' }
+    { name: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/Coinsforcollege/' },
+    { name: 'X', icon: Twitter, href: 'https://x.com/Coins_4_College' },
+    { name: 'LinkedIn', icon: LinkedIn, href: 'https://www.linkedin.com/company/coins-for-college/' }
   ];
 
   return (
@@ -398,7 +394,7 @@ const Footer = () => {
                     fontWeight: 600
                   }}
                 >
-                  Collegen L2
+                  CollegenZ L2
                 </Typography>
               </Box>
             </Box>

@@ -64,13 +64,13 @@ const PlatformAdminDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
-  const [students, setStudents] = useState([]);
+  const [users, setUsers] = useState([]);
   const [colleges, setColleges] = useState([]);
   const [applications, setApplications] = useState([]);
   const [applicationStats, setApplicationStats] = useState(null);
   const [subscribers, setSubscribers] = useState([]);
   const [activeSection, setActiveSection] = useState('overview');
-  const [studentSearch, setStudentSearch] = useState('');
+  const [userSearch, setUserSearch] = useState('');
   const [collegeSearch, setCollegeSearch] = useState('');
   const [applicationSearch, setApplicationSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -151,7 +151,7 @@ const PlatformAdminDashboard = () => {
         ambassadorApi.getAllApplications()
       ]);
       setStats(statsRes.data.stats);
-      setStudents(studentsRes.data);
+      setUsers(studentsRes.data);
       setColleges(collegesRes.data);
       if (applicationsRes.success) {
         setApplications(applicationsRes.data.applications);
@@ -428,9 +428,9 @@ const PlatformAdminDashboard = () => {
     }
   };
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    student.email.toLowerCase().includes(studentSearch.toLowerCase())
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+    user.email.toLowerCase().includes(userSearch.toLowerCase())
   );
 
   const filteredColleges = colleges.filter(college =>
@@ -542,25 +542,25 @@ const PlatformAdminDashboard = () => {
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>Platform Overview</Typography>
           <Typography variant="body2" color="text.secondary">
-            Manage students, colleges, and monitor the entire platform from this dashboard.
+            Manage users, colleges, and monitor the entire platform from this dashboard.
           </Typography>
         </CardContent>
       </Card>
     </>
   );
 
-  const renderStudents = () => (
+  const renderUsers = () => (
     <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>Students ({students.length})</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>Users ({users.length})</Typography>
         </Box>
-        
+
         <TextField
-          placeholder="Search students..."
+          placeholder="Search users..."
           fullWidth
-          value={studentSearch}
-          onChange={(e) => setStudentSearch(e.target.value)}
+          value={userSearch}
+          onChange={(e) => setUserSearch(e.target.value)}
           sx={{ mb: 3 }}
           InputProps={{
             startAdornment: (
@@ -575,7 +575,7 @@ const PlatformAdminDashboard = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>Student</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>User</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>College</TableCell>
                 <TableCell sx={{ fontWeight: 700 }} align="right">Mining Colleges</TableCell>
                 <TableCell sx={{ fontWeight: 700 }} align="right">Referrals</TableCell>
@@ -583,48 +583,48 @@ const PlatformAdminDashboard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredStudents.map((student) => (
-                <TableRow 
-                  key={student._id}
+              {filteredUsers.map((user) => (
+                <TableRow
+                  key={user._id}
                   sx={{ '&:hover': { background: 'rgba(0,0,0,0.02)' } }}
                 >
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                        {student.name.charAt(0).toUpperCase()}
+                        {user.name.charAt(0).toUpperCase()}
                       </Avatar>
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{student.name}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{user.name}</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Email sx={{ fontSize: 12, color: '#64748b' }} />
-                          <Typography variant="caption" color="text.secondary">{student.email}</Typography>
+                          <Typography variant="caption" color="text.secondary">{user.email}</Typography>
                         </Box>
                       </Box>
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{student.college?.name || 'N/A'}</Typography>
-                    <Typography variant="caption" color="text.secondary">{student.college?.country || ''}</Typography>
+                    <Typography variant="body2">{user.college?.name || 'N/A'}</Typography>
+                    <Typography variant="caption" color="text.secondary">{user.college?.country || ''}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Chip 
-                      label={student.studentProfile?.miningColleges?.length || 0}
+                    <Chip
+                      label={user.userProfile?.miningColleges?.length || 0}
                       size="small"
-                      sx={{ 
+                      sx={{
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         color: 'white',
-                        fontWeight: 600 
+                        fontWeight: 600
                       }}
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <Typography variant="body2">{student.studentProfile?.totalReferrals || 0}</Typography>
+                    <Typography variant="body2">{user.userProfile?.totalReferrals || 0}</Typography>
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <CalendarToday sx={{ fontSize: 14, color: '#64748b' }} />
                       <Typography variant="caption">
-                        {new Date(student.createdAt).toLocaleDateString()}
+                        {new Date(user.createdAt).toLocaleDateString()}
                       </Typography>
                     </Box>
                   </TableCell>
@@ -634,9 +634,9 @@ const PlatformAdminDashboard = () => {
           </Table>
         </TableContainer>
 
-        {filteredStudents.length === 0 && (
+        {filteredUsers.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body2" color="text.secondary">No students found</Typography>
+            <Typography variant="body2" color="text.secondary">No users found</Typography>
           </Box>
         )}
       </CardContent>
@@ -1623,8 +1623,8 @@ const PlatformAdminDashboard = () => {
     switch (activeSection) {
       case 'overview':
         return renderOverview();
-      case 'students':
-        return renderStudents();
+      case 'users':
+        return renderUsers();
       case 'colleges':
         return renderColleges();
       case 'submissions':
@@ -1638,7 +1638,7 @@ const PlatformAdminDashboard = () => {
 
   // Calculate stats for sidebar badges
   const sidebarStats = {
-    studentsCount: students.length,
+    usersCount: users.length,
     collegesCount: colleges.length,
     ambassadorsCount: applications.length,
     subscribersCount: subscribers.length,

@@ -54,7 +54,7 @@ export const cleanupExpiredSessions = async () => {
         // We successfully stopped the session - proceed with wallet and stats updates
         await Wallet.findOneAndUpdate(
           {
-            student: session.student,
+            user: session.user,
             college: session.college
           },
           {

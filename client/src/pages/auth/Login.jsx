@@ -49,16 +49,16 @@ const Login = () => {
         login(response.data, response.token);
         
         // Redirect based on role
-        if (response.data.role === 'student') {
-          // Check if student has colleges in miningColleges
-          const hasColleges = response.data.studentProfile?.miningColleges?.length > 0;
+        if (response.data.role === 'user') {
+          // Check if user has colleges in miningColleges
+          const hasColleges = response.data.userProfile?.miningColleges?.length > 0;
 
           if (!hasColleges) {
             // No colleges, redirect to college selection
             navigate('/auth/college-selection');
           } else {
             // Has colleges, go to overview page
-            navigate('/student/overview');
+            navigate('/user/overview');
           }
         } else if (response.data.role === 'college_admin') {
           navigate('/college-admin/dashboard');
@@ -262,7 +262,7 @@ const Login = () => {
               <Typography variant="body2" color="text.secondary">
                 {t('auth.dontHaveAccount')}{' '}
                 <Link
-                  to="/auth/register/student"
+                  to="/auth/register/user"
                   style={{
                     color: '#8b5cf6',
                     textDecoration: 'none',

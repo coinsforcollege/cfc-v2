@@ -18,7 +18,7 @@
     "next": "下一步",
     "previous": "上一步",
     "poweredBy": "技术支持",
-    "collegenL2": "Collegen L2",
+    "collegenL2": "CollegenZ L2",
     "comingSoon": "即将推出",
     "needHelp": "需要帮助？",
     "getSupport": "获取支持",
@@ -97,7 +97,7 @@
     "signUp": "注册",
     "signIn": "登录",
     "or": "或",
-    "studentRegistration": "学生注册",
+    "studentRegistration": "用户注册",
     "collegeRegistration": "大学注册",
     "fullName": "全名",
     "confirmPassword": "确认密码",
@@ -219,7 +219,7 @@
     "minersLabel": "矿工",
     "tokensLabel": "代币",
     "tokenPerHour": "代币/小时",
-    "tokenPerHourPerRef": "+{{rate}} 代币/小时/推荐",
+    "tokenPerHourPerRef": "+{{rate}} 代币/小时/推荐（每所大学最多10个）",
     "previous": "上一页",
     "next": "下一页",
     "pageOf": "第 {{current}} 页，共 {{total}} 页",
@@ -475,8 +475,8 @@
           }
         },
         "unlimitedReferrals": {
-          "title": "无限推荐",
-          "description": "您可以邀请的朋友数量没有限制。分享越多，赚得越多！"
+          "title": "每所大学最多10个推荐",
+          "description": "您可以推荐无限的朋友，但奖金费率是根据每所大学最多10个推荐计算的。超过10个的推荐仍计入您的总社区，但不会增加您的挖矿速率。"
         },
         "getStartedNow": "立即开始"
       },
@@ -506,6 +506,10 @@
           "howSecureIsInfo": {
             "question": "我的信息安全吗？",
             "answer": "我们使用行业标准的加密和安全实践。我们绝不会在未经您同意的情况下分享您的个人信息。"
+          },
+          "referralLimit": {
+            "question": "我可以推荐的次数有限制吗？",
+            "answer": "您可以推荐无限的朋友，但奖金费率是根据每所大学最多10个推荐计算的。超过10个的推荐仍计入您的总社区，但不会增加您的挖矿速率。"
           }
         }
       },
@@ -524,7 +528,7 @@
     "referrals": "推荐",
     "ambassador": "大使",
     "settings": "设置",
-    "buildOnCollegen": "在 Collegen 上构建",
+    "buildOnCollegen": "在 CollegenZ 上构建",
     "welcome": "欢迎",
     "miningStatus": "挖矿状态",
     "totalEarnings": "总收益",
@@ -539,8 +543,8 @@
     "notifications": "通知",
     "profile": "个人资料"
   },
-  "student": {
-    "dashboard": "学生控制台",
+  "user": {
+    "dashboard": "用户控制台",
     "welcome": "欢迎",
     "noCollegeAssigned": "未分配大学",
     "totalBalance": "总余额",
@@ -596,7 +600,7 @@
     "myCollegesDesc": "管理您的大学挖矿投资组合。添加最多10所大学并开始赚取代币。",
     "baseRateTooltip": "每小时赚取的基础代币（所有学生的默认速率）",
     "baseRate": "基础速率",
-    "referralBonusTooltip": "每个成功推荐每小时赚取的额外代币",
+    "referralBonusTooltip": "每个成功推荐每小时赚取的额外代币（每所大学最多10个推荐计入奖金）",
     "sessionHours": "会话小时",
     "activeColleges": "活跃大学",
     "cancel": "取消",
@@ -642,9 +646,9 @@
     "failedToSetPrimaryCollege": "设置主要大学失败",
     "pleaseSelectImage": "请选择图片文件",
     "fileSizeLimit": "文件大小应小于5MB",
-    "earningRateTooltip": "您的挖矿速率：{{baseRate}} 代币/小时（基础）+ {{bonusRate}} 代币/小时（推荐奖励）{{restart}}",
+    "earningRateTooltip": "您的挖矿速率：{{baseRate}} 代币/小时（基础）+ {{bonusRate}} 代币/小时（推荐奖励，上限为 {{cappedCount}}/10 个推荐）{{restart}}",
     "restartMiningToApply": "（重启挖矿以应用新推荐）",
-    "referralsTooltip": "此大学的 {{count}} 个推荐{{plural}}{{active}}",
+    "referralsTooltip": "此大学的 {{count}} 个推荐{{plural}}（{{cappedCount}}/10 计入奖金）{{active}}",
     "referralActive": "（{{effectiveCount}} 个计入当前速率）",
     "community": "社区",
     "communityDesc": "发展您的社区，每位使用您的推荐码加入的好友都能获得奖励代币",
@@ -664,9 +668,9 @@
     "earnBonusRates": "赚取奖励速率",
     "earnBonusRatesDesc": "当有人使用您的代码注册某所大学时，您将为该大学获得每小时额外的代币。",
     "collegeSpecific": "大学专属",
-    "collegeSpecificDesc": "每所大学设定自己的每推荐奖励速率（通常为0.10代币/小时）。",
+    "collegeSpecificDesc": "每所大学设定自己的每推荐奖励速率（通常为0.10代币/小时）。每所大学最多10个推荐计入奖金速率。",
     "compoundEarnings": "复合收益",
-    "compoundEarningsDesc": "更多推荐 = 每所大学更高的挖矿速率。",
+    "compoundEarningsDesc": "更多推荐 = 每所大学更高的挖矿速率（每所大学最多10个推荐计入奖金）。",
     "yourCommunityMembers": "您的社区成员",
     "peopleJoined": "{{count}} {{plural}}使用您的代码加入",
     "personHas": "人已",
@@ -1094,7 +1098,7 @@
     "primaryCollege": "主要大学",
     "notSet": "未设置",
     "role": "角色",
-    "student": "学生",
+    "student": "用户",
     "updateProfile": "更新资料",
     "changeNamePhone": "更改您的姓名和电话号码",
     "fillAllFields": "请填写所有字段",
@@ -1217,7 +1221,7 @@
     "live": "直播",
     "earlySupporters": "{{college}}：{{count}} 名早期支持者",
     "joinedWaitlist": "{{college}} 加入候补名单",
-    "studentsActiveMining": "{{count}} 名学生正在积极挖矿",
+    "studentsActiveMining": "{{count}} 名用户正在积极挖矿",
     "tokensMined": "{{college}} 挖掘了 {{tokens}} 枚代币",
     "institutionsBuilding": "{{count}} 所机构正在构建数字经济",
     "reachingSupporters": "{{college}} 达到 {{count}} 名支持者",
@@ -1233,7 +1237,7 @@
     "title": "全球网络",
     "totalSupporters": "{{college}}：{{count}} 名早期支持者",
     "joinedNetwork": "{{college}} 加入网络",
-    "studentsActiveMining": "{{count}} 名学生正在积极挖矿",
+    "studentsActiveMining": "{{count}} 名用户正在积极挖矿",
     "reachedTokens": "{{college}} 达到 {{tokens}} 枚代币"
   },
   "infrastructure": {
@@ -1262,7 +1266,7 @@
     "whatWeDeliver": "我们交付的内容",
     "whatWeDeliverDesc": "为您部署的企业级基础设施",
     "ctaTitle": "准备好启动您的代币了吗？",
-    "ctaDescription": "加入在 Collegen 上构建数字经济的领先机构"
+    "ctaDescription": "加入在 CollegenZ 上构建数字经济的领先机构"
   },
   "fundraising": {
     "chipLabel": "校友与募资",
@@ -1344,12 +1348,12 @@
   },
   "buildOnCollegen": {
     "chipLabel": "开发者专区",
-    "title": "在 Collegen L2 上构建",
+    "title": "在 CollegenZ L2 上构建",
     "description": "在我们以教育为重点的区块链层上创建创新应用",
     "feature1Title": "开发者 SDK",
     "feature1Desc": "用于构建大学代币应用的综合工具和库",
     "feature2Title": "收入分享",
-    "feature2Desc": "从在 Collegen 生态系统上构建的应用中获利",
+    "feature2Desc": "从在 CollegenZ 生态系统上构建的应用中获利",
     "feature3Title": "教育专注",
     "feature3Desc": "专为教育机构优化的区块链",
     "resourcesTitle": "开发者资源",

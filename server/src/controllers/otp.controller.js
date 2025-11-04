@@ -18,10 +18,10 @@ const generateVerificationToken = (email, role) => {
   );
 };
 
-// @desc    Send OTP for student registration
-// @route   POST /api/auth/otp/send/student
+// @desc    Send OTP for user registration
+// @route   POST /api/auth/otp/send/user
 // @access  Public
-export const sendOTPForStudent = async (req, res, next) => {
+export const sendOTPForUser = async (req, res, next) => {
   try {
     const { name, email, phone, password, referralCode, collegeId, language } = req.body;
 
@@ -73,8 +73,8 @@ export const sendOTPForStudent = async (req, res, next) => {
     // Validate referral code if provided
     if (referralCode) {
       const referredByUser = await User.findOne({
-        'studentProfile.referralCode': referralCode,
-        role: 'student'
+        'userProfile.referralCode': referralCode,
+        role: 'user'
       });
 
       if (!referredByUser) {
@@ -86,7 +86,7 @@ export const sendOTPForStudent = async (req, res, next) => {
     }
 
     // Delete any existing OTP for this email and role
-    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'student' });
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'user' });
 
     // Generate OTP
     const otp = generateOTP();
@@ -95,7 +95,7 @@ export const sendOTPForStudent = async (req, res, next) => {
     const otpDoc = await OTPVerification.create({
       email: email.toLowerCase(),
       otp,
-      role: 'student',
+      role: 'user',
       expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
     });
 
@@ -260,7 +260,7 @@ export const verifyOTP = async (req, res, next) => {
       });
     }
 
-    if (!['student', 'college_admin'].includes(role)) {
+    if (!['user', 'college_admin'].includes(role)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid role'
@@ -345,7 +345,7 @@ export const resendOTP = async (req, res, next) => {
       });
     }
 
-    if (!['student', 'college_admin'].includes(role)) {
+    if (!['user', 'college_admin'].includes(role)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid role'

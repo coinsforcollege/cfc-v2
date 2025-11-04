@@ -10,14 +10,14 @@ import { protect, authorize } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-// All routes require authentication and student role
+// All routes require authentication and user role
 router.use(protect);
 
-// Mining operations (students only)
-router.post('/start/:collegeId', authorize('student'), startMining);
-router.post('/stop/:collegeId', authorize('student'), stopMining);
-router.get('/status', authorize('student'), getMiningStatus);
-router.get('/status/:collegeId', authorize('student'), getMiningStatusForCollege);
+// Mining operations (users only)
+router.post('/start/:collegeId', authorize('user'), startMining);
+router.post('/stop/:collegeId', authorize('user'), stopMining);
+router.get('/status', authorize('user'), getMiningStatus);
+router.get('/status/:collegeId', authorize('user'), getMiningStatusForCollege);
 
 // Auto-stop expired sessions (can be called by cron or admin)
 router.post('/auto-stop', authorize('platform_admin'), autoStopExpiredSessions);

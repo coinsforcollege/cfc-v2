@@ -297,7 +297,7 @@ After student registration, users are redirected to college selection (`/auth/co
 
 ### Mining Sessions
 - Students can mine for up to 24 hours per session
-- Earning rate = base rate (0.25 tokens/hr) + referral bonus
+- Earning rate = base rate (0.25 tokens/hr) + referral bonus (capped at 10 referrals per college)
 - Sessions auto-expire; WebSocket tracks remaining time
 - Tokens are credited to wallet when session completes
 
@@ -309,5 +309,5 @@ Client fetches blog content from Strapi API. Blog posts use dynamic content bloc
 - **File Uploads**: Must use `FormData` with proper content-type headers. Check `client/src/api/collegeAdmin.api.js` for upload examples
 - **Mining Updates**: Only students receive WebSocket updates; check role before connecting
 - **College Status**: Colleges have status field ('Unaffiliated', 'Waitlist', 'Building', 'Live') separate from deprecated `isOnWaitlist` boolean
-- **Referral Codes**: Auto-generated on student creation, format: `REF{lastUserId8chars}{timestamp4chars}`
+- **Referral Codes**: Auto-generated on student creation, format: `REF{lastUserId8chars}{timestamp4chars}`. Bonus rates are capped at 10 referrals per college (users can still refer unlimited friends, but only first 10 count toward mining bonus)
 - **Multiple Colleges**: Students can mine for multiple colleges simultaneously; each has separate wallet balance

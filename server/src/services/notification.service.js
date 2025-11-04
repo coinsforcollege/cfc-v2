@@ -56,16 +56,16 @@ export const createBulkNotifications = async (notificationsArray) => {
 };
 
 /**
- * Check if student reached a token milestone
- * @param {String} studentId - Student ID
+ * Check if user reached a token milestone
+ * @param {String} userId - User ID
  * @param {String} collegeId - College ID
  * @param {Number} newBalance - New wallet balance
  * @returns {Promise<Number|null>} - Milestone reached or null
  */
-export const checkTokenMilestone = async (studentId, collegeId, newBalance) => {
+export const checkTokenMilestone = async (userId, collegeId, newBalance) => {
   try {
     // Get previous balance from wallet
-    const wallet = await Wallet.findOne({ student: studentId, college: collegeId });
+    const wallet = await Wallet.findOne({ user: userId, college: collegeId });
     const previousBalance = wallet ? wallet.balance - newBalance : 0;
 
     // Find milestone crossed
@@ -114,24 +114,24 @@ export const checkAdminTokenMilestone = (newTokenCount, previousTokenCount) => {
 };
 
 /**
- * Notify all students mining a college about a miner milestone
+ * Notify all users mining a college about a miner milestone
  * @param {String} collegeId - College ID
  * @param {String} collegeName - College name
  * @param {Number} milestone - Miner count milestone
  */
 export const notifyStudentsAboutMinerMilestone = async (collegeId, collegeName, milestone) => {
   try {
-    // Get all students mining this college
-    const students = await User.find({
-      role: 'student',
-      'studentProfile.miningColleges.college': collegeId
+    // Get all users mining this college
+    const users = await User.find({
+      role: 'user',
+      'userProfile.miningColleges.college': collegeId
     }).select('_id');
 
-    if (students.length === 0) return;
+    if (users.length === 0) return;
 
-    // Create notifications for all students
-    const notifications = students.map(student => ({
-      recipient: student._id,
+    // Create notifications for all users
+    const notifications = users.map(user => ({
+      recipient: user._id,
       type: 'college_miner_milestone',
       title: `${collegeName} reached ${milestone.toLocaleString()} miners!`,
       message: `Your college ${collegeName} now has ${milestone.toLocaleString()} community members mining. The community is growing!`,
@@ -143,14 +143,14 @@ export const notifyStudentsAboutMinerMilestone = async (collegeId, collegeName, 
       isRead: false,
       category: 'milestone',
       priority: 'medium',
-      actionUrl: `/student/colleges`
+      actionUrl: `/user/colleges`
     }));
 
     await createBulkNotifications(notifications);
 
-    console.log(`Created miner milestone notifications for ${students.length} students`);
+    console.log(`Created miner milestone notifications for ${users.length} users`);
   } catch (error) {
-    console.error('Error notifying students about miner milestone:', error);
+    console.error('Error notifying users about miner milestone:', error);
   }
 };
 

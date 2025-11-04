@@ -5,13 +5,13 @@ import MiningSession from '../models/Mining.js';
 import { createNotification, checkMinerMilestone, notifyStudentsAboutMinerMilestone, notifyAdminAboutMinerMilestone } from '../services/notification.service.js';
 import { broadcastMiningUpdate } from '../websocket/miningSocket.js';
 
-// @desc    Add college to student's mining list
-// @route   POST /api/student/colleges/add
-// @access  Private (Student only)
+// @desc    Add college to user's mining list
+// @route   POST /api/user/colleges/add
+// @access  Private (User only)
 export const addCollegeToMiningList = async (req, res, next) => {
   try {
     const { collegeId } = req.body;
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
     // Parse newCollege if it's a JSON string (from FormData)
     let newCollege = req.body.newCollege;
@@ -26,10 +26,10 @@ export const addCollegeToMiningList = async (req, res, next) => {
       }
     }
 
-    const student = await User.findById(studentId);
+    const user = await User.findById(userId);
 
-    // Check if student already has 10 colleges
-    if (student.studentProfile.miningColleges.length >= 10) {
+    // Check if user already has 10 colleges
+    if (user.userProfile.miningColleges.length >= 10) {
       return res.status(400).json({
         success: false,
         message: 'You can only mine for up to 10 colleges'
@@ -81,7 +81,7 @@ export const addCollegeToMiningList = async (req, res, next) => {
           name,
           country,
           logo: logoPath,
-          createdBy: studentId,
+          createdBy: userId,
           status: 'Unaffiliated'
         });
       }
@@ -92,8 +92,8 @@ export const addCollegeToMiningList = async (req, res, next) => {
       });
     }
 
-    // Check if college is already in student's mining list
-    const alreadyAdded = student.studentProfile.miningColleges.some(
+    // Check if college is already in user's mining list
+    const alreadyAdded = user.userProfile.miningColleges.some(
       mc => mc.college.toString() === college._id.toString()
     );
 
@@ -105,19 +105,19 @@ export const addCollegeToMiningList = async (req, res, next) => {
     }
 
     // Add college to mining list
-    student.studentProfile.miningColleges.push({
+    user.userProfile.miningColleges.push({
       college: college._id,
       addedAt: new Date()
     });
-    await student.save();
+    await user.save();
 
     // Populate the college data
-    await student.populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate admin');
+    await user.populate('userProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate admin');
 
     // Get updated miner count for this college
     const currentMinerCount = await User.countDocuments({
-      role: 'student',
-      'studentProfile.miningColleges.college': college._id
+      role: 'user',
+      'userProfile.miningColleges.college': college._id
     });
 
     // Check if college has an admin to notify
@@ -127,10 +127,10 @@ export const addCollegeToMiningList = async (req, res, next) => {
         recipient: college.admin,
         type: 'new_miner_joined',
         title: 'New miner joined your college!',
-        message: `${student.name} just joined your college community and started mining for ${college.name}. Your community now has ${currentMinerCount} miners!`,
+        message: `${user.name} just joined your college community and started mining for ${college.name}. Your community now has ${currentMinerCount} miners!`,
         data: {
-          studentId: student._id,
-          studentName: student.name,
+          userId: user._id,
+          studentName: user.name,
           collegeId: college._id,
           collegeName: college.name,
           totalMiners: currentMinerCount
@@ -152,13 +152,13 @@ export const addCollegeToMiningList = async (req, res, next) => {
     }
 
     // Broadcast mining update via WebSocket
-    await broadcastMiningUpdate(studentId);
+    await broadcastMiningUpdate(userId);
 
     res.status(200).json({
       success: true,
       message: 'College added to mining list',
       data: {
-        miningColleges: student.studentProfile.miningColleges
+        miningColleges: user.userProfile.miningColleges
       }
     });
   } catch (error) {
@@ -166,17 +166,17 @@ export const addCollegeToMiningList = async (req, res, next) => {
   }
 };
 
-// @desc    Remove college from student's mining list
-// @route   DELETE /api/student/colleges/:collegeId
-// @access  Private (Student only)
+// @desc    Remove college from user's mining list
+// @route   DELETE /api/user/colleges/:collegeId
+// @access  Private (User only)
 export const removeCollegeFromMiningList = async (req, res, next) => {
   try {
     const { collegeId } = req.params;
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
     // Check if there's an active mining session for this college
     const activeSession = await MiningSession.findOne({
-      student: studentId,
+      user: userId,
       college: collegeId,
       isActive: true
     });
@@ -189,21 +189,21 @@ export const removeCollegeFromMiningList = async (req, res, next) => {
     }
 
     // Remove college from mining list
-    const student = await User.findByIdAndUpdate(
-      studentId,
+    const user = await User.findByIdAndUpdate(
+      userId,
       {
         $pull: {
-          'studentProfile.miningColleges': { college: collegeId }
+          'userProfile.miningColleges': { college: collegeId }
         }
       },
       { new: true }
-    ).populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
+    ).populate('userProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate');
 
     res.status(200).json({
       success: true,
       message: 'College removed from mining list',
       data: {
-        miningColleges: student.studentProfile.miningColleges
+        miningColleges: user.userProfile.miningColleges
       }
     });
   } catch (error) {
@@ -211,18 +211,18 @@ export const removeCollegeFromMiningList = async (req, res, next) => {
   }
 };
 
-// @desc    Set primary college for student
-// @route   POST /api/student/colleges/set-primary
-// @access  Private (Student only)
+// @desc    Set primary college for user
+// @route   POST /api/user/colleges/set-primary
+// @access  Private (User only)
 export const setPrimaryCollege = async (req, res, next) => {
   try {
     const { collegeId } = req.body;
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
-    const student = await User.findById(studentId);
+    const user = await User.findById(userId);
 
-    // Check if college is in student's mining list
-    const collegeInList = student.studentProfile.miningColleges.some(
+    // Check if college is in user's mining list
+    const collegeInList = user.userProfile.miningColleges.some(
       mc => mc.college.toString() === collegeId
     );
 
@@ -234,16 +234,16 @@ export const setPrimaryCollege = async (req, res, next) => {
     }
 
     // Update primary college
-    student.college = collegeId;
-    await student.save();
+    user.college = collegeId;
+    await user.save();
 
-    await student.populate('college', 'name country logo stats baseRate referralBonusRate');
+    await user.populate('college', 'name country logo stats baseRate referralBonusRate');
 
     res.status(200).json({
       success: true,
       message: 'Primary college updated successfully',
       data: {
-        college: student.college
+        college: user.college
       }
     });
   } catch (error) {
@@ -251,14 +251,14 @@ export const setPrimaryCollege = async (req, res, next) => {
   }
 };
 
-// @desc    Get student's wallet (all balances)
-// @route   GET /api/student/wallet
-// @access  Private (Student only)
+// @desc    Get user's wallet (all balances)
+// @route   GET /api/user/wallet
+// @access  Private (User only)
 export const getWallet = async (req, res, next) => {
   try {
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
-    const wallets = await Wallet.find({ student: studentId })
+    const wallets = await Wallet.find({ user: userId })
       .populate('college', 'name country logo baseRate referralBonusRate')
       .sort({ balance: -1 });
 
@@ -281,27 +281,27 @@ export const getWallet = async (req, res, next) => {
   }
 };
 
-// @desc    Get student dashboard data
-// @route   GET /api/student/dashboard
-// @access  Private (Student only)
+// @desc    Get user dashboard data
+// @route   GET /api/user/dashboard
+// @access  Private (User only)
 export const getDashboard = async (req, res, next) => {
   try {
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
-    // Get student with populated data
-    const student = await User.findById(studentId)
+    // Get user with populated data
+    const user = await User.findById(userId)
       .populate('college', 'name country logo baseRate referralBonusRate')
-      .populate('studentProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate')
-      .populate('studentProfile.miningColleges.referredStudents.student', 'name email');
+      .populate('userProfile.miningColleges.college', 'name country logo stats baseRate referralBonusRate')
+      .populate('userProfile.miningColleges.referredUsers.user', 'name email');
 
     // Get active mining sessions
     const activeSessions = await MiningSession.find({
-      student: studentId,
+      user: userId,
       isActive: true
     }).populate('college', 'name country logo baseRate referralBonusRate');
 
     // Get wallets
-    const wallets = await Wallet.find({ student: studentId })
+    const wallets = await Wallet.find({ user: userId })
       .populate('college', 'name country logo baseRate referralBonusRate')
       .sort({ balance: -1 });
 
@@ -330,62 +330,62 @@ export const getDashboard = async (req, res, next) => {
     });
 
     // Filter out null colleges (deleted colleges)
-    const validMiningColleges = student.studentProfile.miningColleges.filter(mc => mc.college !== null);
+    const validMiningColleges = user.userProfile.miningColleges.filter(mc => mc.college !== null);
     const validWallets = wallets.filter(w => w.college !== null);
 
-    // Get enhanced data for referred students (mining status and total tokens)
-    const allReferredStudentIds = new Set();
+    // Get enhanced data for referred users (mining status and total tokens)
+    const allReferredUserIds = new Set();
     validMiningColleges.forEach(mc => {
-      mc.referredStudents?.forEach(ref => {
-        if (ref.student && ref.student._id) {
-          allReferredStudentIds.add(ref.student._id.toString());
+      mc.referredUsers?.forEach(ref => {
+        if (ref.user && ref.user._id) {
+          allReferredUserIds.add(ref.user._id.toString());
         }
       });
     });
 
-    const referredStudentsData = {};
-    if (allReferredStudentIds.size > 0) {
-      const studentIds = Array.from(allReferredStudentIds);
+    const referredUsersData = {};
+    if (allReferredUserIds.size > 0) {
+      const userIds = Array.from(allReferredUserIds);
 
-      // Get active mining sessions for referred students
+      // Get active mining sessions for referred users
       const referredActiveSessions = await MiningSession.find({
-        student: { $in: studentIds },
+        user: { $in: userIds },
         isActive: true
       });
 
-      // Get wallets for referred students
+      // Get wallets for referred users
       const referredWallets = await Wallet.find({
-        student: { $in: studentIds }
+        user: { $in: userIds }
       });
 
-      // Aggregate data per student
-      studentIds.forEach(studentId => {
+      // Aggregate data per user
+      userIds.forEach(userId => {
         const activeSessionsCount = referredActiveSessions.filter(
-          s => s.student.toString() === studentId
+          s => s.user.toString() === userId
         ).length;
 
-        const studentWallets = referredWallets.filter(
-          w => w.student.toString() === studentId
+        const userWallets = referredWallets.filter(
+          w => w.user.toString() === userId
         );
 
-        const totalTokens = studentWallets.reduce((sum, w) => sum + w.balance, 0);
+        const totalTokens = userWallets.reduce((sum, w) => sum + w.balance, 0);
 
-        referredStudentsData[studentId] = {
+        referredUsersData[userId] = {
           activeMiningCount: activeSessionsCount,
           totalTokens: totalTokens
         };
       });
     }
 
-    // Enhance miningColleges with referred students data
+    // Enhance miningColleges with referred users data
     const enhancedMiningColleges = validMiningColleges.map(mc => {
-      const enhancedReferredStudents = mc.referredStudents?.map(ref => {
-        if (ref.student && ref.student._id) {
-          const studentId = ref.student._id.toString();
+      const enhancedReferredUsers = mc.referredUsers?.map(ref => {
+        if (ref.user && ref.user._id) {
+          const userId = ref.user._id.toString();
           return {
             ...ref.toObject(),
-            activeMiningCount: referredStudentsData[studentId]?.activeMiningCount || 0,
-            totalTokens: referredStudentsData[studentId]?.totalTokens || 0
+            activeMiningCount: referredUsersData[userId]?.activeMiningCount || 0,
+            totalTokens: referredUsersData[userId]?.totalTokens || 0
           };
         }
         return ref;
@@ -393,44 +393,44 @@ export const getDashboard = async (req, res, next) => {
 
       return {
         ...mc.toObject(),
-        referredStudents: enhancedReferredStudents
+        referredUsers: enhancedReferredUsers
       };
     });
 
     // Calculate active friends for the dashboard card
-    // Count unique referred students who have at least one active mining session
-    const uniqueReferredStudents = new Set();
-    const activeReferredStudents = new Set();
+    // Count unique referred users who have at least one active mining session
+    const uniqueReferredUsers = new Set();
+    const activeReferredUsers = new Set();
 
     validMiningColleges.forEach(mc => {
-      mc.referredStudents?.forEach(ref => {
-        if (ref.student && ref.student._id) {
-          const studentId = ref.student._id.toString();
-          uniqueReferredStudents.add(studentId);
+      mc.referredUsers?.forEach(ref => {
+        if (ref.user && ref.user._id) {
+          const userId = ref.user._id.toString();
+          uniqueReferredUsers.add(userId);
 
-          if (referredStudentsData[studentId]?.activeMiningCount > 0) {
-            activeReferredStudents.add(studentId);
+          if (referredUsersData[userId]?.activeMiningCount > 0) {
+            activeReferredUsers.add(userId);
           }
         }
       });
     });
 
     const activeFriendsCount = {
-      active: activeReferredStudents.size,
-      total: uniqueReferredStudents.size
+      active: activeReferredUsers.size,
+      total: uniqueReferredUsers.size
     };
 
     res.status(200).json({
       success: true,
       data: {
-        student: {
-          id: student._id,
-          name: student.name,
-          email: student.email,
-          college: student.college,
-          referralCode: student.studentProfile.referralCode,
-          totalReferrals: student.studentProfile.totalReferrals,
-          onboardingCompleted: student.studentProfile.onboardingCompleted
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          college: user.college,
+          referralCode: user.userProfile.referralCode,
+          totalReferrals: user.userProfile.totalReferrals,
+          onboardingCompleted: user.userProfile.onboardingCompleted
         },
         miningColleges: enhancedMiningColleges,
         activeSessions: sessionsWithCurrentTokens,
@@ -450,29 +450,29 @@ export const getDashboard = async (req, res, next) => {
 };
 
 // @desc    Mark onboarding as complete
-// @route   POST /api/student/complete-onboarding
-// @access  Private (Student only)
+// @route   POST /api/user/complete-onboarding
+// @access  Private (User only)
 export const completeOnboarding = async (req, res, next) => {
   try {
-    const studentId = req.user.id;
+    const userId = req.user.id;
 
-    const student = await User.findById(studentId);
+    const user = await User.findById(userId);
 
-    if (!student || student.role !== 'student') {
+    if (!user || user.role !== 'user') {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'User not found'
       });
     }
 
-    student.studentProfile.onboardingCompleted = true;
-    await student.save();
+    user.userProfile.onboardingCompleted = true;
+    await user.save();
 
     res.status(200).json({
       success: true,
       message: 'Onboarding completed successfully',
       data: {
-        onboardingCompleted: student.studentProfile.onboardingCompleted
+        onboardingCompleted: user.userProfile.onboardingCompleted
       }
     });
   } catch (error) {

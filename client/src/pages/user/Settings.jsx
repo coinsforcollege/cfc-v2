@@ -274,7 +274,7 @@ const Settings = () => {
                         fontWeight: 600,
                         fontSize: '0.85rem'
                       }}>
-                        {user?.role === 'student' ? t('settings.student') : user?.role}
+                        {user?.role === 'user' ? t('settings.user') : user?.role}
                       </Box>
                     </TableCell>
                   </TableRow>

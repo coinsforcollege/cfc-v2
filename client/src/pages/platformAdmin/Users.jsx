@@ -41,14 +41,14 @@ const Users = () => {
   // Tab state
   const [currentTab, setCurrentTab] = useState(0);
 
-  // State for students list
-  const [students, setStudents] = useState([]);
-  const [loadingStudents, setLoadingStudents] = useState(true);
-  const [errorStudents, setErrorStudents] = useState('');
-  const [searchStudents, setSearchStudents] = useState('');
-  const [pageStudents, setPageStudents] = useState(0);
-  const [rowsPerPageStudents, setRowsPerPageStudents] = useState(25);
-  const [totalStudents, setTotalStudents] = useState(0);
+  // State for users list
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [errorUsers, setErrorUsers] = useState('');
+  const [searchUsers, setSearchUsers] = useState('');
+  const [pageUsers, setPageUsers] = useState(0);
+  const [rowsPerPageUsers, setRowsPerPageUsers] = useState(25);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   // State for college admins list
   const [collegeAdmins, setCollegeAdmins] = useState([]);
@@ -59,26 +59,26 @@ const Users = () => {
   const [rowsPerPageCollegeAdmins, setRowsPerPageCollegeAdmins] = useState(25);
   const [totalCollegeAdmins, setTotalCollegeAdmins] = useState(0);
 
-  // Fetch students
-  const fetchStudents = async () => {
+  // Fetch users
+  const fetchUsers = async () => {
     try {
-      setLoadingStudents(true);
-      setErrorStudents('');
+      setLoadingUsers(true);
+      setErrorUsers('');
       const response = await platformAdminApi.getAllStudents({
-        search: searchStudents,
-        page: pageStudents + 1,
-        limit: rowsPerPageStudents
+        search: searchUsers,
+        page: pageUsers + 1,
+        limit: rowsPerPageUsers
       });
 
       if (response.success) {
-        setStudents(response.data);
-        setTotalStudents(response.pagination.total);
+        setUsers(response.data);
+        setTotalUsers(response.pagination.total);
       }
     } catch (err) {
-      setErrorStudents(err.message || 'Failed to load students');
-      showToast(err.message || 'Failed to load students', 'error');
+      setErrorUsers(err.message || 'Failed to load users');
+      showToast(err.message || 'Failed to load users', 'error');
     } finally {
-      setLoadingStudents(false);
+      setLoadingUsers(false);
     }
   };
 
@@ -107,15 +107,15 @@ const Users = () => {
 
   useEffect(() => {
     if (currentTab === 0) {
-      fetchStudents();
+      fetchUsers();
     } else {
       fetchCollegeAdmins();
     }
-  }, [currentTab, pageStudents, rowsPerPageStudents, pageCollegeAdmins, rowsPerPageCollegeAdmins]);
+  }, [currentTab, pageUsers, rowsPerPageUsers, pageCollegeAdmins, rowsPerPageCollegeAdmins]);
 
-  const handleSearchStudents = () => {
-    setPageStudents(0);
-    fetchStudents();
+  const handleSearchUsers = () => {
+    setPageUsers(0);
+    fetchUsers();
   };
 
   const handleSearchCollegeAdmins = () => {
@@ -125,8 +125,8 @@ const Users = () => {
 
   const handleSearchKeyPress = (e, type) => {
     if (e.key === 'Enter') {
-      if (type === 'students') {
-        handleSearchStudents();
+      if (type === 'users') {
+        handleSearchUsers();
       } else {
         handleSearchCollegeAdmins();
       }
@@ -147,12 +147,12 @@ const Users = () => {
     });
   };
 
-  const handleViewStudent = (id) => {
-    navigate(`/platform-admin/students/${id}`);
+  const handleViewUser = (id) => {
+    navigate(`/platform-admin/users/${id}`);
   };
 
-  const handleEditStudent = (id) => {
-    navigate(`/platform-admin/students/${id}?edit=true`);
+  const handleEditUser = (id) => {
+    navigate(`/platform-admin/users/${id}?edit=true`);
   };
 
   const handleViewCollegeAdmin = (id) => {
@@ -164,7 +164,7 @@ const Users = () => {
   };
 
   const sidebarStats = {
-    studentsCount: totalStudents,
+    usersCount: totalUsers,
     collegeAdminsCount: totalCollegeAdmins
   };
 
@@ -184,7 +184,7 @@ const Users = () => {
           <Button
             variant="contained"
             startIcon={<Refresh />}
-            onClick={currentTab === 0 ? fetchStudents : fetchCollegeAdmins}
+            onClick={currentTab === 0 ? fetchUsers : fetchCollegeAdmins}
             sx={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               fontWeight: 600,
@@ -213,7 +213,7 @@ const Users = () => {
               }
             }}
           >
-            <Tab label={`Students (${totalStudents})`} />
+            <Tab label={`Students (${totalUsers})`} />
             <Tab label={`College Admins (${totalCollegeAdmins})`} />
           </Tabs>
         </Card>
@@ -223,25 +223,25 @@ const Users = () => {
           <CardContent sx={{ p: 3 }}>
             <TextField
               fullWidth
-              placeholder={currentTab === 0 ? 'Search students by name or email...' : 'Search college admins by name or email...'}
-              value={currentTab === 0 ? searchStudents : searchCollegeAdmins}
-              onChange={(e) => currentTab === 0 ? setSearchStudents(e.target.value) : setSearchCollegeAdmins(e.target.value)}
-              onKeyPress={(e) => handleSearchKeyPress(e, currentTab === 0 ? 'students' : 'college-admins')}
+              placeholder={currentTab === 0 ? 'Search users by name or email...' : 'Search college admins by name or email...'}
+              value={currentTab === 0 ? searchUsers : searchCollegeAdmins}
+              onChange={(e) => currentTab === 0 ? setSearchUsers(e.target.value) : setSearchCollegeAdmins(e.target.value)}
+              onKeyPress={(e) => handleSearchKeyPress(e, currentTab === 0 ? 'users' : 'college-admins')}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <Search />
                   </InputAdornment>
                 ),
-                endAdornment: ((currentTab === 0 && searchStudents) || (currentTab === 1 && searchCollegeAdmins)) && (
+                endAdornment: ((currentTab === 0 && searchUsers) || (currentTab === 1 && searchCollegeAdmins)) && (
                   <InputAdornment position="end">
                     <IconButton
                       size="small"
                       onClick={() => {
                         if (currentTab === 0) {
-                          setSearchStudents('');
-                          setPageStudents(0);
-                          fetchStudents();
+                          setSearchUsers('');
+                          setPageUsers(0);
+                          fetchUsers();
                         } else {
                           setSearchCollegeAdmins('');
                           setPageCollegeAdmins(0);
@@ -262,13 +262,13 @@ const Users = () => {
         {currentTab === 0 && (
           <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent sx={{ p: 0 }}>
-              {errorStudents && (
+              {errorUsers && (
                 <Alert severity="error" sx={{ m: 3 }}>
-                  {errorStudents}
+                  {errorUsers}
                 </Alert>
               )}
 
-              {loadingStudents ? (
+              {loadingUsers ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
                   <CircularProgress />
                 </Box>
@@ -278,7 +278,7 @@ const Users = () => {
                     <Table>
                       <TableHead>
                         <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                          <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Student</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#475569' }}>User</TableCell>
                           <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Contact</TableCell>
                           <TableCell sx={{ fontWeight: 700, color: '#475569' }}>College</TableCell>
                           <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Referrals</TableCell>
@@ -287,48 +287,48 @@ const Users = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {students.length === 0 ? (
+                        {users.length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                               <Typography variant="body2" color="text.secondary">
-                                No students found
+                                No users found
                               </Typography>
                             </TableCell>
                           </TableRow>
                         ) : (
-                          students.map((student) => (
-                            <TableRow key={student._id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
+                          users.map((user) => (
+                            <TableRow key={user._id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
                               <TableCell>
                                 <Box>
                                   <Typography variant="body2" fontWeight={600}>
-                                    {student.name}
+                                    {user.name}
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">
-                                    ID: {student._id.slice(-8)}
+                                    ID: {user._id.slice(-8)}
                                   </Typography>
                                 </Box>
                               </TableCell>
                               <TableCell>
                                 <Box>
-                                  <Typography variant="body2">{student.email}</Typography>
+                                  <Typography variant="body2">{user.email}</Typography>
                                   <Typography variant="caption" color="text.secondary">
-                                    {student.phone}
+                                    {user.phone}
                                   </Typography>
                                 </Box>
                               </TableCell>
                               <TableCell>
                                 <Typography variant="body2">
-                                  {student.college?.name || 'N/A'}
+                                  {user.college?.name || 'N/A'}
                                 </Typography>
-                                {student.college?.country && (
+                                {user.college?.country && (
                                   <Typography variant="caption" color="text.secondary">
-                                    {student.college.country}
+                                    {user.college.country}
                                   </Typography>
                                 )}
                               </TableCell>
                               <TableCell>
                                 <Chip
-                                  label={student.studentProfile?.totalReferrals || 0}
+                                  label={user.userProfile?.totalReferrals || 0}
                                   size="small"
                                   color="primary"
                                   sx={{ fontWeight: 600 }}
@@ -336,20 +336,20 @@ const Users = () => {
                               </TableCell>
                               <TableCell>
                                 <Typography variant="caption" color="text.secondary">
-                                  {formatDate(student.createdAt)}
+                                  {formatDate(user.createdAt)}
                                 </Typography>
                               </TableCell>
                               <TableCell align="right">
                                 <IconButton
                                   size="small"
-                                  onClick={() => handleViewStudent(student._id)}
+                                  onClick={() => handleViewUser(user._id)}
                                   sx={{ color: '#667eea' }}
                                 >
                                   <Visibility fontSize="small" />
                                 </IconButton>
                                 <IconButton
                                   size="small"
-                                  onClick={() => handleEditStudent(student._id)}
+                                  onClick={() => handleEditUser(user._id)}
                                   sx={{ color: '#06b6d4' }}
                                 >
                                   <Edit fontSize="small" />
@@ -364,13 +364,13 @@ const Users = () => {
 
                   <TablePagination
                     component="div"
-                    count={totalStudents}
-                    page={pageStudents}
-                    onPageChange={(e, newPage) => setPageStudents(newPage)}
-                    rowsPerPage={rowsPerPageStudents}
+                    count={totalUsers}
+                    page={pageUsers}
+                    onPageChange={(e, newPage) => setPageUsers(newPage)}
+                    rowsPerPage={rowsPerPageUsers}
                     onRowsPerPageChange={(e) => {
-                      setRowsPerPageStudents(parseInt(e.target.value, 10));
-                      setPageStudents(0);
+                      setRowsPerPageUsers(parseInt(e.target.value, 10));
+                      setPageUsers(0);
                     }}
                     rowsPerPageOptions={[10, 25, 50, 100]}
                   />

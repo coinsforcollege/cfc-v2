@@ -12,8 +12,8 @@ const CTASection = () => {
   const { t } = useTranslation();
 
   const getDashboardPath = () => {
-    if (!user) return '/auth/register/student';
-    if (user.role === 'student') return '/student/dashboard';
+    if (!user) return '/auth/register/user';
+    if (user.role === 'user') return '/user/dashboard';
     if (user.role === 'college_admin') return '/college-admin/dashboard';
     if (user.role === 'platform_admin') return '/platform-admin/dashboard';
     return '/';
@@ -148,7 +148,7 @@ const CTASection = () => {
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button
-                      onClick={() => navigate('/auth/register/student')}
+                      onClick={() => navigate('/auth/register/user')}
                       variant="outlined"
                       size="large"
                       sx={{

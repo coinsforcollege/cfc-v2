@@ -15,14 +15,16 @@ import RootLayout from './layouts/RootLayout';
 import ProtectedRoute from './components/guards/ProtectedRoute';
 import PublicRoute from './components/guards/PublicRoute';
 import Login from './pages/auth/Login';
-import StudentRegistration from './pages/auth/StudentRegistration';
+import UserRegistration from './pages/auth/UserRegistration';
 import CollegeRegistration from './pages/auth/CollegeRegistration';
 import CollegeSelection from './pages/auth/CollegeSelection';
 import CollegeAdminSelection from './pages/auth/CollegeAdminSelection';
 import Home from './pages/public/Home';
-import HowItWorksStudents from './pages/public/HowItWorksStudents';
+import HowItWorksUsers from './pages/public/HowItWorksUsers';
 import HowItWorksColleges from './pages/public/HowItWorksColleges';
 import ThingsToKnow from './pages/public/ThingsToKnow';
+import PrivacyPolicy from './pages/public/PrivacyPolicy';
+import TermsOfService from './pages/public/TermsOfService';
 import CollegeBrowse from './pages/public/CollegeBrowse';
 import CollegeView from './pages/public/CollegeView';
 import NetworkMap from './pages/public/NetworkMap';
@@ -37,14 +39,14 @@ import DocsSearch from './pages/public/DocsSearch';
 import DocsFeatured from './pages/public/DocsFeatured';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import StudentDashboard from './pages/student/StudentDashboard';
-import Overview from './pages/student/Overview';
-import MyColleges from './pages/student/MyColleges';
-import Leaderboard from './pages/student/Leaderboard';
-import Community from './pages/student/Community';
-import Ambassador from './pages/student/Ambassador';
-import StudentSettings from './pages/student/Settings';
-import BuildOnCollegen from './pages/student/BuildOnCollegen';
+import UserDashboard from './pages/user/UserDashboard';
+import Overview from './pages/user/Overview';
+import MyColleges from './pages/user/MyColleges';
+import Leaderboard from './pages/user/Leaderboard';
+import Community from './pages/user/Community';
+import Ambassador from './pages/user/Ambassador';
+import UserSettings from './pages/user/Settings';
+import BuildOnCollegen from './pages/user/BuildOnCollegen';
 import CollegeAdminDashboard from './pages/collegeAdmin/CollegeAdminDashboard';
 import CollegeAdminOverview from './pages/collegeAdmin/Overview';
 import CollegeAdminCommunity from './pages/collegeAdmin/Community';
@@ -54,7 +56,7 @@ import CollegeAdminLeaderboard from './pages/collegeAdmin/Leaderboard';
 import CollegeAdminSettings from './pages/collegeAdmin/Settings';
 import PlatformAdminDashboard from './pages/platformAdmin/PlatformAdminDashboard';
 import PlatformAdminUsers from './pages/platformAdmin/Users';
-import PlatformAdminStudentView from './pages/platformAdmin/StudentView';
+import PlatformAdminUserView from './pages/platformAdmin/UserView';
 import PlatformAdminCollegeAdminView from './pages/platformAdmin/CollegeAdminView';
 import PlatformAdminColleges from './pages/platformAdmin/Colleges';
 import PlatformAdminCollegeCreate from './pages/platformAdmin/CollegeCreate';
@@ -79,9 +81,11 @@ function App() {
     <>
       <Route element={<RootLayout />}>
         <Route index element={<Home />} />
-        <Route path="how-it-works/students" element={<HowItWorksStudents />} />
+        <Route path="how-it-works/users" element={<HowItWorksUsers />} />
         <Route path="how-it-works/colleges" element={<HowItWorksColleges />} />
         <Route path="things-to-know" element={<ThingsToKnow />} />
+        <Route path="privacy" element={<PrivacyPolicy />} />
+        <Route path="terms" element={<TermsOfService />} />
         <Route path="colleges" element={<CollegeBrowse />} />
         <Route path="colleges/:id" element={<CollegeView />} />
         <Route path="network" element={<NetworkMap />} />
@@ -99,22 +103,22 @@ function App() {
           element={<AuthLayout />}
         >
           <Route path="login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="register/student" element={<PublicRoute><StudentRegistration /></PublicRoute>} />
+          <Route path="register/user" element={<PublicRoute><UserRegistration /></PublicRoute>} />
           <Route path="register/college" element={<PublicRoute><CollegeRegistration /></PublicRoute>} />
-          <Route path="college-selection" element={<ProtectedRoute allowedRoles={['student']}><CollegeSelection /></ProtectedRoute>} />
+          <Route path="college-selection" element={<ProtectedRoute allowedRoles={['user']}><CollegeSelection /></ProtectedRoute>} />
           <Route path="college-admin-selection" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminSelection /></ProtectedRoute>} />
         </Route>
       </Route>
       {/* Dashboard routes - no RootLayout (they have their own DashboardLayout) */}
-      <Route path="student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><Overview /></ProtectedRoute>} />
-      <Route path="student/overview" element={<ProtectedRoute allowedRoles={['student']}><Overview /></ProtectedRoute>} />
-      <Route path="student/colleges" element={<ProtectedRoute allowedRoles={['student']}><MyColleges /></ProtectedRoute>} />
-      <Route path="student/leaderboard" element={<ProtectedRoute allowedRoles={['student']}><Leaderboard /></ProtectedRoute>} />
-      <Route path="student/community" element={<ProtectedRoute allowedRoles={['student']}><Community /></ProtectedRoute>} />
-      <Route path="student/referrals" element={<ProtectedRoute allowedRoles={['student']}><Community /></ProtectedRoute>} />
-      <Route path="student/ambassador" element={<ProtectedRoute allowedRoles={['student']}><Ambassador /></ProtectedRoute>} />
-      <Route path="student/settings" element={<ProtectedRoute allowedRoles={['student']}><StudentSettings /></ProtectedRoute>} />
-      <Route path="student/build-on-collegen" element={<BuildOnCollegen />} />
+      <Route path="user/dashboard" element={<ProtectedRoute allowedRoles={['user']}><Overview /></ProtectedRoute>} />
+      <Route path="user/overview" element={<ProtectedRoute allowedRoles={['user']}><Overview /></ProtectedRoute>} />
+      <Route path="user/colleges" element={<ProtectedRoute allowedRoles={['user']}><MyColleges /></ProtectedRoute>} />
+      <Route path="user/leaderboard" element={<ProtectedRoute allowedRoles={['user']}><Leaderboard /></ProtectedRoute>} />
+      <Route path="user/community" element={<ProtectedRoute allowedRoles={['user']}><Community /></ProtectedRoute>} />
+      <Route path="user/referrals" element={<ProtectedRoute allowedRoles={['user']}><Community /></ProtectedRoute>} />
+      <Route path="user/ambassador" element={<ProtectedRoute allowedRoles={['user']}><Ambassador /></ProtectedRoute>} />
+      <Route path="user/settings" element={<ProtectedRoute allowedRoles={['user']}><UserSettings /></ProtectedRoute>} />
+      <Route path="user/build-on-collegen" element={<BuildOnCollegen />} />
       <Route path="college-admin/dashboard" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOverview /></ProtectedRoute>} />
       <Route path="college-admin/overview" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOverview /></ProtectedRoute>} />
       <Route path="college-admin/community" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminCommunity /></ProtectedRoute>} />
@@ -124,7 +128,7 @@ function App() {
       <Route path="college-admin/settings" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminSettings /></ProtectedRoute>} />
       <Route path="platform-admin/dashboard" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminDashboard /></ProtectedRoute>} />
       <Route path="platform-admin/users" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUsers /></ProtectedRoute>} />
-      <Route path="platform-admin/students/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminStudentView /></ProtectedRoute>} />
+      <Route path="platform-admin/users/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUserView /></ProtectedRoute>} />
       <Route path="platform-admin/college-admins/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeAdminView /></ProtectedRoute>} />
       <Route path="platform-admin/colleges" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminColleges /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/create" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeCreate /></ProtectedRoute>} />

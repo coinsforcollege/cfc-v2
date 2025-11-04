@@ -23,8 +23,8 @@ const DashboardLayout = ({
 
   const getRoleTitle = (role) => {
     switch (role) {
-      case 'student':
-        return 'Student Dashboard';
+      case 'user':
+        return 'User Dashboard';
       case 'college_admin':
         return 'College Admin';
       case 'platform_admin':

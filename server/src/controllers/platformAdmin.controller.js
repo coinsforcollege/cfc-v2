@@ -7,14 +7,14 @@ import { Readable } from 'stream';
 import { parseAddress } from '../utils/addressParsers.js';
 import { createBulkNotifications } from '../services/notification.service.js';
 
-// @desc    Get all students
-// @route   GET /api/platform-admin/students
+// @desc    Get all users
+// @route   GET /api/platform-admin/users
 // @access  Private (Platform Admin only)
 export const getAllStudents = async (req, res, next) => {
   try {
     const { search, page = 1, limit = 50 } = req.query;
 
-    let query = { role: 'student' };
+    let query = { role: 'user' };
 
     if (search) {
       query.$or = [
@@ -25,9 +25,9 @@ export const getAllStudents = async (req, res, next) => {
 
     const skip = (page - 1) * limit;
 
-    const students = await User.find(query)
+    const users = await User.find(query)
       .populate('college', 'name country')
-      .select('name email phone college studentProfile createdAt lastLogin')
+      .select('name email phone college userProfile createdAt lastLogin')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip(skip);
@@ -36,7 +36,7 @@ export const getAllStudents = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: students,
+      data: users,
       pagination: {
         total,
         page: parseInt(page),
@@ -157,28 +157,28 @@ export const getAllColleges = async (req, res, next) => {
   }
 };
 
-// @desc    Get single student details
-// @route   GET /api/platform-admin/students/:id
+// @desc    Get single user details
+// @route   GET /api/platform-admin/users/:id
 // @access  Private (Platform Admin only)
 export const getStudentDetails = async (req, res, next) => {
   try {
-    const student = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id)
       .populate('college', 'name country logo')
-      .populate('studentProfile.miningColleges.college', 'name country logo stats');
+      .populate('userProfile.miningColleges.college', 'name country logo stats');
 
-    if (!student || student.role !== 'student') {
+    if (!user || user.role !== 'user') {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'User not found'
       });
     }
 
     // Get wallets
-    const wallets = await Wallet.find({ student: student._id })
+    const wallets = await Wallet.find({ user: user._id })
       .populate('college', 'name country');
 
     // Get mining sessions
-    const miningSessions = await MiningSession.find({ student: student._id })
+    const miningSessions = await MiningSession.find({ user: user._id })
       .populate('college', 'name country')
       .sort({ createdAt: -1 })
       .limit(10);
@@ -186,7 +186,7 @@ export const getStudentDetails = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        student,
+        user,
         wallets,
         recentMiningSessions: miningSessions
       }
@@ -214,8 +214,8 @@ export const getCollegeDetails = async (req, res, next) => {
 
     // Get miners count
     const minersCount = await User.countDocuments({
-      role: 'student',
-      'studentProfile.miningColleges.college': college._id
+      role: 'user',
+      'userProfile.miningColleges.college': college._id
     });
 
     // Get active mining sessions
@@ -309,11 +309,11 @@ export const updateCollege = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
-    // Check if status changed and notify students
+    // Check if status changed and notify users
     if (updateData.status && updateData.status !== oldCollege.status) {
       const minersIds = await User.find({
-        role: 'student',
-        'studentProfile.miningColleges.college': college._id
+        role: 'user',
+        'userProfile.miningColleges.college': college._id
       }).distinct('_id');
 
       if (minersIds.length > 0) {
@@ -337,8 +337,8 @@ export const updateCollege = async (req, res, next) => {
           notificationPriority = 'low';
         }
 
-        const notifications = minersIds.map(studentId => ({
-          recipient: studentId,
+        const notifications = minersIds.map(userId => ({
+          recipient: userId,
           type: 'college_status_changed',
           title: notificationTitle,
           message: notificationMessage,
@@ -350,7 +350,7 @@ export const updateCollege = async (req, res, next) => {
           },
           category: 'college',
           priority: notificationPriority,
-          actionUrl: '/student/dashboard'
+          actionUrl: '/user/dashboard'
         }));
 
         await createBulkNotifications(notifications);
@@ -503,25 +503,25 @@ export const updateDefaultRates = async (req, res, next) => {
   }
 };
 
-// @desc    Update student details
-// @route   PUT /api/platform-admin/students/:id
+// @desc    Update user details
+// @route   PUT /api/platform-admin/users/:id
 // @access  Private (Platform Admin only)
 export const updateStudent = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, email, phone, isActive } = req.body;
 
-    const student = await User.findById(id);
+    const user = await User.findById(id);
 
-    if (!student || student.role !== 'student') {
+    if (!user || user.role !== 'user') {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'User not found'
       });
     }
 
     // Check if email is being changed and if it's already taken
-    if (email && email !== student.email) {
+    if (email && email !== user.email) {
       const existingUser = await User.findOne({ email, _id: { $ne: id } });
       if (existingUser) {
         return res.status(400).json({
@@ -529,11 +529,11 @@ export const updateStudent = async (req, res, next) => {
           message: 'Email already in use'
         });
       }
-      student.email = email;
+      user.email = email;
     }
 
     // Check if phone is being changed and if it's already taken
-    if (phone && phone !== student.phone) {
+    if (phone && phone !== user.phone) {
       const existingUser = await User.findOne({ phone, _id: { $ne: id } });
       if (existingUser) {
         return res.status(400).json({
@@ -541,59 +541,59 @@ export const updateStudent = async (req, res, next) => {
           message: 'Phone number already in use'
         });
       }
-      student.phone = phone;
+      user.phone = phone;
     }
 
-    if (name) student.name = name;
+    if (name) user.name = name;
 
     // Update active status if provided
     if (isActive !== undefined) {
-      student.isActive = isActive;
+      user.isActive = isActive;
     }
 
-    await student.save();
+    await user.save();
 
     res.status(200).json({
       success: true,
-      message: 'Student updated successfully',
-      data: student
+      message: 'User updated successfully',
+      data: user
     });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Delete student
-// @route   DELETE /api/platform-admin/students/:id
+// @desc    Delete user
+// @route   DELETE /api/platform-admin/users/:id
 // @access  Private (Platform Admin only)
 export const deleteStudent = async (req, res, next) => {
   try {
-    const student = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id);
 
-    if (!student || student.role !== 'student') {
+    if (!user || user.role !== 'user') {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'User not found'
       });
     }
 
     // Delete associated data
-    await Wallet.deleteMany({ student: student._id });
-    await MiningSession.deleteMany({ student: student._id });
+    await Wallet.deleteMany({ user: user._id });
+    await MiningSession.deleteMany({ user: user._id });
 
-    await student.deleteOne();
+    await user.deleteOne();
 
     res.status(200).json({
       success: true,
-      message: 'Student deleted successfully'
+      message: 'User deleted successfully'
     });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Reset student password
-// @route   PUT /api/platform-admin/students/:id/reset-password
+// @desc    Reset user password
+// @route   PUT /api/platform-admin/users/:id/reset-password
 // @access  Private (Platform Admin only)
 export const resetStudentPassword = async (req, res, next) => {
   try {
@@ -607,17 +607,17 @@ export const resetStudentPassword = async (req, res, next) => {
       });
     }
 
-    const student = await User.findById(id);
+    const user = await User.findById(id);
 
-    if (!student || student.role !== 'student') {
+    if (!user || user.role !== 'user') {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'User not found'
       });
     }
 
-    student.password = newPassword;
-    await student.save();
+    user.password = newPassword;
+    await user.save();
 
     res.status(200).json({
       success: true,
@@ -628,8 +628,8 @@ export const resetStudentPassword = async (req, res, next) => {
   }
 };
 
-// @desc    Add balance to student wallet
-// @route   POST /api/platform-admin/students/:id/add-balance
+// @desc    Add balance to user wallet
+// @route   POST /api/platform-admin/users/:id/add-balance
 // @access  Private (Platform Admin only)
 export const addStudentBalance = async (req, res, next) => {
   try {
@@ -643,12 +643,12 @@ export const addStudentBalance = async (req, res, next) => {
       });
     }
 
-    const student = await User.findById(id);
+    const user = await User.findById(id);
 
-    if (!student || student.role !== 'student') {
+    if (!user || user.role !== 'user') {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'User not found'
       });
     }
 
@@ -662,11 +662,11 @@ export const addStudentBalance = async (req, res, next) => {
     }
 
     // Find or create wallet
-    let wallet = await Wallet.findOne({ student: id, college: collegeId });
+    let wallet = await Wallet.findOne({ user: id, college: collegeId });
 
     if (!wallet) {
       wallet = await Wallet.create({
-        student: id,
+        user: id,
         college: collegeId,
         balance: amount
       });
@@ -684,7 +684,7 @@ export const addStudentBalance = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `Added ${amount} tokens to ${student.name}'s wallet for ${college.name}`,
+      message: `Added ${amount} tokens to ${user.name}'s wallet for ${college.name}`,
       data: wallet
     });
   } catch (error) {
@@ -753,8 +753,8 @@ export const getCollegeAdminDetails = async (req, res, next) => {
     let collegeStats = {};
     if (collegeAdmin.managedCollege) {
       const minersCount = await User.countDocuments({
-        role: 'student',
-        'studentProfile.miningColleges.college': collegeAdmin.managedCollege._id
+        role: 'user',
+        'userProfile.miningColleges.college': collegeAdmin.managedCollege._id
       });
 
       const activeSessionsCount = await MiningSession.countDocuments({
@@ -930,7 +930,7 @@ export const resetCollegeAdminPassword = async (req, res, next) => {
 // @access  Private (Platform Admin only)
 export const getPlatformStats = async (req, res, next) => {
   try {
-    const totalStudents = await User.countDocuments({ role: 'student' });
+    const totalUsers = await User.countDocuments({ role: 'user' });
     const totalColleges = await College.countDocuments();
     const totalCollegeAdmins = await User.countDocuments({ role: 'college_admin' });
     const activeMiningSessions = await MiningSession.countDocuments({ isActive: true });
@@ -982,7 +982,7 @@ export const getPlatformStats = async (req, res, next) => {
     const totalTokensMined = walletBalance + activeSessionTokens;
 
     // Recent activity
-    const recentStudents = await User.find({ role: 'student' })
+    const recentUsers = await User.find({ role: 'user' })
       .sort({ createdAt: -1 })
       .limit(5)
       .select('name email createdAt');
@@ -996,14 +996,14 @@ export const getPlatformStats = async (req, res, next) => {
       success: true,
       data: {
         stats: {
-          totalStudents,
+          totalUsers,
           totalColleges,
           totalCollegeAdmins,
           activeMiningSessions,
           totalTokensMined
         },
         recentActivity: {
-          recentStudents,
+          recentUsers,
           recentColleges
         }
       }

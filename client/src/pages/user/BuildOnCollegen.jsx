@@ -159,7 +159,7 @@ const BuildOnCollegen = () => {
                 label={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Rocket sx={{ fontSize: '1rem' }} />
-                    For Students
+                    For Users
                   </Box>
                 }
                 sx={{
@@ -520,7 +520,7 @@ const BuildOnCollegen = () => {
                       Gas Sponsorship Program
                     </Typography>
                     <Typography sx={{ color: '#718096', lineHeight: 1.6 }}>
-                      Free transactions for student projects, hackathons, and educational initiatives
+                      Free transactions for user projects, hackathons, and educational initiatives
                     </Typography>
                   </Box>
                 </Box>
@@ -712,7 +712,7 @@ const BuildOnCollegen = () => {
                     <Box sx={{ flex: 1, pl: 6 }}>
                       <Box
                         component="img"
-                        src="/images/students-working-study-group.jpg"
+                        src="/images/users-working-study-group.jpg"
                         sx={{
                           width: '100%',
                           height: '200px',
@@ -1198,7 +1198,7 @@ const BuildOnCollegen = () => {
                     >
                       <Button
                         component={Link}
-                        to="/auth/register/student"
+                        to="/auth/register/user"
                         variant="contained"
                         size="large"
                         endIcon={<EmojiEvents />}
@@ -1722,7 +1722,7 @@ const BuildOnCollegen = () => {
                             mb: 6,
                             lineHeight: 1.6
                           }}>
-                            Join the elite group of student leaders shaping the future of campus digital economies
+                            Join the elite group of user leaders shaping the future of campus digital economies
                           </Typography>
                           
                           <Button
@@ -1799,13 +1799,13 @@ const BuildOnCollegen = () => {
                   mx: 'auto',
                 }}
               >
-                Join thousands of students building the future of Web3. Zero gas fees, instant deployment, infinite possibilities.
+                Join thousands of users building the future of Web3. Zero gas fees, instant deployment, infinite possibilities.
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     component={Link}
-                    to="/auth/register/student"
+                    to="/auth/register/user"
                     variant="contained"
                     size="large"
                     endIcon={<Rocket />}

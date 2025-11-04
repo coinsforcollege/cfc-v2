@@ -180,11 +180,11 @@ const collegeSchema = new mongoose.Schema({
     }
   },
   
-  // Student Life
-  studentLife: {
-    totalStudents: Number,
-    internationalStudents: Number,
-    studentToFacultyRatio: String,
+  // Community Life
+  communityLife: {
+    totalMembers: Number,
+    internationalMembers: Number,
+    memberToFacultyRatio: String,
     clubs: Number,
     sports: [String],
     housing: {
@@ -300,7 +300,7 @@ const collegeSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  // Creator info (student who created it if admin hasn't claimed)
+  // Creator info (user who created it if admin hasn't claimed)
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

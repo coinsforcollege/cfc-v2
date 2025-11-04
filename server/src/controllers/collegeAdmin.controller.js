@@ -106,15 +106,15 @@ export const selectCollege = async (req, res, next) => {
       status: 'Waitlist' // Move to Waitlist when admin joins
     }, { new: true });
 
-    // Notify all students mining for this college about status change
+    // Notify all users mining for this college about status change
     const minersIds = await User.find({
-      role: 'student',
-      'studentProfile.miningColleges.college': college._id
+      role: 'user',
+      'userProfile.miningColleges.college': college._id
     }).distinct('_id');
 
     if (minersIds.length > 0) {
-      const notifications = minersIds.map(studentId => ({
-        recipient: studentId,
+      const notifications = minersIds.map(userId => ({
+        recipient: userId,
         type: 'college_status_changed',
         title: `${college.name} has an admin!`,
         message: `Great news! ${college.name} now has an official admin and has been moved to the waitlist. Your college is one step closer to launching its token!`,
@@ -126,7 +126,7 @@ export const selectCollege = async (req, res, next) => {
         },
         category: 'college',
         priority: 'high',
-        actionUrl: '/student/dashboard'
+        actionUrl: '/user/dashboard'
       }));
 
       await createBulkNotifications(notifications);
@@ -160,10 +160,10 @@ export const getDashboard = async (req, res, next) => {
 
     const college = admin.managedCollege;
 
-    // Get all miners (students who have added this college to their mining list)
+    // Get all miners (users who have added this college to their mining list)
     const totalMiners = await User.countDocuments({
-      role: 'student',
-      'studentProfile.miningColleges.college': college._id
+      role: 'user',
+      'userProfile.miningColleges.college': college._id
     });
 
     // Calculate total tokens mined from all wallets
@@ -423,8 +423,8 @@ export const viewCommunity = async (req, res, next) => {
     const totalCountPipeline = [
       {
         $match: {
-          role: 'student',
-          'studentProfile.miningColleges.college': new mongoose.Types.ObjectId(collegeId)
+          role: 'user',
+          'userProfile.miningColleges.college': new mongoose.Types.ObjectId(collegeId)
         }
       },
       {
@@ -437,24 +437,24 @@ export const viewCommunity = async (req, res, next) => {
 
     // Then fetch paginated data
     const minersWithWallets = await User.aggregate([
-      // Match students mining for this college
+      // Match users mining for this college
       {
         $match: {
-          role: 'student',
-          'studentProfile.miningColleges.college': new mongoose.Types.ObjectId(collegeId)
+          role: 'user',
+          'userProfile.miningColleges.college': new mongoose.Types.ObjectId(collegeId)
         }
       },
       // Lookup wallet data
       {
         $lookup: {
           from: 'wallets',
-          let: { studentId: '$_id' },
+          let: { userId: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ['$student', '$$studentId'] },
+                    { $eq: ['$user', '$$userId'] },
                     { $eq: ['$college', new mongoose.Types.ObjectId(collegeId)] }
                   ]
                 }
@@ -468,13 +468,13 @@ export const viewCommunity = async (req, res, next) => {
       {
         $lookup: {
           from: 'miningsessions',
-          let: { studentId: '$_id' },
+          let: { userId: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ['$student', '$$studentId'] },
+                    { $eq: ['$user', '$$userId'] },
                     { $eq: ['$college', new mongoose.Types.ObjectId(collegeId)] },
                     { $eq: ['$isActive', true] }
                   ]
@@ -485,7 +485,7 @@ export const viewCommunity = async (req, res, next) => {
           as: 'activeMining'
         }
       },
-      // Unwind arrays (use preserveNullAndEmptyArrays to keep miners without wallet/session)
+      // Unwind arrays (use preserveNullAndEmptyArrays to keep users without wallet/session)
       {
         $addFields: {
           wallet: { $arrayElemAt: ['$wallet', 0] },
@@ -520,8 +520,8 @@ export const viewCommunity = async (req, res, next) => {
           id: '$_id',
           name: 1,
           email: 1,
-          referralCode: '$studentProfile.referralCode',
-          totalReferrals: '$studentProfile.totalReferrals',
+          referralCode: '$userProfile.referralCode',
+          totalReferrals: '$userProfile.totalReferrals',
           tokensMined: {
             $add: [
               { $ifNull: ['$wallet.balance', 0] },
@@ -643,7 +643,7 @@ export const getLeaderboard = async (req, res, next) => {
           name: college.name,
           location: `${college.city || ''}${college.city && college.state ? ', ' : ''}${college.state || ''}${(college.city || college.state) && college.country ? ', ' : ''}${college.country || ''}`.trim() || 'Location not set',
           logo: college.logo,
-          totalStudents: college.stats?.totalMiners || 0,
+          totalUsers: college.stats?.totalMiners || 0,
           activeMiningSessions: activeSessions,
           totalTokensMined: college.stats?.totalTokensMined || 0,
           miningRate: college.baseRate || 0,

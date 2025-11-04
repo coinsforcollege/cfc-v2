@@ -13,7 +13,7 @@ const emailTranslations = {
       subject: 'Welcome to Coins For College!',
       title: 'Welcome to Coins For College!',
       greeting: 'Hi {{name}},',
-      message: 'Congratulations on joining Coins For College! You\'re now part of a community helping students mine tokens for their favorite colleges.',
+      message: 'Congratulations on joining Coins For College! You\'re now part of a community helping users mine tokens for their favorite colleges.',
       gettingStarted: 'Getting Started:',
       gettingStartedItems: [
         'Add colleges to your mining list',

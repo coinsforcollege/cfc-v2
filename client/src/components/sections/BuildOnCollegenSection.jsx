@@ -393,7 +393,7 @@ const BuildOnCollegenSection = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
                   component={Link}
-                  to="/auth/register/student"
+                  to="/auth/register/user"
                   variant="contained"
                   size="large"
                   endIcon={<ArrowForward />}

@@ -4,7 +4,7 @@ import React from 'react';
 
 function Statistics({ studentCount, collegeCount, countryCount, theme }) {
   const stats = [
-    { icon: Group, label: 'Students Mining', value: studentCount.toLocaleString(), color: 'primary' },
+    { icon: Group, label: 'Users Mining', value: studentCount.toLocaleString(), color: 'primary' },
     { icon: School, label: 'Colleges Participating', value: collegeCount, color: 'secondary' },
     { icon: Public, label: 'Countries', value: countryCount, color: 'success' }
   ];

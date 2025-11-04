@@ -44,7 +44,7 @@ import { platformAdminApi } from '../../api/platformAdmin.api';
 import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
 
-const StudentView = () => {
+const UserView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -52,7 +52,7 @@ const StudentView = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [student, setStudent] = useState(null);
+  const [user, setUser] = useState(null);
   const [wallets, setWallets] = useState([]);
   const [miningSessions, setMiningSessions] = useState([]);
 
@@ -72,27 +72,27 @@ const StudentView = () => {
   const [colleges, setColleges] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Fetch student details
-  const fetchStudentDetails = async () => {
+  // Fetch user details
+  const fetchUserDetails = async () => {
     try {
       setLoading(true);
       setError('');
       const response = await platformAdminApi.getStudentDetails(id);
 
       if (response.success) {
-        setStudent(response.data.student);
+        setUser(response.data.user);
         setWallets(response.data.wallets);
         setMiningSessions(response.data.recentMiningSessions);
         setEditFormData({
-          name: response.data.student.name,
-          email: response.data.student.email,
-          phone: response.data.student.phone,
-          isActive: response.data.student.isActive
+          name: response.data.user.name,
+          email: response.data.user.email,
+          phone: response.data.user.phone,
+          isActive: response.data.user.isActive
         });
       }
     } catch (err) {
-      setError(err.message || 'Failed to load student details');
-      showToast(err.message || 'Failed to load student details', 'error');
+      setError(err.message || 'Failed to load user details');
+      showToast(err.message || 'Failed to load user details', 'error');
     } finally {
       setLoading(false);
     }
@@ -111,7 +111,7 @@ const StudentView = () => {
   };
 
   useEffect(() => {
-    fetchStudentDetails();
+    fetchUserDetails();
     fetchColleges();
   }, [id]);
 
@@ -121,12 +121,12 @@ const StudentView = () => {
       const response = await platformAdminApi.updateStudent(id, editFormData);
 
       if (response.success) {
-        showToast('Student updated successfully', 'success');
+        showToast('User updated successfully', 'success');
         setIsEditMode(false);
-        fetchStudentDetails();
+        fetchUserDetails();
       }
     } catch (err) {
-      showToast(err.message || 'Failed to update student', 'error');
+      showToast(err.message || 'Failed to update user', 'error');
     } finally {
       setSaving(false);
     }
@@ -135,10 +135,10 @@ const StudentView = () => {
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setEditFormData({
-      name: student.name,
-      email: student.email,
-      phone: student.phone,
-      isActive: student.isActive
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isActive: user.isActive
     });
   };
 
@@ -165,18 +165,18 @@ const StudentView = () => {
     }
   };
 
-  // Delete student
+  // Delete user
   const handleDeleteConfirm = async () => {
     try {
       setActionLoading(true);
       const response = await platformAdminApi.deleteStudent(id);
 
       if (response.success) {
-        showToast('Student deleted successfully', 'success');
+        showToast('User deleted successfully', 'success');
         navigate('/platform-admin/users');
       }
     } catch (err) {
-      showToast(err.message || 'Failed to delete student', 'error');
+      showToast(err.message || 'Failed to delete user', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -200,7 +200,7 @@ const StudentView = () => {
         showToast(response.message || 'Balance added successfully', 'success');
         setAddBalanceDialogOpen(false);
         setBalanceFormData({ collegeId: '', amount: '' });
-        fetchStudentDetails();
+        fetchUserDetails();
       }
     } catch (err) {
       showToast(err.message || 'Failed to add balance', 'error');
@@ -229,11 +229,11 @@ const StudentView = () => {
     );
   }
 
-  if (error || !student) {
+  if (error || !user) {
     return (
       <DashboardLayout>
         <Box sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
-          <Alert severity="error">{error || 'Student not found'}</Alert>
+          <Alert severity="error">{error || 'User not found'}</Alert>
           <Button
             startIcon={<ArrowBack />}
             onClick={() => navigate('/platform-admin/users')}
@@ -257,10 +257,10 @@ const StudentView = () => {
             </IconButton>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                {student.name}
+                {user.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Student ID: {student._id}
+                User ID: {user._id}
               </Typography>
             </Box>
           </Box>
@@ -358,52 +358,52 @@ const StudentView = () => {
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Name</Typography>
-                  <Typography variant="body1" fontWeight={600}>{student.name}</Typography>
+                  <Typography variant="body1" fontWeight={600}>{user.name}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Email</Typography>
-                  <Typography variant="body1" fontWeight={600}>{student.email}</Typography>
+                  <Typography variant="body1" fontWeight={600}>{user.email}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Phone</Typography>
-                  <Typography variant="body1" fontWeight={600}>{student.phone}</Typography>
+                  <Typography variant="body1" fontWeight={600}>{user.phone}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">College</Typography>
                   <Typography variant="body1" fontWeight={600}>
-                    {student.college?.name || 'N/A'}
-                    {student.college?.country && ` (${student.college.country})`}
+                    {user.college?.name || 'N/A'}
+                    {user.college?.country && ` (${user.college.country})`}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Referral Code</Typography>
                   <Typography variant="body1" fontWeight={600}>
-                    {student.studentProfile?.referralCode || 'N/A'}
+                    {user.userProfile?.referralCode || 'N/A'}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Total Referrals</Typography>
                   <Typography variant="body1" fontWeight={600}>
-                    {student.studentProfile?.totalReferrals || 0}
+                    {user.userProfile?.totalReferrals || 0}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Joined Date</Typography>
-                  <Typography variant="body1" fontWeight={600}>{formatDate(student.createdAt)}</Typography>
+                  <Typography variant="body1" fontWeight={600}>{formatDate(user.createdAt)}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Last Login</Typography>
                   <Typography variant="body1" fontWeight={600}>
-                    {student.lastLogin ? formatDate(student.lastLogin) : 'Never'}
+                    {user.lastLogin ? formatDate(user.lastLogin) : 'Never'}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
                   <Box sx={{ mt: 0.5 }}>
                     <Chip
-                      label={student.isActive ? 'Active' : 'Inactive'}
+                      label={user.isActive ? 'Active' : 'Inactive'}
                       size="small"
-                      color={student.isActive ? 'success' : 'default'}
+                      color={user.isActive ? 'success' : 'default'}
                       sx={{ fontWeight: 600 }}
                     />
                   </Box>
@@ -443,7 +443,7 @@ const StudentView = () => {
                   onClick={() => setDeleteDialogOpen(true)}
                   sx={{ color: '#ef4444', borderColor: '#ef4444', fontWeight: 600 }}
                 >
-                  Delete Student
+                  Delete User
                 </Button>
               </Box>
             </CardContent>
@@ -491,11 +491,11 @@ const StudentView = () => {
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
               Mining Colleges
             </Typography>
-            {student.studentProfile?.miningColleges?.length === 0 ? (
+            {user.userProfile?.miningColleges?.length === 0 ? (
               <Typography variant="body2" color="text.secondary">No colleges added yet</Typography>
             ) : (
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {student.studentProfile?.miningColleges
+                {user.userProfile?.miningColleges
                   ?.filter(mc => mc.college)
                   .map((mc, index) => (
                     <Chip
@@ -568,7 +568,7 @@ const StudentView = () => {
           <DialogContent>
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Reset password for {student.name}
+                Reset password for {user.name}
               </Typography>
               <TextField
                 fullWidth
@@ -615,7 +615,7 @@ const StudentView = () => {
           <DialogTitle sx={{ fontWeight: 700 }}>Confirm Delete</DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to delete {student.name}? This will also delete all associated wallets and mining sessions.
+              Are you sure you want to delete {user.name}? This will also delete all associated wallets and mining sessions.
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 2.5 }}>
@@ -656,7 +656,7 @@ const StudentView = () => {
           <DialogContent>
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Add tokens to {student.name}'s wallet
+                Add tokens to {user.name}'s wallet
               </Typography>
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>College</InputLabel>
@@ -708,4 +708,4 @@ const StudentView = () => {
   );
 };
 
-export default StudentView;
+export default UserView;

@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const ambassadorApplicationSchema = new mongoose.Schema({
-  // Student Information
-  student: {
+  // User Information
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -112,7 +112,7 @@ const ambassadorApplicationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Index for faster queries
-ambassadorApplicationSchema.index({ student: 1 });
+ambassadorApplicationSchema.index({ user: 1 });
 ambassadorApplicationSchema.index({ status: 1, submittedAt: -1 });
 ambassadorApplicationSchema.index({ college: 1 });
 

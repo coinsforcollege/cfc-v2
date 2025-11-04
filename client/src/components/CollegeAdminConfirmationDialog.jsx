@@ -81,7 +81,7 @@ const CollegeAdminConfirmationDialog = ({ open, onConfirm, onCancel }) => {
 
           <Button
             component={Link}
-            to="/auth/student-registration"
+            to="/auth/register/user"
             variant="contained"
             size="medium"
             sx={{

@@ -27,8 +27,8 @@ const HeroSection = () => {
   ];
 
   const getDashboardPath = () => {
-    if (!user) return '/auth/register/student';
-    if (user.role === 'student') return '/student/dashboard';
+    if (!user) return '/auth/register/user';
+    if (user.role === 'user') return '/user/dashboard';
     if (user.role === 'college_admin') return '/college-admin/dashboard';
     if (user.role === 'platform_admin') return '/platform-admin/dashboard';
     return '/';
@@ -368,10 +368,10 @@ const HeroSection = () => {
                     }}
                   >
                     <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.9, lineHeight: 1 }}>
-                      {user ? (user.role === 'student' ? t('hero.continue') : t('hero.goTo')) : t('hero.community')}
+                      {user ? (user.role === 'user' ? t('hero.continue') : t('hero.goTo')) : t('hero.community')}
                     </Box>
                     <Box sx={{ lineHeight: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      {user ? (user.role === 'student' ? t('hero.mining') : t('header.dashboard')) : t('hero.startMining')}
+                      {user ? (user.role === 'user' ? t('hero.mining') : t('header.dashboard')) : t('hero.startMining')}
                       <ArrowForward sx={{ fontSize: '1rem' }} />
                     </Box>
                   </Button>

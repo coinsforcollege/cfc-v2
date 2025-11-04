@@ -2,7 +2,7 @@ import apiClient from './apiClient';
 
 export const authApi = {
   // OTP
-  sendOTPStudent: (data) => apiClient.post('/auth/otp/send/student', data),
+  sendOTPUser: (data) => apiClient.post('/auth/otp/send/user', data),
   sendOTPCollege: (data) => apiClient.post('/auth/otp/send/college', data),
   verifyOTP: (data) => apiClient.post('/auth/otp/verify', data),
   resendOTP: (data) => apiClient.post('/auth/otp/resend', data),
@@ -13,7 +13,7 @@ export const authApi = {
   resendOTPForPasswordChange: () => apiClient.post('/auth/otp/resend/password-change'),
 
   // Register
-  registerStudent: (data) => apiClient.post('/auth/register/student', data),
+  registerUser: (data) => apiClient.post('/auth/register/user', data),
   registerCollege: (data) => apiClient.post('/auth/register/college', data),
 
   // Login
