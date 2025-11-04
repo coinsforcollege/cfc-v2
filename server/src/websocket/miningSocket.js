@@ -160,17 +160,17 @@ export const setupWebSocketHandlers = (io) => {
           try {
             const miningStatus = await getMiningStatusForUserOptimized(userId, now);
 
-            // Only broadcast if data has changed significantly (delta updates)
-            // This reduces unnecessary network traffic for unchanged data
-            if (hasSignificantChange(userId, miningStatus)) {
-              // Broadcast to all devices of this user using room
-              ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
-            }
-
-            // Check if user still has active sessions
+            // Check if user has active sessions
             const hasActiveSessions = miningStatus.activeSessions?.some(session =>
               session.isActive && session.remainingHours > 0
             );
+
+            // Always send updates for active miners (real-time balance updates)
+            // Use delta check only for idle users to reduce unnecessary traffic
+            if (hasActiveSessions || hasSignificantChange(userId, miningStatus)) {
+              // Broadcast to all devices of this user using room
+              ioInstance.to(`user:${userId}`).emit('miningStatus', miningStatus);
+            }
 
             if (!hasActiveSessions) {
               usersWithActiveMining.delete(userId);

@@ -115,15 +115,12 @@ const Overview = () => {
 
   useEffect(() => {
     if (wsMiningStatus) {
-      console.log('🔍 Processing WebSocket mining status:', wsMiningStatus);
       const statusMap = {};
       wsMiningStatus.activeSessions?.forEach(session => {
         if (session.college) {
-          console.log('📌 Active session for college:', session.college._id, 'isActive:', session.isActive, 'remainingHours:', session.remainingHours);
           statusMap[session.college._id] = session;
         }
       });
-      console.log('📊 Mining status map:', statusMap);
 
       // Only update if mining status actually changed (prevent unnecessary re-renders)
       setMiningStatus(prevStatus => {
@@ -443,8 +440,6 @@ const Overview = () => {
                         const session = miningStatus[miningCollege.college._id];
                         const isMining = session?.isActive && session?.remainingHours > 0;
                         const progress = isMining ? Math.round(((24 - session.remainingHours) / 24) * 100) : 0;
-
-                        console.log('🎯 College:', miningCollege.college.name, 'ID:', miningCollege.college._id, 'Session found:', !!session, 'isMining:', isMining);
 
                         return (
                           <TableRow key={index} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
