@@ -133,6 +133,25 @@ const MyColleges = () => {
     fetchDashboard();
   }, [user, navigate]);
 
+  // Initialize miningStatus from API data to avoid race condition with WebSocket
+  // This ensures correct button state is shown immediately on page load
+  useEffect(() => {
+    if (dashboard?.activeSessions && dashboard.activeSessions.length > 0) {
+      const initialStatusMap = {};
+      dashboard.activeSessions.forEach(session => {
+        if (session.college) {
+          initialStatusMap[session.college._id] = session;
+        }
+      });
+      // Only set if miningStatus is still empty (initial load)
+      setMiningStatus(prev => {
+        // If already populated by WebSocket, don't override
+        if (Object.keys(prev).length > 0) return prev;
+        return initialStatusMap;
+      });
+    }
+  }, [dashboard?.activeSessions]);
+
   const handleStartMining = async (collegeId) => {
     try {
       setActionLoading(`start-${collegeId}`);

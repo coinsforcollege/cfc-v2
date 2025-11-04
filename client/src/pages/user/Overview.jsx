@@ -122,18 +122,9 @@ const Overview = () => {
         }
       });
 
-      // Only update if mining status actually changed (prevent unnecessary re-renders)
-      setMiningStatus(prevStatus => {
-        const prevKeys = Object.keys(prevStatus).sort().join(',');
-        const newKeys = Object.keys(statusMap).sort().join(',');
-        const prevActive = Object.values(prevStatus).map(s => `${s.sessionId}-${s.isActive}`).sort().join(',');
-        const newActive = Object.values(statusMap).map(s => `${s.sessionId}-${s.isActive}`).sort().join(',');
-
-        if (prevKeys === newKeys && prevActive === newActive) {
-          return prevStatus; // No change, don't trigger re-render
-        }
-        return statusMap;
-      });
+      // Always update mining status to reflect current token values
+      // Even though session IDs stay the same, currentTokens changes every 5 seconds
+      setMiningStatus(statusMap);
 
       // Only update activeSessions if they actually changed
       setDashboard(prev => {
@@ -168,6 +159,25 @@ const Overview = () => {
       startTour(isMobile);
     }
   }, [dashboard, loading, isMobile]);
+
+  // Initialize miningStatus from API data to avoid race condition with WebSocket
+  // This ensures correct state is shown immediately on page load
+  useEffect(() => {
+    if (dashboard?.activeSessions && dashboard.activeSessions.length > 0) {
+      const initialStatusMap = {};
+      dashboard.activeSessions.forEach(session => {
+        if (session.college) {
+          initialStatusMap[session.college._id] = session;
+        }
+      });
+      // Only set if miningStatus is still empty (initial load)
+      setMiningStatus(prev => {
+        // If already populated by WebSocket, don't override
+        if (Object.keys(prev).length > 0) return prev;
+        return initialStatusMap;
+      });
+    }
+  }, [dashboard?.activeSessions]);
 
   const totalMiningTokens = useMemo(() => {
     return Object.values(miningStatus).reduce((sum, session) =>
