@@ -188,6 +188,39 @@ const MyColleges = () => {
     }
   };
 
+  const handleToggleAllMining = useCallback(async () => {
+    try {
+      // Check if all colleges are currently mining
+      const allMining = dashboard?.miningColleges?.length > 0 && dashboard?.miningColleges?.every(mc => {
+        const session = miningStatus[mc.college._id];
+        return session && session.isActive && session.remainingHours > 0;
+      });
+
+      if (allMining) {
+        // Stop All
+        setActionLoading('stop-all');
+        const response = await miningApi.stopAllMining();
+        if (response.success) {
+          showToast(response.message, 'success');
+          fetchDashboard();
+        }
+      } else {
+        // Start All (Mine All)
+        setActionLoading('mine-all');
+        const response = await miningApi.startAllMining();
+        if (response.success) {
+          showToast(response.message, 'success');
+          fetchDashboard();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle all mining:', err);
+      showToast(err.message || 'Failed to toggle mining', 'error');
+    } finally {
+      setActionLoading('');
+    }
+  }, [dashboard, miningStatus, showToast]);
+
   const handleCompleteTour = async () => {
     try {
       await userApi.completeOnboarding();
@@ -462,6 +495,55 @@ const MyColleges = () => {
             {t('user.activeColleges')} ({dashboard?.miningColleges.filter(mc => mc.college).length}/10)
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {dashboard?.miningColleges?.length > 0 && (
+              (() => {
+                const allMining = dashboard?.miningColleges?.every(mc => {
+                   const session = miningStatus[mc.college._id];
+                   return session && session.isActive && session.remainingHours > 0;
+                });
+                
+                return (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={allMining ? <Stop /> : <PlayArrow />}
+                    onClick={handleToggleAllMining}
+                    disabled={actionLoading === 'mine-all' || actionLoading === 'stop-all'}
+                    sx={{
+                      background: allMining 
+                        ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                        : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: 'white',
+                      fontWeight: 600,
+                      px: { xs: 1.5, sm: 2 },
+                      py: { xs: 0.5, sm: 1 },
+                      fontSize: { xs: '0.65rem', sm: '0.875rem' },
+                      textTransform: 'none',
+                      minWidth: 'auto',
+                      '& .MuiButton-startIcon': {
+                        marginRight: { xs: 0.25, sm: 1 },
+                        '& > svg': {
+                          fontSize: { xs: '0.875rem', sm: '1.25rem' }
+                        }
+                      },
+                      '&:hover': {
+                        background: allMining
+                          ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
+                          : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      },
+                      '&.Mui-disabled': {
+                        background: '#e2e8f0',
+                        color: '#94a3b8'
+                      }
+                    }}
+                  >
+                    {allMining ? 'Stop All' : 'Mine All'}
+                  </Button>
+                );
+              })()
+            )}
             {dashboard?.miningColleges.filter(mc => mc.college).length > 0 && (
               <Button
                 variant={deleteMode ? 'contained' : 'outlined'}

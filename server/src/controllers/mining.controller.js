@@ -186,6 +186,138 @@ export const startMining = async (req, res, next) => {
   }
 };
 
+// @desc    Start mining for all available colleges
+// @route   POST /api/mining/start-all
+// @access  Private (User only)
+export const startAllMining = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const now = new Date();
+
+    // Get user's mining colleges
+    const user = await User.findById(userId);
+    if (!user || !user.userProfile || !user.userProfile.miningColleges) {
+      return res.status(400).json({
+        success: false,
+        message: 'No mining colleges found'
+      });
+    }
+
+    const miningColleges = user.userProfile.miningColleges;
+    let startedCount = 0;
+    const results = [];
+
+    // First, auto-stop any expired sessions for this user (same logic as startMining)
+    const expiredSessions = await MiningSession.find({
+      user: userId,
+      isActive: true,
+      endTime: { $lte: now }
+    });
+
+    for (const session of expiredSessions) {
+      const miningDuration = (session.endTime - session.startTime) / (1000 * 60 * 60);
+      const tokensEarned = miningDuration * session.earningRate;
+
+      const updatedSession = await MiningSession.findOneAndUpdate(
+        { _id: session._id, isActive: true },
+        { $set: { isActive: false, tokensEarned: tokensEarned } },
+        { new: false }
+      );
+
+      if (updatedSession) {
+        await Wallet.findOneAndUpdate(
+          { user: session.user, college: session.college },
+          { $inc: { balance: tokensEarned, totalMined: tokensEarned }, lastUpdated: now },
+          { upsert: true }
+        );
+        await College.findByIdAndUpdate(session.college, {
+          $inc: { 'stats.activeMiners': -1, 'stats.totalTokensMined': tokensEarned }
+        });
+      }
+    }
+
+    // Now iterate through all colleges and start mining if not already active
+    for (const mc of miningColleges) {
+      const collegeId = mc.college.toString();
+
+      // Check if already mining for this college
+      const existingSession = await MiningSession.findOne({
+        user: userId,
+        college: collegeId,
+        isActive: true,
+        endTime: { $gt: now }
+      });
+
+      if (existingSession) {
+        results.push({ collegeId, status: 'already_active' });
+        continue;
+      }
+
+      // Get college details for rates
+      const college = await College.findById(collegeId);
+      if (!college) continue;
+
+      // Calculate rates (reusing logic from startMining)
+      const baseRate = college.baseRate || 0.25;
+      const referralBonusRate = college.referralBonusRate || 0.1;
+      const totalReferrals = mc.referredUsers?.length || 0;
+      const activeReferrals = getCappedReferralCount(mc.referredUsers);
+      const referralBonus = calculateReferralBonus(totalReferrals, referralBonusRate);
+      const earningRate = baseRate + referralBonus;
+
+      // Create session
+      const startTime = new Date();
+      const endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
+
+      await MiningSession.create({
+        user: userId,
+        college: collegeId,
+        startTime,
+        endTime,
+        earningRate,
+        isActive: true,
+        lastCalculatedAt: startTime
+      });
+
+      // Ensure wallet exists
+      let wallet = await Wallet.findOne({ user: userId, college: collegeId });
+      const isFirstTime = !wallet;
+      if (!wallet) {
+        await Wallet.create({
+          user: userId,
+          college: collegeId,
+          balance: 0,
+          totalMined: 0
+        });
+      }
+
+      // Update college stats
+      const statsUpdate = { 'stats.activeMiners': 1 };
+      if (isFirstTime) statsUpdate['stats.totalMiners'] = 1;
+      await College.findByIdAndUpdate(collegeId, { $inc: statsUpdate });
+
+      startedCount++;
+      results.push({ collegeId, status: 'started' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Started mining for ${startedCount} colleges`,
+      data: {
+        startedCount,
+        results
+      }
+    });
+
+    if (startedCount > 0) {
+      await broadcastMiningUpdate(userId);
+    }
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Stop mining for a college (manual stop or auto after 24h)
 // @route   POST /api/mining/stop/:collegeId
 // @access  Private (User only)
@@ -590,3 +722,139 @@ export const autoStopExpiredSessions = async (req, res, next) => {
   }
 };
 
+// @desc    Stop mining for all active colleges
+// @route   POST /api/mining/stop-all
+// @access  Private (User only)
+export const stopAllMining = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const now = new Date();
+
+    // Find all active mining sessions for this user
+    const activeSessions = await MiningSession.find({
+      user: userId,
+      isActive: true
+    }).populate('college', 'name admin stats');
+
+    if (activeSessions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No active mining sessions found'
+      });
+    }
+
+    let stoppedCount = 0;
+    const results = [];
+
+    for (const session of activeSessions) {
+      const miningDuration = (now - session.startTime) / (1000 * 60 * 60);
+      const tokensEarned = miningDuration * session.earningRate;
+
+      // Atomically mark session inactive
+      const updatedSession = await MiningSession.findOneAndUpdate(
+        {
+          _id: session._id,
+          isActive: true
+        },
+        {
+          $set: {
+            isActive: false,
+            tokensEarned: tokensEarned,
+            endTime: now
+          }
+        },
+        { new: false }
+      );
+
+      if (!updatedSession) {
+        continue;
+      }
+
+      // Update wallet
+      const wallet = await Wallet.findOneAndUpdate(
+        { user: userId, college: session.college._id },
+        {
+          $inc: {
+            balance: tokensEarned,
+            totalMined: tokensEarned
+          },
+          lastUpdated: now
+        },
+        { upsert: true, new: true }
+      );
+
+      // Update college stats
+      const previousTotalTokens = session.college.stats.totalTokensMined || 0;
+      await College.findByIdAndUpdate(session.college._id, {
+        $inc: {
+          'stats.activeMiners': -1,
+          'stats.totalTokensMined': tokensEarned
+        }
+      });
+
+      // Create notification
+      await createNotification({
+        recipient: userId,
+        type: 'mining_completed',
+        title: 'Mining session stopped',
+        message: `You earned ${tokensEarned.toFixed(2)} tokens from ${session.college?.name || 'your college'}.`,
+        data: {
+          collegeId: session.college._id,
+          collegeName: session.college?.name,
+          tokensEarned: parseFloat(tokensEarned.toFixed(2)),
+          sessionDuration: miningDuration
+        },
+        category: 'mining',
+        priority: 'low',
+        actionUrl: '/user/colleges'
+      });
+
+      // Check milestones
+      const milestone = await checkTokenMilestone(userId, session.college._id, wallet.balance);
+      if (milestone) {
+        await createNotification({
+          recipient: userId,
+          type: 'token_milestone',
+          title: `${milestone.toLocaleString()} tokens milestone!`,
+          message: `Congratulations! You've mined ${milestone.toLocaleString()} tokens for ${session.college?.name}.`,
+          data: {
+            collegeId: session.college._id,
+            collegeName: session.college?.name,
+            milestone,
+            totalBalance: wallet.balance
+          },
+          category: 'milestone',
+          priority: 'high',
+          actionUrl: '/user/colleges'
+        });
+      }
+
+      if (session.college.admin) {
+        const newTotalTokens = previousTotalTokens + tokensEarned;
+        const adminMilestone = checkAdminTokenMilestone(newTotalTokens, previousTotalTokens);
+        if (adminMilestone) {
+          await notifyAdminAboutTokenMilestone(session.college.admin, session.college.name, adminMilestone);
+        }
+      }
+
+      stoppedCount++;
+      results.push({ collegeId: session.college._id, tokensEarned });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Stopped mining for ${stoppedCount} colleges`,
+      data: {
+        stoppedCount,
+        results
+      }
+    });
+
+    if (stoppedCount > 0) {
+      await broadcastMiningUpdate(userId);
+    }
+
+  } catch (error) {
+    next(error);
+  }
+};

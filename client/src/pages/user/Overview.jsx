@@ -112,6 +112,39 @@ const Overview = () => {
     }
   }, [t, showToast]);
 
+  const handleToggleAllMining = useCallback(async () => {
+    try {
+      // Check if all colleges are currently mining
+      const allMining = dashboard?.miningColleges?.every(mc => {
+        const session = miningStatus[mc.college._id];
+        return session && session.isActive && session.remainingHours > 0;
+      });
+
+      if (allMining) {
+        // Stop All
+        setActionLoading('stop-all');
+        const response = await miningApi.stopAllMining();
+        if (response.success) {
+          showToast(response.message, 'success');
+          fetchDashboard();
+        }
+      } else {
+        // Start All (Mine All)
+        setActionLoading('mine-all');
+        const response = await miningApi.startAllMining();
+        if (response.success) {
+          showToast(response.message, 'success');
+          fetchDashboard();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle all mining:', err);
+      showToast(err.message || 'Failed to toggle mining', 'error');
+    } finally {
+      setActionLoading('');
+    }
+  }, [dashboard, miningStatus, showToast]);
+
 
   useEffect(() => {
     if (wsMiningStatus) {
@@ -399,29 +432,66 @@ const Overview = () => {
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
                   {t('user.tokenMiners')}
                 </Typography>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    if (tourActive && (tourStep === 'navigate-mobile' || tourStep === 'navigate')) {
-                      nextStep();
-                    }
-                    navigate('/user/colleges');
-                  }}
-                  data-tour={tourActive && tourStep === 'navigate-mobile' && isMobileTour ? 'view-colleges-mobile-button' : undefined}
-                  sx={{
-                    textTransform: 'none',
-                    borderColor: '#8b5cf6',
-                    color: '#8b5cf6',
-                    fontWeight: 600,
-                    '&:hover': {
-                      borderColor: '#7c3aed',
-                      background: 'rgba(139, 92, 246, 0.05)'
-                    }
-                  }}
-                >
-                  {t('user.viewColleges')}
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {(() => {
+                    const allMining = dashboard?.miningColleges?.length > 0 && dashboard?.miningColleges?.every(mc => {
+                       const session = miningStatus[mc.college._id];
+                       return session && session.isActive && session.remainingHours > 0;
+                    });
+                    
+                    return (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={allMining ? <Stop /> : <PlayArrow />}
+                        onClick={handleToggleAllMining}
+                        disabled={actionLoading === 'mine-all' || actionLoading === 'stop-all'}
+                        sx={{
+                          background: allMining 
+                            ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                            : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: 'white',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          '&:hover': {
+                            background: allMining
+                              ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
+                              : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                          },
+                          '&.Mui-disabled': {
+                            background: '#e2e8f0',
+                            color: '#94a3b8'
+                          }
+                        }}
+                      >
+                        {allMining ? 'Stop All' : 'Mine All'}
+                      </Button>
+                    );
+                  })()}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      if (tourActive && (tourStep === 'navigate-mobile' || tourStep === 'navigate')) {
+                        nextStep();
+                      }
+                      navigate('/user/colleges');
+                    }}
+                    data-tour={tourActive && tourStep === 'navigate-mobile' && isMobileTour ? 'view-colleges-mobile-button' : undefined}
+                    sx={{
+                      textTransform: 'none',
+                      borderColor: '#8b5cf6',
+                      color: '#8b5cf6',
+                      fontWeight: 600,
+                      '&:hover': {
+                        borderColor: '#7c3aed',
+                        background: 'rgba(139, 92, 246, 0.05)'
+                      }
+                    }}
+                  >
+                    {t('user.viewColleges')}
+                  </Button>
+                </Box>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 {t('user.miningStatus')}

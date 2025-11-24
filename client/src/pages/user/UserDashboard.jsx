@@ -686,20 +686,37 @@ const StudentDashboard = () => {
         </Box>
       </Box>
 
-      {/* My Colleges */}
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           My Colleges
         </Typography>
-        {dashboard?.miningColleges.filter(mc => mc.college).length < 10 && (
+        <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
             variant="contained"
-            startIcon={<Add />}
-            onClick={() => setShowAddCollegeDialog(true)}
+            startIcon={<PlayArrow />}
+            onClick={async () => {
+              try {
+                setActionLoading('mine-all');
+                const response = await miningApi.startAllMining();
+                if (response.success) {
+                  showToast(response.message, 'success');
+                  fetchDashboard();
+                }
+              } catch (err) {
+                console.error('Failed to start all mining:', err);
+                showToast(err.message || 'Failed to start all mining', 'error');
+              } finally {
+                setActionLoading('');
+              }
+            }}
+            disabled={dashboard?.miningColleges.every(mc => {
+               const session = miningStatus[mc.college._id];
+               return session && session.isActive && session.remainingHours > 0;
+            })}
             sx={{ 
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               borderRadius: 2,
-              boxShadow: '0 2px 12px rgba(102, 126, 234, 0.4)',
+              boxShadow: '0 2px 12px rgba(16, 185, 129, 0.4)',
               fontWeight: 600,
               px: 2,
               py: 1,
@@ -707,13 +724,40 @@ const StudentDashboard = () => {
               transition: 'all 0.2s',
               '&:hover': {
                 transform: 'translateY(-2px)',
-                boxShadow: '0 4px 16px rgba(102, 126, 234, 0.5)'
+                boxShadow: '0 4px 16px rgba(16, 185, 129, 0.5)'
+              },
+              '&.Mui-disabled': {
+                background: '#e2e8f0',
+                color: '#94a3b8'
               }
             }}
           >
-            Add College
+            Mine All
           </Button>
-        )}
+          {dashboard?.miningColleges.filter(mc => mc.college).length < 10 && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setShowAddCollegeDialog(true)}
+              sx={{ 
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: 2,
+                boxShadow: '0 2px 12px rgba(102, 126, 234, 0.4)',
+                fontWeight: 600,
+                px: 2,
+                py: 1,
+                fontSize: '0.875rem',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 16px rgba(102, 126, 234, 0.5)'
+                }
+              }}
+            >
+              Add College
+            </Button>
+          )}
+        </Box>
       </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 2 }}>

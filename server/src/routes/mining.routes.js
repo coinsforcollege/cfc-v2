@@ -1,7 +1,9 @@
 import express from 'express';
 import {
   startMining,
+  startAllMining,
   stopMining,
+  stopAllMining,
   getMiningStatus,
   getMiningStatusForCollege,
   autoStopExpiredSessions
@@ -15,7 +17,9 @@ router.use(protect);
 
 // Mining operations (users only)
 router.post('/start/:collegeId', authorize('user'), startMining);
-router.post('/stop/:collegeId', authorize('user'), stopMining);
+router.post('/start-all', protect, authorize('user'), startAllMining);
+router.post('/stop/:collegeId', protect, authorize('user'), stopMining);
+router.post('/stop-all', protect, authorize('user'), stopAllMining);
 router.get('/status', authorize('user'), getMiningStatus);
 router.get('/status/:collegeId', authorize('user'), getMiningStatusForCollege);
 

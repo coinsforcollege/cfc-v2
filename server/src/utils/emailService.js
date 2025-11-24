@@ -53,36 +53,43 @@ const sendEmail = async (toEmail, toName, subject, htmlBody) => {
   }
 };
 
+// Shared styles for consistency
+const styles = {
+  container: 'font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; color: #333333;',
+  header: 'text-align: center; padding: 40px 20px 20px;',
+  content: 'padding: 0 20px 40px;',
+  title: 'font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 16px;',
+  text: 'font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 20px;',
+  button: 'display: block; width: 100%; text-align: center; padding: 16px 0; background-color: #7c3aed; color: #ffffff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; margin: 30px 0;',
+  footer: 'border-top: 1px solid #e5e7eb; padding: 30px 20px; text-align: center; color: #9ca3af; font-size: 12px; line-height: 1.5;',
+  icon: 'width: 48px; height: 48px; margin-bottom: 20px; display: inline-block;',
+  highlightBox: 'background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0;'
+};
+
 export const sendOTPEmail = async (toEmail, toName, otp, language = 'en') => {
   const t = getEmailTranslations(language);
   
   const emailBody = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #8b5cf6; margin: 0;">${t.common.brandName}</h1>
+    <div style="${styles.container}">
+      <div style="${styles.header}">
+        <img src="https://cdn-icons-png.flaticon.com/512/2716/2716205.png" alt="Security" style="${styles.icon}" />
+        <h1 style="${styles.title}">${t.otp.title}</h1>
       </div>
 
-      <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%); border-radius: 10px; padding: 30px; margin-bottom: 20px;">
-        <h2 style="color: #2d3748; margin-top: 0;">${t.otp.title}</h2>
-        <p style="color: #718096; font-size: 16px; line-height: 1.6;">
-          ${t.otp.message}
-        </p>
+      <div style="${styles.content}">
+        <p style="${styles.text}">${t.otp.message}</p>
 
-        <div style="background: white; border: 2px dashed #8b5cf6; border-radius: 8px; padding: 20px; text-align: center; margin: 25px 0;">
-          <p style="color: #718096; font-size: 14px; margin: 0 0 10px 0;">${t.otp.otpLabel}</p>
-          <h1 style="color: #8b5cf6; font-size: 36px; letter-spacing: 8px; margin: 0; font-weight: bold;">${otp}</h1>
+        <div style="${styles.highlightBox}">
+          <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">${t.otp.otpLabel}</div>
+          <div style="font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #7c3aed;">${otp}</div>
         </div>
 
-        <p style="color: #718096; font-size: 14px; line-height: 1.6;">
-          ${t.otp.validity}
-        </p>
+        <p style="${styles.text}; font-size: 14px; color: #6b7280;">${t.otp.validity}</p>
       </div>
 
-      <div style="text-align: center; color: #a0aec0; font-size: 12px;">
-        <p>${t.otp.footer}</p>
-        <p style="margin-top: 20px;">
-          ${t.common.copyright}
-        </p>
+      <div style="${styles.footer}">
+        <p style="margin: 0 0 10px;">${t.otp.footer}</p>
+        <p style="margin: 0;">${t.common.copyright}</p>
       </div>
     </div>
   `;
@@ -92,46 +99,35 @@ export const sendOTPEmail = async (toEmail, toName, otp, language = 'en') => {
 
 export const sendWelcomeEmail = async (toEmail, toName, dashboardUrl, language = 'en') => {
   const t = getEmailTranslations(language);
-  
-  const gettingStartedItems = t.welcome.gettingStartedItems.map(item => `<li>${item}</li>`).join('');
+  const gettingStartedItems = t.welcome.gettingStartedItems.map(item => 
+    `<li style="margin-bottom: 10px; padding-left: 5px;">${item}</li>`
+  ).join('');
   
   const emailBody = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #8b5cf6; margin: 0;">${t.common.brandName}</h1>
+    <div style="${styles.container}">
+      <div style="${styles.header}">
+        <img src="https://cdn-icons-png.flaticon.com/512/3159/3159066.png" alt="Welcome" style="${styles.icon}" />
+        <h1 style="${styles.title}">${t.welcome.title}</h1>
       </div>
 
-      <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%); border-radius: 10px; padding: 30px; margin-bottom: 20px;">
-        <h2 style="color: #2d3748; margin-top: 0;">${t.welcome.title}</h2>
-        <p style="color: #718096; font-size: 16px; line-height: 1.6;">
-          ${t.welcome.greeting.replace('{{name}}', toName)}
-        </p>
-        <p style="color: #718096; font-size: 16px; line-height: 1.6;">
-          ${t.welcome.message}
-        </p>
+      <div style="${styles.content}">
+        <p style="${styles.text}">${t.welcome.greeting.replace('{{name}}', toName)}</p>
+        <p style="${styles.text}">${t.welcome.message}</p>
 
-        <div style="background: white; border-radius: 8px; padding: 20px; margin: 25px 0;">
-          <h3 style="color: #2d3748; margin-top: 0; font-size: 18px;">${t.welcome.gettingStarted}</h3>
-          <ul style="color: #718096; font-size: 14px; line-height: 1.8; padding-left: 20px;">
+        <a href="${dashboardUrl}" style="${styles.button}">${t.welcome.ctaButton}</a>
+
+        <div style="margin-top: 30px;">
+          <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 15px;">${t.welcome.gettingStarted}</h3>
+          <ul style="color: #4b5563; font-size: 16px; line-height: 1.6; padding-left: 20px; margin: 0;">
             ${gettingStartedItems}
           </ul>
         </div>
-
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-            ${t.welcome.ctaButton}
-          </a>
-        </div>
-
-        <p style="color: #718096; font-size: 14px; line-height: 1.6;">
-          ${t.welcome.helpText}
-        </p>
+        
+        <p style="${styles.text}; margin-top: 30px; font-size: 14px; color: #6b7280;">${t.welcome.helpText}</p>
       </div>
 
-      <div style="text-align: center; color: #a0aec0; font-size: 12px;">
-        <p style="margin-top: 20px;">
-          ${t.common.copyright}
-        </p>
+      <div style="${styles.footer}">
+        <p style="margin: 0;">${t.common.copyright}</p>
       </div>
     </div>
   `;
@@ -145,64 +141,49 @@ export const sendMinerStoppedEmail = async (toEmail, toName, sessionsData, dashb
   const totalHours = sessionsData.reduce((sum, s) => sum + s.durationHours, 0);
 
   const sessionRows = sessionsData.map(session => `
-    <tr style="border-bottom: 1px solid #e2e8f0;">
-      <td style="padding: 12px; color: #2d3748;">${session.collegeName}</td>
-      <td style="padding: 12px; color: #10b981; font-weight: bold; text-align: center;">${session.tokensEarned.toFixed(2)}</td>
-      <td style="padding: 12px; color: #718096; text-align: center;">${session.balance.toFixed(2)}</td>
-      <td style="padding: 12px; color: #718096; text-align: center;">${session.durationHours.toFixed(1)}h</td>
+    <tr style="border-bottom: 1px solid #f3f4f6;">
+      <td style="padding: 16px 8px; color: #111827; font-weight: 500;">${session.collegeName}</td>
+      <td style="padding: 16px 8px; color: #10b981; font-weight: 600; text-align: right;">+${session.tokensEarned.toFixed(2)}</td>
     </tr>
   `).join('');
 
   const emailBody = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #8b5cf6; margin: 0;">${t.common.brandName}</h1>
+    <div style="${styles.container}">
+      <div style="${styles.header}">
+        <img src="https://cdn-icons-png.flaticon.com/512/2933/2933116.png" alt="Mining Complete" style="${styles.icon}" />
+        <h1 style="${styles.title}">${t.minerStopped.title}</h1>
       </div>
 
-      <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%); border-radius: 10px; padding: 30px; margin-bottom: 20px;">
-        <h2 style="color: #2d3748; margin-top: 0;">${t.minerStopped.title}</h2>
-        <p style="color: #718096; font-size: 16px; line-height: 1.6;">
-          ${t.minerStopped.greeting.replace('{{name}}', toName)}
-        </p>
-        <p style="color: #718096; font-size: 16px; line-height: 1.6;">
-          ${t.minerStopped.message}
-        </p>
-
-        <div style="background: white; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center;">
-          <p style="color: #718096; font-size: 14px; margin: 0 0 5px 0;">${t.minerStopped.totalTokensLabel}</p>
-          <h1 style="color: #10b981; font-size: 42px; margin: 0; font-weight: bold;">${totalTokens.toFixed(2)}</h1>
-          <p style="color: #718096; font-size: 14px; margin: 10px 0 0 0;">in ${totalHours.toFixed(1)} hours</p>
+      <div style="${styles.content}">
+        <p style="${styles.text}">${t.minerStopped.greeting.replace('{{name}}', toName)}</p>
+        
+        <div style="${styles.highlightBox}">
+          <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">${t.minerStopped.totalTokensLabel}</div>
+          <div style="font-size: 42px; font-weight: 700; color: #10b981;">${totalTokens.toFixed(2)}</div>
+          <div style="font-size: 14px; color: #6b7280; margin-top: 5px;">in ${totalHours.toFixed(1)} hours</div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; margin: 20px 0;">
-          <thead>
-            <tr style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);">
-              <th style="padding: 12px; text-align: left; color: #2d3748; font-weight: 600;">${t.minerStopped.tableHeaders.college}</th>
-              <th style="padding: 12px; text-align: center; color: #2d3748; font-weight: 600;">${t.minerStopped.tableHeaders.earned}</th>
-              <th style="padding: 12px; text-align: center; color: #2d3748; font-weight: 600;">${t.minerStopped.tableHeaders.balance}</th>
-              <th style="padding: 12px; text-align: center; color: #2d3748; font-weight: 600;">${t.minerStopped.tableHeaders.time}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${sessionRows}
-          </tbody>
-        </table>
+        <a href="${dashboardUrl}" style="${styles.button}">${t.minerStopped.ctaButton}</a>
 
-        <p style="color: #718096; font-size: 16px; line-height: 1.6; margin-top: 25px;">
-          ${t.minerStopped.encouragement}
-        </p>
-
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-            ${t.minerStopped.ctaButton}
-          </a>
+        <div style="margin-top: 30px;">
+           <table style="width: 100%; border-collapse: collapse;">
+             <thead>
+               <tr style="border-bottom: 2px solid #f3f4f6;">
+                 <th style="padding: 10px 8px; text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.minerStopped.tableHeaders.college}</th>
+                 <th style="padding: 10px 8px; text-align: right; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.minerStopped.tableHeaders.earned}</th>
+               </tr>
+             </thead>
+             <tbody>
+               ${sessionRows}
+             </tbody>
+           </table>
         </div>
+
+        <p style="${styles.text}; margin-top: 30px; text-align: center;">${t.minerStopped.encouragement}</p>
       </div>
 
-      <div style="text-align: center; color: #a0aec0; font-size: 12px;">
-        <p style="margin-top: 20px;">
-          ${t.common.copyright}
-        </p>
+      <div style="${styles.footer}">
+        <p style="margin: 0;">${t.common.copyright}</p>
       </div>
     </div>
   `;
@@ -215,44 +196,37 @@ export const sendInactivityReminderEmail = async (toEmail, toName, inactiveDurat
   const durationText = getDurationText(inactiveDuration, language);
   const encouragementText = t.inactivityReminder.encouragement[inactiveDuration] || t.inactivityReminder.encouragement.default;
   
-  const reasonsList = t.inactivityReminder.reasons.map(reason => `<li>${reason}</li>`).join('');
+  const reasonsList = t.inactivityReminder.reasons.map(reason => 
+    `<li style="margin-bottom: 10px; padding-left: 5px;">${reason}</li>`
+  ).join('');
 
   const emailBody = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #8b5cf6; margin: 0;">${t.common.brandName}</h1>
+    <div style="${styles.container}">
+      <div style="${styles.header}">
+        <img src="https://cdn-icons-png.flaticon.com/512/2972/2972531.png" alt="Miss You" style="${styles.icon}" />
+        <h1 style="${styles.title}">${t.inactivityReminder.title.replace('{{name}}', toName)}</h1>
       </div>
 
-      <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%); border-radius: 10px; padding: 30px; margin-bottom: 20px;">
-        <h2 style="color: #2d3748; margin-top: 0;">${t.inactivityReminder.title.replace('{{name}}', toName)}</h2>
-        <p style="color: #718096; font-size: 16px; line-height: 1.6;">
-          ${encouragementText}
-        </p>
+      <div style="${styles.content}">
+        <p style="${styles.text}">${encouragementText}</p>
 
-        <div style="background: white; border-radius: 8px; padding: 25px; margin: 25px 0; text-align: center;">
-          <div style="font-size: 48px; margin-bottom: 15px;">⏰</div>
-          <p style="color: #2d3748; font-size: 18px; margin: 0; font-weight: 600;">${t.inactivityReminder.noActiveMiners}</p>
-          <p style="color: #718096; font-size: 14px; margin: 10px 0 0 0;">${t.inactivityReminder.inactiveFor.replace('{{duration}}', durationText)}</p>
+        <div style="${styles.highlightBox}; background-color: #fff1f2; border-color: #fecdd3;">
+          <div style="font-size: 18px; font-weight: 600; color: #be123c; margin-bottom: 5px;">${t.inactivityReminder.noActiveMiners}</div>
+          <div style="font-size: 14px; color: #9f1239;">${t.inactivityReminder.inactiveFor.replace('{{duration}}', durationText)}</div>
         </div>
 
-        <div style="background: white; border-radius: 8px; padding: 20px; margin: 25px 0;">
-          <h3 style="color: #2d3748; margin-top: 0; font-size: 16px;">${t.inactivityReminder.whyStartMining}</h3>
-          <ul style="color: #718096; font-size: 14px; line-height: 1.8; padding-left: 20px; margin: 10px 0 0 0;">
+        <a href="${dashboardUrl}" style="${styles.button}">${t.inactivityReminder.ctaButton}</a>
+
+        <div style="margin-top: 30px;">
+          <h3 style="font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 15px;">${t.inactivityReminder.whyStartMining}</h3>
+          <ul style="color: #4b5563; font-size: 16px; line-height: 1.6; padding-left: 20px; margin: 0;">
             ${reasonsList}
           </ul>
         </div>
-
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${dashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-            ${t.inactivityReminder.ctaButton}
-          </a>
-        </div>
       </div>
 
-      <div style="text-align: center; color: #a0aec0; font-size: 12px;">
-        <p style="margin-top: 20px;">
-          ${t.common.copyright}
-        </p>
+      <div style="${styles.footer}">
+        <p style="margin: 0;">${t.common.copyright}</p>
       </div>
     </div>
   `;
