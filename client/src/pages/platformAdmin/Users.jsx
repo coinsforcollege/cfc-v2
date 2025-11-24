@@ -20,7 +20,12 @@ import {
   Alert,
   InputAdornment,
   Tabs,
-  Tab
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tooltip
 } from '@mui/material';
 import {
   Search,
@@ -28,7 +33,8 @@ import {
   Edit,
   Delete,
   Refresh,
-  Close
+  Close,
+  PersonRemove
 } from '@mui/icons-material';
 import { platformAdminApi } from '../../api/platformAdmin.api';
 import { useToast } from '../../contexts/ToastContext';
@@ -58,6 +64,11 @@ const Users = () => {
   const [pageCollegeAdmins, setPageCollegeAdmins] = useState(0);
   const [rowsPerPageCollegeAdmins, setRowsPerPageCollegeAdmins] = useState(25);
   const [totalCollegeAdmins, setTotalCollegeAdmins] = useState(0);
+
+  // Remove admin dialog
+  const [removeAdminDialogOpen, setRemoveAdminDialogOpen] = useState(false);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [removingAdmin, setRemovingAdmin] = useState(false);
 
   // Fetch users
   const fetchUsers = async () => {
@@ -161,6 +172,31 @@ const Users = () => {
 
   const handleEditCollegeAdmin = (id) => {
     navigate(`/platform-admin/college-admins/${id}?edit=true`);
+  };
+
+  const handleRemoveAdminClick = (admin) => {
+    setSelectedAdmin(admin);
+    setRemoveAdminDialogOpen(true);
+  };
+
+  const handleRemoveAdminConfirm = async () => {
+    if (!selectedAdmin) return;
+
+    try {
+      setRemovingAdmin(true);
+      const response = await platformAdminApi.removeCollegeAdmin(selectedAdmin._id);
+
+      if (response.success) {
+        showToast('College admin status removed successfully', 'success');
+        setRemoveAdminDialogOpen(false);
+        setSelectedAdmin(null);
+        fetchCollegeAdmins();
+      }
+    } catch (err) {
+      showToast(err.message || 'Failed to remove college admin', 'error');
+    } finally {
+      setRemovingAdmin(false);
+    }
   };
 
   const sidebarStats = {
@@ -458,11 +494,11 @@ const Users = () => {
                               </TableCell>
                               <TableCell>
                                 <Typography variant="caption" color="text.secondary">
-                                  {formatDate(admin.createdAt)}
-                                </Typography>
-                              </TableCell>
-                              <TableCell align="right">
-                                <IconButton
+                                    {formatDate(admin.createdAt)}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <IconButton
                                   size="small"
                                   onClick={() => handleViewCollegeAdmin(admin._id)}
                                   sx={{ color: '#667eea' }}
@@ -476,6 +512,15 @@ const Users = () => {
                                 >
                                   <Edit fontSize="small" />
                                 </IconButton>
+                                <Tooltip title="Remove Admin Status">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleRemoveAdminClick(admin)}
+                                    sx={{ color: '#f59e0b' }}
+                                  >
+                                    <PersonRemove fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
                               </TableCell>
                             </TableRow>
                           ))
@@ -501,6 +546,61 @@ const Users = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Remove Admin Confirmation Dialog */}
+        <Dialog
+          open={removeAdminDialogOpen}
+          onClose={() => setRemoveAdminDialogOpen(false)}
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
+            }
+          }}
+        >
+          <DialogTitle sx={{ fontWeight: 700 }}>Remove College Admin Status</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Are you sure you want to remove <strong>{selectedAdmin?.name}</strong> as admin of <strong>{selectedAdmin?.managedCollege?.name}</strong>?
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              This will:
+            </Typography>
+            <Box component="ul" sx={{ mt: 1, pl: 2 }}>
+              <Typography component="li" variant="body2" color="text.secondary">
+                Change user role to 'user'
+              </Typography>
+              <Typography component="li" variant="body2" color="text.secondary">
+                Disconnect user from the college
+              </Typography>
+              <Typography component="li" variant="body2" color="text.secondary">
+                Reset college status to 'Unaffiliated' if applicable
+              </Typography>
+              <Typography component="li" variant="body2" color="text.secondary">
+                Send a notification email to the user
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 2.5 }}>
+            <Button onClick={() => setRemoveAdminDialogOpen(false)} sx={{ color: '#64748b', fontWeight: 600 }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRemoveAdminConfirm}
+              variant="contained"
+              disabled={removingAdmin}
+              sx={{
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                fontWeight: 700,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+                }
+              }}
+            >
+              {removingAdmin ? <CircularProgress size={20} /> : 'Remove Admin'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </DashboardLayout>
   );

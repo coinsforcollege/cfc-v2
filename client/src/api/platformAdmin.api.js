@@ -18,6 +18,9 @@ export const platformAdminApi = {
   updateCollegeAdmin: (id, data) => apiClient.put(`/platform-admin/college-admins/${id}`, data),
   deleteCollegeAdmin: (id) => apiClient.delete(`/platform-admin/college-admins/${id}`),
   resetCollegeAdminPassword: (id, data) => apiClient.put(`/platform-admin/college-admins/${id}/reset-password`, data),
+  removeCollegeAdmin: (id) => apiClient.put(`/platform-admin/college-admins/${id}/remove`),
+  assignCollegeAdmin: (id, data) => apiClient.put(`/platform-admin/users/${id}/assign-college-admin`, data),
+  reassignCollegeAdmin: (adminId, newCollegeId) => apiClient.put(`/platform-admin/college-admins/${adminId}/reassign`, { newCollegeId }),
 
   // Colleges
   getAllColleges: (params) => apiClient.get('/platform-admin/colleges', { params }),

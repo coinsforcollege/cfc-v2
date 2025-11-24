@@ -25,6 +25,7 @@ import { Search, School, People, TrendingUp, LocationOn, Add, Close, CloudUpload
 import { useTranslation } from 'react-i18next';
 import { collegesApi } from '../../api/colleges.api';
 import { userApi } from '../../api/user.api';
+import * as Auth from '../../api/auth.api';
 import { useAuth } from '../../contexts/AuthContext';
 import { getImageUrl } from '../../utils/imageUtils';
 import { COUNTRIES } from '../../constants/countries';
@@ -126,18 +127,30 @@ const CollegeSelection = () => {
       const response = await userApi.addCollege(formData);
 
       if (response.success) {
-        // Update user context with new college data
-        const updatedUser = {
-          ...user,
-          studentProfile: {
-            ...user.userProfile,
-            miningColleges: response.data.miningColleges
-          }
-        };
-        updateUser(updatedUser);
-
-        // Redirect to overview page
-        navigate('/user/overview');
+        // Refresh user data from server to get complete updated profile
+        const userDataResponse = await Auth.getMe();
+        
+        if (userDataResponse.success) {
+          // Update context with fresh server data
+          updateUser(userDataResponse.data);
+          
+          // Small delay to ensure context propagates
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Navigate to dashboard
+          navigate('/user/colleges', { replace: true });
+        } else {
+          // Fallback: manually update context (old behavior)
+          const updatedUser = {
+            ...user,
+            userProfile: {  // FIX: was studentProfile (typo)
+              ...user.userProfile,
+              miningColleges: response.data.miningColleges
+            }
+          };
+          updateUser(updatedUser);
+          navigate('/user/colleges', { replace: true });
+        }
       }
     } catch (err) {
       setError(err.message || 'Failed to add college');
@@ -206,22 +219,36 @@ const CollegeSelection = () => {
         formData.append('logoFile', logoFile);
       }
 
+
       const response = await userApi.addCollege(formData);
 
       if (response.success) {
-        // Update user context
-        const updatedUser = {
-          ...user,
-          studentProfile: {
-            ...user.userProfile,
-            miningColleges: response.data.miningColleges
-          }
-        };
-        updateUser(updatedUser);
+        // Refresh user data from server
+        const userDataResponse = await Auth.getMe();
+        
+        if (userDataResponse.success) {
+          updateUser(userDataResponse.data);
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } else {
+          // Fallback
+          const updatedUser = {
+            ...user,
+            userProfile: {  // FIX: was studentProfile
+              ...user.userProfile,
+              miningColleges: response.data.miningColleges
+            }
+          };
+          updateUser(updatedUser);
+        }
 
-        // Close dialog and redirect to overview
         setShowAddDialog(false);
-        navigate('/user/overview');
+        setNewCollege({ name: '', country: '', logo: '' });
+        setLogoFile(null);
+        setLogoPreview('');
+        setLogoInputType('url');
+        
+        // Navigate to dashboard
+        navigate('/user/colleges', { replace: true });
       }
     } catch (err) {
       setError(err.message || 'Failed to add college');

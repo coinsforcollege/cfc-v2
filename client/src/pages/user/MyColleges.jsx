@@ -830,20 +830,40 @@ const MyColleges = () => {
                   </Box>
 
                   {/* College Name */}
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      color: '#f1f5f9',
-                      fontSize: '0.95rem',
-                      mb: 0.5,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    {mc.college.name}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        color: '#f1f5f9',
+                        fontSize: '0.95rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {mc.college.name}
+                    </Typography>
+                    <Chip
+                      label={mc.college.status || 'Unaffiliated'}
+                      size="small"
+                      sx={{
+                        height: 16,
+                        fontSize: '0.55rem',
+                        fontWeight: 700,
+                        background: mc.college.status === 'Live' 
+                          ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                          : mc.college.status === 'Building'
+                          ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                          : mc.college.status === 'Waitlist'
+                          ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                          : 'rgba(100, 116, 139, 0.3)',
+                        color: '#fff',
+                        border: 'none',
+                        '& .MuiChip-label': { px: 1, py: 0 }
+                      }}
+                    />
+                  </Box>
 
                   <Typography
                     variant="caption"

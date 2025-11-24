@@ -59,6 +59,15 @@ const emailTranslations = {
       ],
       ctaButton: 'Start Mining Now'
     },
+    collegeAdminRemoved: {
+      subject: 'Update on Your College Admin Status',
+      title: 'Admin Status Update',
+      greeting: 'Hi {{name}},',
+      message: 'We are writing to inform you that your status as the administrator for <strong>{{collegeName}}</strong> has been removed.',
+      reason: 'This change was made by our platform administrators. If you believe this is a mistake or would like to discuss this further, please contact our support team.',
+      ctaButton: 'Contact Support',
+      supportEmail: 'support@coinsforcollege.org'
+    },
     common: {
       brandName: 'Coins For College',
       copyright: '© 2025 Coins For College. All rights reserved.'
@@ -122,6 +131,15 @@ const emailTranslations = {
         '攀登排行榜'
       ],
       ctaButton: '立即开始挖矿'
+    },
+    collegeAdminRemoved: {
+      subject: '关于您的大学管理员状态更新',
+      title: '管理员状态更新',
+      greeting: '您好 {{name}}，',
+      message: '我们要通知您，您作为 <strong>{{collegeName}}</strong> 管理员的身份已被移除。',
+      reason: '此更改由我们的平台管理员执行。如果您认为这是一个错误或想进一步讨论，请联系我们的支持团队。',
+      ctaButton: '联系支持',
+      supportEmail: 'support@coinsforcollege.org'
     },
     common: {
       brandName: '大学代币',

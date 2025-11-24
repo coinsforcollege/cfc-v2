@@ -272,6 +272,45 @@ const CollegeAdminSelection = () => {
           </Typography>
         </Box>
 
+        {/* Admin Removal Notification */}
+        {user && user.role === 'user' && (
+          <Alert 
+            severity="warning" 
+            sx={{ mb: 3, maxWidth: '800px', mx: 'auto' }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+              Your College Admin Application Was Not Verified
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              We were unable to verify your association as an administrator for your selected college. 
+              If you believe this was a mistake, please contact us at <strong>support@coinsforcollege.org</strong>.
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 1.5 }}>
+              If you'd like to mine tokens as a community member instead, please create a regular user account:
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                // Log out and redirect to sign up
+                window.location.href = '/auth/signup';
+              }}
+              sx={{
+                borderColor: '#f59e0b',
+                color: '#f59e0b',
+                textTransform: 'none',
+                fontWeight: 600,
+                '&:hover': {
+                  borderColor: '#d97706',
+                  backgroundColor: 'rgba(245, 158, 11, 0.04)'
+                }
+              }}
+            >
+              Create Community User Account
+            </Button>
+          </Alert>
+        )}
+
         {error && (
           <Alert severity="error" sx={{ mb: 3, maxWidth: '800px', mx: 'auto' }} onClose={() => setError('')}>
             {error}

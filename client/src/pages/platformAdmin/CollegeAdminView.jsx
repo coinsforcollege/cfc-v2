@@ -29,6 +29,8 @@ import {
   Save,
   Cancel,
   LockReset,
+  Lock,
+  School,
   Delete
 } from '@mui/icons-material';
 import { platformAdminApi } from '../../api/platformAdmin.api';
@@ -112,12 +114,28 @@ const CollegeAdminView = () => {
   const handleSaveChanges = async () => {
     try {
       setSaving(true);
-      const response = await platformAdminApi.updateCollegeAdmin(id, editFormData);
-
-      if (response.success) {
-        showToast('College admin updated successfully', 'success');
-        setIsEditMode(false);
-        fetchCollegeAdminDetails();
+      
+      // Check if managedCollege has changed (reassignment)
+      const hasCollegeChanged = editFormData.managedCollege !== (collegeAdmin.managedCollege?._id || '');
+      
+      if (hasCollegeChanged && editFormData.managedCollege) {
+        // Use reassign endpoint if college changed
+        const response = await platformAdminApi.reassignCollegeAdmin(id, editFormData.managedCollege);
+        
+        if (response.success) {
+          showToast('College admin reassigned successfully', 'success');
+          setIsEditMode(false);
+          fetchCollegeAdminDetails();
+        }
+      } else {
+        // Use regular update for other fields
+        const response = await platformAdminApi.updateCollegeAdmin(id, editFormData);
+        
+        if (response.success) {
+          showToast('College admin updated successfully', 'success');
+          setIsEditMode(false);
+          fetchCollegeAdminDetails();
+        }
       }
     } catch (err) {
       showToast(err.message || 'Failed to update college admin', 'error');
@@ -420,9 +438,33 @@ const CollegeAdminView = () => {
         {collegeAdmin.managedCollege && (
           <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
-                Managed College
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  Managed College
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<School />}
+                  onClick={() => {
+                    setEditingCollege(collegeAdmin.managedCollege);
+                    setShowCollegeForm(true);
+                  }}
+                  sx={{
+                    borderColor: '#667eea',
+                    color: '#667eea',
+                    fontSize: '0.75rem',
+                    py: 0.5,
+                    px: 1.5,
+                    '&:hover': {
+                      borderColor: '#764ba2',
+                      background: 'rgba(102, 126, 234, 0.05)'
+                    }
+                  }}
+                >
+                  View College Details
+                </Button>
+              </Box>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <Typography variant="caption" color="text.secondary">College Name</Typography>

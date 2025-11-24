@@ -51,6 +51,7 @@ const CollegeEdit = () => {
     shortName: '',
     tagline: '',
     type: 'University',
+    status: 'Unaffiliated',
     establishedYear: '',
     country: '',
     state: '',
@@ -333,6 +334,41 @@ const CollegeEdit = () => {
                 <MenuItem value="School">School</MenuItem>
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
+              <TextField
+                fullWidth
+                select
+                label="College Status"
+                value={collegeFormData.status || 'Unaffiliated'}
+                onChange={(e) => handleCollegeFormChange('status', e.target.value)}
+                helperText="Unaffiliated = no admin, Waitlist = has admin, Building = launching, Live = token live"
+              >
+                <MenuItem value="Unaffiliated">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#94a3b8' }} />
+                    Unaffiliated
+                  </Box>
+                </MenuItem>
+                <MenuItem value="Waitlist">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#3b82f6' }} />
+                    Waitlist
+                  </Box>
+                </MenuItem>
+                <MenuItem value="Building">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f59e0b' }} />
+                    Building
+                  </Box>
+                </MenuItem>
+                <MenuItem value="Live">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#10b981' }} />
+                    Live
+                  </Box>
+                </MenuItem>
+              </TextField>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, marginBottom: 3 }}>
               <TextField
                 fullWidth
                 label="Established Year"

@@ -381,26 +381,89 @@ export const deleteCollege = async (req, res, next) => {
       });
     }
 
-    // Check if there are active mining sessions
-    const activeSessionsCount = await MiningSession.countDocuments({
+    // Get all users mining this college before deletion
+    const minersIds = await User.find({
+      role: 'user',
+      'userProfile.miningColleges.college': college._id
+    }).distinct('_id');
+
+    console.log(`🗑️ Deleting college: ${college.name}`);
+    console.log(`📊 Found ${minersIds.length} miners to clean up`);
+
+    // Stop all active mining sessions for this college
+    const activeSessions = await MiningSession.find({
       college: college._id,
       isActive: true
     });
 
-    if (activeSessionsCount > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete college with active mining sessions'
-      });
+    if (activeSessions.length > 0) {
+      console.log(`⛔ Stopping ${activeSessions.length} active mining sessions`);
+      await MiningSession.updateMany(
+        { college: college._id, isActive: true },
+        { isActive: false, endTime: new Date() }
+      );
     }
 
+    // Remove college from all users' miningColleges arrays
+    if (minersIds.length > 0) {
+      console.log(`🧹 Removing college from ${minersIds.length} users' mining lists`);
+      await User.updateMany(
+        { 'userProfile.miningColleges.college': college._id },
+        { $pull: { 'userProfile.miningColleges': { college: college._id } } }
+      );
+    }
+
+    // Archive wallet data (soft delete - keep balance records for audit)
+    const walletCount = await Wallet.countDocuments({ college: college._id });
+    if (walletCount > 0) {
+      console.log(`💰 Found ${walletCount} wallet records (keeping for audit trail)`);
+      // Note: We're NOT deleting wallets to preserve balance history
+      // They will be filtered out by frontend as college is null after deletion
+    }
+
+    // Notify all affected miners about college deletion
+    if (minersIds.length > 0) {
+      const notifications = minersIds.map(userId => ({
+        recipient: userId,
+        type: 'college_deleted',
+        title: `${college.name} has been removed`,
+        message: `The college "${college.name}" has been removed from the platform. Your mining history and tokens for this college have been preserved in your account records.`,
+        data: {
+          collegeId: college._id,
+          collegeName: college.name
+        },
+        category: 'college',
+        priority: 'high',
+        actionUrl: '/user/colleges'
+      }));
+
+      await createBulkNotifications(notifications);
+      console.log(`📧 Sent deletion notifications to ${minersIds.length} miners`);
+    }
+
+    // If college has an admin, set their managedCollege to null
+    if (college.admin) {
+      await User.findByIdAndUpdate(college.admin, {
+        managedCollege: null
+      });
+      console.log(`👤 Removed admin association`);
+    }
+
+    // Finally, delete the college
     await college.deleteOne();
+    console.log(`✅ College "${college.name}" deleted successfully`);
 
     res.status(200).json({
       success: true,
-      message: 'College deleted successfully'
+      message: 'College deleted successfully',
+      data: {
+        minersAffected: minersIds.length,
+        sessionsEnded: activeSessions.length,
+        walletsPreserved: walletCount
+      }
     });
   } catch (error) {
+    console.error('❌ Error deleting college:', error);
     next(error);
   }
 };
@@ -871,11 +934,18 @@ export const deleteCollegeAdmin = async (req, res, next) => {
       });
     }
 
-    // If managing a college, remove admin reference from college
+    // If managing a college, remove admin reference from college and reset status
     if (collegeAdmin.managedCollege) {
-      await College.findByIdAndUpdate(collegeAdmin.managedCollege, {
-        admin: null
-      });
+      const college = await College.findById(collegeAdmin.managedCollege);
+      if (college) {
+        college.admin = null;
+        // Reset status to Unaffiliated if it was Waitlist or Building
+        if (college.status === 'Waitlist' || college.status === 'Building') {
+          college.status = 'Unaffiliated';
+          console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
+        }
+        await college.save();
+      }
     }
 
     await collegeAdmin.deleteOne();
@@ -924,6 +994,358 @@ export const resetCollegeAdminPassword = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Remove college admin status from user
+// @route   PUT /api/platform-admin/college-admins/:id/remove
+// @access  Private (Platform Admin only)
+export const removeCollegeAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // Find the college admin
+    const collegeAdmin = await User.findById(id).populate('managedCollege', 'name status');
+
+    if (!collegeAdmin || collegeAdmin.role !== 'college_admin') {
+      return res.status(404).json({
+        success: false,
+        message: 'College admin not found'
+      });
+    }
+
+    const collegeName = collegeAdmin.managedCollege?.name || 'Unknown College';
+    const collegeId = collegeAdmin.managedCollege?._id;
+
+    // Update user: change role to 'user' and remove managedCollege
+    collegeAdmin.role = 'user';
+    collegeAdmin.managedCollege = null;
+    
+    // Initialize userProfile if it doesn't exist
+    if (!collegeAdmin.userProfile) {
+      collegeAdmin.userProfile = {
+        miningColleges: [],
+        totalReferrals: 0,
+        onboardingCompleted: false
+      };
+    }
+    
+    // Ensure required userProfile fields exist
+    if (!collegeAdmin.userProfile.miningColleges) {
+      collegeAdmin.userProfile.miningColleges = [];
+    }
+    if (collegeAdmin.userProfile.totalReferrals === undefined) {
+      collegeAdmin.userProfile.totalReferrals = 0;
+    }
+    if (collegeAdmin.userProfile.onboardingCompleted === undefined) {
+      collegeAdmin.userProfile.onboardingCompleted = false;
+    }
+    
+    await collegeAdmin.save();
+    
+    console.log('✅ User role changed:', collegeAdmin.role, 'User ID:', collegeAdmin._id);
+
+    // Update college: remove admin reference and reset status if needed
+    if (collegeId) {
+      const college = await College.findById(collegeId);
+      if (college) {
+        college.admin = null;
+        // Reset status to Unaffiliated if it was Waitlist or Building
+        if (college.status === 'Waitlist' || college.status === 'Building') {
+          college.status = 'Unaffiliated';
+        }
+        await college.save();
+        console.log('✅ College admin removed:', college.name, 'New status:', college.status);
+      }
+    }
+
+    // Send email notification
+    const { sendCollegeAdminRemovedEmail } = await import('../utils/emailService.js');
+    await sendCollegeAdminRemovedEmail(
+      collegeAdmin.email,
+      collegeAdmin.name,
+      collegeName,
+      collegeAdmin.languagePreference || 'en'
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'College admin status removed successfully',
+      data: {
+        user: collegeAdmin,
+        collegeName
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error removing college admin:', error);
+    next(error);
+  }
+};
+
+// @desc    Assign college admin status to user
+// @route   PUT /api/platform-admin/users/:id/assign-college-admin
+// @access  Private (Platform Admin only)
+export const assignCollegeAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { collegeId } = req.body;
+
+    if (!collegeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'College ID is required'
+      });
+    }
+
+    // Find the user
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user is already a college admin
+    if (user.role === 'college_admin') {
+      return res.status(400).json({
+        success: false,
+        message: 'User is already a college admin'
+      });
+    }
+
+    // Find the college
+    const college = await College.findById(collegeId);
+
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: 'College not found'
+      });
+    }
+
+    // Check if college already has an admin
+    if (college.admin) {
+      return res.status(400).json({
+        success: false,
+        message: 'This college already has an admin. Only one admin per college is allowed.'
+      });
+    }
+
+    // Update user: change role to 'college_admin' and set managedCollege
+    user.role = 'college_admin';
+    user.managedCollege = collegeId;
+    await user.save();
+
+    // Update college: set admin reference and update status
+    college.admin = user._id;
+    // Move to Waitlist if currently Unaffiliated
+    if (college.status === 'Unaffiliated') {
+      college.status = 'Waitlist';
+    }
+    await college.save();
+
+    // Notify all users mining for this college about status change if status changed
+    if (college.status === 'Waitlist') {
+      const minersIds = await User.find({
+        role: 'user',
+        'userProfile.miningColleges.college': college._id
+      }).distinct('_id');
+
+      if (minersIds.length > 0) {
+        const notifications = minersIds.map(userId => ({
+          recipient: userId,
+          type: 'college_status_changed',
+          title: `${college.name} has an admin!`,
+          message: `Great news! ${college.name} now has an official admin and has been moved to the waitlist. Your college is one step closer to launching its token!`,
+          data: {
+            collegeId: college._id,
+            collegeName: college.name,
+            newStatus: 'Waitlist',
+            oldStatus: 'Unaffiliated'
+          },
+          category: 'college',
+          priority: 'high',
+          actionUrl: '/user/dashboard'
+        }));
+
+        await createBulkNotifications(notifications);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'User assigned as college admin successfully',
+      data: {
+        user,
+        college
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Reassign college admin to different college
+// @route   PUT /api/platform-admin/college-admins/:id/reassign
+// @access  Private (Platform Admin only)
+export const reassignCollegeAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { newCollegeId } = req.body;
+
+    if (!newCollegeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'New college ID is required'
+      });
+    }
+
+    // Find the admin
+    const admin = await User.findById(id).populate('managedCollege');
+
+    if (!admin || admin.role !== 'college_admin') {
+      return res.status(404).json({
+        success: false,
+        message: 'College admin not found'
+      });
+    }
+
+    const oldCollege = admin.managedCollege;
+
+    if (!oldCollege) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin is not currently managing any college'
+      });
+    }
+
+    if (oldCollege._id.toString() === newCollegeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin is already managing this college'
+      });
+    }
+
+    // Find the new college
+    const newCollege = await College.findById(newCollegeId);
+
+    if (!newCollege) {
+      return res.status(404).json({
+        success: false,
+        message: 'New college not found'
+      });
+    }
+
+    // Check if new college already has an admin
+    if (newCollege.admin) {
+      return res.status(400).json({
+        success: false,
+        message: 'The target college already has an admin'
+      });
+    }
+
+    console.log(`🔄 Reassigning admin ${admin.name} from ${oldCollege.name} to ${newCollege.name}`);
+
+    // Update old college: remove admin, potentially change status
+    oldCollege.admin = null;
+    if (oldCollege.status === 'Waitlist' || oldCollege.status === 'Building') {
+      oldCollege.status = 'Unaffiliated';
+      console.log(`📊 Old college "${oldCollege.name}" status changed to Unaffiliated`);
+    }
+    await oldCollege.save();
+
+    // Update admin: change managedCollege
+    admin.managedCollege = newCollegeId;
+    await admin.save();
+
+    // Update new college: set admin, potentially change status
+    newCollege.admin = admin._id;
+    if (newCollege.status === 'Unaffiliated') {
+      newCollege.status = 'Waitlist';
+      console.log(`📊 New college "${newCollege.name}" status changed to Waitlist`);
+    }
+    await newCollege.save();
+
+    // Notify miners of old college about admin change
+    const oldCollegeMiners = await User.find({
+      role: 'user',
+      'userProfile.miningColleges.college': oldCollege._id
+    }).distinct('_id');
+
+    if (oldCollegeMiners.length > 0) {
+      const oldNotifications = oldCollegeMiners.map(userId => ({
+        recipient: userId,
+        type: 'college_status_changed',
+        title: `Admin change for ${oldCollege.name}`,
+        message: `The admin for ${oldCollege.name} has been reassigned. The college status has been updated to ${oldCollege.status}.`,
+        data: {
+          collegeId: oldCollege._id,
+          collegeName: oldCollege.name,
+          newStatus: oldCollege.status
+        },
+        category: 'college',
+        priority: 'medium',
+        actionUrl: '/user/colleges'
+      }));
+
+      await createBulkNotifications(oldNotifications);
+      console.log(`📧 Notified ${oldCollegeMiners.length} miners of old college`);
+    }
+
+    // Notify miners of new college about new admin
+    const newCollegeMiners = await User.find({
+      role: 'user',
+      'userProfile.miningColleges.college': newCollege._id
+    }).distinct('_id');
+
+    if (newCollegeMiners.length > 0) {
+      const newNotifications = newCollegeMiners.map(userId => ({
+        recipient: userId,
+        type: 'college_status_changed',
+        title: `${newCollege.name} has a new admin!`,
+        message: `Great news! ${newCollege.name} now has an official admin. ${newCollege.status === 'Waitlist' ? 'The college has been moved to the waitlist and is one step closer to launching its token!' : ''}`,
+        data: {
+          collegeId: newCollege._id,
+          collegeName: newCollege.name,
+          newStatus: newCollege.status
+        },
+        category: 'college',
+        priority: 'high',
+        actionUrl: '/user/colleges'
+      }));
+
+      await createBulkNotifications(newNotifications);
+      console.log(`📧 Notified ${newCollegeMiners.length} miners of new college`);
+    }
+
+    console.log(`✅ Admin successfully reassigned`);
+
+    res.status(200).json({
+      success: true,
+      message: 'College admin reassigned successfully',
+      data: {
+        admin: {
+          id: admin._id,
+          name: admin.name,
+          previousCollege: {
+            id: oldCollege._id,
+            name: oldCollege.name,
+            newStatus: oldCollege.status
+          },
+          newCollege: {
+            id: newCollege._id,
+            name: newCollege.name,
+            newStatus: newCollege.status
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error reassigning college admin:', error);
+    next(error);
+  }
+};
+
 
 // @desc    Get platform statistics
 // @route   GET /api/platform-admin/stats

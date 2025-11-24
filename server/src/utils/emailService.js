@@ -233,3 +233,33 @@ export const sendInactivityReminderEmail = async (toEmail, toName, inactiveDurat
 
   return await sendEmail(toEmail, toName, t.inactivityReminder.subject.replace('{{duration}}', durationText), emailBody);
 };
+
+export const sendCollegeAdminRemovedEmail = async (toEmail, toName, collegeName, language = 'en') => {
+  const t = getEmailTranslations(language);
+  
+  const emailBody = `
+    <div style="${styles.container}">
+      <div style="${styles.header}">
+        <img src="https://cdn-icons-png.flaticon.com/512/1000/1000997.png" alt="Admin Update" style="${styles.icon}" />
+        <h1 style="${styles.title}">${t.collegeAdminRemoved.title}</h1>
+      </div>
+
+      <div style="${styles.content}">
+        <p style="${styles.text}">${t.collegeAdminRemoved.greeting.replace('{{name}}', toName)}</p>
+        <p style="${styles.text}">${t.collegeAdminRemoved.message.replace('{{collegeName}}', collegeName)}</p>
+        
+        <div style="${styles.highlightBox}; background-color: #fff7ed; border-color: #ffedd5;">
+          <p style="${styles.text}; margin: 0; color: #9a3412;">${t.collegeAdminRemoved.reason}</p>
+        </div>
+
+        <a href="mailto:${t.collegeAdminRemoved.supportEmail}" style="${styles.button}">${t.collegeAdminRemoved.ctaButton}</a>
+      </div>
+
+      <div style="${styles.footer}">
+        <p style="margin: 0;">${t.common.copyright}</p>
+      </div>
+    </div>
+  `;
+
+  return await sendEmail(toEmail, toName, t.collegeAdminRemoved.subject, emailBody);
+};

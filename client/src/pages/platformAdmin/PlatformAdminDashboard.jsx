@@ -94,6 +94,7 @@ const PlatformAdminDashboard = () => {
     shortName: '',
     tagline: '',
     type: 'University',
+    status: 'Unaffiliated',
     establishedYear: '',
     country: '',
     state: '',
@@ -586,7 +587,15 @@ const PlatformAdminDashboard = () => {
               {filteredUsers.map((user) => (
                 <TableRow
                   key={user._id}
-                  sx={{ '&:hover': { background: 'rgba(0,0,0,0.02)' } }}
+                  onClick={() => navigate(`/platform-admin/users/${user._id}`)}
+                  sx={{ 
+                    cursor: 'pointer',
+                    '&:hover': { 
+                      background: 'linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                      transform: 'translateX(2px)',
+                      transition: 'all 0.2s'
+                    } 
+                  }}
                 >
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -711,32 +720,68 @@ const PlatformAdminDashboard = () => {
                       placeholder="e.g., MIT"
                     />
                   </Grid>
-                  <Grid item xs={12} md={2}>
+                  <Grid item xs={12} md={6}>
                     <TextField
-                      label="Type"
                       select
+                      label="College Type *"
                       fullWidth
                       value={collegeFormData.type}
                       onChange={(e) => handleCollegeFormChange('type', e.target.value)}
+                      required
                     >
                       <MenuItem value="University">University</MenuItem>
                       <MenuItem value="College">College</MenuItem>
-                      <MenuItem value="Institute">Institute</MenuItem>
-                      <MenuItem value="School">School</MenuItem>
+                      <MenuItem value="Community College">Community College</MenuItem>
+                      <MenuItem value="Technical Institute">Technical Institute</MenuItem>
+                      <MenuItem value="Liberal Arts College">Liberal Arts College</MenuItem>
                       <MenuItem value="Other">Other</MenuItem>
                     </TextField>
                   </Grid>
-                  <Grid item xs={12} md={2}>
+                  <Grid item xs={12} md={6}>
                     <TextField
-                      label="Est. Year"
+                      select
+                      label="College Status *"
+                      fullWidth
+                      value={collegeFormData.status || 'Unaffiliated'}
+                      onChange={(e) => handleCollegeFormChange('status', e.target.value)}
+                      helperText="Unaffiliated = no admin, Waitlist = has admin pending activation, Building = preparing launch, Live = token launched"
+                    >
+                      <MenuItem value="Unaffiliated">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#94a3b8' }} />
+                          Unaffiliated
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="Waitlist">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#3b82f6' }} />
+                          Waitlist
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="Building">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f59e0b' }} />
+                          Building
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="Live">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#10b981' }} />
+                          Live
+                        </Box>
+                      </MenuItem>
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Established Year"
                       type="number"
                       fullWidth
                       value={collegeFormData.establishedYear}
                       onChange={(e) => handleCollegeFormChange('establishedYear', e.target.value)}
-                      placeholder="1861"
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} md={6}>
                     <TextField
                       label="Tagline"
                       fullWidth
@@ -1188,7 +1233,18 @@ const PlatformAdminDashboard = () => {
                 {filteredColleges.map((college) => (
                   <TableRow 
                     key={college._id}
-                    sx={{ '&:hover': { background: 'rgba(0,0,0,0.02)' } }}
+                    onClick={() => {
+                      setEditingCollege(college);
+                      setShowCollegeForm(true);
+                    }}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { 
+                        background: 'linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                        transform: 'translateX(2px)',
+                        transition: 'all 0.2s'
+                      } 
+                    }}
                   >
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

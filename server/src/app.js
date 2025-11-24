@@ -79,13 +79,23 @@ if (process.env.NODE_ENV === 'development') {
   app.use(requestLogger);
 }
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP, please try again later'
-});
-app.use('/api', limiter);
+// Rate limiting (skip in development)
+if (process.env.NODE_ENV !== 'development') {
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 requests per window
+    message: 'Too many requests from this IP, please try again later'
+  });
+  app.use('/api', limiter);
+} else {
+  // Development: more lenient rate limiting
+  const devLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 1000, // 1000 requests per minute (very high for dev)
+    message: 'Too many requests, slow down'
+  });
+  app.use('/api', devLimiter);
+}
 
 // Health check
 app.get('/api/health', (req, res) => {
