@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router';
+import { trackPageView } from '../utils/fbPixel';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import {
@@ -16,6 +18,11 @@ const DashboardLayout = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView();
+  }, [location]);
 
   const handleCloseMobileMenu = () => {
     setMobileMenuOpen(false);

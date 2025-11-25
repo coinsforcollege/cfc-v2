@@ -40,6 +40,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { ambassadorApi } from '../../api/ambassador.api';
+import { trackLead } from '../../utils/fbPixel';
 
 const activities = [
   'Organize Events',
@@ -159,6 +160,10 @@ const AmbassadorApply = () => {
       delete submitData.agreeToTerms;
 
       await ambassadorApi.submitApplication(submitData);
+      
+      // Track ambassador application lead
+      trackLead('Ambassador Application');
+      
       setSuccess(true);
       window.scrollTo(0, 0);
       

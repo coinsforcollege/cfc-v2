@@ -36,6 +36,7 @@
     "motion": "^12.23.22",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-facebook-pixel": "^1.0.4",
     "react-force-graph-2d": "^1.29.0",
     "react-force-graph-3d": "^1.29.0",
     "react-google-recaptcha-v3": "^1.11.0",

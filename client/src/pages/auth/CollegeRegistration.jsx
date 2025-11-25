@@ -14,71 +14,10 @@ import { authApi } from '../../api/auth.api';
 import OTPDialog from '../../components/OTPDialog';
 import CollegeAdminConfirmationDialog from '../../components/CollegeAdminConfirmationDialog';
 
+import { trackLead } from '../../utils/fbPixel';
+
 const CollegeRegistration = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const { t, i18n } = useTranslation();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showOTPDialog, setShowOTPDialog] = useState(false);
-  const [verificationToken, setVerificationToken] = useState(null);
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(true);
-  const [confirmedAsAdmin, setConfirmedAsAdmin] = useState(false);
-
-  useEffect(() => {
-    const hasConfirmed = sessionStorage.getItem('collegeAdminConfirmed');
-    if (hasConfirmed === 'true') {
-      setConfirmedAsAdmin(true);
-      setShowConfirmationDialog(false);
-    }
-  }, []);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    setError('');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const otpData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-        language: i18n.language || 'en'
-      };
-
-      const response = await authApi.sendOTPCollege(otpData);
-
-      if (response.success) {
-        setShowOTPDialog(true);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to send verification code. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ... existing code ...
 
   const handleOTPVerified = async (token) => {
     setVerificationToken(token);
@@ -98,6 +37,10 @@ const CollegeRegistration = () => {
 
       if (response.success) {
         login(response.data, response.token);
+        
+        // Track lead event
+        trackLead('College Registration');
+        
         navigate('/auth/college-admin-selection');
       }
     } catch (err) {

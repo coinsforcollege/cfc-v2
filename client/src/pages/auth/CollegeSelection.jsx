@@ -29,6 +29,7 @@ import * as Auth from '../../api/auth.api';
 import { useAuth } from '../../contexts/AuthContext';
 import { getImageUrl } from '../../utils/imageUtils';
 import { COUNTRIES } from '../../constants/countries';
+import { trackCollegeSelection } from '../../utils/fbPixel';
 
 // Helper function to get chip style based on status
 const getStatusChipStyle = (status) => {
@@ -127,6 +128,12 @@ const CollegeSelection = () => {
       const response = await userApi.addCollege(formData);
 
       if (response.success) {
+        // Track college selection
+        const selectedCollege = colleges.find(c => c._id === collegeId);
+        if (selectedCollege) {
+          trackCollegeSelection(selectedCollege.name, collegeId);
+        }
+
         // Refresh user data from server to get complete updated profile
         const userDataResponse = await Auth.getMe();
         
@@ -223,6 +230,9 @@ const CollegeSelection = () => {
       const response = await userApi.addCollege(formData);
 
       if (response.success) {
+        // Track college creation/selection
+        trackCollegeSelection(newCollege.name, 'new_college');
+
         // Refresh user data from server
         const userDataResponse = await Auth.getMe();
         

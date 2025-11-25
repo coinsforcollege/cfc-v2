@@ -2,7 +2,8 @@ import { Home, Explore } from '@mui/icons-material';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
+import { trackPageView } from '../../utils/fbPixel';
 
 const NotFoundPage = () => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -16,6 +17,12 @@ const NotFoundPage = () => {
     'Sorry, this classroom doesn\'t exist',
     'Our smart contract couldn\'t find this route',
   ];
+
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView();
+  }, [location]);
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { blogApi } from '../api/blog.api';
 import { useAuth } from '../contexts/AuthContext';
+import { trackContact } from '../utils/fbPixel';
 
 const Contact = () => {
   const { user } = useAuth();
@@ -57,6 +58,9 @@ const Contact = () => {
       const response = await blogApi.submitContact(formData);
 
       if (response.success) {
+        // Track contact event
+        trackContact(formData.subject || 'General Inquiry');
+        
         setSuccess(true);
         setFormData({
           name: user?.name || '',

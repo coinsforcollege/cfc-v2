@@ -6,6 +6,8 @@ import {
 } from '@tanstack/react-query';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import { useEffect } from 'react';
+import { initFacebookPixel, trackPageView } from './utils/fbPixel';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -76,6 +78,11 @@ const darkTheme = createTheme({
 const queryClient = new QueryClient();
 
 function App() {
+  // Initialize Facebook Pixel
+  useEffect(() => {
+    initFacebookPixel();
+    trackPageView(); // Track initial page view
+  }, []);
 
   const routes = createRoutesFromElements(
     <>

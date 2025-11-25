@@ -31,13 +31,19 @@ import {
   ContactSupport,
   PersonAdd
 } from '@mui/icons-material';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import Header from '../../components/layout/Header';
+import { trackPageView } from '../../utils/fbPixel';
 
 const BuildOnCollegen = () => {
   const [currentLine, setCurrentLine] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
   const [gasComparison, setGasComparison] = useState({ ethereum: 0, collegen: 0 });
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView();
+  }, [location]);
 
   const solidityCode = [
     "// Smart Contract for Campus Token",

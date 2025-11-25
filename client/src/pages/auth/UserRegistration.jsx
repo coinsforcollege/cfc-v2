@@ -16,46 +16,9 @@ import { authApi } from '../../api/auth.api';
 import { collegesApi } from '../../api/colleges.api';
 import OTPDialog from '../../components/OTPDialog';
 
+import { trackCompleteRegistration } from '../../utils/fbPixel';
+
 const StudentRegistration = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [searchParams] = useSearchParams();
-  const { t, i18n } = useTranslation();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    referralCode: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [referralCollege, setReferralCollege] = useState(null);
-  const [showOTPDialog, setShowOTPDialog] = useState(false);
-  const [verificationToken, setVerificationToken] = useState(null);
-
-  // Extract referral code and college ID from URL params
-  useEffect(() => {
-    const refCode = searchParams.get('ref');
-    const collegeId = searchParams.get('college');
-
-    if (refCode) {
-      setFormData(prev => ({ ...prev, referralCode: refCode }));
-    }
-
-    if (collegeId) {
-      // Fetch college details to display
-      collegesApi.getById(collegeId)
-        .then(response => {
-          setReferralCollege(response.data);
-        })
-        .catch(err => {
-          console.error('Failed to fetch college:', err);
-        });
-    }
-  }, [searchParams]);
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -122,6 +85,9 @@ const StudentRegistration = () => {
 
       if (response.success) {
         login(response.data, response.token);
+        
+        // Track registration event
+        trackCompleteRegistration('user');
 
         const hasColleges = response.data.userProfile?.miningColleges?.length > 0;
 

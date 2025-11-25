@@ -6,18 +6,20 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { authApi } from '../../api/auth.api';
 
+import { trackLogin } from '../../utils/fbPixel';
+
 const Login = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login } = useAuth();
   const { executeRecaptcha } = useGoogleReCaptcha();
-  const { t } = useTranslation();
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -47,6 +49,9 @@ const Login = () => {
       
       if (response.success) {
         login(response.data, response.token);
+        
+        // Track login event
+        trackLogin(response.data.role);
         
         // Redirect based on role
         if (response.data.role === 'user') {
