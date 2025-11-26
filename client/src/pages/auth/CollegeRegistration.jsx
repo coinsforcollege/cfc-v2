@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import {
   Box,
@@ -17,7 +17,66 @@ import CollegeAdminConfirmationDialog from '../../components/CollegeAdminConfirm
 import { trackLead } from '../../utils/fbPixel';
 
 const CollegeRegistration = () => {
-  // ... existing code ...
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showOTPDialog, setShowOTPDialog] = useState(false);
+  const [verificationToken, setVerificationToken] = useState(null);
+  const [confirmedAsAdmin, setConfirmedAsAdmin] = useState(() => {
+    return sessionStorage.getItem('collegeAdminConfirmed') === 'true';
+  });
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(() => {
+    return sessionStorage.getItem('collegeAdminConfirmed') !== 'true';
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const otpData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password
+      };
+
+      const response = await authApi.sendOTPCollege(otpData);
+
+      if (response.success) {
+        setShowOTPDialog(true);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to send verification code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOTPVerified = async (token) => {
     setVerificationToken(token);

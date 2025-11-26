@@ -934,17 +934,36 @@ export const deleteCollegeAdmin = async (req, res, next) => {
       });
     }
 
-    // If managing a college, remove admin reference from college and reset status
+    // CRITICAL FIX: Find ALL colleges that have this user as admin
+    // This handles cases where user's managedCollege is null but college still references them
+    const collegesWithThisAdmin = await College.find({ admin: req.params.id });
+    
+    // Clear admin reference from all colleges that reference this user
+    for (const college of collegesWithThisAdmin) {
+      college.admin = null;
+      // Reset status to Unaffiliated if it was Waitlist or Building
+      if (college.status === 'Waitlist' || college.status === 'Building') {
+        college.status = 'Unaffiliated';
+        console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
+      }
+      await college.save();
+    }
+    
+    // Also handle the case where managedCollege exists (for backward compatibility)
     if (collegeAdmin.managedCollege) {
-      const college = await College.findById(collegeAdmin.managedCollege);
-      if (college) {
-        college.admin = null;
-        // Reset status to Unaffiliated if it was Waitlist or Building
-        if (college.status === 'Waitlist' || college.status === 'Building') {
-          college.status = 'Unaffiliated';
-          console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
+      const wasAlreadyHandled = collegesWithThisAdmin.some(
+        c => c._id.toString() === collegeAdmin.managedCollege.toString()
+      );
+      if (!wasAlreadyHandled) {
+        const college = await College.findById(collegeAdmin.managedCollege);
+        if (college && college.admin && college.admin.toString() === req.params.id) {
+          college.admin = null;
+          if (college.status === 'Waitlist' || college.status === 'Building') {
+            college.status = 'Unaffiliated';
+            console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
+          }
+          await college.save();
         }
-        await college.save();
       }
     }
 
@@ -1012,11 +1031,21 @@ export const removeCollegeAdmin = async (req, res, next) => {
       });
     }
 
-    const collegeName = collegeAdmin.managedCollege?.name || 'Unknown College';
-    const collegeId = collegeAdmin.managedCollege?._id;
+    // CRITICAL FIX: Find ALL colleges that have this user as admin
+    // This handles cases where user's managedCollege is null but college still references them
+    const collegesWithThisAdmin = await College.find({ admin: id });
+    
+    // Get college name for email notification (before we clear it)
+    let collegeName = 'Unknown College';
+    if (collegeAdmin.managedCollege) {
+      collegeName = collegeAdmin.managedCollege.name;
+    } else if (collegesWithThisAdmin.length > 0) {
+      collegeName = collegesWithThisAdmin[0].name;
+    }
 
     // Update user: change role to 'user' and remove managedCollege
     collegeAdmin.role = 'user';
+    const previousManagedCollegeId = collegeAdmin.managedCollege?._id;
     collegeAdmin.managedCollege = null;
     
     // Initialize userProfile if it doesn't exist
@@ -1043,17 +1072,34 @@ export const removeCollegeAdmin = async (req, res, next) => {
     
     console.log('✅ User role changed:', collegeAdmin.role, 'User ID:', collegeAdmin._id);
 
-    // Update college: remove admin reference and reset status if needed
-    if (collegeId) {
-      const college = await College.findById(collegeId);
-      if (college) {
-        college.admin = null;
-        // Reset status to Unaffiliated if it was Waitlist or Building
-        if (college.status === 'Waitlist' || college.status === 'Building') {
-          college.status = 'Unaffiliated';
+    // Update ALL colleges that have this user as admin: remove admin reference and reset status if needed
+    // This fixes the bug where college.admin wasn't cleared if user's managedCollege was null
+    for (const college of collegesWithThisAdmin) {
+      college.admin = null;
+      // Reset status to Unaffiliated if it was Waitlist or Building
+      if (college.status === 'Waitlist' || college.status === 'Building') {
+        college.status = 'Unaffiliated';
+      }
+      await college.save();
+      console.log('✅ College admin removed:', college.name, 'New status:', college.status);
+    }
+    
+    // Also handle the case where previousManagedCollegeId exists but wasn't found in collegesWithThisAdmin
+    // (for backward compatibility and edge cases)
+    if (previousManagedCollegeId) {
+      const wasAlreadyHandled = collegesWithThisAdmin.some(
+        c => c._id.toString() === previousManagedCollegeId.toString()
+      );
+      if (!wasAlreadyHandled) {
+        const college = await College.findById(previousManagedCollegeId);
+        if (college && college.admin && college.admin.toString() === id) {
+          college.admin = null;
+          if (college.status === 'Waitlist' || college.status === 'Building') {
+            college.status = 'Unaffiliated';
+          }
+          await college.save();
+          console.log('✅ College admin removed (from previousManagedCollege):', college.name, 'New status:', college.status);
         }
-        await college.save();
-        console.log('✅ College admin removed:', college.name, 'New status:', college.status);
       }
     }
 

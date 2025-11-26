@@ -86,12 +86,19 @@ export interface ContentRichText extends Struct.ComponentSchema {
 export interface ContentTextBlock extends Struct.ComponentSchema {
   collectionName: 'components_content_editor_blocks';
   info: {
-    description: 'Text content with visual editor';
+    description: 'Text content with CKEditor (HTML support)';
     displayName: 'Text Block';
     icon: 'align-left';
   };
   attributes: {
-    body: Schema.Attribute.Blocks & Schema.Attribute.Required;
+    body: Schema.Attribute.RichText &
+      Schema.Attribute.Required &
+      Schema.Attribute.CustomField<
+        'plugin::ckeditor5.CKEditor',
+        {
+          preset: 'defaultHtml';
+        }
+      >;
   };
 }
 

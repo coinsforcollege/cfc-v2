@@ -51,6 +51,7 @@ import {
   ContactSupport,
   Assignment,
   CardGiftcard,
+  EmojiEvents,
 } from '@mui/icons-material';
 import { colors, gradients, spacing, typography, shadows, borderRadius } from '../../utils/designTokens';
 

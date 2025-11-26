@@ -19,6 +19,41 @@ import OTPDialog from '../../components/OTPDialog';
 import { trackCompleteRegistration } from '../../utils/fbPixel';
 
 const StudentRegistration = () => {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { login } = useAuth();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    referralCode: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showOTPDialog, setShowOTPDialog] = useState(false);
+  const [verificationToken, setVerificationToken] = useState(null);
+  const [referralCollege, setReferralCollege] = useState(null);
+
+  // Fetch referral college if college query param exists
+  useEffect(() => {
+    const collegeId = searchParams.get('college');
+    if (collegeId) {
+      collegesApi.getById(collegeId)
+        .then(response => {
+          if (response.success) {
+            setReferralCollege(response.data);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch referral college:', err);
+        });
+    }
+  }, [searchParams]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
