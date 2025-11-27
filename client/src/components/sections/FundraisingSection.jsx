@@ -9,7 +9,6 @@ import {
   ArrowBack,
   Star,
   People,
-  AttachMoney,
   Timeline,
   Security,
   Visibility
@@ -48,30 +47,6 @@ const FundraisingSection = () => {
       gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
       stats: { volume: '$1.2M', trades: '3,456', liquidity: '98%' },
       image: '/images/students-working-study-group.jpg'
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: t('fundraising.testimonial1Name'),
-      role: t('fundraising.testimonial1Role'),
-      quote: t('fundraising.testimonial1Quote'),
-      avatar: 'SC',
-      amount: t('fundraising.testimonial1Amount')
-    },
-    {
-      name: t('fundraising.testimonial2Name'),
-      role: t('fundraising.testimonial2Role'),
-      quote: t('fundraising.testimonial2Quote'),
-      avatar: 'MR',
-      amount: t('fundraising.testimonial2Amount')
-    },
-    {
-      name: t('fundraising.testimonial3Name'),
-      role: t('fundraising.testimonial3Role'),
-      quote: t('fundraising.testimonial3Quote'),
-      avatar: 'PP',
-      amount: t('fundraising.testimonial3Amount')
     }
   ];
 
@@ -477,108 +452,6 @@ const FundraisingSection = () => {
                       </Box>
                     </Box>
                   </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </Box>
-        </Box>
-
-
-        {/* Testimonials Slider */}
-        <Box sx={{ mb: 8 }}>
-          <Typography
-            variant="h3"
-            sx={{
-              fontSize: { xs: '1.8rem', md: '2.2rem' },
-              fontWeight: 700,
-              color: '#2d3748',
-              mb: 4,
-              textAlign: 'center',
-            }}
-          >
-            {t('fundraising.testimonialsTitle')}
-          </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 4, overflowX: 'auto', pb: 2, alignItems: 'stretch', '&::-webkit-scrollbar': { display: 'none' } }}>
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card
-                  sx={{
-                    minWidth: '350px',
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '20px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                    p: 4,
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
-                    <Box
-                      sx={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontWeight: 600,
-                        fontSize: '1.1rem',
-                      }}
-                    >
-                      {testimonial.avatar}
-                    </Box>
-                    <Box>
-                      <Typography sx={{ fontWeight: 600, color: '#2d3748', mb: 0.5 }}>
-                        {testimonial.name}
-                      </Typography>
-                      <Typography sx={{ fontSize: '0.9rem', color: '#718096' }}>
-                        {testimonial.role}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
-                  <Typography
-                    sx={{
-                      color: '#4a5568',
-                      fontSize: '1rem',
-                      lineHeight: 1.6,
-                      mb: 3,
-                      fontStyle: 'italic',
-                      flex: 1,
-                    }}
-                  >
-                    "{testimonial.quote}"
-                  </Typography>
-                  
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 2,
-                      p: 2,
-                      borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                      color: 'white',
-                      mt: 'auto',
-                    }}
-                  >
-                    <AttachMoney sx={{ fontSize: '20px' }} />
-                    <Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      {testimonial.amount}
-                    </Typography>
-                  </Box>
                 </Card>
               </motion.div>
             ))}
