@@ -9,6 +9,7 @@ import { setupWebSocketHandlers } from './websocket/miningSocket.js';
 import { cleanupExpiredSessions } from './jobs/cleanupExpiredSessions.js';
 import { sendMinerStoppedEmails } from './jobs/sendMinerStoppedEmails.js';
 import { sendInactivityReminders } from './jobs/sendInactivityReminders.js';
+import { validateCollegeAdmins } from './jobs/validateCollegeAdmins.js';
 
 // Verify env loaded
 console.log('🔍 ENV CHECK:', {
@@ -95,6 +96,24 @@ connectDB().then(() => {
       console.error('Error in inactivity reminders job:', err);
     });
   }, INACTIVITY_REMINDER_INTERVAL);
+
+  // Start college admin validation job - runs every 6 hours
+  const VALIDATION_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
+  console.log(`🔍 Starting college admin validation job - runs every 6 hours`);
+
+  // Run immediately on startup (1 minute delay to let DB connect and other jobs start)
+  setTimeout(() => {
+    validateCollegeAdmins().catch(err => {
+      console.error('Error in initial validation job:', err);
+    });
+  }, 1 * 60 * 1000);
+
+  // Schedule periodic validation
+  setInterval(() => {
+    validateCollegeAdmins().catch(err => {
+      console.error('Error in validation job:', err);
+    });
+  }, VALIDATION_INTERVAL);
 
   // Start server
   server.listen(PORT, () => {

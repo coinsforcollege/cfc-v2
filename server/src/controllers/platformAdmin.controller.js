@@ -6,6 +6,7 @@ import csv from 'csv-parser';
 import { Readable } from 'stream';
 import { parseAddress } from '../utils/addressParsers.js';
 import { createBulkNotifications } from '../services/notification.service.js';
+import mongoose from 'mongoose';
 
 // @desc    Get all users
 // @route   GET /api/platform-admin/users
@@ -924,10 +925,15 @@ export const updateCollegeAdmin = async (req, res, next) => {
 // @route   DELETE /api/platform-admin/college-admins/:id
 // @access  Private (Platform Admin only)
 export const deleteCollegeAdmin = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const collegeAdmin = await User.findById(req.params.id);
+    const collegeAdmin = await User.findById(req.params.id).session(session);
 
     if (!collegeAdmin || collegeAdmin.role !== 'college_admin') {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'College admin not found'
@@ -936,7 +942,7 @@ export const deleteCollegeAdmin = async (req, res, next) => {
 
     // CRITICAL FIX: Find ALL colleges that have this user as admin
     // This handles cases where user's managedCollege is null but college still references them
-    const collegesWithThisAdmin = await College.find({ admin: req.params.id });
+    const collegesWithThisAdmin = await College.find({ admin: req.params.id }).session(session);
     
     // Clear admin reference from all colleges that reference this user
     for (const college of collegesWithThisAdmin) {
@@ -946,7 +952,7 @@ export const deleteCollegeAdmin = async (req, res, next) => {
         college.status = 'Unaffiliated';
         console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
       }
-      await college.save();
+      await college.save({ session });
     }
     
     // Also handle the case where managedCollege exists (for backward compatibility)
@@ -955,25 +961,30 @@ export const deleteCollegeAdmin = async (req, res, next) => {
         c => c._id.toString() === collegeAdmin.managedCollege.toString()
       );
       if (!wasAlreadyHandled) {
-      const college = await College.findById(collegeAdmin.managedCollege);
+      const college = await College.findById(collegeAdmin.managedCollege).session(session);
         if (college && college.admin && college.admin.toString() === req.params.id) {
         college.admin = null;
         if (college.status === 'Waitlist' || college.status === 'Building') {
           college.status = 'Unaffiliated';
           console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
         }
-        await college.save();
+        await college.save({ session });
         }
       }
     }
 
-    await collegeAdmin.deleteOne();
+    await collegeAdmin.deleteOne({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(200).json({
       success: true,
       message: 'College admin deleted successfully'
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };
@@ -1018,13 +1029,18 @@ export const resetCollegeAdminPassword = async (req, res, next) => {
 // @route   PUT /api/platform-admin/college-admins/:id/remove
 // @access  Private (Platform Admin only)
 export const removeCollegeAdmin = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { id } = req.params;
     
     // Find the college admin
-    const collegeAdmin = await User.findById(id).populate('managedCollege', 'name status');
+    const collegeAdmin = await User.findById(id).populate('managedCollege', 'name status').session(session);
 
     if (!collegeAdmin || collegeAdmin.role !== 'college_admin') {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'College admin not found'
@@ -1033,7 +1049,7 @@ export const removeCollegeAdmin = async (req, res, next) => {
 
     // CRITICAL FIX: Find ALL colleges that have this user as admin
     // This handles cases where user's managedCollege is null but college still references them
-    const collegesWithThisAdmin = await College.find({ admin: id });
+    const collegesWithThisAdmin = await College.find({ admin: id }).session(session);
     
     // Get college name for email notification (before we clear it)
     let collegeName = 'Unknown College';
@@ -1068,7 +1084,7 @@ export const removeCollegeAdmin = async (req, res, next) => {
       collegeAdmin.userProfile.onboardingCompleted = false;
     }
     
-    await collegeAdmin.save();
+    await collegeAdmin.save({ session });
     
     console.log('✅ User role changed:', collegeAdmin.role, 'User ID:', collegeAdmin._id);
 
@@ -1080,7 +1096,7 @@ export const removeCollegeAdmin = async (req, res, next) => {
         if (college.status === 'Waitlist' || college.status === 'Building') {
           college.status = 'Unaffiliated';
         }
-        await college.save();
+        await college.save({ session });
         console.log('✅ College admin removed:', college.name, 'New status:', college.status);
     }
     
@@ -1091,17 +1107,20 @@ export const removeCollegeAdmin = async (req, res, next) => {
         c => c._id.toString() === previousManagedCollegeId.toString()
       );
       if (!wasAlreadyHandled) {
-        const college = await College.findById(previousManagedCollegeId);
+        const college = await College.findById(previousManagedCollegeId).session(session);
         if (college && college.admin && college.admin.toString() === id) {
           college.admin = null;
           if (college.status === 'Waitlist' || college.status === 'Building') {
             college.status = 'Unaffiliated';
           }
-          await college.save();
+          await college.save({ session });
           console.log('✅ College admin removed (from previousManagedCollege):', college.name, 'New status:', college.status);
         }
       }
     }
+
+    await session.commitTransaction();
+    session.endSession();
 
     // Send email notification
     const { sendCollegeAdminRemovedEmail } = await import('../utils/emailService.js');
@@ -1121,6 +1140,8 @@ export const removeCollegeAdmin = async (req, res, next) => {
       }
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('❌ Error removing college admin:', error);
     next(error);
   }
@@ -1130,11 +1151,16 @@ export const removeCollegeAdmin = async (req, res, next) => {
 // @route   PUT /api/platform-admin/users/:id/assign-college-admin
 // @access  Private (Platform Admin only)
 export const assignCollegeAdmin = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { id } = req.params;
     const { collegeId } = req.body;
 
     if (!collegeId) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'College ID is required'
@@ -1142,9 +1168,11 @@ export const assignCollegeAdmin = async (req, res, next) => {
     }
 
     // Find the user
-    const user = await User.findById(id);
+    const user = await User.findById(id).session(session);
 
     if (!user) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'User not found'
@@ -1153,6 +1181,8 @@ export const assignCollegeAdmin = async (req, res, next) => {
 
     // Check if user is already a college admin
     if (user.role === 'college_admin') {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'User is already a college admin'
@@ -1160,9 +1190,11 @@ export const assignCollegeAdmin = async (req, res, next) => {
     }
 
     // Find the college
-    const college = await College.findById(collegeId);
+    const college = await College.findById(collegeId).session(session);
 
     if (!college) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'College not found'
@@ -1171,6 +1203,8 @@ export const assignCollegeAdmin = async (req, res, next) => {
 
     // Check if college already has an admin
     if (college.admin) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'This college already has an admin. Only one admin per college is allowed.'
@@ -1180,7 +1214,7 @@ export const assignCollegeAdmin = async (req, res, next) => {
     // Update user: change role to 'college_admin' and set managedCollege
     user.role = 'college_admin';
     user.managedCollege = collegeId;
-    await user.save();
+    await user.save({ session });
 
     // Update college: set admin reference and update status
     college.admin = user._id;
@@ -1188,9 +1222,13 @@ export const assignCollegeAdmin = async (req, res, next) => {
     if (college.status === 'Unaffiliated') {
       college.status = 'Waitlist';
     }
-    await college.save();
+    await college.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     // Notify all users mining for this college about status change if status changed
+    // Done AFTER transaction commit
     if (college.status === 'Waitlist') {
       const minersIds = await User.find({
         role: 'user',
@@ -1227,6 +1265,8 @@ export const assignCollegeAdmin = async (req, res, next) => {
       }
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };
@@ -1235,11 +1275,16 @@ export const assignCollegeAdmin = async (req, res, next) => {
 // @route   PUT /api/platform-admin/college-admins/:id/reassign
 // @access  Private (Platform Admin only)
 export const reassignCollegeAdmin = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { id } = req.params;
     const { newCollegeId } = req.body;
 
     if (!newCollegeId) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'New college ID is required'
@@ -1247,9 +1292,11 @@ export const reassignCollegeAdmin = async (req, res, next) => {
     }
 
     // Find the admin
-    const admin = await User.findById(id).populate('managedCollege');
+    const admin = await User.findById(id).populate('managedCollege').session(session);
 
     if (!admin || admin.role !== 'college_admin') {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'College admin not found'
@@ -1259,6 +1306,8 @@ export const reassignCollegeAdmin = async (req, res, next) => {
     const oldCollege = admin.managedCollege;
 
     if (!oldCollege) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'Admin is not currently managing any college'
@@ -1266,6 +1315,8 @@ export const reassignCollegeAdmin = async (req, res, next) => {
     }
 
     if (oldCollege._id.toString() === newCollegeId) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'Admin is already managing this college'
@@ -1273,9 +1324,11 @@ export const reassignCollegeAdmin = async (req, res, next) => {
     }
 
     // Find the new college
-    const newCollege = await College.findById(newCollegeId);
+    const newCollege = await College.findById(newCollegeId).session(session);
 
     if (!newCollege) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({
         success: false,
         message: 'New college not found'
@@ -1284,6 +1337,8 @@ export const reassignCollegeAdmin = async (req, res, next) => {
 
     // Check if new college already has an admin
     if (newCollege.admin) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'The target college already has an admin'
@@ -1293,16 +1348,18 @@ export const reassignCollegeAdmin = async (req, res, next) => {
     console.log(`🔄 Reassigning admin ${admin.name} from ${oldCollege.name} to ${newCollege.name}`);
 
     // Update old college: remove admin, potentially change status
-    oldCollege.admin = null;
-    if (oldCollege.status === 'Waitlist' || oldCollege.status === 'Building') {
-      oldCollege.status = 'Unaffiliated';
-      console.log(`📊 Old college "${oldCollege.name}" status changed to Unaffiliated`);
+    // Note: oldCollege is from populate, so we need to fetch it with session to update it
+    const oldCollegeDoc = await College.findById(oldCollege._id).session(session);
+    oldCollegeDoc.admin = null;
+    if (oldCollegeDoc.status === 'Waitlist' || oldCollegeDoc.status === 'Building') {
+      oldCollegeDoc.status = 'Unaffiliated';
+      console.log(`📊 Old college "${oldCollegeDoc.name}" status changed to Unaffiliated`);
     }
-    await oldCollege.save();
+    await oldCollegeDoc.save({ session });
 
     // Update admin: change managedCollege
     admin.managedCollege = newCollegeId;
-    await admin.save();
+    await admin.save({ session });
 
     // Update new college: set admin, potentially change status
     newCollege.admin = admin._id;
@@ -1310,8 +1367,12 @@ export const reassignCollegeAdmin = async (req, res, next) => {
       newCollege.status = 'Waitlist';
       console.log(`📊 New college "${newCollege.name}" status changed to Waitlist`);
     }
-    await newCollege.save();
+    await newCollege.save({ session });
 
+    await session.commitTransaction();
+    session.endSession();
+
+    // Notifications happen after commit
     // Notify miners of old college about admin change
     const oldCollegeMiners = await User.find({
       role: 'user',
@@ -1323,11 +1384,11 @@ export const reassignCollegeAdmin = async (req, res, next) => {
         recipient: userId,
         type: 'college_status_changed',
         title: `Admin change for ${oldCollege.name}`,
-        message: `The admin for ${oldCollege.name} has been reassigned. The college status has been updated to ${oldCollege.status}.`,
+        message: `The admin for ${oldCollege.name} has been reassigned. The college status has been updated to ${oldCollegeDoc.status}.`,
         data: {
           collegeId: oldCollege._id,
           collegeName: oldCollege.name,
-          newStatus: oldCollege.status
+          newStatus: oldCollegeDoc.status
         },
         category: 'college',
         priority: 'medium',
@@ -1376,7 +1437,7 @@ export const reassignCollegeAdmin = async (req, res, next) => {
           previousCollege: {
             id: oldCollege._id,
             name: oldCollege.name,
-            newStatus: oldCollege.status
+            newStatus: oldCollegeDoc.status
           },
           newCollege: {
             id: newCollege._id,
@@ -1387,6 +1448,8 @@ export const reassignCollegeAdmin = async (req, res, next) => {
       }
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('❌ Error reassigning college admin:', error);
     next(error);
   }

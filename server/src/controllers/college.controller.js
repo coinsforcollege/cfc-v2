@@ -53,70 +53,21 @@ export const getAllColleges = async (req, res, next) => {
       sortOrder = { 'stats.totalMiners': -1, name: 1 };
     }
 
-    // Execute query - don't populate admin yet, we'll validate it
+    // Execute query - don't populate admin yet
     const colleges = await College.find(query)
       .select('name country city logo coverImage description tagline stats status admin type studentLife baseRate referralBonusRate createdAt')
       .sort(sortOrder)
       .limit(parseInt(limit))
-      .skip(skip);
-    
-    // Validate admin references - clear invalid ones
-    // An admin is valid only if: admin exists, has role 'college_admin', and managedCollege matches
-    const User = (await import('../models/User.js')).default;
-    const validatedColleges = await Promise.all(
-      colleges.map(async (college) => {
-        const collegeObj = college.toObject();
-        
-        // If admin field exists (as ObjectId), validate it
-        if (collegeObj.admin) {
-          const adminId = collegeObj.admin._id || collegeObj.admin;
-          const adminUser = await User.findById(adminId);
-          
-          // Admin is invalid if:
-          // 1. User doesn't exist (was deleted)
-          // 2. User role is not 'college_admin'
-          // 3. User's managedCollege doesn't match this college
-          const isInvalidAdmin = !adminUser || 
-                                 adminUser.role !== 'college_admin' || 
-                                 !adminUser.managedCollege || 
-                                 adminUser.managedCollege.toString() !== college._id.toString();
-          
-          if (isInvalidAdmin) {
-            // Clear invalid admin reference
-            await College.updateOne(
-              { _id: college._id },
-              { $set: { admin: null } }
-            );
-            collegeObj.admin = null;
-            
-            // Reset status if needed
-            if (collegeObj.status === 'Waitlist' || collegeObj.status === 'Building') {
-              await College.updateOne(
-                { _id: college._id },
-                { $set: { status: 'Unaffiliated' } }
-              );
-              collegeObj.status = 'Unaffiliated';
-            }
-          } else {
-            // Admin is valid - populate it for response
-            collegeObj.admin = {
-              _id: adminUser._id,
-              name: adminUser.name,
-              email: adminUser.email
-            };
-          }
-        }
-        
-        return collegeObj;
-      })
-    );
+      .skip(skip)
+      .populate('admin', 'name email'); // Standard populate, no heavy validation
 
     // Calculate and assign ranks based on totalTokensMined (handle ties)
     const collegesWithRank = [];
     let currentRank = skip + 1;
     let previousTokens = null;
     
-    validatedColleges.forEach((college, index) => {
+    colleges.forEach((college, index) => {
+      const collegeObj = college.toObject();
       const tokens = college.stats?.totalTokensMined || 0;
       
       // If tokens are different from previous, update rank
@@ -124,9 +75,9 @@ export const getAllColleges = async (req, res, next) => {
         currentRank = skip + index + 1;
       }
       
-      college.rank = currentRank;
+      collegeObj.rank = currentRank;
       previousTokens = tokens;
-      collegesWithRank.push(college);
+      collegesWithRank.push(collegeObj);
     });
 
     // Get global stats (regardless of filters/pagination)
