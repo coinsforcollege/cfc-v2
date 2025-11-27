@@ -13,6 +13,6 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',  // Accept connections from network
-    port: 5173
+    port: 3000
   }
 })

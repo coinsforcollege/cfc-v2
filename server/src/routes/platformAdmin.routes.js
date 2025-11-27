@@ -5,6 +5,8 @@ import {
   createCollege,
   getStudentDetails,
   getCollegeDetails,
+  getCollegeMiners,
+  getCollegeSessions,
   updateCollege,
   deleteCollege,
   getPlatformStats,
@@ -65,6 +67,8 @@ router.post('/colleges/bulk-import-preview', uploadCSV.single('csvFile'), bulkIm
 router.post('/colleges/bulk-import-confirm', bulkImportConfirm);
 router.put('/colleges/bulk-remove-images', bulkRemoveImages);
 router.get('/colleges/:id', getCollegeDetails);
+router.get('/colleges/:id/miners', getCollegeMiners);
+router.get('/colleges/:id/sessions', getCollegeSessions);
 router.put('/colleges/:id', upload.fields([
   { name: 'logoFile', maxCount: 1 },
   { name: 'coverFile', maxCount: 1 }

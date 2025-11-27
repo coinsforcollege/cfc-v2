@@ -25,7 +25,7 @@ JWT_SECRET=cfc2_super_secret_jwt_key_12345_make_it_very_long_and_secure
 JWT_EXPIRE=30d
 
 # Client URL (for CORS)
-CLIENT_URL=http://localhost:5173
+CLIENT_URL=http://localhost:3000
 ```
 
 ### 3. Run the Server

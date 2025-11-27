@@ -215,7 +215,7 @@ Uses `multer` middleware for file uploads:
 ```bash
 cd client
 npm install
-npm run dev      # Start dev server on port 5173
+npm run dev      # Start dev server on port 3000
 npm run build    # Build for production
 npm run start    # Serve production build on port 3000
 npm run lint     # Run ESLint
@@ -262,7 +262,7 @@ PORT=4000
 MONGODB_URI=<mongodb-connection-string>
 JWT_SECRET=<secret-key>
 JWT_EXPIRE=30d
-CLIENT_URL=http://localhost:5173
+CLIENT_URL=http://localhost:3000
 ```
 
 **IMPORTANT**: Server .env file is not version controlled. Reference `/server/README.md` for complete setup instructions.

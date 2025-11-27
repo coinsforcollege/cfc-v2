@@ -41,10 +41,10 @@ const allowed = new Set([
   'https://coinsforcollege.org',
   'https://www.coinsforcollege.org',
   'https://cfc-v2.onrender.com',
-  'http://localhost:5173',
   'http://localhost:3000',
-  'http://192.168.0.16:5173',
-  'http://192.168.0.195:5173'
+  'http://localhost:3000',
+  'http://192.168.0.16:3000',
+  'http://192.168.0.195:3000'
 ]);
 
 app.use(cors({

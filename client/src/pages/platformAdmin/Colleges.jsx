@@ -157,21 +157,8 @@ const Colleges = () => {
   };
 
   // View college details
-  const handleViewCollege = async (college) => {
-    setSelectedCollege(college);
-    setViewDialogOpen(true);
-    setDetailsLoading(true);
-
-    try {
-      const response = await platformAdminApi.getCollegeDetails(college._id);
-      if (response.success) {
-        setCollegeDetails(response.data);
-      }
-    } catch (err) {
-      showToast(err.message || 'Failed to load college details', 'error');
-    } finally {
-      setDetailsLoading(false);
-    }
+  const handleViewCollege = (college) => {
+    navigate(`/platform-admin/colleges/${college._id}`);
   };
 
   // Add/Edit college
@@ -612,7 +599,7 @@ const Colleges = () => {
                         colleges.map((college) => (
                           <TableRow key={college._id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
                             <TableCell>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer' }} onClick={() => handleViewCollege(college)}>
                                 <Avatar
                                   src={college.logo ? getImageUrl(college.logo) : undefined}
                                   sx={{
@@ -624,7 +611,7 @@ const Colleges = () => {
                                   {college.name.charAt(0).toUpperCase()}
                                 </Avatar>
                                 <Box>
-                                  <Typography variant="body2" fontWeight={600}>
+                                  <Typography variant="body2" fontWeight={600} sx={{ '&:hover': { color: 'primary.main' } }}>
                                     {college.name}
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">

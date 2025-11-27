@@ -197,6 +197,112 @@ export const getStudentDetails = async (req, res, next) => {
   }
 };
 
+// @desc    Get college miners (paginated)
+// @route   GET /api/platform-admin/colleges/:id/miners
+// @access  Private (Platform Admin only)
+export const getCollegeMiners = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 50, search } = req.query;
+    
+    const skip = (page - 1) * limit;
+    
+    // Base query: Users who have this college in their miningColleges
+    let query = {
+      role: 'user',
+      'userProfile.miningColleges.college': id
+    };
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const miners = await User.find(query)
+      .select('name email phone createdAt lastLogin')
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(skip);
+      
+    const total = await User.countDocuments(query);
+    
+    // Fetch wallet balances for these miners for this college
+    const minerIds = miners.map(m => m._id);
+    const wallets = await Wallet.find({
+      user: { $in: minerIds },
+      college: id
+    });
+    
+    // Map wallets to miners
+    const minersWithWallet = miners.map(miner => {
+      const wallet = wallets.find(w => w.user.toString() === miner._id.toString());
+      return {
+        ...miner.toObject(),
+        wallet: {
+          balance: wallet ? wallet.balance : 0,
+          totalMined: wallet ? wallet.totalMined : 0
+        }
+      };
+    });
+    
+    res.status(200).json({
+      success: true,
+      data: minersWithWallet,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get college mining sessions (paginated)
+// @route   GET /api/platform-admin/colleges/:id/sessions
+// @access  Private (Platform Admin only)
+export const getCollegeSessions = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 50, status } = req.query;
+    
+    const skip = (page - 1) * limit;
+    
+    let query = { college: id };
+    
+    if (status === 'active') {
+      query.isActive = true;
+    } else if (status === 'completed') {
+      query.isActive = false;
+    }
+    
+    const sessions = await MiningSession.find(query)
+      .populate('user', 'name email')
+      .sort({ startTime: -1 }) // Newest first
+      .limit(parseInt(limit))
+      .skip(skip);
+      
+    const total = await MiningSession.countDocuments(query);
+    
+    res.status(200).json({
+      success: true,
+      data: sessions,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get single college details
 // @route   GET /api/platform-admin/colleges/:id
 // @access  Private (Platform Admin only)

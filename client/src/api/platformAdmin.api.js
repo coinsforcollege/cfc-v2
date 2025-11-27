@@ -25,6 +25,8 @@ export const platformAdminApi = {
   // Colleges
   getAllColleges: (params) => apiClient.get('/platform-admin/colleges', { params }),
   getCollegeDetails: (id) => apiClient.get(`/platform-admin/colleges/${id}`),
+  getCollegeMiners: (id, params) => apiClient.get(`/platform-admin/colleges/${id}/miners`, { params }),
+  getCollegeSessions: (id, params) => apiClient.get(`/platform-admin/colleges/${id}/sessions`, { params }),
   createCollege: (data) => apiClient.post('/platform-admin/colleges', data),
   updateCollege: (id, data) => apiClient.put(`/platform-admin/colleges/${id}`, data),
   deleteCollege: (id) => apiClient.delete(`/platform-admin/colleges/${id}`),

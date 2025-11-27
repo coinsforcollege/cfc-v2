@@ -61,6 +61,8 @@ import PlatformAdminUsers from './pages/platformAdmin/Users';
 import PlatformAdminUserView from './pages/platformAdmin/UserView';
 import PlatformAdminCollegeAdminView from './pages/platformAdmin/CollegeAdminView';
 import PlatformAdminColleges from './pages/platformAdmin/Colleges';
+import PlatformAdminCollegeView from './pages/platformAdmin/CollegeView';
+import PlatformAdminCollegeAdmins from './pages/platformAdmin/CollegeAdmins';
 import PlatformAdminCollegeCreate from './pages/platformAdmin/CollegeCreate';
 import PlatformAdminCollegeEdit from './pages/platformAdmin/CollegeEdit';
 import PlatformAdminAmbassadors from './pages/platformAdmin/Ambassadors';
@@ -136,8 +138,10 @@ function App() {
       <Route path="platform-admin/dashboard" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminDashboard /></ProtectedRoute>} />
       <Route path="platform-admin/users" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUsers /></ProtectedRoute>} />
       <Route path="platform-admin/users/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUserView /></ProtectedRoute>} />
+      <Route path="platform-admin/college-admins" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeAdmins /></ProtectedRoute>} />
       <Route path="platform-admin/college-admins/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeAdminView /></ProtectedRoute>} />
       <Route path="platform-admin/colleges" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminColleges /></ProtectedRoute>} />
+      <Route path="platform-admin/colleges/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeView /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/create" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeCreate /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/bulk-import-upload" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportUpload /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/bulk-import-preview" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportPreview /></ProtectedRoute>} />

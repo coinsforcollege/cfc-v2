@@ -7,8 +7,8 @@ export default [
     name: 'strapi::cors',
     config: {
       enabled: true,
-      origin: ['http://localhost:3000', 'http://localhost:5173', 'https://coinsforcollege.org','http://192.168.0.195:5173','http://192.168.0.195:4000',
-        'https://www.coinsforcollege.org','http://192.168.0.16:5173', 'http://192.168.0.16:4000',
+      origin: ['http://localhost:3000', 'http://localhost:3000', 'https://coinsforcollege.org','http://192.168.0.195:3000','http://192.168.0.195:4000',
+        'https://www.coinsforcollege.org','http://192.168.0.16:3000', 'http://192.168.0.16:4000',
         'https://cfc-v2.onrender.com',process.env.CLIENT_URL].filter(Boolean),
       headers: '*',
     },
