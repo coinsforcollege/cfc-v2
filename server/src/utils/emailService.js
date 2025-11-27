@@ -55,7 +55,9 @@ const sendEmail = async (toEmail, toName, subject, htmlBody) => {
 
 // Shared styles for consistency
 const styles = {
-  container: 'font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; color: #333333;',
+  wrapperTable: 'width: 100%; background-color: #f3f4f6; padding: 20px 0;',
+  containerTable: 'width: 600px; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;',
+  container: 'font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background-color: #ffffff; color: #333333;',
   header: 'text-align: center; padding: 40px 20px 20px;',
   content: 'padding: 0 20px 40px;',
   title: 'font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 16px;',
@@ -70,28 +72,38 @@ export const sendOTPEmail = async (toEmail, toName, otp, language = 'en') => {
   const t = getEmailTranslations(language);
   
   const emailBody = `
-    <div style="${styles.container}">
-      <div style="${styles.header}">
-        <img src="https://cdn-icons-png.flaticon.com/512/2716/2716205.png" alt="Security" style="${styles.icon}" />
-        <h1 style="${styles.title}">${t.otp.title}</h1>
-      </div>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="${styles.wrapperTable}">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="${styles.containerTable}">
+            <tr>
+              <td style="${styles.container}">
+                <div style="${styles.header}">
+                  <img src="https://cdn-icons-png.flaticon.com/512/2716/2716205.png" alt="Security" style="${styles.icon}" />
+                  <h1 style="${styles.title}">${t.otp.title}</h1>
+                </div>
 
-      <div style="${styles.content}">
-        <p style="${styles.text}">${t.otp.message}</p>
+                <div style="${styles.content}">
+                  <p style="${styles.text}">${t.otp.message}</p>
 
-        <div style="${styles.highlightBox}">
-          <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">${t.otp.otpLabel}</div>
-          <div style="font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #7c3aed;">${otp}</div>
-        </div>
+                  <div style="${styles.highlightBox}">
+                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">${t.otp.otpLabel}</div>
+                    <div style="font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #7c3aed;">${otp}</div>
+                  </div>
 
-        <p style="${styles.text}; font-size: 14px; color: #6b7280;">${t.otp.validity}</p>
-      </div>
+                  <p style="${styles.text}; font-size: 14px; color: #6b7280;">${t.otp.validity}</p>
+                </div>
 
-      <div style="${styles.footer}">
-        <p style="margin: 0 0 10px;">${t.otp.footer}</p>
-        <p style="margin: 0;">${t.common.copyright}</p>
-      </div>
-    </div>
+                <div style="${styles.footer}">
+                  <p style="margin: 0 0 10px;">${t.otp.footer}</p>
+                  <p style="margin: 0;">${t.common.copyright}</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 
   return await sendEmail(toEmail, toName, t.otp.subject, emailBody);
@@ -104,32 +116,42 @@ export const sendWelcomeEmail = async (toEmail, toName, dashboardUrl, language =
   ).join('');
   
   const emailBody = `
-    <div style="${styles.container}">
-      <div style="${styles.header}">
-        <img src="https://cdn-icons-png.flaticon.com/512/3159/3159066.png" alt="Welcome" style="${styles.icon}" />
-        <h1 style="${styles.title}">${t.welcome.title}</h1>
-      </div>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="${styles.wrapperTable}">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="${styles.containerTable}">
+            <tr>
+              <td style="${styles.container}">
+                <div style="${styles.header}">
+                  <img src="https://cdn-icons-png.flaticon.com/512/3159/3159066.png" alt="Welcome" style="${styles.icon}" />
+                  <h1 style="${styles.title}">${t.welcome.title}</h1>
+                </div>
 
-      <div style="${styles.content}">
-        <p style="${styles.text}">${t.welcome.greeting.replace('{{name}}', toName)}</p>
-        <p style="${styles.text}">${t.welcome.message}</p>
+                <div style="${styles.content}">
+                  <p style="${styles.text}">${t.welcome.greeting.replace('{{name}}', toName)}</p>
+                  <p style="${styles.text}">${t.welcome.message}</p>
 
-        <a href="${dashboardUrl}" style="${styles.button}">${t.welcome.ctaButton}</a>
+                  <a href="${dashboardUrl}" style="${styles.button}">${t.welcome.ctaButton}</a>
 
-        <div style="margin-top: 30px;">
-          <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 15px;">${t.welcome.gettingStarted}</h3>
-          <ul style="color: #4b5563; font-size: 16px; line-height: 1.6; padding-left: 20px; margin: 0;">
-            ${gettingStartedItems}
-          </ul>
-        </div>
-        
-        <p style="${styles.text}; margin-top: 30px; font-size: 14px; color: #6b7280;">${t.welcome.helpText}</p>
-      </div>
+                  <div style="margin-top: 30px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 15px;">${t.welcome.gettingStarted}</h3>
+                    <ul style="color: #4b5563; font-size: 16px; line-height: 1.6; padding-left: 20px; margin: 0;">
+                      ${gettingStartedItems}
+                    </ul>
+                  </div>
+                  
+                  <p style="${styles.text}; margin-top: 30px; font-size: 14px; color: #6b7280;">${t.welcome.helpText}</p>
+                </div>
 
-      <div style="${styles.footer}">
-        <p style="margin: 0;">${t.common.copyright}</p>
-      </div>
-    </div>
+                <div style="${styles.footer}">
+                  <p style="margin: 0;">${t.common.copyright}</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 
   return await sendEmail(toEmail, toName, t.welcome.subject, emailBody);
@@ -148,44 +170,54 @@ export const sendMinerStoppedEmail = async (toEmail, toName, sessionsData, dashb
   `).join('');
 
   const emailBody = `
-    <div style="${styles.container}">
-      <div style="${styles.header}">
-        <img src="https://cdn-icons-png.flaticon.com/512/2933/2933116.png" alt="Mining Complete" style="${styles.icon}" />
-        <h1 style="${styles.title}">${t.minerStopped.title}</h1>
-      </div>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="${styles.wrapperTable}">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="${styles.containerTable}">
+            <tr>
+              <td style="${styles.container}">
+                <div style="${styles.header}">
+                  <img src="https://cdn-icons-png.flaticon.com/512/2933/2933116.png" alt="Mining Complete" style="${styles.icon}" />
+                  <h1 style="${styles.title}">${t.minerStopped.title}</h1>
+                </div>
 
-      <div style="${styles.content}">
-        <p style="${styles.text}">${t.minerStopped.greeting.replace('{{name}}', toName)}</p>
-        
-        <div style="${styles.highlightBox}">
-          <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">${t.minerStopped.totalTokensLabel}</div>
-          <div style="font-size: 42px; font-weight: 700; color: #10b981;">${totalTokens.toFixed(2)}</div>
-          <div style="font-size: 14px; color: #6b7280; margin-top: 5px;">in ${totalHours.toFixed(1)} hours</div>
-        </div>
+                <div style="${styles.content}">
+                  <p style="${styles.text}">${t.minerStopped.greeting.replace('{{name}}', toName)}</p>
+                  
+                  <div style="${styles.highlightBox}">
+                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">${t.minerStopped.totalTokensLabel}</div>
+                    <div style="font-size: 42px; font-weight: 700; color: #10b981;">${totalTokens.toFixed(2)}</div>
+                    <div style="font-size: 14px; color: #6b7280; margin-top: 5px;">in ${totalHours.toFixed(1)} hours</div>
+                  </div>
 
-        <a href="${dashboardUrl}" style="${styles.button}">${t.minerStopped.ctaButton}</a>
+                  <a href="${dashboardUrl}" style="${styles.button}">${t.minerStopped.ctaButton}</a>
 
-        <div style="margin-top: 30px;">
-           <table style="width: 100%; border-collapse: collapse;">
-             <thead>
-               <tr style="border-bottom: 2px solid #f3f4f6;">
-                 <th style="padding: 10px 8px; text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.minerStopped.tableHeaders.college}</th>
-                 <th style="padding: 10px 8px; text-align: right; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.minerStopped.tableHeaders.earned}</th>
-               </tr>
-             </thead>
-             <tbody>
-               ${sessionRows}
-             </tbody>
-           </table>
-        </div>
+                  <div style="margin-top: 30px;">
+                     <table style="width: 100%; border-collapse: collapse;">
+                       <thead>
+                         <tr style="border-bottom: 2px solid #f3f4f6;">
+                           <th style="padding: 10px 8px; text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.minerStopped.tableHeaders.college}</th>
+                           <th style="padding: 10px 8px; text-align: right; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.minerStopped.tableHeaders.earned}</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         ${sessionRows}
+                       </tbody>
+                     </table>
+                  </div>
 
-        <p style="${styles.text}; margin-top: 30px; text-align: center;">${t.minerStopped.encouragement}</p>
-      </div>
+                  <p style="${styles.text}; margin-top: 30px; text-align: center;">${t.minerStopped.encouragement}</p>
+                </div>
 
-      <div style="${styles.footer}">
-        <p style="margin: 0;">${t.common.copyright}</p>
-      </div>
-    </div>
+                <div style="${styles.footer}">
+                  <p style="margin: 0;">${t.common.copyright}</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 
   return await sendEmail(toEmail, toName, t.minerStopped.subject, emailBody);
@@ -201,34 +233,44 @@ export const sendInactivityReminderEmail = async (toEmail, toName, inactiveDurat
   ).join('');
 
   const emailBody = `
-    <div style="${styles.container}">
-      <div style="${styles.header}">
-        <img src="https://cdn-icons-png.flaticon.com/512/2972/2972531.png" alt="Miss You" style="${styles.icon}" />
-        <h1 style="${styles.title}">${t.inactivityReminder.title.replace('{{name}}', toName)}</h1>
-      </div>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="${styles.wrapperTable}">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="${styles.containerTable}">
+            <tr>
+              <td style="${styles.container}">
+                <div style="${styles.header}">
+                  <img src="https://cdn-icons-png.flaticon.com/512/2972/2972531.png" alt="Miss You" style="${styles.icon}" />
+                  <h1 style="${styles.title}">${t.inactivityReminder.title.replace('{{name}}', toName)}</h1>
+                </div>
 
-      <div style="${styles.content}">
-        <p style="${styles.text}">${encouragementText}</p>
+                <div style="${styles.content}">
+                  <p style="${styles.text}">${encouragementText}</p>
 
-        <div style="${styles.highlightBox}; background-color: #fff1f2; border-color: #fecdd3;">
-          <div style="font-size: 18px; font-weight: 600; color: #be123c; margin-bottom: 5px;">${t.inactivityReminder.noActiveMiners}</div>
-          <div style="font-size: 14px; color: #9f1239;">${t.inactivityReminder.inactiveFor.replace('{{duration}}', durationText)}</div>
-        </div>
+                  <div style="${styles.highlightBox}; background-color: #fff1f2; border-color: #fecdd3;">
+                    <div style="font-size: 18px; font-weight: 600; color: #be123c; margin-bottom: 5px;">${t.inactivityReminder.noActiveMiners}</div>
+                    <div style="font-size: 14px; color: #9f1239;">${t.inactivityReminder.inactiveFor.replace('{{duration}}', durationText)}</div>
+                  </div>
 
-        <a href="${dashboardUrl}" style="${styles.button}">${t.inactivityReminder.ctaButton}</a>
+                  <a href="${dashboardUrl}" style="${styles.button}">${t.inactivityReminder.ctaButton}</a>
 
-        <div style="margin-top: 30px;">
-          <h3 style="font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 15px;">${t.inactivityReminder.whyStartMining}</h3>
-          <ul style="color: #4b5563; font-size: 16px; line-height: 1.6; padding-left: 20px; margin: 0;">
-            ${reasonsList}
-          </ul>
-        </div>
-      </div>
+                  <div style="margin-top: 30px;">
+                    <h3 style="font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 15px;">${t.inactivityReminder.whyStartMining}</h3>
+                    <ul style="color: #4b5563; font-size: 16px; line-height: 1.6; padding-left: 20px; margin: 0;">
+                      ${reasonsList}
+                    </ul>
+                  </div>
+                </div>
 
-      <div style="${styles.footer}">
-        <p style="margin: 0;">${t.common.copyright}</p>
-      </div>
-    </div>
+                <div style="${styles.footer}">
+                  <p style="margin: 0;">${t.common.copyright}</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 
   return await sendEmail(toEmail, toName, t.inactivityReminder.subject.replace('{{duration}}', durationText), emailBody);
@@ -238,27 +280,37 @@ export const sendCollegeAdminRemovedEmail = async (toEmail, toName, collegeName,
   const t = getEmailTranslations(language);
   
   const emailBody = `
-    <div style="${styles.container}">
-      <div style="${styles.header}">
-        <img src="https://cdn-icons-png.flaticon.com/512/1000/1000997.png" alt="Admin Update" style="${styles.icon}" />
-        <h1 style="${styles.title}">${t.collegeAdminRemoved.title}</h1>
-      </div>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="${styles.wrapperTable}">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="${styles.containerTable}">
+            <tr>
+              <td style="${styles.container}">
+                <div style="${styles.header}">
+                  <img src="https://cdn-icons-png.flaticon.com/512/1000/1000997.png" alt="Admin Update" style="${styles.icon}" />
+                  <h1 style="${styles.title}">${t.collegeAdminRemoved.title}</h1>
+                </div>
 
-      <div style="${styles.content}">
-        <p style="${styles.text}">${t.collegeAdminRemoved.greeting.replace('{{name}}', toName)}</p>
-        <p style="${styles.text}">${t.collegeAdminRemoved.message.replace('{{collegeName}}', collegeName)}</p>
-        
-        <div style="${styles.highlightBox}; background-color: #fff7ed; border-color: #ffedd5;">
-          <p style="${styles.text}; margin: 0; color: #9a3412;">${t.collegeAdminRemoved.reason}</p>
-        </div>
+                <div style="${styles.content}">
+                  <p style="${styles.text}">${t.collegeAdminRemoved.greeting.replace('{{name}}', toName)}</p>
+                  <p style="${styles.text}">${t.collegeAdminRemoved.message.replace('{{collegeName}}', collegeName)}</p>
+                  
+                  <div style="${styles.highlightBox}; background-color: #fff7ed; border-color: #ffedd5;">
+                    <p style="${styles.text}; margin: 0; color: #9a3412;">${t.collegeAdminRemoved.reason}</p>
+                  </div>
 
-        <a href="mailto:${t.collegeAdminRemoved.supportEmail}" style="${styles.button}">${t.collegeAdminRemoved.ctaButton}</a>
-      </div>
+                  <a href="mailto:${t.collegeAdminRemoved.supportEmail}" style="${styles.button}">${t.collegeAdminRemoved.ctaButton}</a>
+                </div>
 
-      <div style="${styles.footer}">
-        <p style="margin: 0;">${t.common.copyright}</p>
-      </div>
-    </div>
+                <div style="${styles.footer}">
+                  <p style="margin: 0;">${t.common.copyright}</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 
   return await sendEmail(toEmail, toName, t.collegeAdminRemoved.subject, emailBody);

@@ -955,14 +955,14 @@ export const deleteCollegeAdmin = async (req, res, next) => {
         c => c._id.toString() === collegeAdmin.managedCollege.toString()
       );
       if (!wasAlreadyHandled) {
-        const college = await College.findById(collegeAdmin.managedCollege);
+      const college = await College.findById(collegeAdmin.managedCollege);
         if (college && college.admin && college.admin.toString() === req.params.id) {
-          college.admin = null;
-          if (college.status === 'Waitlist' || college.status === 'Building') {
-            college.status = 'Unaffiliated';
-            console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
-          }
-          await college.save();
+        college.admin = null;
+        if (college.status === 'Waitlist' || college.status === 'Building') {
+          college.status = 'Unaffiliated';
+          console.log(`🔄 College "${college.name}" status reset to Unaffiliated after admin deletion`);
+        }
+        await college.save();
         }
       }
     }
@@ -1075,13 +1075,13 @@ export const removeCollegeAdmin = async (req, res, next) => {
     // Update ALL colleges that have this user as admin: remove admin reference and reset status if needed
     // This fixes the bug where college.admin wasn't cleared if user's managedCollege was null
     for (const college of collegesWithThisAdmin) {
-      college.admin = null;
-      // Reset status to Unaffiliated if it was Waitlist or Building
-      if (college.status === 'Waitlist' || college.status === 'Building') {
-        college.status = 'Unaffiliated';
-      }
-      await college.save();
-      console.log('✅ College admin removed:', college.name, 'New status:', college.status);
+        college.admin = null;
+        // Reset status to Unaffiliated if it was Waitlist or Building
+        if (college.status === 'Waitlist' || college.status === 'Building') {
+          college.status = 'Unaffiliated';
+        }
+        await college.save();
+        console.log('✅ College admin removed:', college.name, 'New status:', college.status);
     }
     
     // Also handle the case where previousManagedCollegeId exists but wasn't found in collegesWithThisAdmin
