@@ -16,7 +16,7 @@ NODE_ENV=development
 PORT=4000
 
 # MongoDB Atlas Connection String
-MONGODB_URI=mongodb+srv://aman:sujata12@cfc2demo.dqzhcd7.mongodb.net/?retryWrites=true&w=majority&appName=cfc2demo
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=cfc2demo
 
 # JWT Secret (use a strong random string)
 JWT_SECRET=cfc2_super_secret_jwt_key_12345_make_it_very_long_and_secure
