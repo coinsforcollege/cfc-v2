@@ -77,6 +77,35 @@ const CollegeCoins = () => {
         </div>
       </section>
 
+      {/* Definition Section */}
+      <section className="py-16 bg-gradient-to-b from-slate-50 to-white">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <h2 className="text-2xl md:text-4xl font-bold max-w-5xl mx-auto mb-10 leading-tight">
+              <span className="text-slate-900">{t('collegeCoins.definition.part1')}</span>{' '}
+              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">{t('collegeCoins.definition.part2')}</span>{' '}
+              <span className="text-slate-900">{t('collegeCoins.definition.part3')}</span>
+            </h2>
+            <div className="flex justify-center gap-2 md:gap-4">
+              <span className="px-3 py-1.5 md:px-5 md:py-2.5 bg-purple-100 text-purple-700 rounded-full text-xs md:text-base font-semibold shadow-sm whitespace-nowrap">
+                {t('collegeCoins.definition.chip1')}
+              </span>
+              <span className="px-3 py-1.5 md:px-5 md:py-2.5 bg-pink-100 text-pink-700 rounded-full text-xs md:text-base font-semibold shadow-sm whitespace-nowrap">
+                {t('collegeCoins.definition.chip2')}
+              </span>
+              <span className="px-3 py-1.5 md:px-5 md:py-2.5 bg-indigo-100 text-indigo-700 rounded-full text-xs md:text-base font-semibold shadow-sm whitespace-nowrap">
+                {t('collegeCoins.definition.chip3')}
+              </span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Key Stats Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">

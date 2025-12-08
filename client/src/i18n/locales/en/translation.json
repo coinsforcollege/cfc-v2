@@ -1621,6 +1621,14 @@
       "subtitle": "Before You Even Apply",
       "description": "As students prepare, universities reward. Coins accumulate across schools, ready to become tuition, housing, and more."
     },
+    "definition": {
+      "part1": "A digital token issued by a university.",
+      "part2": "Earned by students.",
+      "part3": "Spent on campus or traded for cash.",
+      "chip1": "Learn to Earn",
+      "chip2": "Pay For Tuition",
+      "chip3": "Hold For Future"
+    },
     "stats": {
       "stat1": {
         "value": "$273B",
