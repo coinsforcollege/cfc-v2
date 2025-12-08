@@ -1090,7 +1090,36 @@
     "featuredColleges": "精选大学",
     "viewAllColleges": "查看所有大学",
     "statistics": "平台统计",
-    "recentActivity": "最近活动"
+    "recentActivity": "最近活动",
+    "collegeCoinsSection": {
+      "title": "大学代币",
+      "description": "通过学生可以赚取、交易和使用的品牌数字代币，改变您的奖学金计划。创建一个繁荣的校园经济，吸引顶尖人才并提高入学率。",
+      "perfectFor": "最适合：",
+      "perfectForList": [
+        "寻求学生参与的大学",
+        "拥有奖学金计划的学院",
+        "建立校园经济的机构"
+      ],
+      "learnMore": "了解更多",
+      "features": {
+        "attractStudents": {
+          "title": "吸引顶尖学生",
+          "desc": "增加注册率和学生参与度的奖学金代币"
+        },
+        "tradeable": {
+          "title": "在 InTuition 上可交易",
+          "desc": "学生可以将代币兑换成 USD、USDC 或其他大学代币"
+        },
+        "blockchain": {
+          "title": "区块链支持",
+          "desc": "在 CollegenZ L2 上安全、透明地分发"
+        },
+        "instantDistribution": {
+          "title": "即时分发",
+          "desc": "为成就和里程碑实时奖励代币"
+        }
+      }
+    }
   },
   "settings": {
     "accountSettings": "账户设置",

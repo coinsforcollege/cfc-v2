@@ -1090,7 +1090,36 @@
     "featuredColleges": "Featured Colleges",
     "viewAllColleges": "View All Colleges",
     "statistics": "Platform Statistics",
-    "recentActivity": "Recent Activity"
+    "recentActivity": "Recent Activity",
+    "collegeCoinsSection": {
+      "title": "College Coins",
+      "description": "Transform your scholarship program with branded digital coins that students can earn, trade, and use. Create a thriving campus economy that attracts top talent and boosts enrollment.",
+      "perfectFor": "Perfect for:",
+      "perfectForList": [
+        "Universities seeking student engagement",
+        "Colleges with scholarship programs",
+        "Institutions building campus economies"
+      ],
+      "learnMore": "Learn More",
+      "features": {
+        "attractStudents": {
+          "title": "Attract Top Students",
+          "desc": "Scholarship coins that increase enrollment and student engagement"
+        },
+        "tradeable": {
+          "title": "Tradeable on InTuition",
+          "desc": "Students can trade coins for USD, USDC, or other college coins"
+        },
+        "blockchain": {
+          "title": "Blockchain-Backed",
+          "desc": "Secure, transparent distribution on CollegenZ L2"
+        },
+        "instantDistribution": {
+          "title": "Instant Distribution",
+          "desc": "Award coins in real-time for achievements and milestones"
+        }
+      }
+    }
   },
   "settings": {
     "accountSettings": "Account Settings",

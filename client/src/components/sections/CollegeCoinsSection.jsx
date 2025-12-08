@@ -3,33 +3,35 @@ import { motion } from 'framer-motion';
 import { Box, Container, Typography, Button } from '@mui/material';
 import { School, TrendingUp, Shield, Bolt, ArrowForward } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 const CollegeCoinsSection = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const features = [
     {
       icon: School,
-      title: 'Attract Top Students',
-      description: 'Scholarship coins that increase enrollment and student engagement',
+      title: t('home.collegeCoinsSection.features.attractStudents.title'),
+      description: t('home.collegeCoinsSection.features.attractStudents.desc'),
       color: '#3b82f6'
     },
     {
       icon: TrendingUp,
-      title: 'Tradeable on Intuition',
-      description: 'Students can trade coins for USD, USDC, or other college coins',
+      title: t('home.collegeCoinsSection.features.tradeable.title'),
+      description: t('home.collegeCoinsSection.features.tradeable.desc'),
       color: '#8b5cf6'
     },
     {
       icon: Shield,
-      title: 'Blockchain-Backed',
-      description: 'Secure, transparent distribution on CollegenZ L2',
+      title: t('home.collegeCoinsSection.features.blockchain.title'),
+      description: t('home.collegeCoinsSection.features.blockchain.desc'),
       color: '#10b981'
     },
     {
       icon: Bolt,
-      title: 'Instant Distribution',
-      description: 'Award coins in real-time for achievements and milestones',
+      title: t('home.collegeCoinsSection.features.instantDistribution.title'),
+      description: t('home.collegeCoinsSection.features.instantDistribution.desc'),
       color: '#f59e0b'
     }
   ];
@@ -86,7 +88,7 @@ const CollegeCoinsSection = () => {
                   mb: 3,
                 }}
               >
-                College Coins
+                {t('home.collegeCoinsSection.title')}
               </Typography>
               
               <Typography
@@ -97,8 +99,7 @@ const CollegeCoinsSection = () => {
                   mb: 4,
                 }}
               >
-                Transform your scholarship program with branded digital coins that students can earn, trade, and use. 
-                Create a thriving campus economy that attracts top talent and boosts enrollment.
+                {t('home.collegeCoinsSection.description')}
               </Typography>
 
               <Box sx={{ mb: 4 }}>
@@ -110,10 +111,10 @@ const CollegeCoinsSection = () => {
                     fontWeight: 500,
                   }}
                 >
-                  Perfect for:
+                  {t('home.collegeCoinsSection.perfectFor')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {['Universities seeking student engagement', 'Colleges with scholarship programs', 'Institutions building campus economies'].map((item, index) => (
+                  {t('home.collegeCoinsSection.perfectForList', { returnObjects: true }).map((item, index) => (
                     <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Box
                         sx={{
@@ -151,7 +152,7 @@ const CollegeCoinsSection = () => {
                   },
                 }}
               >
-                Learn More
+                {t('home.collegeCoinsSection.learnMore')}
               </Button>
             </Box>
 
