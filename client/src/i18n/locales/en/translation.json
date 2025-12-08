@@ -55,6 +55,7 @@
     "contact": "Contact",
     "intuitionExchange": "InTuition Exchange",
     "collegenzBlockchain": "CollegenZ Blockchain",
+    "networkMap": "Network Map",
     "gasManager": "Gas Manager",
     "documentation": "Documentation",
     "campusAmbassador": "Campus Ambassador",
@@ -1806,7 +1807,7 @@
     },
     "intuitionExchange": {
       "title": "Trading on",
-      "subtitle": "Intuition Exchange",
+      "subtitle": "InTuition Exchange",
       "desc": "Students can trade college coins against USD, USDC, and USDT. The exchange provides liquidity for coins beyond campus use.",
       "features": {
         "seed": "Seed funds for future",
@@ -1865,7 +1866,7 @@
           "Coin creation on CollegenZ L2",
           "Pledge management dashboard",
           "RFE platform integration",
-          "Intuition Exchange listing",
+          "InTuition Exchange listing",
           "Email support"
         ],
         "bestForLabel": "Best for:",
@@ -1895,7 +1896,7 @@
     "networkVisualization": {
       "nodes": {
         "colleges": "Colleges",
-        "intuition": "Intuition",
+        "intuition": "InTuition",
         "exchange": "Exchange",
         "students": "Students",
         "cfc1": "Coins For",
@@ -1911,7 +1912,7 @@
           { "title": "Colleges issue coins", "desc": "Through Coins For College platform, creating digital scholarships" },
           { "title": "Students earn & spend", "desc": "Via Rewards For Education, completing tasks to unlock opportunities" },
           { "title": "L2 settlement layer", "desc": "CollegenZ blockchain ensures secure, fast, low-cost transactions" },
-          { "title": "Intuition Exchange", "desc": "Provides liquidity, enabling trading between coins and fiat" }
+          { "title": "InTuition Exchange", "desc": "Provides liquidity, enabling trading between coins and fiat" }
         ]
       }
     }

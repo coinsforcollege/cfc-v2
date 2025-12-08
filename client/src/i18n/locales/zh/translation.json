@@ -55,6 +55,7 @@
     "contact": "联系我们",
     "intuitionExchange": "InTuition 交易所",
     "collegenzBlockchain": "CollegenZ 区块链",
+    "networkMap": "网络地图",
     "gasManager": "Gas 管理器",
     "documentation": "文档",
     "campusAmbassador": "校园大使",
@@ -1806,7 +1807,7 @@
     },
     "intuitionExchange": {
       "title": "交易在",
-      "subtitle": "Intuition 交易所",
+      "subtitle": "InTuition 交易所",
       "desc": "学生可以将大学代币兑换成 USD、USDC 和 USDT。交易所为校园以外的代币使用提供流动性。",
       "features": {
         "seed": "未来的种子资金",
@@ -1865,7 +1866,7 @@
           "在 CollegenZ L2 上创建代币",
           "承诺管理仪表板",
           "RFE 平台集成",
-          "Intuition 交易所上市",
+          "InTuition 交易所上市",
           "电子邮件支持"
         ],
         "bestForLabel": "最适合：",
@@ -1895,7 +1896,7 @@
     "networkVisualization": {
       "nodes": {
         "colleges": "大学",
-        "intuition": "Intuition",
+        "intuition": "InTuition",
         "exchange": "交易所",
         "students": "学生",
         "cfc1": "Coins For",
@@ -1911,7 +1912,7 @@
           { "title": "大学发行代币", "desc": "通过 Coins For College 平台，创建数字奖学金" },
           { "title": "学生赚取和消费", "desc": "通过 Rewards For Education，完成任务以解锁机会" },
           { "title": "L2 结算层", "desc": "CollegenZ 区块链确保安全、快速、低成本的交易" },
-          { "title": "Intuition 交易所", "desc": "提供流动性，实现代币和法币之间的交易" }
+          { "title": "InTuition 交易所", "desc": "提供流动性，实现代币和法币之间的交易" }
         ]
       }
     }

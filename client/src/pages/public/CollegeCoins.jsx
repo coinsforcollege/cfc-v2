@@ -1057,7 +1057,7 @@ const CollegeCoins = () => {
         </div>
       </section>
 
-      {/* Student Use Cases - Section 3: Trading on Intuition Exchange */}
+      {/* Student Use Cases - Section 3: Trading on InTuition Exchange */}
       <section className="py-20 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 md:p-16 shadow-xl border border-slate-200">
@@ -1068,7 +1068,7 @@ const CollegeCoins = () => {
                 <div className="mb-6">
                   <img 
                     src="/images/intuition-logo.svg" 
-                    alt="Intuition" 
+                    alt="InTuition" 
                     className="h-12 md:h-14 mb-3"
                   />
                   <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-2">
@@ -1463,9 +1463,9 @@ const CollegeCoins = () => {
                 </defs>
 
                 {/* Connection Lines with Marquee Animation */}
-                {/* Top Row: Colleges to Intuition */}
+                {/* Top Row: Colleges to InTuition */}
                 <line x1="100" y1="80" x2="300" y2="80" stroke="#94a3b8" strokeWidth="2" className="animated-line" />
-                {/* Top Row: Intuition to Students */}
+                {/* Top Row: InTuition to Students */}
                 <line x1="300" y1="80" x2="500" y2="80" stroke="#94a3b8" strokeWidth="2" className="animated-line" />
                 
                 {/* Bottom Row: CFC to L2 */}
@@ -1475,13 +1475,13 @@ const CollegeCoins = () => {
                 
                 {/* Vertical: Colleges to CFC */}
                 <line x1="100" y1="80" x2="100" y2="280" stroke="#f59e0b" strokeWidth="2" className="animated-line" />
-                {/* Vertical: Intuition to L2 */}
+                {/* Vertical: InTuition to L2 */}
                 <line x1="300" y1="80" x2="300" y2="280" stroke="#10b981" strokeWidth="2" className="animated-line" />
                 {/* Vertical: Students to RFE */}
                 <line x1="500" y1="80" x2="500" y2="280" stroke="#ec4899" strokeWidth="2" className="animated-line" />
 
                 {/* Animated Particles */}
-                {/* Particle: Colleges to Intuition */}
+                {/* Particle: Colleges to InTuition */}
                 <motion.circle r="4" fill="#f59e0b" 
                   animate={{ cx: [100, 300], cy: [80, 80] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -1504,7 +1504,7 @@ const CollegeCoins = () => {
                   <text x="100" y="120" textAnchor="middle" fill="#92400e" fontSize="11" fontWeight="600">{t('collegeCoins.networkVisualization.nodes.colleges')}</text>
                 </g>
 
-                {/* Intuition Exchange */}
+                {/* InTuition Exchange */}
                 <g>
                   <image href="/images/intuition-logo.svg" x="275" y="55" width="50" height="50" />
                   <text x="300" y="118" textAnchor="middle" fill="#065f46" fontSize="11" fontWeight="600">{t('collegeCoins.networkVisualization.nodes.intuition')}</text>
