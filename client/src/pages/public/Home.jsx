@@ -11,10 +11,15 @@ import TractionProofSection from '../../components/sections/TractionProofSection
 import BuildOnCollegenSection from '../../components/sections/BuildOnCollegenSection';
 import CTASection from '../../components/sections/CTASection';
 import CollegeCoinsSection from '../../components/sections/CollegeCoinsSection';
+import SEO from '../../components/common/SEO';
 
 function Home() {
   return (
     <Box>
+      <SEO 
+        title="Home"
+        description="Join the revolution in campus economics. Earn tokens while supporting your college's digital transformation."
+      />
       <HeroSection />
       <NetworkMapSection />
       <CollegeCoinsSection />

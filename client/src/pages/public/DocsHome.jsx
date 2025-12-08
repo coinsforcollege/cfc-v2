@@ -16,6 +16,7 @@ import { colors, borderRadius } from '../../utils/designTokens';
 import CategoryCard from '../../components/docs/CategoryCard';
 import ArticleListItem from '../../components/docs/ArticleListItem';
 import DocsContactCTA from '../../components/docs/DocsContactCTA';
+import SEO from '../../components/common/SEO';
 
 const DocsHome = () => {
   const navigate = useNavigate();
@@ -84,6 +85,10 @@ const DocsHome = () => {
         pb: 8
       }}
     >
+      <SEO 
+        title={t('auth.helpAndDocumentation')}
+        description={t('auth.findAnswersGuides')}
+      />
       {/* Hero Section - Centered */}
       <Box
         sx={{

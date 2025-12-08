@@ -2,11 +2,18 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { PhoneMockup } from '../../components/PhoneMockup';
 import { useTranslation, Trans } from 'react-i18next';
+import SEO from '../../components/common/SEO';
 
 const CollegeCoins = () => {
   const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      <SEO 
+        title="College Coins | Coins For College"
+        description="Transform your scholarship program with branded digital coins. Create a thriving campus economy that attracts top talent and boosts enrollment."
+        url="https://coinsforcollege.org/college-coins"
+        image="https://coinsforcollege.org/og_college_coin.png"
+      />
       {/* Hero Section - Full Height */}
       <section 
         className="relative h-screen flex items-center justify-center overflow-hidden"
