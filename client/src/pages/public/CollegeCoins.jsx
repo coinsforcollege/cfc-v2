@@ -811,57 +811,89 @@ const CollegeCoins = () => {
           </div>
 
           {/* Additional Content - Phone Mockups */}
-          <div className="mt-20 grid md:grid-cols-2 gap-12">
-            {/* Language Learning */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex flex-col items-center"
-            >
-              <div className="relative">
-                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 to-transparent rounded-full blur-3xl -z-10" />
-                 <PhoneMockup variant="graph" frameStyle="minimal" />
-              </div>
-              <div className="mt-8 text-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-600 text-sm font-medium mb-3">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.334-1.49 17.087 17.087 0 003.13-3.733 18.992 18.992 0 01-1.487-2.494 1 1 0 111.79-.89c.234.47.489.928.764 1.372.417-.934.752-1.913.997-2.927H3a1 1 0 110-2h3V3a1 1 0 011-1zm6 6a1 1 0 01.894.553l2.991 5.982a.869.869 0 01.02.037l.99 1.98a1 1 0 11-1.79.894L15.383 16h-4.764l-.724 1.447a1 1 0 11-1.788-.894l.99-1.98.019-.038 2.99-5.982A1 1 0 0113 8zm-1.382 6h2.764L13 11.236 11.618 14z" clipRule="evenodd" />
-                  </svg>
-                  <span>{t('collegeCoins.phoneMockups.language.tag')}</span>
+          <div className="mt-20 relative">
+            <div className="grid md:grid-cols-2 gap-12">
+              {/* Language Learning */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="flex flex-col items-center"
+              >
+                <div className="relative">
+                   <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 to-transparent rounded-full blur-3xl -z-10" />
+                   <PhoneMockup variant="graph" frameStyle="minimal" />
                 </div>
-                <h3 className="text-3xl font-bold text-slate-900 mb-3">{t('collegeCoins.phoneMockups.language.title')}</h3>
-                <p className="text-slate-600 max-w-md mx-auto">
-                  {t('collegeCoins.phoneMockups.language.desc')}
-                </p>
-              </div>
-            </motion.div>
+                <div className="mt-8 text-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-600 text-sm font-medium mb-3">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.334-1.49 17.087 17.087 0 003.13-3.733 18.992 18.992 0 01-1.487-2.494 1 1 0 111.79-.89c.234.47.489.928.764 1.372.417-.934.752-1.913.997-2.927H3a1 1 0 110-2h3V3a1 1 0 011-1zm6 6a1 1 0 01.894.553l2.991 5.982a.869.869 0 01.02.037l.99 1.98a1 1 0 11-1.79.894L15.383 16h-4.764l-.724 1.447a1 1 0 11-1.788-.894l.99-1.98.019-.038 2.99-5.982A1 1 0 0113 8zm-1.382 6h2.764L13 11.236 11.618 14z" clipRule="evenodd" />
+                    </svg>
+                    <span>{t('collegeCoins.phoneMockups.language.tag')}</span>
+                  </div>
+                  <h3 className="text-3xl font-bold text-slate-900 mb-3">{t('collegeCoins.phoneMockups.language.title')}</h3>
+                  <p className="text-slate-600 max-w-md mx-auto">
+                    {t('collegeCoins.phoneMockups.language.desc')}
+                  </p>
+                </div>
+              </motion.div>
 
-            {/* Visa Documentation */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-col items-center"
-            >
-              <div className="relative">
-                 <div className="absolute inset-0 bg-gradient-to-tr from-green-600/20 to-transparent rounded-full blur-3xl -z-10" />
-                 <PhoneMockup variant="vault" frameStyle="dark" />
-              </div>
-              <div className="mt-8 text-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-600 text-sm font-medium mb-3">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>{t('collegeCoins.phoneMockups.visa.tag')}</span>
+              {/* Visa Documentation */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="flex flex-col items-center"
+              >
+                <div className="relative">
+                   <div className="absolute inset-0 bg-gradient-to-tr from-green-600/20 to-transparent rounded-full blur-3xl -z-10" />
+                   <PhoneMockup variant="vault" frameStyle="dark" />
                 </div>
-                <h3 className="text-3xl font-bold text-slate-900 mb-3">{t('collegeCoins.phoneMockups.visa.title')}</h3>
-                <p className="text-slate-600 max-w-md mx-auto">
-                  {t('collegeCoins.phoneMockups.visa.desc')}
-                </p>
-              </div>
-            </motion.div>
+                <div className="mt-8 text-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-600 text-sm font-medium mb-3">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>{t('collegeCoins.phoneMockups.visa.tag')}</span>
+                  </div>
+                  <h3 className="text-3xl font-bold text-slate-900 mb-3">{t('collegeCoins.phoneMockups.visa.title')}</h3>
+                  <p className="text-slate-600 max-w-md mx-auto">
+                    {t('collegeCoins.phoneMockups.visa.desc')}
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Centered Learn More Button - Desktop Only */}
+            <a
+              href="https://rewardsforeducation.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                className="relative group"
+              >
+                {/* Animated glow */}
+                <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-80 transition duration-500 animate-pulse" />
+                
+                {/* Button content */}
+                <div className="relative flex flex-col items-center gap-2 px-6 py-4 bg-gradient-to-br from-blue-500/80 to-cyan-600/80 backdrop-blur-md rounded-xl shadow-2xl border border-white/20">
+                  <img 
+                    src="/images/rfe-logo-colored-bg.svg" 
+                    alt="RFE" 
+                    className="h-8 w-auto"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <span className="text-sm font-semibold text-white">{t('collegeCoins.phoneMockups.learnMore')}</span>
+                </div>
+              </motion.div>
+            </a>
           </div>
         </div>
       </section>
