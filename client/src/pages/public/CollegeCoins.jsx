@@ -13,6 +13,10 @@ const CollegeCoins = () => {
         description="Transform your scholarship program with branded digital coins. Create a thriving campus economy that attracts top talent and boosts enrollment."
         url="https://coinsforcollege.org/college-coins"
         image="https://coinsforcollege.org/og_college_coin.png"
+        ogImage="https://coinsforcollege.org/og_college_coin.png"
+        twitterImage="https://coinsforcollege.org/og_college_coin.png"
+        imageWidth="1200"
+        imageHeight="630"
       />
       {/* Hero Section - Full Height */}
       <section 
