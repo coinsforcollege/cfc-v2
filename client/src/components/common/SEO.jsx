@@ -5,8 +5,12 @@ const SEO = ({
   title, 
   description, 
   image: propImage = 'https://coinsforcollege.org/og_image.png',
+  ogImage: propOgImage,
+  twitterImage: propTwitterImage,
   url,
-  type = 'website'
+  type = 'website',
+  imageWidth,
+  imageHeight
 }) => {
   const siteTitle = 'Coins For College';
   const fullTitle = title ? `${title} | ${siteTitle}` : 'Coins For College - Digital Token Economies for Academic Institutions';
@@ -17,6 +21,12 @@ const SEO = ({
   
   // Ensure absolute URL
   const image = propImage.startsWith('http') ? propImage : `${siteUrl}${propImage}`;
+  
+  const ogImageRaw = propOgImage || image;
+  const ogImage = ogImageRaw.startsWith('http') ? ogImageRaw : `${siteUrl}${ogImageRaw}`;
+  
+  const twitterImageRaw = propTwitterImage || image;
+  const twitterImage = twitterImageRaw.startsWith('http') ? twitterImageRaw : `${siteUrl}${twitterImageRaw}`;
 
   return (
     <Helmet>
@@ -29,14 +39,16 @@ const SEO = ({
       <meta property="og:url" content={metaUrl} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={metaDescription} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={ogImage} />
+      {imageWidth && <meta property="og:image:width" content={imageWidth} />}
+      {imageHeight && <meta property="og:image:height" content={imageHeight} />}
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:url" content={metaUrl} />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={metaDescription} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={twitterImage} />
     </Helmet>
   );
 };
