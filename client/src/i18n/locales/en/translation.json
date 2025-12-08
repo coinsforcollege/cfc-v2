@@ -1616,9 +1616,10 @@
   },
   "collegeCoins": {
     "hero": {
-      "title": "College Coins:",
-      "subtitle": "Institution-Branded Digital Assets",
-      "description": "Every university creates its own blockchain-based currency for scholarships, \n            campus payments, and community engagement."
+      "chip": "College Coins",
+      "title": "Scholarships That Find You",
+      "subtitle": "Before You Even Apply",
+      "description": "As students prepare, universities reward. Coins accumulate across schools, ready to become tuition, housing, and more."
     },
     "stats": {
       "stat1": {
