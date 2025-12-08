@@ -10,12 +10,14 @@ import OperationsModelSection from '../../components/sections/OperationsModelSec
 import TractionProofSection from '../../components/sections/TractionProofSection';
 import BuildOnCollegenSection from '../../components/sections/BuildOnCollegenSection';
 import CTASection from '../../components/sections/CTASection';
+import CollegeCoinsSection from '../../components/sections/CollegeCoinsSection';
 
 function Home() {
   return (
     <Box>
       <HeroSection />
       <NetworkMapSection />
+      <CollegeCoinsSection />
       <InfrastructureSection />
       <FundraisingSection />
       <CampusDigitalEconomySection />

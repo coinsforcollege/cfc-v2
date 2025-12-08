@@ -34,6 +34,7 @@
   "header": {
     "howItWorks": "How it Works",
     "colleges": "Colleges",
+    "collegeCoins": "College Coins",
     "networkMap": "Network Map",
     "updates": "Updates",
     "login": "Login",
@@ -1581,6 +1582,338 @@
       "confirmLogout": "Confirm Logout",
       "confirmMessage": "Are you sure you want to logout? You will need to login again to access your account.",
       "cancel": "Cancel"
+    }
+  },
+  "collegeCoins": {
+    "hero": {
+      "title": "College Coins:",
+      "subtitle": "Institution-Branded Digital Assets",
+      "description": "Every university creates its own blockchain-based currency for scholarships, \n            campus payments, and community engagement."
+    },
+    "stats": {
+      "stat1": {
+        "value": "$273B",
+        "label": "Global annual scholarship market"
+      },
+      "stat2": {
+        "value": "28%",
+        "label": "Average unclaimed scholarship funds"
+      },
+      "stat3": {
+        "value": "$1.7T",
+        "label": "Outstanding student loan debt"
+      },
+      "stat4": {
+        "value": "20,000+",
+        "label": "Universities worldwide"
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Your Scholarship Program?",
+      "description": "Join forward-thinking institutions using College Coins to attract top students, increase enrollment, and revolutionize financial aid distribution.",
+      "primaryButton": "Let's Discuss",
+      "secondaryButton": "Get Started Free"
+    },
+    "scholarshipPledges": {
+      "title": "Scholarship Pledges",
+      "subtitle": "Transform scholarship distribution with smart pledge technology",
+      "lifecycle": {
+        "title": "Pledge Lifecycle",
+        "step1": {
+          "title": "College Creates Pledge",
+          "desc": "Coins locked in smart contract"
+        },
+        "step2": {
+          "title": "Student Receives Notification",
+          "desc": "Offer visible on dashboard"
+        },
+        "step3a": {
+          "title": "Student Enrolls",
+          "desc": "→ Coins transfer to wallet"
+        },
+        "step3b": {
+          "title": "Doesn't Enroll",
+          "desc": "→ Pledge auto-reverts"
+        }
+      },
+      "content": {
+        "title": "Scholarships That Never Go to Waste",
+        "description": "Colleges make scholarship offers as coin pledges. Each pledge locks coins in a blockchain smart contract tied to a specific student's ID.",
+        "trigger1": {
+          "title": "Enrollment Trigger",
+          "desc": "Student enrolls within 1 year → coins transfer"
+        },
+        "trigger2": {
+          "title": "Expiry Trigger",
+          "desc": "Student doesn't enroll → coins revert automatically"
+        },
+        "example": {
+          "title": "Example Scenario",
+          "desc": "Student receives pledges from 5 universities. Student chooses one university. The moment enrollment confirms, the chosen university's pledge transfers to student wallet. Other 4 universities' pledges revert automatically and can be immediately re-pledged to waitlist students."
+        }
+      }
+    },
+    "studentEngagement": {
+      "title": "Student Engagement",
+      "subtitle": "Incentivize every milestone from application to alumni participation",
+      "prospective": {
+        "title": "Prospective Students",
+        "items": [
+          "Complete AI tutoring",
+          "Language test achievements",
+          "Early document submission",
+          "Virtual event attendance"
+        ]
+      },
+      "current": {
+        "title": "Current Students",
+        "items": [
+          "Club participation",
+          "Competition entries",
+          "Academic milestones",
+          "Career outcomes"
+        ]
+      },
+      "alumni": {
+        "title": "Post-Graduation",
+        "items": [
+          "Alumni mentorship programs",
+          "Networking event tickets",
+          "Scholarship donations with matching",
+          "Campus initiative voting"
+        ]
+      },
+      "footer": "Each activity has a coin value set by the college. Students accumulate balance before even applying, creating early institutional attachment."
+    },
+    "campusOperations": {
+      "title": "Campus Operations",
+      "subtitle": "Enable coin-based payments across all campus services and local partners",
+      "tuition": {
+        "tag": "Financial Operations",
+        "title": "Tuition & Fees",
+        "desc": "Transform how students pay for education with blockchain-powered transactions",
+        "items": [
+          "Accept coins for full or partial tuition",
+          "College sets exchange rate",
+          "Pay with coins instead of cash",
+          "Zero credit card fees"
+        ]
+      },
+      "services": {
+        "tag": "Student Services",
+        "title": "Campus Services",
+        "items": [
+          "Housing deposits and semester rent",
+          "Meal plan subscriptions",
+          "Textbook and course materials",
+          "Gym, parking, lab access",
+          "Event tickets and facility rentals"
+        ]
+      },
+      "local": {
+        "tag": "Local Integration",
+        "title": "Local Ecosystem",
+        "items": [
+          "Partner with nearby businesses to accept coins",
+          "Campus bookstore discounts for coin payments",
+          "Coffee shops, restaurants participate",
+          "Creates closed-loop campus economy",
+          "Vendors can hold coins or trade on exchange"
+        ]
+      }
+    },
+    "collegeCTA": {
+      "title": "Ready to Launch Your College Coin?",
+      "description": "Join leading institutions using blockchain technology to transform student engagement and campus payments",
+      "button": "Get Started as a College"
+    },
+    "earningBeforeEnrollment": {
+      "title": "Earning Before Enrollment",
+      "description": "Students accumulate coins from multiple universities before even applying through the RFE platform",
+      "rfe": {
+        "label": "RFE PLATFORM",
+        "title": "Rewards For Education",
+        "items": [
+          "AI-powered tutoring",
+          "Language proficiency training",
+          "Application assistance",
+          "Scholarship tracking"
+        ],
+        "button": "Learn More"
+      },
+      "steps": {
+        "step1": {
+          "title": "Sign Up",
+          "desc": "Student creates RFE profile, selects colleges of interest. All selected colleges can now reward their activity."
+        },
+        "step2": {
+          "title": "Complete AI Tutoring",
+          "desc": "Finishes SAT Math prep modules. <1>Earns coins</1> from colleges tracking progress."
+        },
+        "step3": {
+          "title": "Achieve Language Score",
+          "desc": "Gets TOEFL score. <1>Earns coins</1> from colleges that value language proficiency."
+        },
+        "step4": {
+          "title": "Manage Documents",
+          "desc": "Organize transcripts, essays, and recommendation letters. <1>Earns coins</1> from colleges for timely submission."
+        },
+        "step5": {
+          "title": "Attend Virtual Events",
+          "desc": "Joins campus tours and webinars. <1>Earns coins</1> from hosting colleges."
+        },
+        "step6": {
+          "title": "Prepare Visa Documents",
+          "desc": "Compiles financial proofs, academic transcripts, and identity documents for visa filing. <1>Earns coins</1> for completion."
+        },
+        "step7": {
+          "title": "Achieve Funding Readiness",
+          "desc": "Secures financial aid, scholarships, or funding sources. <1>Earns coins</1> upon demonstrating financial readiness."
+        }
+      },
+      "result": "<0>Result:</0> Student has accumulated coins from multiple universities and is prepared for enrollment with all documents ready."
+    },
+    "phoneMockups": {
+      "language": {
+        "tag": "Language Proficiency",
+        "title": "Fluency in Any Language",
+        "desc": "CEFR-aligned training for IELTS, TOEFL, TestDaF, and DELF. Earn coins for achieving proficiency milestones."
+      },
+      "visa": {
+        "tag": "Visa Ready",
+        "title": "Visa Filing Assistance",
+        "desc": "Compile and organize financial proofs, academic transcripts, and identity documents all in one secure vault."
+      }
+    },
+    "campusPayments": {
+      "title": "Campus Payments After Enrollment",
+      "desc": "Students use coins for all campus expenses. College sets pricing for each service. Coins function as campus currency.",
+      "cards": {
+        "tuition": { "title": "Tuition", "desc": "Pay with coins" },
+        "housing": { "title": "Housing", "desc": "Dorm & deposits" },
+        "dining": { "title": "Dining", "desc": "Meal plans" },
+        "books": { "title": "Books", "desc": "Course materials" },
+        "parking": { "title": "Parking", "desc": "Permits" },
+        "gym": { "title": "Gym", "desc": "Fitness center" },
+        "printing": { "title": "Printing", "desc": "Copy services" },
+        "events": { "title": "Events", "desc": "Sports & concerts" },
+        "lab": { "title": "Lab Access", "desc": "Equipment" },
+        "resume": { "title": "Resume Review", "desc": "Career services" },
+        "interview": { "title": "Mock Interview", "desc": "Interview prep" },
+        "cafe": { "title": "Campus Café", "desc": "Food & drinks" }
+      },
+      "footer": "<0>Colleges determine coin-to-dollar exchange rate.</0> Students pay with earned or pledged coins instead of cash."
+    },
+    "intuitionExchange": {
+      "title": "Trading on",
+      "subtitle": "Intuition Exchange",
+      "desc": "Students can trade college coins against USD, USDC, and USDT. The exchange provides liquidity for coins beyond campus use.",
+      "features": {
+        "seed": "Seed funds for future",
+        "seedDesc": " - save coins for post-graduation expenses",
+        "nonEdu": "Non-educational expenses",
+        "nonEduDesc": " - convert coins to cash for off-campus needs",
+        "nonStudent": "Non-students can participate",
+        "nonStudentDesc": " - parents and employers can acquire coins"
+      },
+      "infoCard": {
+        "label": "Exchange Participants",
+        "value": "Students, Parents, Employers"
+      },
+      "buySell": {
+        "title": "Buy & Sell",
+        "items": [
+          "Trade coins against USD, USDC, USDT",
+          "Market orders (instant) or limit orders (set your price)",
+          "Real-time price charts",
+          "Order book showing live supply/demand",
+          "Convert coins to cash or cash to coins"
+        ]
+      },
+      "onramp": {
+        "title": "Onramp (Buy Coins)",
+        "desc": "Purchase coins with credit card or bank transfer. Parents can buy coins to gift students. Employers buy coins to offer as signing bonuses.",
+        "useCasesLabel": "Use Cases:",
+        "useCases": [
+          "Student needs more coins for tuition",
+          "Parent wants to pre-fund semester expenses",
+          "Company recruiting offers coins per interview"
+        ]
+      },
+      "offramp": {
+        "title": "Offramp (Sell for Cash)",
+        "desc": "Sell coins on exchange. Convert to fiat currency or stablecoins.",
+        "useCasesLabel": "Use Cases:",
+        "useCases": [
+          "Graduate with leftover coins",
+          "Need cash for expenses outside campus",
+          "Transferring to different school"
+        ]
+      }
+    },
+    "pricingPlans": {
+      "title": "Pricing Plans",
+      "desc": "Choose the plan that fits your institution's needs",
+      "free": {
+        "badge": "Starter",
+        "title": "Free Plan",
+        "value": "95%",
+        "retention": "retention",
+        "note": "College keeps 95% of total coin supply",
+        "featuresLabel": "What's Included",
+        "features": [
+          "Coin creation on CollegenZ L2",
+          "Pledge management dashboard",
+          "RFE platform integration",
+          "Intuition Exchange listing",
+          "Email support"
+        ],
+        "bestForLabel": "Best for:",
+        "bestFor": "Colleges testing blockchain systems • Institutions with <5,000 students • Zero upfront costs",
+        "button": "Get Started Free"
+      },
+      "custom": {
+        "badge": "Recommended",
+        "tag": "Institution",
+        "title": "Custom Institution",
+        "value": "99.9%",
+        "retention": "retention",
+        "note": "Negotiated revenue share",
+        "featuresLabel": "Everything in Free, Plus",
+        "features": [
+          "White-label customization",
+          "Dedicated account manager",
+          "Custom smart contracts",
+          "API integration & SLA",
+          "Priority exchange placement"
+        ],
+        "bestForLabel": "Best for:",
+        "bestFor": "Universities with >10,000 students • Deep system integration • Custom pricing",
+        "button": "Contact Sales"
+      }
+    },
+    "networkVisualization": {
+      "nodes": {
+        "colleges": "Colleges",
+        "intuition": "Intuition",
+        "exchange": "Exchange",
+        "students": "Students",
+        "cfc1": "Coins For",
+        "cfc2": "College",
+        "l2": "CollegenZ L2",
+        "rfe1": "Rewards For",
+        "rfe2": "Education"
+      },
+      "ecosystem": {
+        "title": "The College Coins Ecosystem",
+        "desc": "An interconnected network where colleges, students, and platforms work seamlessly together. Data flows continuously through CollegenZ L2, enabling instant transactions, transparent tracking, and real-time updates across the entire education financing ecosystem.",
+        "items": [
+          { "title": "Colleges issue coins", "desc": "Through Coins For College platform, creating digital scholarships" },
+          { "title": "Students earn & spend", "desc": "Via Rewards For Education, completing tasks to unlock opportunities" },
+          { "title": "L2 settlement layer", "desc": "CollegenZ blockchain ensures secure, fast, low-cost transactions" },
+          { "title": "Intuition Exchange", "desc": "Provides liquidity, enabling trading between coins and fiat" }
+        ]
+      }
     }
   }
 }

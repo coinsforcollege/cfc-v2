@@ -22,9 +22,9 @@ const Footer = () => {
 
   const footerLinks = {
     platform: [
-      { name: t('footer.intuitionExchange'), href: 'https://www.intuitionexchange.com/' },
+      { name: t('footer.intuitionExchange'), href: 'https://www.intuitionexchange.com/'},
       { name: t('footer.collegenzBlockchain'), href: '/blockchain' },
-      { name: t('footer.gasManager'), href: '/gas-manager' }
+      { name: t('footer.networkMap'), href: '/network' }
     ],
     resources: [
       { name: t('footer.documentation'), href: '/docs' },

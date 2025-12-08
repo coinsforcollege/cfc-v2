@@ -34,6 +34,7 @@
   "header": {
     "howItWorks": "工作原理",
     "colleges": "大学",
+    "collegeCoins": "大学代币",
     "networkMap": "网络地图",
     "updates": "更新",
     "login": "登录",
@@ -1581,6 +1582,338 @@
       "confirmLogout": "确认退出",
       "confirmMessage": "您确定要退出登录吗？您需要重新登录才能访问您的账户。",
       "cancel": "取消"
+    }
+  },
+  "collegeCoins": {
+    "hero": {
+      "title": "大学代币：",
+      "subtitle": "机构品牌数字资产",
+      "description": "每所大学都为奖学金、\n            校园支付和社区参与创建自己的基于区块链的货币。"
+    },
+    "stats": {
+      "stat1": {
+        "value": "$273B",
+        "label": "全球年度奖学金市场"
+      },
+      "stat2": {
+        "value": "28%",
+        "label": "平均未申领奖学金资金"
+      },
+      "stat3": {
+        "value": "$1.7T",
+        "label": "未偿学生贷款债务"
+      },
+      "stat4": {
+        "value": "20,000+",
+        "label": "全球大学"
+      }
+    },
+    "cta": {
+      "title": "准备好改变您的奖学金计划了吗？",
+      "description": "加入使用大学代币吸引顶尖学生、提高入学率和革新经济援助分配的前瞻性机构。",
+      "primaryButton": "让我们讨论",
+      "secondaryButton": "免费开始"
+    },
+    "scholarshipPledges": {
+      "title": "奖学金承诺",
+      "subtitle": "利用智能承诺技术变革奖学金分配",
+      "lifecycle": {
+        "title": "承诺生命周期",
+        "step1": {
+          "title": "大学创建承诺",
+          "desc": "代币锁定在智能合约中"
+        },
+        "step2": {
+          "title": "学生收到通知",
+          "desc": "录取通知在仪表板上可见"
+        },
+        "step3a": {
+          "title": "学生入学",
+          "desc": "→ 代币转移到钱包"
+        },
+        "step3b": {
+          "title": "未入学",
+          "desc": "→ 承诺自动撤销"
+        }
+      },
+      "content": {
+        "title": "永不浪费的奖学金",
+        "description": "大学以代币承诺的形式提供奖学金。每个承诺将代币锁定在与特定学生ID绑定的区块链智能合约中。",
+        "trigger1": {
+          "title": "入学触发",
+          "desc": "学生在1年内入学 → 代币转移"
+        },
+        "trigger2": {
+          "title": "过期触发",
+          "desc": "学生未入学 → 代币自动撤销"
+        },
+        "example": {
+          "title": "示例场景",
+          "desc": "学生收到5所大学的承诺。学生选择一所大学。一旦确认入学，所选大学的承诺将转移到学生钱包。其他4所大学的承诺自动撤销，并可立即重新承诺给候补名单上的学生。"
+        }
+      }
+    },
+    "studentEngagement": {
+      "title": "学生参与",
+      "subtitle": "激励从申请到校友参与的每一个里程碑",
+      "prospective": {
+        "title": "潜在学生",
+        "items": [
+          "完成 AI 辅导",
+          "语言测试成绩",
+          "早期文件提交",
+          "虚拟活动出席"
+        ]
+      },
+      "current": {
+        "title": "在校学生",
+        "items": [
+          "社团参与",
+          "竞赛报名",
+          "学术里程碑",
+          "职业成果"
+        ]
+      },
+      "alumni": {
+        "title": "毕业后",
+        "items": [
+          "校友导师计划",
+          "社交活动门票",
+          "奖学金捐赠配对",
+          "校园倡议投票"
+        ]
+      },
+      "footer": "每个活动都有大学设定的代币价值。学生甚至在申请之前就积累余额，建立早期的机构依恋。"
+    },
+    "campusOperations": {
+      "title": "校园运营",
+      "subtitle": "在所有校园服务和本地合作伙伴中启用基于代币的支付",
+      "tuition": {
+        "tag": "财务运营",
+        "title": "学费与费用",
+        "desc": "利用区块链交易改变学生支付教育费用的方式",
+        "items": [
+          "接受代币支付全部或部分学费",
+          "大学设定汇率",
+          "使用代币而非现金支付",
+          "零信用卡手续费"
+        ]
+      },
+      "services": {
+        "tag": "学生服务",
+        "title": "校园服务",
+        "items": [
+          "住房押金和学期租金",
+          "膳食计划订阅",
+          "教科书和课程材料",
+          "健身房、停车场、实验室访问权",
+          "活动门票和设施租赁"
+        ]
+      },
+      "local": {
+        "tag": "本地整合",
+        "title": "本地生态系统",
+        "items": [
+          "与附近商家合作接受代币",
+          "校园书店代币支付折扣",
+          "咖啡店、餐厅参与",
+          "创建闭环校园经济",
+          "供应商可以持有代币或在交易所交易"
+        ]
+      }
+    },
+    "collegeCTA": {
+      "title": "准备好发行您的大学代币了吗？",
+      "description": "加入使用区块链技术变革学生参与和校园支付的领先机构",
+      "button": "作为大学开始使用"
+    },
+    "earningBeforeEnrollment": {
+      "title": "入学前赚取",
+      "description": "学生甚至在通过 RFE 平台申请之前，就从多所大学积累代币",
+      "rfe": {
+        "label": "RFE 平台",
+        "title": "教育奖励",
+        "items": [
+          "AI 驱动的辅导",
+          "语言能力培训",
+          "申请协助",
+          "奖学金追踪"
+        ],
+        "button": "了解更多"
+      },
+      "steps": {
+        "step1": {
+          "title": "注册",
+          "desc": "学生创建 RFE 个人资料，选择感兴趣的大学。所有选定的大学现在都可以奖励他们的活动。"
+        },
+        "step2": {
+          "title": "完成 AI 辅导",
+          "desc": "完成 SAT 数学预备模块。从追踪进度的大学<1>赚取代币</1>。"
+        },
+        "step3": {
+          "title": "获得语言成绩",
+          "desc": "获得托福成绩。从重视语言能力的大学<1>赚取代币</1>。"
+        },
+        "step4": {
+          "title": "管理文件",
+          "desc": "整理成绩单、论文和推荐信。因及时提交而从大学<1>赚取代币</1>。"
+        },
+        "step5": {
+          "title": "参加虚拟活动",
+          "desc": "参加校园参观和网络研讨会。从主办大学<1>赚取代币</1>。"
+        },
+        "step6": {
+          "title": "准备签证文件",
+          "desc": "汇编财务证明、学术成绩单和身份文件以进行签证申请。因完成而<1>赚取代币</1>。"
+        },
+        "step7": {
+          "title": "达到资金就绪",
+          "desc": "获得经济援助、奖学金或资金来源。在证明资金就绪后<1>赚取代币</1>。"
+        }
+      },
+      "result": "<0>结果：</0>学生已从多所大学积累代币，并准备好所有文件进行入学。"
+    },
+    "phoneMockups": {
+      "language": {
+        "tag": "语言能力",
+        "title": "精通任何语言",
+        "desc": "针对雅思、托福、TestDaF 和 DELF 的 CEFR 对齐培训。达到熟练里程碑赚取代币。"
+      },
+      "visa": {
+        "tag": "签证就绪",
+        "title": "签证申请协助",
+        "desc": "在一个安全保险库中汇编和整理财务证明、学术成绩单和身份文件。"
+      }
+    },
+    "campusPayments": {
+      "title": "入学后的校园支付",
+      "desc": "学生使用代币支付所有校园费用。大学为每项服务设定价格。代币作为校园货币。",
+      "cards": {
+        "tuition": { "title": "学费", "desc": "使用代币支付" },
+        "housing": { "title": "住宿", "desc": "宿舍和押金" },
+        "dining": { "title": "餐饮", "desc": "膳食计划" },
+        "books": { "title": "书籍", "desc": "课程材料" },
+        "parking": { "title": "停车", "desc": "许可证" },
+        "gym": { "title": "健身房", "desc": "健身中心" },
+        "printing": { "title": "打印", "desc": "复印服务" },
+        "events": { "title": "活动", "desc": "体育和音乐会" },
+        "lab": { "title": "实验室访问", "desc": "设备" },
+        "resume": { "title": "简历审查", "desc": "职业服务" },
+        "interview": { "title": "模拟面试", "desc": "面试准备" },
+        "cafe": { "title": "校园咖啡馆", "desc": "食品和饮料" }
+      },
+      "footer": "<0>大学决定代币对美元的汇率。</0>学生使用赚取或承诺的代币支付，而不是现金。"
+    },
+    "intuitionExchange": {
+      "title": "交易在",
+      "subtitle": "Intuition 交易所",
+      "desc": "学生可以将大学代币兑换成 USD、USDC 和 USDT。交易所为校园以外的代币使用提供流动性。",
+      "features": {
+        "seed": "未来的种子资金",
+        "seedDesc": " - 为毕业后的费用节省代币",
+        "nonEdu": "非教育费用",
+        "nonEduDesc": " - 将代币兑换成现金以满足校外需求",
+        "nonStudent": "非学生可以参与",
+        "nonStudentDesc": " - 父母和雇主可以获取代币"
+      },
+      "infoCard": {
+        "label": "交易所参与者",
+        "value": "学生、家长、雇主"
+      },
+      "buySell": {
+        "title": "买入和卖出",
+        "items": [
+          "针对 USD、USDC、USDT 交易代币",
+          "市价单（即时）或限价单（设定价格）",
+          "实时价格图表",
+          "显示实时供需的订单簿",
+          "将代币兑换成现金或将现金兑换成代币"
+        ]
+      },
+      "onramp": {
+        "title": "入金（购买代币）",
+        "desc": "使用信用卡或银行转账购买代币。父母可以购买代币赠送给学生。雇主购买代币作为签约奖金提供。",
+        "useCasesLabel": "用例：",
+        "useCases": [
+          "学生需要更多代币支付学费",
+          "家长希望预先资助学期费用",
+          "公司招聘每次面试提供代币"
+        ]
+      },
+      "offramp": {
+        "title": "出金（出售换取现金）",
+        "desc": "在交易所出售代币。兑换成法定货币或稳定币。",
+        "useCasesLabel": "用例：",
+        "useCases": [
+          "毕业时持有剩余代币",
+          "需要现金支付校外费用",
+          "转学到其他学校"
+        ]
+      }
+    },
+    "pricingPlans": {
+      "title": "定价计划",
+      "desc": "选择适合您机构需求的计划",
+      "free": {
+        "badge": "入门",
+        "title": "免费计划",
+        "value": "95%",
+        "retention": "保留",
+        "note": "大学保留总代币供应量的 95%",
+        "featuresLabel": "包含内容",
+        "features": [
+          "在 CollegenZ L2 上创建代币",
+          "承诺管理仪表板",
+          "RFE 平台集成",
+          "Intuition 交易所上市",
+          "电子邮件支持"
+        ],
+        "bestForLabel": "最适合：",
+        "bestFor": "测试区块链系统的大学 • 学生人数少于 5,000 的机构 • 零前期成本",
+        "button": "免费开始"
+      },
+      "custom": {
+        "badge": "推荐",
+        "tag": "机构",
+        "title": "定制机构",
+        "value": "99.9%",
+        "retention": "保留",
+        "note": "协商的收入分成",
+        "featuresLabel": "包含免费版所有内容，加上",
+        "features": [
+          "白标定制",
+          "专属客户经理",
+          "定制智能合约",
+          "API 集成和 SLA",
+          "优先交易所放置"
+        ],
+        "bestForLabel": "最适合：",
+        "bestFor": "拥有超过 10,000 名学生的大学 • 深度系统集成 • 定制价格",
+        "button": "联系销售"
+      }
+    },
+    "networkVisualization": {
+      "nodes": {
+        "colleges": "大学",
+        "intuition": "Intuition",
+        "exchange": "交易所",
+        "students": "学生",
+        "cfc1": "Coins For",
+        "cfc2": "College",
+        "l2": "CollegenZ L2",
+        "rfe1": "Rewards For",
+        "rfe2": "Education"
+      },
+      "ecosystem": {
+        "title": "大学代币生态系统",
+        "desc": "一个相互连接的网络，大学、学生和平台无缝协作。数据通过 CollegenZ L2 持续流动，实现即时交易、透明追踪和整个教育融资生态系统的实时更新。",
+        "items": [
+          { "title": "大学发行代币", "desc": "通过 Coins For College 平台，创建数字奖学金" },
+          { "title": "学生赚取和消费", "desc": "通过 Rewards For Education，完成任务以解锁机会" },
+          { "title": "L2 结算层", "desc": "CollegenZ 区块链确保安全、快速、低成本的交易" },
+          { "title": "Intuition 交易所", "desc": "提供流动性，实现代币和法币之间的交易" }
+        ]
+      }
     }
   }
 }

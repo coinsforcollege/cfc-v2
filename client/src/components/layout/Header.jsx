@@ -124,6 +124,19 @@ const Header = () => {
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: '24px' }}>
               <Link
+                to="/college-coins"
+                style={{
+                  textDecoration: 'none',
+                  color: '#111827',
+                  fontSize: '0.95rem',
+                  transition: 'color 0.3s ease',
+                }}
+                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
+                onMouseLeave={(e) => e.target.style.color = '#111827'}
+              >
+                {t('header.collegeCoins')}
+              </Link>
+              <Link
                 to="/how-it-works/colleges"
                 style={{
                   textDecoration: 'none',
@@ -148,19 +161,6 @@ const Header = () => {
                 onMouseLeave={(e) => e.target.style.color = '#111827'}
               >
                 {t('header.colleges')}
-              </Link>
-              <Link
-                to="/network"
-                style={{
-                  textDecoration: 'none',
-                  color: '#111827',
-                  fontSize: '0.95rem',
-                  transition: 'color 0.3s ease',
-                }}
-                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
-                onMouseLeave={(e) => e.target.style.color = '#111827'}
-              >
-                {t('header.networkMap')}
               </Link>
               <Link
                 to="/blog"
@@ -318,6 +318,13 @@ const Header = () => {
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Link
+                to="/college-coins"
+                style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
+                onClick={toggleMobileMenu}
+              >
+                {t('header.collegeCoins')}
+              </Link>
+              <Link
                 to="/how-it-works/colleges"
                 style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
                 onClick={toggleMobileMenu}
@@ -330,13 +337,6 @@ const Header = () => {
                 onClick={toggleMobileMenu}
               >
                 {t('header.colleges')}
-              </Link>
-              <Link
-                to="/network"
-                style={{ textDecoration: 'none', color: '#374151', fontSize: '1.1rem' }}
-                onClick={toggleMobileMenu}
-              >
-                {t('header.networkMap')}
               </Link>
               <Link
                 to="/blog"
