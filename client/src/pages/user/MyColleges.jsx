@@ -342,49 +342,14 @@ const MyColleges = () => {
     >
       <Box sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
         {/* Header with Title/Tagline and Stats */}
-        <Box sx={{ mb: 4, mt: 4, display: 'flex', width: '100%', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: { xs: 'center', md: 'stretch' } }}>
-          {/* Title & Tagline - 50% */}
-          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: { xs: 'center', md: 'flex-start' }, textAlign: { xs: 'center', md: 'left' } }}>
+        <Box sx={{ mb: 4, mt: 4, display: 'flex', width: '100%', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', textAlign: 'left' }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
               {t('user.myColleges')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {t('user.myCollegesDesc')}
             </Typography>
-          </Box>
-
-          {/* Mining Stats - 50% */}
-          <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', gap: 4, justifyContent: { xs: 'center', md: 'flex-end' }, alignItems: 'center' }}>
-            <Tooltip title={t('user.baseRateTooltip')}>
-              <Box sx={{ textAlign: 'center', cursor: 'help' }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#06b6d4', mb: 0.5 }}>
-                  0.25
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
-                  {t('user.baseRate')}
-                </Typography>
-              </Box>
-            </Tooltip>
-
-            <Tooltip title={t('user.referralBonusTooltip')}>
-              <Box sx={{ textAlign: 'center', cursor: 'help' }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#8b5cf6', mb: 0.5 }}>
-                  +0.10
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
-                  {t('user.referralBonus')}
-                </Typography>
-              </Box>
-            </Tooltip>
-
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: '#ec4899', mb: 0.5 }}>
-                24
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
-                {t('user.sessionHours')}
-              </Typography>
-            </Box>
           </Box>
         </Box>
 
