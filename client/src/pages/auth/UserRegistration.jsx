@@ -41,6 +41,16 @@ const StudentRegistration = () => {
   // Fetch referral college if college query param exists
   useEffect(() => {
     const collegeId = searchParams.get('college');
+    const referralCode = searchParams.get('ref');
+
+    // Pre-fill referral code if present
+    if (referralCode) {
+      setFormData(prev => ({
+        ...prev,
+        referralCode
+      }));
+    }
+
     if (collegeId) {
       collegesApi.getById(collegeId)
         .then(response => {
@@ -359,14 +369,7 @@ const StudentRegistration = () => {
               sx={{ mb: 2 }}
             />
 
-            <TextField
-              fullWidth
-              label={t('auth.referralCodeOptional')}
-              name="referralCode"
-              value={formData.referralCode}
-              onChange={handleChange}
-              sx={{ mb: 3 }}
-            />
+
 
             <Button
               fullWidth

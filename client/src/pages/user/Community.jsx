@@ -18,7 +18,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button
+  Button,
+  TextField,
+  MenuItem
 } from '@mui/material';
 import {
   ContentCopy,
@@ -51,12 +53,27 @@ const Community = () => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareDialogData, setShareDialogData] = useState(null);
 
+  const [selectedCollegeId, setSelectedCollegeId] = useState('');
+
   const fetchDashboard = async () => {
     try {
       setLoading(true);
       const response = await userApi.getDashboard();
       if (response.success) {
         setDashboard(response.data);
+        
+        // Set default selected college (prefer primary, then first available)
+        const colleges = response.data.miningColleges?.filter(mc => mc.college) || [];
+        if (colleges.length > 0) {
+          const primaryId = response.data.user?.college?._id || response.data.user?.college;
+          const primaryInList = colleges.find(mc => mc.college._id === primaryId);
+          
+          if (primaryInList) {
+            setSelectedCollegeId(primaryId);
+          } else {
+            setSelectedCollegeId(colleges[0].college._id);
+          }
+        }
       }
     } catch (err) {
       setError(err.message || t('user.failedToLoadData'));
@@ -86,7 +103,12 @@ const Community = () => {
   const copyReferralLink = () => {
     if (dashboard?.user?.referralCode) {
       const baseUrl = window.location.origin;
-      const referralLink = `${baseUrl}/auth/register/user?ref=${dashboard.user.referralCode}`;
+      let referralLink = `${baseUrl}/auth/register/user?ref=${dashboard.user.referralCode}`;
+      
+      if (selectedCollegeId) {
+        referralLink += `&college=${selectedCollegeId}`;
+      }
+      
       navigator.clipboard.writeText(referralLink);
       setCopiedLink(true);
       showToast(t('user.referralLinkCopied'), 'success');
@@ -108,17 +130,23 @@ const Community = () => {
   };
 
   const handleShareGeneral = () => {
-    const primaryCollege = dashboard?.user?.college;
+    // Find the selected college object
+    const selectedCollege = dashboard?.miningColleges?.find(mc => mc.college?._id === selectedCollegeId)?.college;
     const totalBalance = dashboard?.summary?.totalBalance || 0;
     const baseUrl = window.location.origin;
 
+    let shareUrl = `${baseUrl}/auth/register/user?ref=${dashboard?.user?.referralCode}`;
+    if (selectedCollegeId) {
+      shareUrl += `&college=${selectedCollegeId}`;
+    }
+
     setShareDialogData({
-      collegeName: primaryCollege?.name || 'My College',
-      collegeLogo: primaryCollege?.logo,
+      collegeName: selectedCollege?.name || 'My College',
+      collegeLogo: selectedCollege?.logo,
       balance: totalBalance,
       isGeneral: true,
-      text: "I'm earning tokens on Coins For College. Join the community!",
-      url: `${baseUrl}/auth/register/user?ref=${dashboard?.user?.referralCode}`
+      text: `Join me in mining tokens for ${selectedCollege?.name || 'Costs For College'}!`,
+      url: shareUrl
     });
     setShowShareDialog(true);
   };
@@ -329,66 +357,45 @@ const Community = () => {
               {/* Referral Code and Share Button - Side by Side */}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                  {t('user.yourUniqueCode')}
+                  {t('user.selectCollegeToShare')}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  {/* Code Box */}
-                  <Box sx={{ width: '50%' }}>
-                    <Box sx={{
-                      height: '100%',
-                      p: 2,
-                      borderRadius: 2,
-                      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%)',
-                      border: '1px solid rgba(102, 126, 234, 0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 1.5,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
-                        border: '1px solid rgba(102, 126, 234, 0.4)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)'
-                      }
-                    }}>
-                      <Typography sx={{
-                        flex: 1,
-                        fontWeight: 700,
-                        fontFamily: 'Monaco, Courier, monospace',
-                        color: 'white',
-                        fontSize: '1rem',
-                        letterSpacing: '1px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {dashboard?.user?.referralCode}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={copyReferralCode}
-                        sx={{
-                          background: copiedCode ? 'rgba(34, 197, 94, 0.2)' : 'rgba(102, 126, 234, 0.2)',
-                          color: copiedCode ? '#22c55e' : 'white',
-                          border: copiedCode ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid rgba(102, 126, 234, 0.4)',
-                          '&:hover': {
-                            background: copiedCode ? 'rgba(34, 197, 94, 0.3)' : 'rgba(102, 126, 234, 0.3)',
-                          }
-                        }}
-                      >
-                        {copiedCode ? <CheckCircle fontSize="small" /> : <ContentCopy fontSize="small" />}
-                      </IconButton>
-                    </Box>
+                  {/* College Selector */}
+                  <Box sx={{ width: '60%' }}>
+                    <TextField
+                      select
+                      fullWidth
+                      value={selectedCollegeId}
+                      onChange={(e) => setSelectedCollegeId(e.target.value)}
+                      variant="outlined"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          background: 'rgba(15, 23, 42, 0.6)',
+                          color: 'white',
+                          borderRadius: 2,
+                          '& fieldset': { border: '1px solid rgba(148, 163, 184, 0.3)' },
+                          '&:hover fieldset': { border: '1px solid rgba(148, 163, 184, 0.5)' },
+                          '&.Mui-focused fieldset': { border: '1px solid #8b5cf6' }
+                        },
+                        '& .MuiSelect-icon': { color: 'white' }
+                      }}
+                    >
+                      {dashboard?.miningColleges?.filter(mc => mc.college).map((mc) => (
+                        <MenuItem key={mc.college._id} value={mc.college._id}>
+                          {mc.college.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Box>
 
                   {/* Share Button */}
-                  <Box sx={{ width: '50%' }}>
+                  <Box sx={{ width: '40%' }}>
                     <Button
                       fullWidth
                       variant="contained"
                       startIcon={<Share />}
                       onClick={handleShareGeneral}
+                      disabled={!selectedCollegeId}
                       sx={{
                         height: '100%',
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -404,10 +411,16 @@ const Community = () => {
                           boxShadow: '0 6px 25px rgba(102, 126, 234, 0.5)',
                           transform: 'translateY(-2px)'
                         },
+                        '&.Mui-disabled': {
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          color: 'rgba(255, 255, 255, 0.3)',
+                          border: 'none',
+                          boxShadow: 'none'
+                        },
                         transition: 'all 0.3s ease'
                       }}
                     >
-                      {t('user.shareWithFriends')}
+                      {t('user.share')}
                     </Button>
                   </Box>
                 </Box>
@@ -415,9 +428,6 @@ const Community = () => {
 
               {/* Share Link */}
               <Box>
-                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                  {t('user.quickShareLink')}
-                </Typography>
                 <Box sx={{
                   p: 2,
                   borderRadius: 2,
@@ -437,11 +447,10 @@ const Community = () => {
                     fontSize: '0.8rem',
                     fontFamily: 'Monaco, Courier, monospace',
                     color: 'rgba(255,255,255,0.7)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    wordBreak: 'break-all',
+                    lineHeight: 1.5
                   }}>
-                    {`${window.location.origin}/auth/register/user?ref=${dashboard?.user?.referralCode}`}
+                    {`${window.location.origin}/auth/register/user?ref=${dashboard?.user?.referralCode}${selectedCollegeId ? `&college=${selectedCollegeId}` : ''}`}
                   </Typography>
                   <IconButton
                     size="small"

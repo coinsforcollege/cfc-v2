@@ -2,7 +2,9 @@
   "common": {
     "coinsForCollege": "Coins For College",
     "loading": "Loading...",
+    "loadMore": "Load More",
     "error": "Error",
+    "learnMore": "Learn More",
     "success": "Success",
     "submit": "Submit",
     "cancel": "Cancel",
@@ -661,7 +663,7 @@
     "growYourNetwork": "Grow your network & earn bonuses",
     "yourUniqueCode": "Your Unique Code",
     "shareWithFriends": "Share With Friends",
-    "quickShareLink": "Quick Share Link",
+    "selectCollegeToShare": "Select College to Share",
     "referralCodeCopied": "Referral code copied!",
     "referralLinkCopied": "Referral link copied!",
     "howCommunityRewardsWork": "How Community Rewards Work",

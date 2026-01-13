@@ -2,7 +2,9 @@
   "common": {
     "coinsForCollege": "大学代币",
     "loading": "加载中...",
+    "loadMore": "加载更多",
     "error": "错误",
+    "learnMore": "了解更多",
     "success": "成功",
     "submit": "提交",
     "cancel": "取消",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import {
   Box,
   Typography,
@@ -21,7 +21,7 @@ import {
   IconButton,
   MenuItem
 } from '@mui/material';
-import { Search, School, People, TrendingUp, LocationOn, Add, Close, CloudUpload, Link as LinkIcon } from '@mui/icons-material';
+import { Search, School, People, TrendingUp, LocationOn, Add, Close, CloudUpload, Link as LinkIcon, InfoOutlined } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { collegesApi } from '../../api/colleges.api';
 import { userApi } from '../../api/user.api';
@@ -64,6 +64,8 @@ const getStatusChipStyle = (status) => {
 
 const CollegeSelection = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromDashboard = location.state?.fromDashboard;
   const { user, updateUser } = useAuth();
   const { t } = useTranslation();
   
@@ -72,6 +74,9 @@ const CollegeSelection = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [addingCollege, setAddingCollege] = useState(null);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
   
   // Add College Dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -85,15 +90,19 @@ const CollegeSelection = () => {
   const [logoPreview, setLogoPreview] = useState('');
 
   useEffect(() => {
-    fetchColleges();
+    setPage(1);
   }, [searchTerm]);
+
+  useEffect(() => {
+    fetchColleges();
+  }, [page, searchTerm]);
 
   const fetchColleges = async () => {
     try {
       setLoading(true);
       
       const params = {
-        page: 1,
+        page: page,
         limit: 20,
         sortBy: 'tokens'
       };
@@ -104,11 +113,15 @@ const CollegeSelection = () => {
 
       const response = await collegesApi.getAll(params);
       
-      if (response.colleges) {
-        setColleges(response.colleges);
+      const newColleges = response.colleges || response || [];
+      
+      if (page === 1) {
+        setColleges(newColleges);
       } else {
-        setColleges(response || []);
+        setColleges(prev => [...prev, ...newColleges]);
       }
+
+      setHasMore(response.pagination?.hasNextPage || false);
     } catch (err) {
       console.error('Error fetching colleges:', err);
       setError('Failed to load colleges');
@@ -469,26 +482,51 @@ const CollegeSelection = () => {
                           </Box>
                         </Box>
 
-                        {/* Add Button */}
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          startIcon={addingCollege === college._id ? <CircularProgress size={16} color="inherit" /> : <Add />}
-                          disabled={addingCollege === college._id}
-                          onClick={() => handleAddCollege(college._id)}
-                          sx={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                            borderRadius: 2,
-                            py: 1,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)'
-                            }
-                          }}
-                        >
-                          {addingCollege === college._id ? t('auth.adding') : t('auth.addCollege')}
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                          <Button
+                            variant="contained"
+                            startIcon={addingCollege === college._id ? <CircularProgress size={16} color="inherit" /> : <Add />}
+                            disabled={addingCollege === college._id}
+                            onClick={() => handleAddCollege(college._id)}
+                            sx={{
+                              flex: 1,
+                              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                              borderRadius: 2,
+                              py: 1,
+                              fontWeight: 600,
+                              textTransform: 'none',
+                              '&:hover': {
+                                background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)'
+                              }
+                            }}
+                          >
+                            {addingCollege === college._id ? t('auth.adding') : t('auth.addCollege')}
+                          </Button>
+                          
+                          {fromDashboard && (
+                            <Button
+                              variant="outlined"
+                              startIcon={<InfoOutlined />}
+                              onClick={() => window.open(`/colleges/${college._id}`, '_blank')}
+                              sx={{
+                                flex: 1,
+                                borderRadius: 2,
+                                py: 1,
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                borderColor: '#94a3b8',
+                                color: '#64748b',
+                                '&:hover': {
+                                  borderColor: '#8b5cf6',
+                                  color: '#8b5cf6',
+                                  background: 'rgba(139, 92, 246, 0.04)'
+                                }
+                              }}
+                            >
+                              {t('common.learnMore') || 'Learn More'}
+                            </Button>
+                          )}
+                        </Box>
                       </Box>
                     </Box>
                   </CardContent>
@@ -506,6 +544,30 @@ const CollegeSelection = () => {
                 <Typography variant="body2" color="text.secondary">
                   {t('auth.tryDifferentSearch')}
                 </Typography>
+              </Box>
+            )}
+
+            {/* Load More Button */}
+            {hasMore && !loading && colleges.length > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setPage(prev => prev + 1)}
+                  sx={{
+                    color: '#8b5cf6',
+                    borderColor: '#8b5cf6',
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    px: 4,
+                    '&:hover': {
+                      borderColor: '#7c3aed',
+                      backgroundColor: 'rgba(139, 92, 246, 0.04)'
+                    }
+                  }}
+                >
+                  {t('common.loadMore') || 'Load More'}
+                </Button>
               </Box>
             )}
           </>
