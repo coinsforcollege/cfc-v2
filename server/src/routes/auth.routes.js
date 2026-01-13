@@ -8,7 +8,8 @@ import {
   updateProfile,
   changePassword,
   changePasswordWithOTP,
-  updateLanguagePreference
+  updateLanguagePreference,
+  resetPassword
 } from '../controllers/auth.controller.js';
 import {
   sendOTPForUser,
@@ -17,7 +18,9 @@ import {
   resendOTP,
   sendOTPForPasswordChange,
   verifyOTPForPasswordChange,
-  resendOTPForPasswordChange
+  resendOTPForPasswordChange,
+  sendOTPForForgotPassword,
+  verifyOTPForForgotPassword
 } from '../controllers/otp.controller.js';
 import { protect } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -29,6 +32,8 @@ router.post('/otp/send/user', sendOTPForUser);
 router.post('/otp/send/college', sendOTPForCollege);
 router.post('/otp/verify', verifyOTP);
 router.post('/otp/resend', resendOTP);
+router.post('/otp/send/forgot-password', sendOTPForForgotPassword);
+router.post('/otp/verify/forgot-password', verifyOTPForForgotPassword);
 
 // OTP routes (protected)
 router.post('/otp/send/password-change', protect, sendOTPForPasswordChange);
@@ -39,6 +44,7 @@ router.post('/otp/resend/password-change', protect, resendOTPForPasswordChange);
 router.post('/register/user', registerUser);
 router.post('/register/college', upload.single('logoFile'), registerCollegeAdmin);
 router.post('/login', login);
+router.post('/reset-password', resetPassword);
 
 // Protected routes
 router.get('/me', protect, getMe);

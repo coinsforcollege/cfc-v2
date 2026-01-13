@@ -887,3 +887,94 @@ export const changePasswordWithOTP = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Reset password with token (public)
+// @route   POST /api/auth/reset-password
+// @access  Public
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, newPassword, verificationToken } = req.body;
+
+    // Validation
+    if (!email || !newPassword || !verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email, new password and verification token'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters'
+      });
+    }
+
+    // Verify verification token
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+
+    // Verify token type and data
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'forgot_password') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+    
+    // Convert to lowercase to ensure matching
+    const normalizedEmail = email.toLowerCase();
+    
+    // Verify email matches
+    if (tokenData.email !== normalizedEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email does not match verified token'
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: normalizedEmail,
+      role: 'forgot_password',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification not found. Please verify OTP again.'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    // Clean up OTP
+    await OTPVerification.deleteMany({ email: normalizedEmail, role: 'forgot_password' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully. You can now login with your new password.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

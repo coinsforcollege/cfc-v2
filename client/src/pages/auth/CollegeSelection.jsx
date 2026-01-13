@@ -135,7 +135,7 @@ const CollegeSelection = () => {
         }
 
         // Refresh user data from server to get complete updated profile
-        const userDataResponse = await Auth.getMe();
+        const userDataResponse = await Auth.authApi.getMe();
         
         if (userDataResponse.success) {
           // Update context with fresh server data
@@ -160,6 +160,23 @@ const CollegeSelection = () => {
         }
       }
     } catch (err) {
+      // If error says "already in your mining list", treat it as success and redirect
+      if (err.message && err.message.includes('already in your mining list')) {
+        // Must refresh user data so frontend knows about the college!
+        try {
+          const userDataResponse = await Auth.authApi.getMe();
+          if (userDataResponse.success) {
+            updateUser(userDataResponse.data);
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        } catch (e) {
+          console.error('Failed to refresh user data', e);
+        }
+        
+        navigate('/user/colleges', { replace: true });
+        return;
+      }
+      
       setError(err.message || 'Failed to add college');
       setAddingCollege(null);
     }
@@ -234,7 +251,7 @@ const CollegeSelection = () => {
         trackCollegeSelection(newCollege.name, 'new_college');
 
         // Refresh user data from server
-        const userDataResponse = await Auth.getMe();
+        const userDataResponse = await Auth.authApi.getMe();
         
         if (userDataResponse.success) {
           updateUser(userDataResponse.data);

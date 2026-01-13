@@ -7,6 +7,24 @@ import { Readable } from 'stream';
 import { parseAddress } from '../utils/addressParsers.js';
 import { createBulkNotifications } from '../services/notification.service.js';
 import mongoose from 'mongoose';
+import ActivityLog from '../models/ActivityLog.js';
+
+// Helper to log admin activity
+const logAdminActivity = async (adminId, action, targetType, targetId, details, req) => {
+  try {
+    await ActivityLog.create({
+      admin: adminId,
+      action,
+      targetType,
+      targetId,
+      details,
+      ipAddress: req.ip || req.connection.remoteAddress,
+      userAgent: req.get('User-Agent')
+    });
+  } catch (error) {
+    console.error('Failed to log activity:', error);
+  }
+};
 
 // @desc    Get all users
 // @route   GET /api/platform-admin/users
@@ -101,6 +119,16 @@ export const createCollege = async (req, res, next) => {
     }
 
     const college = await College.create(collegeData);
+
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'create_college',
+      'College',
+      college._id,
+      { name: college.name, country: college.country },
+      req
+    );
 
     res.status(201).json({
       success: true,
@@ -464,6 +492,21 @@ export const updateCollege = async (req, res, next) => {
       }
     }
 
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'update_college',
+      'College',
+      college._id,
+      { 
+        updates: Object.keys(updateData),
+        statusChanged: updateData.status && updateData.status !== oldCollege.status,
+        oldStatus: oldCollege.status,
+        newStatus: updateData.status
+      },
+      req
+    );
+
     res.status(200).json({
       success: true,
       message: 'College updated successfully',
@@ -560,6 +603,20 @@ export const deleteCollege = async (req, res, next) => {
     await college.deleteOne();
     console.log(`✅ College "${college.name}" deleted successfully`);
 
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'delete_college',
+      'College',
+      college._id, // Note: This ID will no longer point to an existing college
+      { 
+        name: college.name,
+        minersAffected: minersIds.length,
+        walletsPreserved: walletCount 
+      },
+      req
+    );
+
     res.status(200).json({
       success: true,
       message: 'College deleted successfully',
@@ -625,6 +682,16 @@ export const updateCollegeRates = async (req, res, next) => {
         referralBonusRate: college.referralBonusRate
       }
     });
+
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'update_rates',
+      'College',
+      college._id,
+      { baseRate, referralBonusRate },
+      req
+    );
   } catch (error) {
     next(error);
   }
@@ -668,6 +735,20 @@ export const updateDefaultRates = async (req, res, next) => {
         collegesUpdated: result.modifiedCount
       }
     });
+
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'update_rates',
+      'System',
+      null,
+      { 
+        baseRate, 
+        referralBonusRate,
+        collegesUpdated: result.modifiedCount 
+      },
+      req
+    );
   } catch (error) {
     next(error);
   }
@@ -728,6 +809,18 @@ export const updateStudent = async (req, res, next) => {
       message: 'User updated successfully',
       data: user
     });
+
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'update_user',
+      'User',
+      user._id,
+      { 
+        updates: Object.keys(req.body).filter(k => ['name', 'email', 'phone', 'isActive'].includes(k))
+      },
+      req
+    );
   } catch (error) {
     next(error);
   }
@@ -757,6 +850,16 @@ export const deleteStudent = async (req, res, next) => {
       success: true,
       message: 'User deleted successfully'
     });
+
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'delete_user',
+      'User',
+      user._id, // Will not exist anymore
+      { name: user.name, email: user.email },
+      req
+    );
   } catch (error) {
     next(error);
   }
@@ -793,6 +896,16 @@ export const resetStudentPassword = async (req, res, next) => {
       success: true,
       message: 'Password reset successfully'
     });
+
+    // Log activity
+    await logAdminActivity(
+      req.user.id,
+      'update_user',
+      'User',
+      user._id,
+      { action: 'password_reset' },
+      req
+    );
   } catch (error) {
     next(error);
   }

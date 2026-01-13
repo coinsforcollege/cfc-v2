@@ -656,3 +656,154 @@ export const resendOTPForPasswordChange = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Send OTP for forgot password
+// @route   POST /api/auth/otp/send/forgot-password
+// @access  Public
+export const sendOTPForForgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    // Validation
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email'
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email: email.toLowerCase() });
+    
+    if (!user) {
+      // For security, don't reveal if user exists
+      return res.status(404).json({
+        success: false,
+        message: 'User with this email does not exist.'
+      });
+    }
+
+    // Delete any existing OTP for this email and forgot_password role
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'forgot_password' });
+
+    // Generate OTP
+    const otp = generateOTP();
+
+    // Save OTP to database
+    const otpDoc = await OTPVerification.create({
+      email: email.toLowerCase(),
+      otp,
+      role: 'forgot_password',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+    });
+
+    // Send OTP email
+    const emailResult = await sendOTPEmail(email, user.name, otp);
+
+    if (!emailResult.success) {
+      // Clean up if email fails
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully to your email',
+      data: {
+        email: email.toLowerCase(),
+        expiresIn: 600 // 10 minutes in seconds
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP for forgot password
+// @route   POST /api/auth/otp/verify/forgot-password
+// @access  Public
+export const verifyOTPForForgotPassword = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Validation
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and OTP'
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Find OTP document
+    const otpDoc = await OTPVerification.findOne({
+      email: email.toLowerCase(),
+      role: 'forgot_password',
+      isVerified: false
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP not found or already verified. Please request a new OTP.'
+      });
+    }
+
+    // Check if expired
+    if (otpDoc.isExpired()) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired. Please request a new one.'
+      });
+    }
+
+    // Check attempts
+    if (otpDoc.attempts >= 5) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum verification attempts exceeded. Please request a new OTP.'
+      });
+    }
+
+    // Verify OTP
+    if (otpDoc.otp !== otp) {
+      await otpDoc.incrementAttempts();
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP. Please try again.',
+        attemptsRemaining: 5 - (otpDoc.attempts + 1)
+      });
+    }
+
+    // Mark as verified
+    otpDoc.isVerified = true;
+    await otpDoc.save();
+
+    // Generate verification token
+    const verificationToken = generateVerificationToken(email.toLowerCase(), 'forgot_password');
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully',
+      data: {
+        verificationToken,
+        email: email.toLowerCase()
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

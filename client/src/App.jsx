@@ -21,6 +21,7 @@ import UserRegistration from './pages/auth/UserRegistration';
 import CollegeRegistration from './pages/auth/CollegeRegistration';
 import CollegeSelection from './pages/auth/CollegeSelection';
 import CollegeAdminSelection from './pages/auth/CollegeAdminSelection';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import Home from './pages/public/Home';
 import HowItWorksUsers from './pages/public/HowItWorksUsers';
 import HowItWorksColleges from './pages/public/HowItWorksColleges';
@@ -114,6 +115,7 @@ function App() {
           element={<AuthLayout />}
         >
           <Route path="login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
           <Route path="register/user" element={<PublicRoute><UserRegistration /></PublicRoute>} />
           <Route path="register/college" element={<PublicRoute><CollegeRegistration /></PublicRoute>} />
           <Route path="college-selection" element={<ProtectedRoute allowedRoles={['user']}><CollegeSelection /></ProtectedRoute>} />

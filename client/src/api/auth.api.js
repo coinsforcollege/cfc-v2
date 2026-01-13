@@ -11,6 +11,11 @@ export const authApi = {
   sendOTPForPasswordChange: (data) => apiClient.post('/auth/otp/send/password-change', data),
   verifyOTPForPasswordChange: (data) => apiClient.post('/auth/otp/verify/password-change', data),
   resendOTPForPasswordChange: () => apiClient.post('/auth/otp/resend/password-change'),
+  
+  // Forgot Password
+  sendForgotPasswordOTP: (email) => apiClient.post('/auth/otp/send/forgot-password', { email }),
+  verifyForgotPasswordOTP: (data) => apiClient.post('/auth/otp/verify/forgot-password', data),
+  resetPassword: (data) => apiClient.post('/auth/reset-password', data),
 
   // Register
   registerUser: (data) => apiClient.post('/auth/register/user', data),

@@ -238,8 +238,22 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              sx={{ mb: 3 }}
+              sx={{ mb: 1 }}
             />
+            
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+              <Link
+                to="/auth/forgot-password"
+                style={{
+                  color: '#8b5cf6',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  fontWeight: 600
+                }}
+              >
+                {t('auth.forgotPassword', 'Forgot Password?')}
+              </Link>
+            </Box>
 
             <Button
               fullWidth
