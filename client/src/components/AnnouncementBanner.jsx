@@ -17,20 +17,26 @@ const AnnouncementBanner = () => {
       const response = await apiClient.get('/blog/announcements');
 
       if (response.success && response.data && response.data.length > 0) {
-        const latestAnnouncement = response.data[0];
-        const announcementId = latestAnnouncement.id;
+        // Find the first non-dismissed announcement
+        let activeAnnouncement = null;
+        
+        for (const item of response.data) {
+          const dismissed = localStorage.getItem(`announcement_dismissed_${item.id}`);
+          if (!dismissed) {
+            activeAnnouncement = item;
+            break;
+          }
+        }
 
-        const dismissed = localStorage.getItem(`announcement_dismissed_${announcementId}`);
-
-        if (!dismissed) {
+        if (activeAnnouncement) {
           setAnnouncement({
-            id: announcementId,
-            message: latestAnnouncement.message,
-            link: latestAnnouncement.link,
-            linkLabel: latestAnnouncement.linkLabel,
-            image: latestAnnouncement.image ? {
-              url: latestAnnouncement.image.url,
-              alt: latestAnnouncement.image.alternativeText || 'Announcement'
+            id: activeAnnouncement.id,
+            message: activeAnnouncement.message,
+            link: activeAnnouncement.link,
+            linkLabel: activeAnnouncement.linkLabel,
+            image: activeAnnouncement.image ? {
+              url: activeAnnouncement.image.url,
+              alt: activeAnnouncement.image.alternativeText || 'Announcement'
             } : null
           });
           setVisible(true);

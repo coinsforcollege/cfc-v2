@@ -429,13 +429,47 @@ export const getAnnouncements = async (req, res) => {
       params: {
         'filters[active][$eq]': true,
         'populate[image]': true,
-        'sort': 'priority:desc,createdAt:desc'
+        // We will sort manually in the controller to handle "0 is last" but "1 comes before 2"
+        'pagination[pageSize]': 100 
       }
+    });
+
+    let announcements = response.data.results || response.data.data || [];
+    
+    // Normalize data structure if needed (Strapi v4)
+    announcements = announcements.map(item => {
+      const attrs = item.attributes || item;
+      return { ...attrs, id: item.id };
+    });
+
+    // Custom Sort:
+    // 1. Non-zero priority comes BEFORE zero priority.
+    // 2. Non-zero priority sorted ASC (1 before 2).
+    // 3. Ties broken by Date Created (Newest first).
+    announcements.sort((a, b) => {
+      const pA = a.priority || 0;
+      const pB = b.priority || 0;
+
+      // If both have priority, lower number is better (1 before 2)
+      if (pA > 0 && pB > 0) {
+        if (pA !== pB) return pA - pB;
+        // Tie-break: Newest first
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+
+      // If A has priority but B does not (pB is 0), A comes first
+      if (pA > 0 && pB === 0) return -1;
+
+      // If B has priority but A does not (pA is 0), B comes first
+      if (pB > 0 && pA === 0) return 1;
+
+      // Both are 0: Sort by Newest first
+      return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
     res.json({
       success: true,
-      data: response.data.results || response.data.data || []
+      data: announcements
     });
   } catch (error) {
     console.error('Error fetching announcements:', error.message);
