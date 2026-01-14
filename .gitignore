@@ -8,3 +8,6 @@ server/public/images/logo/*
 !server/public/images/logo/.gitkeep
 server/public/images/cover/*
 !server/public/images/cover/.gitkeep
+
+# Ignored Scripts
+server/scripts/

@@ -90,6 +90,7 @@ export const sendOTPForUser = async (req, res, next) => {
 
     // Generate OTP
     const otp = generateOTP();
+    console.log('OTP for user registration:', email.toLowerCase(), otp);
 
     // Save OTP to database (expires in 10 minutes)
     const otpDoc = await OTPVerification.create({
@@ -211,6 +212,7 @@ export const sendOTPForCollege = async (req, res, next) => {
 
     // Generate OTP
     const otp = generateOTP();
+    console.log('OTP for college registration:', email.toLowerCase(), otp);
 
     // Save OTP to database (expires in 10 minutes)
     const otpDoc = await OTPVerification.create({
@@ -389,6 +391,7 @@ export const resendOTP = async (req, res, next) => {
 
     // Generate new OTP
     const otp = generateOTP();
+    console.log('OTP for resend:', email.toLowerCase(), otp);
 
     // Save OTP to database
     const newOtpDoc = await OTPVerification.create({
@@ -463,6 +466,7 @@ export const sendOTPForPasswordChange = async (req, res, next) => {
 
     // Generate OTP
     const otp = generateOTP();
+    console.log('OTP for password change:', user.email.toLowerCase(), otp);
 
     // Save OTP to database (expires in 10 minutes)
     const otpDoc = await OTPVerification.create({
@@ -623,6 +627,7 @@ export const resendOTPForPasswordChange = async (req, res, next) => {
 
     // Generate new OTP
     const otp = generateOTP();
+    console.log('OTP for password change resend:', user.email.toLowerCase(), otp);
 
     // Save OTP to database
     const newOtpDoc = await OTPVerification.create({
@@ -688,6 +693,7 @@ export const sendOTPForForgotPassword = async (req, res, next) => {
 
     // Generate OTP
     const otp = generateOTP();
+    console.log('OTP for forgot password:', email.toLowerCase(), otp);
 
     // Save OTP to database
     const otpDoc = await OTPVerification.create({

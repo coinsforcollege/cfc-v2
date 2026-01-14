@@ -477,7 +477,7 @@ const Overview = () => {
                       }
                       navigate('/user/colleges');
                     }}
-                    data-tour={tourActive && tourStep === 'navigate-mobile' && isMobileTour ? 'view-colleges-mobile-button' : undefined}
+                    data-tour={tourActive && (tourStep === 'navigate-mobile' || tourStep === 'navigate') ? 'view-colleges-mobile-button' : undefined}
                     sx={{
                       textTransform: 'none',
                       borderColor: '#8b5cf6',

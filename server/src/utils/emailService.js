@@ -12,6 +12,8 @@ const FROM_EMAIL = process.env.ZEPTOMAIL_FROM_EMAIL || 'noreply@coinsforcollege.
 const FROM_NAME = process.env.ZEPTOMAIL_FROM_NAME || 'Coins For College';
 
 const sendEmail = async (toEmail, toName, subject, htmlBody) => {
+  console.log(`[EmailService] Attempting to send '${subject}' to ${toEmail}`);
+  
   try {
     const response = await axios.post(
       ZEPTOMAIL_API_URL,
@@ -40,12 +42,15 @@ const sendEmail = async (toEmail, toName, subject, htmlBody) => {
       }
     );
 
+    console.log(`[EmailService] Success for ${toEmail}. MessageID: ${response.data.data?.[0]?.messageKey || 'Unknown'}, Response: ${JSON.stringify(response.data)}`);
+
     return {
       success: true,
       data: response.data
     };
   } catch (error) {
-    console.error('Email sending error:', error.response?.data || error.message);
+    const errorDetails = error.response?.data || error.message;
+    console.error(`[EmailService] Failed to send to ${toEmail}. Error: ${JSON.stringify(errorDetails)}`);
     return {
       success: false,
       error: error.response?.data?.message || error.message

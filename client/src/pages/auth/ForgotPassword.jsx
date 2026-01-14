@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { Box, TextField, Button, Typography, Alert, CircularProgress, Stepper, Step, StepLabel, Container, Paper } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -19,8 +19,20 @@ const ForgotPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [verificationToken, setVerificationToken] = useState('');
+  const [timer, setTimer] = useState(30);
   
   const steps = ['Verify Email', 'Enter OTP', 'Reset Password'];
+
+  // Timer countdown
+  useEffect(() => {
+    let interval;
+    if (activeStep === 1 && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [activeStep, timer]);
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -32,9 +44,28 @@ const ForgotPassword = () => {
       if (response.success) {
         setSuccess('OTP sent successfully. Please check your email.');
         setActiveStep(1);
+        setTimer(30); // Reset timer on success
       }
     } catch (err) {
       setError(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      const response = await authApi.sendForgotPasswordOTP(email);
+      if (response.success) {
+        setSuccess('OTP resent successfully.');
+        setTimer(30); // Reset timer
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -224,6 +255,25 @@ const ForgotPassword = () => {
             >
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Verify Code'}
             </Button>
+            
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleResendOTP}
+              disabled={loading || timer > 0}
+              sx={{ 
+                mb: 2,
+                borderColor: '#e2e8f0',
+                color: timer > 0 ? '#94a3b8' : '#6366f1',
+                '&:hover': {
+                    borderColor: '#6366f1',
+                    background: 'rgba(99, 102, 241, 0.04)'
+                }
+              }}
+            >
+              {timer > 0 ? `Resend Code in ${timer}s` : 'Resend Code'}
+            </Button>
+
             <Button
               fullWidth
               variant="text"

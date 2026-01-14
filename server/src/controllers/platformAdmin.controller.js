@@ -405,6 +405,16 @@ export const updateCollege = async (req, res, next) => {
       }
     });
 
+    // Sanitize array fields - ensure they are not empty strings
+    const arrayFields = ['images', 'accreditations', 'rankings', 'programs', 'highlights', 'facilities'];
+    arrayFields.forEach(field => {
+      if (updateData[field] === '' || (typeof updateData[field] === 'string' && updateData[field].trim() === '')) {
+         // If a string is passed for an array field, it's invalid unless we parse it (if JSON) or delete it (if empty)
+         // Assuming here we just want to avoid the "" error.
+         delete updateData[field];
+      }
+    });
+
     // Remove fields that shouldn't be updated directly
     delete updateData._id;
     delete updateData.createdAt;

@@ -144,6 +144,27 @@ const MyColleges = () => {
     }
   }, [dashboard?.activeSessions]);
 
+  // Auto-advance tour if already mining or no colleges
+  useEffect(() => {
+    if (tourActive && tourStep === 'mining' && !loading && dashboard?.miningColleges) {
+      const validColleges = dashboard.miningColleges.filter(mc => mc.college);
+      
+      // Check if all valid colleges are currently mining
+      const allMining = validColleges.length > 0 && validColleges.every(mc => {
+        const session = miningStatus[mc.college._id];
+        return session && session.isActive && session.remainingHours > 0;
+      });
+
+      // If no colleges (nothing to mine) or all are already mining, auto-advance
+      if (validColleges.length === 0 || allMining) {
+        const timer = setTimeout(() => {
+          nextStep();
+        }, 1000); // Small delay to ensure user sees the transition
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [tourActive, tourStep, loading, dashboard, miningStatus, nextStep]);
+
   const handleStartMining = async (collegeId) => {
     try {
       setActionLoading(`start-${collegeId}`);
@@ -217,7 +238,7 @@ const MyColleges = () => {
     try {
       await userApi.completeOnboarding();
       completeTour();
-      navigate('/user/colleges');
+      navigate('/user/dashboard');
     } catch (err) {
       console.error('Failed to complete onboarding:', err);
     }
@@ -932,7 +953,7 @@ const MyColleges = () => {
                       fullWidth
                       variant="contained"
                       startIcon={isActive ? <Stop /> : <PlayArrow />}
-                      data-tour={tourActive && tourStep === 'mining' && index === 0 && !isActive ? 'start-mining-button' : undefined}
+                      data-tour={tourActive && tourStep === 'mining' && !isActive ? 'start-mining-button' : undefined}
                       onClick={() => isActive ? handleStopMining(mc.college._id) : handleStartMining(mc.college._id)}
                       disabled={actionLoading === `start-${mc.college._id}` || actionLoading === `stop-${mc.college._id}`}
                       sx={{

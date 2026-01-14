@@ -254,6 +254,32 @@ export const updateCollegeDetails = async (req, res, next) => {
       }
     });
 
+    // Sanitize array fields - ensure they are not empty strings
+    const arrayFields = ['images', 'accreditations', 'rankings', 'programs', 'highlights', 'facilities'];
+    arrayFields.forEach(field => {
+      if (updateData[field] === '') {
+        delete updateData[field]; // Use existing value or default
+      }
+      
+      // Also check req.body in case it wasn't copied to updateData yet
+      if (req.body[field] !== undefined) {
+         if (req.body[field] === '') {
+             // If frontend sent empty string, it likely means "empty"
+             // But for arrays, we should probably ignore it or set to [], 
+             // but deleting it is safer if we just want to avoid the crash.
+             // If we want to clear the array, we should set to [].
+             // However, based on the error, "" is being passed.
+             // Let's set it to valid [] if it's meant to be cleared, or delete to ignore.
+             // Given it's a PATCH-like update, ignoring (delete) is safer than clearing.
+             // But if user meant to clear it, we should probably handle that? 
+             // For now, let's just ensure we never pass "" to mongoose.
+             delete updateData[field];
+         } else if (Array.isArray(req.body[field])) {
+             updateData[field] = req.body[field];
+         }
+      }
+    });
+
     // Handle file uploads (req.files contains logoFile and/or coverFile)
     if (req.files) {
       if (req.files.logoFile && req.files.logoFile[0]) {
