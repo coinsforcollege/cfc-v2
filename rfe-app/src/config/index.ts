@@ -2,8 +2,13 @@ import { Platform } from 'react-native';
 
 // API URL configuration
 const getApiUrl = (): string => {
+  // Use env variable if set
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  
   if (__DEV__) {
-    // Development: Android emulator uses 10.0.2.2, others use localhost
+    // Development: Android emulator uses 10.0.2.2, web/iOS use localhost
     if (Platform.OS === 'android') {
       return 'http://10.0.2.2:4000/api';
     }

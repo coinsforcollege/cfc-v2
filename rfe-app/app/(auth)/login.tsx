@@ -80,7 +80,7 @@ export default function LoginScreen() {
           {/* Top accent bar */}
           <Box className="h-2 bg-primary-600" />
           
-          <Box className="flex-1 px-6 pt-16 pb-8">
+          <Box className="flex-1 px-6 pt-16 pb-16">
             <VStack className="w-full max-w-[400px] self-center flex-1 justify-between">
               <VStack space="3xl">
                 {/* Header - Swiss left-aligned */}
