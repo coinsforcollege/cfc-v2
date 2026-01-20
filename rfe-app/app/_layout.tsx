@@ -5,7 +5,7 @@ import '@/global.css';
 
 export default function RootLayout() {
   return (
-    <GluestackUIProvider mode="light">
+    <GluestackUIProvider mode="system">
       <AuthProvider>
         <Stack screenOptions={{ headerShown: false }} />
       </AuthProvider>

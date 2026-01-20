@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { Stack, router } from 'expo-router';
+import { Slot, router } from 'expo-router';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { DashboardLayout } from '@/components/navigation';
 
 export default function AppLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -15,5 +16,9 @@ export default function AppLayout() {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <DashboardLayout>
+      <Slot />
+    </DashboardLayout>
+  );
 }
