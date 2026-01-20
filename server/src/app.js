@@ -22,6 +22,8 @@ import ambassadorRoutes from './routes/ambassador.routes.js';
 import blogRoutes from './routes/blog.routes.js';
 import docsRoutes from './routes/docs.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import categoryRoutes from './routes/category.routes.js';
+import taskRoutes from './routes/task.routes.js';
 
 // Import middleware
 import errorHandler from './middlewares/errorHandler.js';
@@ -37,20 +39,42 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // ---------- CORS FIX ----------
-const allowed = new Set([
+// 1. Base default allowed list (Production)
+const defaultAllowed = [
   'https://coinsforcollege.org',
   'https://www.coinsforcollege.org',
-  'https://cfc-v2.onrender.com',
-  'http://localhost:3000',
-  'http://localhost:3000',
-  'http://192.168.0.16:3000',
-  'http://192.168.0.195:3000'
-]);
+  'https://cfc-v2.onrender.com'
+];
+
+// 2. Add the configured CLIENT_URL from .env
+if (process.env.CLIENT_URL) {
+  defaultAllowed.push(process.env.CLIENT_URL);
+}
+
+// 3. Add any from environment variables (comma separated)
+const envAllowed = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+const allowedOrigins = [...defaultAllowed, ...envAllowed];
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true);         // allow same-origin / server-side
-    return cb(null, allowed.has(origin));
+    // 1. Allow server-to-server requests (no origin)
+    if (!origin) return cb(null, true);
+
+    // 2. DEVELOPMENT: Allow any local network request (localhost, 192.168.x.x, 10.x.x.x)
+    if (process.env.NODE_ENV === 'development') {
+      if (origin.startsWith('http://localhost') || 
+          origin.startsWith('http://192.168.') || 
+          origin.startsWith('http://10.')) {
+        return cb(null, true);
+      }
+    }
+
+    // 3. PRODUCTION/STRICT: Only allow trusted domains
+    if (allowedOrigins.includes(origin)) {
+      return cb(null, true);
+    }
+
+    return cb(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS'],
@@ -117,6 +141,8 @@ app.use('/api/ambassador', ambassadorRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/docs', docsRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // 404
 app.use('*', (req, res) => {

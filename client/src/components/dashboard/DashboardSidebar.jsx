@@ -12,7 +12,8 @@ import {
   GraduationCap,
   Mail,
   HelpCircle,
-  Home
+  Home,
+  ClipboardList
 } from 'lucide-react';
 import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
@@ -51,6 +52,7 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
     ],
     platform_admin: [
       { id: 'overview', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/platform-admin/dashboard' },
+      { id: 'tasks', label: 'Tasks', icon: ClipboardList, path: '/platform-admin/tasks' },
       { id: 'users', label: t('platformAdmin.users'), icon: Users, badge: stats.studentsCount, path: '/platform-admin/users' },
       { id: 'college_admins', label: t('platformAdmin.collegeAdmins'), icon: GraduationCap, badge: stats.collegeAdminsCount, path: '/platform-admin/college-admins' },
       { id: 'colleges', label: t('header.colleges'), icon: School, badge: stats.collegesCount, path: '/platform-admin/colleges' },

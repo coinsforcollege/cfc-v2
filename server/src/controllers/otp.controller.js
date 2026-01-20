@@ -247,6 +247,87 @@ export const sendOTPForCollege = async (req, res, next) => {
   }
 };
 
+// @desc    Send OTP for student registration
+// @route   POST /api/auth/otp/send/student
+// @access  Public
+export const sendOTPForStudent = async (req, res, next) => {
+  try {
+    const { name, email, phone, password, language } = req.body;
+
+    // Validation
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields: name, email, phone, password'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: existingUser.email === email ? 'Email already registered' : 'Phone number already registered'
+      });
+    }
+
+    // Delete any existing OTP for this email and role
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'student' });
+
+    // Generate OTP
+    const otp = generateOTP();
+    console.log('OTP for student registration:', email.toLowerCase(), otp);
+
+    // Save OTP to database (expires in 10 minutes)
+    const otpDoc = await OTPVerification.create({
+      email: email.toLowerCase(),
+      otp,
+      role: 'student',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+    });
+
+    // Send OTP email
+    const emailResult = await sendOTPEmail(email, name, otp, language || 'en');
+
+    if (!emailResult.success) {
+      // Clean up if email fails
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully to your email',
+      data: {
+        email: email.toLowerCase(),
+        expiresIn: 600 // 10 minutes in seconds
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Verify OTP
 // @route   POST /api/auth/otp/verify
 // @access  Public
@@ -262,7 +343,7 @@ export const verifyOTP = async (req, res, next) => {
       });
     }
 
-    if (!['user', 'college_admin'].includes(role)) {
+    if (!['user', 'college_admin', 'student'].includes(role)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid role'
@@ -347,7 +428,7 @@ export const resendOTP = async (req, res, next) => {
       });
     }
 
-    if (!['user', 'college_admin'].includes(role)) {
+    if (!['user', 'college_admin', 'student'].includes(role)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid role'

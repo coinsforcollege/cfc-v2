@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'college_admin', 'platform_admin'],
+    enum: ['user', 'college_admin', 'platform_admin', 'student'],
     required: true
   },
   // For users (miners)

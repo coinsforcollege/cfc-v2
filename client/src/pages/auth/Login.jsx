@@ -34,13 +34,21 @@ const Login = () => {
     setLoading(true);
 
     try {
-      if (!executeRecaptcha) {
-        setError('reCAPTCHA not ready. Please try again.');
-        setLoading(false);
-        return;
-      }
+      let recaptchaToken;
 
-      const recaptchaToken = await executeRecaptcha('login');
+      if (import.meta.env.DEV) {
+        // Dev bypass
+        console.log('Using mock reCAPTCHA token for dev');
+        recaptchaToken = 'mock-token';
+      } else {
+        if (!executeRecaptcha) {
+          setError('reCAPTCHA not ready. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        recaptchaToken = await executeRecaptcha('login');
+      }
 
       const response = await authApi.login({
         ...formData,

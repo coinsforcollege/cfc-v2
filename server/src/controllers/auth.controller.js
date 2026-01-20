@@ -307,6 +307,132 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
+// @desc    Register a new student
+// @route   POST /api/auth/register/student
+// @access  Public
+export const registerStudent = async (req, res, next) => {
+  try {
+    const { name, email, phone, password, verificationToken } = req.body;
+
+    // Validation
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields: name, email, phone, password'
+      });
+    }
+
+    // Verify OTP token
+    if (!verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email verification required. Please verify your email first.'
+      });
+    }
+
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token. Please verify your email again.'
+      });
+    }
+
+    // Verify token type and data
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'student') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    // Verify email matches
+    if (tokenData.email !== email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email does not match verified email'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: email.toLowerCase(),
+      role: 'student',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email verification not found. Please verify your email again.'
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: existingUser.email === email ? 'Email already registered' : 'Phone number already registered'
+      });
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      role: 'student'
+    });
+
+    // Delete OTP verification record after successful registration
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'student' });
+
+    // Generate JWT token
+    const token = generateToken(user._id, user.role);
+
+    // Return user data (without password)
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role
+    };
+
+    res.status(201).json({
+      success: true,
+      message: 'Student registered successfully',
+      data: userData,
+      token
+    });
+
+    // Send welcome email asynchronously
+    const dashboardUrl = `${process.env.CLIENT_URL}/user/dashboard`; // Maybe update for RFE specific URL later
+    const emailLog = await EmailLog.logEmail(user._id, user.email, 'welcome', { dashboardUrl });
+
+    sendWelcomeEmail(user.email, user.name, dashboardUrl, user.languagePreference)
+      .then(async (result) => {
+        if (result.success) {
+          await emailLog.markAsSent();
+          console.log(`Welcome email sent to ${user.email}`);
+        } else {
+          await emailLog.markAsFailed(result.error);
+          console.error(`Failed to send welcome email to ${user.email}:`, result.error);
+        }
+      })
+      .catch(async (error) => {
+        await emailLog.markAsFailed(error.message);
+        console.error(`Error sending welcome email to ${user.email}:`, error);
+      });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Register a new college admin
 // @route   POST /api/auth/register/college
 // @access  Public
@@ -504,7 +630,7 @@ export const registerCollegeAdmin = async (req, res, next) => {
 // @access  Public
 export const login = async (req, res, next) => {
   try {
-    const { email, password, recaptchaToken } = req.body;
+    const { email, password, recaptchaToken, platform } = req.body;
 
     // Validation
     if (!email || !password) {
@@ -514,29 +640,42 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // Verify reCAPTCHA
-    if (!recaptchaToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'reCAPTCHA verification required'
-      });
-    }
+    let recaptchaResult = { success: true, score: 1.0 };
 
-    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+    // Platform-based reCAPTCHA handling:
+    // - 'ios' and 'android': Skip reCAPTCHA (native apps can't use reCAPTCHA v3 without WebView)
+    // - 'web' or undefined: Require reCAPTCHA
+    const isNativeMobile = platform === 'ios' || platform === 'android';
 
-    if (!recaptchaResult.success) {
-      return res.status(400).json({
-        success: false,
-        message: 'reCAPTCHA verification failed. Please try again.'
-      });
-    }
+    if (isNativeMobile) {
+      // Native mobile apps: Skip reCAPTCHA, rely on rate limiting and other security measures
+      // reCAPTCHA v3 cannot work on native mobile without WebView
+    } else if (process.env.NODE_ENV === 'development' && recaptchaToken === 'mock-token') {
+      // Development: Allow 'mock-token' for testing
+    } else {
+      // Web platform: Strictly enforce reCAPTCHA
+      if (!recaptchaToken) {
+        return res.status(400).json({
+          success: false,
+          message: 'reCAPTCHA verification required'
+        });
+      }
+      recaptchaResult = await verifyRecaptcha(recaptchaToken);
 
-    // For reCAPTCHA v3, check the score (0.0 - 1.0, higher is more human-like)
-    if (recaptchaResult.score < 0.5) {
-      return res.status(400).json({
-        success: false,
-        message: 'Security verification failed. Please try again.'
-      });
+      if (!recaptchaResult.success) {
+        return res.status(400).json({
+          success: false,
+          message: 'reCAPTCHA verification failed. Please try again.'
+        });
+      }
+
+      // For reCAPTCHA v3, check the score (0.0 - 1.0, higher is more human-like)
+      if (recaptchaResult.score < 0.5) {
+        return res.status(400).json({
+          success: false,
+          message: 'Security verification failed. Please try again.'
+        });
+      }
     }
 
     // Find user by email and include password

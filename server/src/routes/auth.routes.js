@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   registerUser,
+  registerStudent,
   registerCollegeAdmin,
   login,
   getMe,
@@ -13,6 +14,7 @@ import {
 } from '../controllers/auth.controller.js';
 import {
   sendOTPForUser,
+  sendOTPForStudent,
   sendOTPForCollege,
   verifyOTP,
   resendOTP,
@@ -29,6 +31,7 @@ const router = express.Router();
 
 // OTP routes (public)
 router.post('/otp/send/user', sendOTPForUser);
+router.post('/otp/send/student', sendOTPForStudent);
 router.post('/otp/send/college', sendOTPForCollege);
 router.post('/otp/verify', verifyOTP);
 router.post('/otp/resend', resendOTP);
@@ -42,6 +45,7 @@ router.post('/otp/resend/password-change', protect, resendOTPForPasswordChange);
 
 // Public routes
 router.post('/register/user', registerUser);
+router.post('/register/student', registerStudent);
 router.post('/register/college', upload.single('logoFile'), registerCollegeAdmin);
 router.post('/login', login);
 router.post('/reset-password', resetPassword);

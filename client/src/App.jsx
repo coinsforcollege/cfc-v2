@@ -72,6 +72,11 @@ import PlatformAdminSubscribers from './pages/platformAdmin/Subscribers';
 import BulkImportUpload from './pages/platformAdmin/BulkImportUpload';
 import BulkImportPreview from './pages/platformAdmin/BulkImportPreview';
 import BulkImportResults from './pages/platformAdmin/BulkImportResults';
+import TasksLayout from './pages/platformAdmin/tasks/TasksLayout';
+import TaskList from './pages/platformAdmin/tasks/TaskList';
+import TaskCreate from './pages/platformAdmin/tasks/TaskCreate';
+import CategoryManager from './pages/platformAdmin/tasks/CategoryManager';
+import TaskView from './pages/platformAdmin/tasks/TaskView';
   
 const darkTheme = createTheme({
   palette: {
@@ -150,6 +155,14 @@ function App() {
       <Route path="platform-admin/colleges/bulk-import-upload" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportUpload /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/bulk-import-preview" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportPreview /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/bulk-import-results" element={<ProtectedRoute allowedRoles={['platform_admin']}><BulkImportResults /></ProtectedRoute>} />
+      <Route path="platform-admin/tasks" element={<ProtectedRoute allowedRoles={['platform_admin']}><TasksLayout /></ProtectedRoute>}>
+          <Route index element={<TaskList />} />
+          <Route path="categories" element={<CategoryManager />} />
+          <Route path="create" element={<TaskCreate />} />
+          <Route path="edit/:id" element={<TaskCreate />} />
+          <Route path=":id" element={<TaskView />} />
+      </Route>
+      <Route path="platform-admin/colleges/:id/edit" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeEdit /></ProtectedRoute>} />
       <Route path="platform-admin/colleges/:id/edit" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminCollegeEdit /></ProtectedRoute>} />
       <Route path="platform-admin/ambassadors" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminAmbassadors /></ProtectedRoute>} />
       <Route path="platform-admin/subscribers" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminSubscribers /></ProtectedRoute>} />
