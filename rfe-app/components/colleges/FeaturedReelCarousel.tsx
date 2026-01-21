@@ -9,6 +9,7 @@ import {
   useColorScheme,
   StyleSheet,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
@@ -54,7 +55,7 @@ const FEATURED_COLLEGES = [
     shortName: 'Oxford',
     country: 'UK',
     city: 'Oxford',
-    coverImage: 'https://images.unsplash.com/photo-1592280771884-f3da7e189874?w=400&h=600&fit=crop',
+    coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=600&fit=crop',
     type: 'University',
   },
   {
@@ -72,7 +73,7 @@ const FEATURED_COLLEGES = [
     shortName: 'U of T',
     country: 'Canada',
     city: 'Toronto',
-    coverImage: 'https://images.unsplash.com/photo-1525921429618-f5170764280b?w=400&h=600&fit=crop',
+    coverImage: 'https://images.unsplash.com/photo-1544531696-b9481c8df52c?w=400&h=600&fit=crop',
     type: 'University',
   },
   {
@@ -99,7 +100,7 @@ const FEATURED_COLLEGES = [
     shortName: 'NUS',
     country: 'Singapore',
     city: 'Singapore',
-    coverImage: 'https://images.unsplash.com/photo-1590012314607-68987532f48d?w=400&h=600&fit=crop',
+    coverImage: 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=600&fit=crop',
     type: 'University',
   },
   {
@@ -108,7 +109,7 @@ const FEATURED_COLLEGES = [
     shortName: 'Edinburgh',
     country: 'UK',
     city: 'Edinburgh',
-    coverImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=600&fit=crop',
+    coverImage: 'https://images.unsplash.com/photo-1592280771884-f3da7e189874?w=400&h=600&fit=crop',
     type: 'University',
   },
 ];
@@ -142,7 +143,6 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
   const isDark = colorScheme === 'dark';
   const [isLiked, setIsLiked] = useState(false);
   
-  // Generate consistent random count based on index
   const interestedCount = React.useMemo(() => {
     return Math.floor(Math.random() * 5000) + 1200 + (index * 500);
   }, [index]);
@@ -169,33 +169,24 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
           elevation: 8,
         }}
       >
-        {/* Background Image */}
         <Image
           source={{ uri: college.coverImage }}
           style={{ width: '100%', height: '100%' }}
           resizeMode="cover"
         />
         
-        {/* Gradient Overlay */}
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '70%',
-            background: `linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)`,
-          }}
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.9)']}
+          locations={[0, 0.4, 1]}
+          className="absolute bottom-0 left-0 right-0 h-[70%]"
         />
         
-        {/* Top Rank Badge */}
         <View
           style={{
             position: 'absolute',
             top: 10,
             left: 10,
             backgroundColor: 'rgba(255,255,255,0.2)',
-            backdropFilterBlur: 4,
             borderRadius: 6,
             paddingHorizontal: 6,
             paddingVertical: 3,
@@ -206,7 +197,6 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
           </Text>
         </View>
         
-        {/* Country Badge */}
         <View
           style={{
             position: 'absolute',
@@ -223,7 +213,6 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
           </Text>
         </View>
         
-        {/* College Info */}
         <View
           style={{
             position: 'absolute',
@@ -232,7 +221,6 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
             right: 10,
           }}
         >
-          {/* Logo placeholder */}
           <View
             style={{
               width: 28,
@@ -269,7 +257,6 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
           </Text>
         </View>
         
-        {/* Bottom Actions */}
         <View
           style={{
             position: 'absolute',
@@ -281,7 +268,6 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
             alignItems: 'center',
           }}
         >
-          {/* Interested count */}
           <View className="flex-row items-center">
             <Globe size={10} color="white" />
             <Text className="text-white font-semibold text-[10px] ml-1">
@@ -289,7 +275,6 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
             </Text>
           </View>
           
-          {/* Like button */}
           <Pressable
             onPress={() => setIsLiked(!isLiked)}
             style={({ pressed }) => ({

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Image, Dimensions, Pressable, Platform, useColorScheme } from 'react-native';
+import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, useColorScheme } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
@@ -82,7 +82,6 @@ function Header({ user }: { user: any }) {
       <Pressable style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}>
         <Box className="w-10 h-10 rounded-full bg-background-50 items-center justify-center border border-outline-200 shadow-sm">
           <Bell size={20} color="#64748b" />
-          {/* Notification Dot */}
           <Box className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-error-500 border border-white" />
         </Box>
       </Pressable>
@@ -93,7 +92,6 @@ function Header({ user }: { user: any }) {
 function PassportCard() {
   return (
     <Box className="md:mx-0 h-[220px] rounded-2xl overflow-hidden shadow-hard-4 relative my-2 bg-primary-900">
-      {/* Background Image & Overlay */}
       <Image 
         source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
         className="absolute w-full h-full opacity-30 dark:opacity-80"
@@ -101,9 +99,7 @@ function PassportCard() {
       />
       <Box className="absolute w-full h-full bg-primary-700 dark:bg-primary-0 opacity-80" />
       
-      {/* Content Container */}
       <View className="flex-1 p-7 justify-between">
-        {/* Top Row: Tier Badge & Brand */}
         <HStack className="justify-between items-start">
           <Box className="bg-white/10 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
             <HStack space="xs" className="items-center">
@@ -116,7 +112,6 @@ function PassportCard() {
           <CreditCard size={24} color="rgba(255,255,255,0.4)" />
         </HStack>
 
-        {/* Middle: Big Balance */}
         <VStack>
           <Text className="text-white/60 text-xs font-bold uppercase tracking-[0.15em] mb-1">
             Total Balance
@@ -131,7 +126,6 @@ function PassportCard() {
           </HStack>
         </VStack>
 
-        {/* Bottom: Change & Action */}
         <HStack className="justify-between items-end">
           <Box className="bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30 flex-row items-center">
             <TrendingUp size={12} color="#34d399" />
@@ -159,20 +153,18 @@ function PassportCard() {
   );
 }
 
-// Extracted for robust Hover state
-function ActionButton({ item, isDark }: { item: any, isDark: boolean }) {
+function ActionButton({ item, isDark }: { item: any; isDark: boolean }) {
   return (
     <Pressable
       onPress={() => router.push(item.href as any)}
-      className="md:w-[48%] md:h-[48%] hover:scale-[1.05] active:scale-[0.96] active:opacity-90 transition-transform duration-200"
+      className="md:w-[48%] md:h-[48%] active:scale-[0.96] active:opacity-90 transition-transform duration-200"
     >
-      {/* Gradient 3D Surface */}
       <LinearGradient
-        colors={isDark ? item.colorsDark as [string, string] : item.colorsLight as [string, string]}
+        colors={isDark ? item.colorsDark : item.colorsLight}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={{ borderRadius: 24 }} 
-        className="w-16 h-16 md:w-full md:h-full mb-2 items-center justify-center rounded-3xl md:rounded-[36px]"
+        className="w-16 h-16 md:w-full md:h-full mb-2 items-center justify-center rounded-3xl"
+        style={Platform.OS === 'web' ? {} : { borderRadius: 36 }}
       >
           <Image 
             source={item.image} 
@@ -180,13 +172,11 @@ function ActionButton({ item, isDark }: { item: any, isDark: boolean }) {
             className="w-11 h-11 md:w-10 md:h-10 md:mb-1" 
             resizeMode="contain"
           />
-          {/* Desktop Label (Inside) */}
           <Text className="hidden md:flex text-typography-800 text-[10px] font-bold uppercase tracking-wider text-center">
             {item.label}
           </Text>
       </LinearGradient>
       
-      {/* Mobile Label (Outside) */}
       <Text className="md:hidden text-typography-600 text-sm font-bold tracking-tight text-center">
         {item.label}
       </Text>
@@ -195,37 +185,36 @@ function ActionButton({ item, isDark }: { item: any, isDark: boolean }) {
 }
 
 function ActionGrid() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useColorScheme() === 'dark';
 
   const actions = [
     { 
       label: 'Tasks', 
       href: '/(app)/tasks', 
       image: iconTarget,
-      colorsLight: ['#ecfdf5', '#10b981'], // Emerald 50 -> 500
-      colorsDark: ['#064e3b', '#10b981'],   // Emerald 900 -> 500
+      colorsLight: ['#ecfdf5', '#10b981'],
+      colorsDark: ['#064e3b', '#10b981'],
     }, 
     { 
       label: 'Colleges', 
       href: '/(app)/colleges', 
       image: iconCalendar, 
-      colorsLight: ['#eef2ff', '#6366f1'], // Indigo 50 -> 500
-      colorsDark: ['#312e81', '#6366f1'],   // Indigo 900 -> 500
+      colorsLight: ['#eef2ff', '#6366f1'],
+      colorsDark: ['#312e81', '#6366f1'],
     },   
     { 
       label: 'Offers', 
       href: '/(app)/offers', 
       image: iconChat, 
-      colorsLight: ['#fffbeb', '#f59e0b'], // Amber 50 -> 500
-      colorsDark: ['#451a03', '#f59e0b'],   // Amber 900 -> 500
+      colorsLight: ['#fffbeb', '#f59e0b'],
+      colorsDark: ['#451a03', '#f59e0b'],
     },
     { 
       label: 'Docs', 
       href: '/(app)/documents', 
       image: iconFolder,
-      colorsLight: ['#f0f9ff', '#0ea5e9'], // Sky 50 -> 500
-      colorsDark: ['#0c4a6e', '#0ea5e9'],   // Sky 900 -> 500
+      colorsLight: ['#f0f9ff', '#0ea5e9'],
+      colorsDark: ['#0c4a6e', '#0ea5e9'],
     }, 
   ];
 
@@ -258,6 +247,16 @@ function SectionTitle({ title, action, href }: { title: string, action?: string,
   );
 }
 
+function GradientOverlay() {
+  return (
+    <LinearGradient
+      colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']}
+      locations={[0, 0.3, 1]}
+      className="absolute bottom-0 left-0 right-0 h-[70%]"
+    />
+  );
+}
+
 function MarketplaceCarousel() {
   return (
     <Box className="mb-10">
@@ -267,7 +266,7 @@ function MarketplaceCarousel() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
         decelerationRate="fast"
-        snapToInterval={160 + 16} // card width + gap
+        snapToInterval={160 + 16}
       >
         {MOCK_COLLEGES.map((college) => (
           <Pressable 
@@ -276,18 +275,14 @@ function MarketplaceCarousel() {
             style={({pressed}) => ({ opacity: pressed ? 0.9 : 1 })}
           >
             <Box 
-              className="w-40 h-[240px] rounded-[24px] overflow-hidden bg-slate-900 relative shadow-hard-2 border border-outline-100"
+              className="w-40 h-[240px] rounded-3xl overflow-hidden bg-slate-900 relative shadow-hard-2 border border-outline-100"
             >
               <Image 
                 source={{ uri: college.image }}
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
               />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.95)']}
-                locations={[0, 0.5, 1]}
-                style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '70%' }}
-              />
+              <GradientOverlay />
               
               <View className="absolute top-3 right-3 bg-white/20 backdrop-blur-md px-2 py-1 rounded-lg border border-white/20">
                 <Text className="text-white text-[10px] font-bold">
@@ -356,14 +351,13 @@ function WalletStack() {
       {MOCK_OFFERS.map((offer) => (
         <Box 
           key={offer.id} 
-          className="bg-slate-900 p-6 rounded-[24px] shadow-hard-3 relative overflow-hidden"
+          className="bg-slate-900 p-6 rounded-3xl shadow-hard-3 relative overflow-hidden"
         >
-           {/* Subtle highlight instead of circles */}
            <LinearGradient
-              colors={['rgba(255,255,255,0.05)', 'transparent']}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 1}}
-              style={{ position: 'absolute', width: '100%', height: '100%' }}
+             colors={['rgba(255,255,255,0.05)', 'transparent']}
+             start={{ x: 0, y: 0 }}
+             end={{ x: 1, y: 1 }}
+             className="absolute top-0 left-0 right-0 bottom-0"
            />
 
            <HStack className="justify-between items-center relative z-10">
@@ -402,12 +396,10 @@ export default function HomeScreen() {
     <ScreenContainer showHeader={false} showBackButton={false}>
       <VStack className="flex-1 bg-background-0" space="md">
         
-        {/* Sticky Header */}
         <Box className="bg-background-0 z-10">
           <Header user={user} />
         </Box>
 
-        {/* Content */}
         <ScrollView 
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
@@ -430,3 +422,37 @@ export default function HomeScreen() {
     </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  gradientButton: {
+    borderRadius: 24,
+  },
+  gradientContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '70%',
+  },
+  gradientTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '30%',
+  },
+  gradientMid: {
+    position: 'absolute',
+    top: '30%',
+    left: 0,
+    right: 0,
+    height: '30%',
+  },
+  gradientBot: {
+    position: 'absolute',
+    top: '60%',
+    left: 0,
+    right: 0,
+    height: '40%',
+  },
+});

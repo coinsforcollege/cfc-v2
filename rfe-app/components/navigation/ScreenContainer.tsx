@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { ScrollView, Pressable, useWindowDimensions, Platform } from 'react-native';
+import { ScrollView, Pressable, useWindowDimensions, Platform, useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
@@ -57,9 +57,13 @@ export function ScreenContainer({
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const isDesktop = width >= TABLET_BREAKPOINT;
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   
   const topPadding = isDesktop ? 0 : Math.max(insets.top, DEFAULT_TOP_INSET);
   const bottomPadding = isDesktop ? 0 : Math.max(insets.bottom, 0);
+
+  const iconColor = isDark ? '#f5f5f5' : '#262627';
 
   return (
     <Box className="flex-1 bg-background-0">
@@ -91,11 +95,11 @@ export function ScreenContainer({
                   {showBackButton && !isDesktop && (
                     <Pressable
                       onPress={() => router.back()}
-                      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                      className="mr-1"
+                      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                      className="mr-2"
                     >
                       <Box className="w-10 h-10 items-center justify-center">
-                        <ChevronLeft size={24} strokeWidth={2} className="text-typography-950" />
+                        <ChevronLeft size={24} strokeWidth={2.5} color={iconColor} />
                       </Box>
                     </Pressable>
                   )}
