@@ -12,18 +12,13 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { ChevronLeft } from './icons';
 
 const TABLET_BREAKPOINT = 768;
-// Default safe area values to prevent layout flash
 const DEFAULT_TOP_INSET = Platform.OS === 'ios' ? 47 : 24;
 
 interface ScreenContainerProps {
   children: React.ReactNode;
-  /** Small label above heading - Swiss style uppercase tracking */
   label?: string;
-  /** Main heading */
   heading?: string;
-  /** Whether to show header section */
   showHeader?: boolean;
-  /** Whether to show back button (auto-hidden on home) */
   showBackButton?: boolean;
 }
 
@@ -41,11 +36,7 @@ function UserAvatar({ name }: { name: string }) {
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <Box 
-        className="
-          w-10 h-10 rounded-full 
-          bg-primary-500
-          items-center justify-center
-        "
+        className="w-10 h-10 rounded-full bg-primary-500 items-center justify-center"
       >
         <Text className="text-sm font-semibold text-typography-0">
           {initials || 'U'}
@@ -59,7 +50,6 @@ export function ScreenContainer({
   children, 
   label, 
   heading,
-  header,
   showHeader = true,
   showBackButton = true,
 }: ScreenContainerProps) {
@@ -68,7 +58,6 @@ export function ScreenContainer({
   const insets = useSafeAreaInsets();
   const isDesktop = width >= TABLET_BREAKPOINT;
   
-  // Use insets with fallback to prevent layout flash on mobile
   const topPadding = isDesktop ? 0 : Math.max(insets.top, DEFAULT_TOP_INSET);
   const bottomPadding = isDesktop ? 0 : Math.max(insets.bottom, 0);
 
@@ -96,11 +85,9 @@ export function ScreenContainer({
             space="3xl"
             style={{ alignItems: 'stretch' }}
           >
-            {/* Page header with back button and avatar */}
             {showHeader && (
               <HStack className="items-center justify-between">
                 <HStack className="items-center flex-1" space="sm">
-                  {/* Back button - hidden on desktop */}
                   {showBackButton && !isDesktop && (
                     <Pressable
                       onPress={() => router.back()}
@@ -108,19 +95,15 @@ export function ScreenContainer({
                       className="mr-1"
                     >
                       <Box className="w-10 h-10 items-center justify-center">
-                        <ChevronLeft size={24} strokeWidth={2} color="rgb(var(--color-typography-950))" />
+                        <ChevronLeft size={24} strokeWidth={2} className="text-typography-950" />
                       </Box>
                     </Pressable>
                   )}
                   
-                  {/* Title area */}
                   <VStack space="xs" className="flex-1">
                     {label && (
                       <Text 
-                        className="
-                          text-sm font-medium tracking-[0.15em] uppercase 
-                          text-typography-400
-                        "
+                        className="text-sm font-medium tracking-[0.15em] uppercase text-typography-400"
                       >
                         {label}
                       </Text>
@@ -128,10 +111,7 @@ export function ScreenContainer({
                     {heading && (
                       <Heading 
                         size="xl" 
-                        className="
-                          text-typography-950
-                          tracking-tight font-semibold
-                        "
+                        className="text-typography-950 tracking-tight font-semibold"
                       >
                         {heading}
                       </Heading>
@@ -139,7 +119,6 @@ export function ScreenContainer({
                   </VStack>
                 </HStack>
                 
-                {/* User avatar - only on mobile */}
                 {!isDesktop && (
                   <UserAvatar name={user?.name || 'User'} />
                 )}
