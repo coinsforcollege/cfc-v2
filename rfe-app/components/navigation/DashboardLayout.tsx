@@ -22,9 +22,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   if (isDesktop) {
     // Desktop layout: Sidebar + Content
     return (
-      <HStack className="flex-1 bg-background-0 dark:bg-background-0">
+      <HStack className="flex-1 bg-background-0">
         <Sidebar />
-        <Box className="flex-1 bg-background-50 dark:bg-background-50">
+        <Box className="flex-1 bg-background-50">
           {children}
         </Box>
       </HStack>
@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Mobile layout: Edge to edge, no bottom nav
   return (
-    <Box className="flex-1 bg-background-0 dark:bg-background-0">
+    <Box className="flex-1 bg-background-0">
       {children}
     </Box>
   );

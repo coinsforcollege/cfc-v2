@@ -17,10 +17,10 @@ const bannerSubjectRight = require('@/assets/images/subject-on-right.webp');
 const bannerCollegeCampus = require('@/assets/images/college-campus.jpg');
 
 const navItems = [
-  { name: 'Tasks', icon: ListTodo, href: '/(app)/tasks', bg: '#3b82f6', shadow: '#1d4ed8' },
-  { name: 'Colleges', icon: GraduationCap, href: '/(app)/colleges', bg: '#10b981', shadow: '#047857' },
-  { name: 'Offers', icon: Award, href: '/(app)/offers', bg: '#f59e0b', shadow: '#b45309' },
-  { name: 'Docs', icon: FileText, href: '/(app)/documents', bg: '#8b5cf6', shadow: '#6d28d9' },
+  { name: 'Tasks', icon: ListTodo, href: '/(app)/tasks', bg: 'bg-primary-500', shadow: 'border-primary-700' },
+  { name: 'Colleges', icon: GraduationCap, href: '/(app)/colleges', bg: 'bg-success-500', shadow: 'border-success-700' },
+  { name: 'Offers', icon: Award, href: '/(app)/offers', bg: 'bg-warning-500', shadow: 'border-warning-700' },
+  { name: 'Docs', icon: FileText, href: '/(app)/documents', bg: 'bg-info-500', shadow: 'border-info-700' },
 ];
 
 const dummyTasks = [
@@ -82,9 +82,13 @@ interface Task {
 }
 
 function TaskCard({ task }: { task: Task }) {
-  // Light tinted background based on task color
-  const bgColor = task.completed ? '#f3f4f6' : `${task.color}15`;
-  const borderColor = task.completed ? '#d1d5db' : `${task.color}40`;
+  // Use semantic theme variables for colors
+  const bgColor = task.completed 
+    ? 'rgb(var(--color-background-50))' 
+    : `${task.color}15`;
+  const borderColor = task.completed 
+    ? 'rgb(var(--color-outline-200))' 
+    : `${task.color}40`;
   
   return (
     <Pressable
@@ -94,15 +98,17 @@ function TaskCard({ task }: { task: Task }) {
         transform: [{ scale: pressed ? 0.98 : 1 }],
       })}
     >
-      <View 
-        style={{
-          flexDirection: 'row',
-          backgroundColor: bgColor,
-          borderRadius: 16,
-          overflow: 'hidden',
-          borderWidth: 2,
-          borderColor: borderColor,
-        }}
+      <Box 
+        className={`
+          flex-row rounded-2xl overflow-hidden border-2
+          ${task.completed 
+            ? 'bg-background-50 border-outline-200' 
+            : 'border-transparent'}
+        `}
+        style={!task.completed ? { 
+          backgroundColor: `${task.color}15`,
+          borderColor: `${task.color}40`,
+        } : undefined}
       >
         {/* Image thumbnail */}
         <Image
@@ -119,72 +125,56 @@ function TaskCard({ task }: { task: Task }) {
         {/* Content */}
         <View style={{ flex: 1, paddingVertical: 12, paddingRight: 12, justifyContent: 'center' }}>
           <Text 
-            style={{
-              fontSize: 15,
-              fontWeight: '700',
-              color: task.completed ? '#9ca3af' : '#1f2937',
-              textDecorationLine: task.completed ? 'line-through' : 'none',
-              marginBottom: 6,
-            }}
+            className={`
+              text-base font-bold mb-1.5
+              ${task.completed 
+                ? 'text-typography-400 line-through' 
+                : 'text-typography-950'}
+            `}
           >
             {task.title}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View 
-              style={{
-                backgroundColor: task.completed ? '#d1d5db' : task.color,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 6,
-              }}
+            <Box 
+              className={`
+                px-[10px] py-1 rounded-md
+                ${task.completed ? 'bg-outline-200' : ''}
+              `}
+              style={!task.completed ? { backgroundColor: task.color } : undefined}
             >
               <Text 
-                style={{ 
-                  color: '#ffffff', 
-                  fontSize: 10, 
-                  fontWeight: '800', 
-                  letterSpacing: 0.5,
-                  textTransform: 'uppercase',
-                }}
+                className="text-typography-0 text-xs font-extrabold tracking-wider uppercase"
               >
                 {task.difficulty}
               </Text>
-            </View>
-            <View 
-              style={{
-                backgroundColor: task.completed ? '#d1d5db' : '#fbbf24',
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 6,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
+            </Box>
+            <Box 
+              className={`
+                px-[10px] py-[4px] rounded-md flex-row items-center
+                ${task.completed ? 'bg-outline-200' : 'bg-warning-400'}
+              `}
             >
-              <Text style={{ color: task.completed ? '#6b7280' : '#78350f', fontSize: 12, fontWeight: '800' }}>
+              <Text 
+                className={`
+                  text-xs font-extrabold
+                  ${task.completed ? 'text-typography-500' : 'text-warning-950'}
+                `}
+              >
                 +{task.coins} SP
               </Text>
-            </View>
+            </Box>
           </View>
         </View>
         
         {/* Checkmark for completed */}
         {task.completed && (
-          <View 
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: '#10b981',
-              alignItems: 'center',
-              justifyContent: 'center',
-              alignSelf: 'center',
-              marginRight: 12,
-            }}
+          <Box 
+            className="w-8 h-8 rounded-full bg-success-500 items-center justify-center self-center mr-3"
           >
-            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>✓</Text>
-          </View>
+            <Text className="text-typography-0 text-base font-bold">✓</Text>
+          </Box>
         )}
-      </View>
+      </Box>
     </Pressable>
   );
 }
@@ -206,30 +196,19 @@ function NavCard({ name, icon: Icon, href, bg, shadow }: NavCardProps) {
           transform: [{ scale: pressed ? 0.95 : 1 }],
         })}
       >
-        <View
-          style={{
-            backgroundColor: bg,
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderBottomWidth: 3,
-            borderBottomColor: shadow,
-          }}
+        <Box
+          className={`
+            ${bg} ${shadow} 
+            w-14 h-14 rounded-full 
+            items-center justify-center 
+            border-b-[3px]
+          `}
         >
           <Icon size={24} strokeWidth={1.5} color="#ffffff" />
-        </View>
+        </Box>
       </Pressable>
       <Text 
-        style={{ 
-          fontSize: 10, 
-          fontWeight: '600', 
-          color: '#374151', 
-          textAlign: 'center',
-          marginTop: 6,
-          lineHeight: 14,
-        }}
+        className="text-xs font-semibold text-typography-600 text-center mt-1.5"
       >
         {name}
       </Text>
@@ -263,7 +242,6 @@ function Banner1({ width }: { width: number }) {
           textShadowOffset: { width: 2, height: 2 },
           textShadowRadius: 4,
           textAlign: 'right',
-          lineHeight: 32,
         }}>
           EARN{'\n'}SCHOLARSHIP{'\n'}POINTS
         </Text>
@@ -332,7 +310,6 @@ function Banner2({ width }: { width: number }) {
           textShadowColor: 'rgba(0,0,0,0.9)',
           textShadowOffset: { width: 3, height: 3 },
           textShadowRadius: 8,
-          lineHeight: 52,
         }}>
           100%
         </Text>
@@ -414,7 +391,6 @@ function Banner3({ width }: { width: number }) {
           textShadowOffset: { width: 2, height: 2 },
           textShadowRadius: 4,
           marginTop: 2,
-          lineHeight: 42,
         }}>
           COLLEGE?
         </Text>
@@ -514,78 +490,44 @@ export default function HomeScreen() {
   return (
     <ScreenContainer label="Welcome back" heading={user?.name || 'Student'} showBackButton={false}>
       {/* Stats cards - Swiss minimal with colors */}
-      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        <View 
-          style={{
-            flex: 1,
-            minWidth: 140,
-            backgroundColor: '#3b82f6',
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            borderLeftWidth: 3,
-            borderLeftColor: '#1d4ed8',
-          }}
+      <HStack space="sm" className="flex-wrap items-start">
+        <Box 
+          className="
+            flex-1 min-w-[140px] bg-primary-500 
+            px-3.5 py-2.5 
+            border-l-[3px] border-primary-700
+          "
         >
           <Text 
-            style={{
-              fontSize: 9,
-              fontWeight: '600',
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.8)',
-              marginBottom: 2,
-            }}
+            className="text-xs font-semibold tracking-[0.15em] uppercase text-typography-0/80 mb-0.5"
           >
             Pending Tasks
           </Text>
           <Text 
-            style={{
-              fontSize: 28,
-              fontWeight: '800',
-              color: '#ffffff',
-              letterSpacing: -1,
-              lineHeight: 34,
-            }}
+            className="text-3xl font-extrabold text-typography-0 tracking-tighter"
           >
             0
           </Text>
-        </View>
-        <View 
-          style={{
-            flex: 1,
-            minWidth: 140,
-            backgroundColor: '#fbbf24',
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            borderLeftWidth: 3,
-            borderLeftColor: '#b45309',
-          }}
+        </Box>
+        <Box 
+          className="
+            flex-1 min-w-[140px] bg-warning-400 
+            px-3.5 py-2.5 
+            border-l-[3px] border-warning-600
+          "
         >
           <Text 
-            style={{
-              fontSize: 9,
-              fontWeight: '600',
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-              color: 'rgba(0,0,0,0.6)',
-              marginBottom: 2,
-            }}
+            className="text-xs font-semibold tracking-[0.15em] uppercase text-warning-950/60 mb-0.5"
           >
             Scholarship Points
           </Text>
           <Text 
-            style={{
-              fontSize: 28,
-              fontWeight: '800',
-              color: '#78350f',
-              letterSpacing: -1,
-              lineHeight: 34,
-            }}
+            className="text-3xl font-extrabold text-warning-950 tracking-tighter"
           >
             0
           </Text>
-        </View>
-      </View>
+        </Box>
+      </HStack>
 
       {/* Navigation row - 4 items */}
       <HStack space="2xl" className="w-full">
@@ -608,10 +550,7 @@ export default function HomeScreen() {
       <VStack space="md">
         <HStack className="justify-between items-center">
           <Text 
-            className="
-              text-[11px] font-medium tracking-[0.15em] uppercase 
-              text-typography-400 dark:text-typography-500
-            "
+            className="text-sm font-medium tracking-[0.15em] uppercase text-typography-400"
           >
             Today's Tasks
           </Text>

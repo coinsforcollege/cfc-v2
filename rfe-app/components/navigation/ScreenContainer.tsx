@@ -43,7 +43,7 @@ function UserAvatar({ name }: { name: string }) {
       <Box 
         className="
           w-10 h-10 rounded-full 
-          bg-primary-500 dark:bg-primary-500
+          bg-primary-500
           items-center justify-center
         "
       >
@@ -76,7 +76,7 @@ export function ScreenContainer({
   const bottomPadding = isDesktop ? 0 : Math.max(insets.bottom, 0);
 
   return (
-    <Box className="flex-1 bg-background-0 dark:bg-background-0">
+    <Box className="flex-1 bg-background-0">
       <ScrollView 
         className="flex-1"
         contentContainerStyle={{
@@ -111,7 +111,7 @@ export function ScreenContainer({
                       className="mr-1"
                     >
                       <Box className="w-10 h-10 items-center justify-center">
-                        <ChevronLeft size={24} strokeWidth={2} color="#1a1a1a" />
+                        <ChevronLeft size={24} strokeWidth={2} color="rgb(var(--color-typography-950))" />
                       </Box>
                     </Pressable>
                   )}
@@ -121,8 +121,8 @@ export function ScreenContainer({
                     {label && (
                       <Text 
                         className="
-                          text-[11px] font-medium tracking-[0.15em] uppercase 
-                          text-typography-400 dark:text-typography-500
+                          text-sm font-medium tracking-[0.15em] uppercase 
+                          text-typography-400
                         "
                       >
                         {label}
@@ -132,7 +132,7 @@ export function ScreenContainer({
                       <Heading 
                         size="xl" 
                         className="
-                          text-typography-950 dark:text-typography-950
+                          text-typography-950
                           tracking-tight font-semibold
                         "
                       >

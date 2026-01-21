@@ -48,7 +48,7 @@ function SidebarItem({ route, href, isActive }: SidebarItemProps) {
         className={`
           relative px-6 py-3 items-center gap-4
           ${isActive 
-            ? 'bg-primary-500 dark:bg-primary-500' 
+            ? 'bg-primary-500' 
             : 'bg-transparent'
           }
         `}
@@ -95,14 +95,14 @@ export function Sidebar() {
     <Box 
       className="
         w-[280px] h-full
-        bg-background-50 dark:bg-background-50
+        bg-background-50
         border-r border-outline-100 dark:border-outline-200
       "
     >
       <VStack className="h-full">
         {/* Logo / Brand area */}
         <Box className="px-6 py-8 border-b border-outline-100 dark:border-outline-200">
-          <Text className="text-xs font-medium tracking-widest uppercase text-typography-500 dark:text-typography-400">
+          <Text className="text-xs font-medium tracking-widest uppercase text-typography-500">
             Student Portal
           </Text>
         </Box>
@@ -139,7 +139,7 @@ export function Sidebar() {
 
         {/* Footer - minimal version indicator */}
         <Box className="px-6 py-4 border-t border-outline-100 dark:border-outline-200">
-          <Text className="text-2xs font-normal tracking-wide text-typography-400 dark:text-typography-500">
+          <Text className="text-xs font-normal tracking-wide text-typography-400">
             v1.0.0
           </Text>
         </Box>
