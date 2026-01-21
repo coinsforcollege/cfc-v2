@@ -1,11 +1,9 @@
 'use client';
 import React from 'react';
 import { useWindowDimensions, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Sidebar } from './Sidebar';
-import { BottomNav } from './BottomNav';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,15 +31,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // Mobile layout: Content + Bottom Nav
+  // Mobile layout: Edge to edge, no bottom nav
   return (
-    <Box className="flex-1 bg-primary-500 dark:bg-primary-500">
-      <Box className="flex-1 bg-background-0 dark:bg-background-0">
-        {children}
-      </Box>
-      <SafeAreaView edges={['bottom']} style={{ backgroundColor: 'transparent' }}>
-        <BottomNav />
-      </SafeAreaView>
+    <Box className="flex-1 bg-background-0 dark:bg-background-0">
+      {children}
     </Box>
   );
 }

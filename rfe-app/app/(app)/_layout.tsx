@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Slot, router } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { DashboardLayout } from '@/components/navigation';
 
@@ -18,7 +18,13 @@ export default function AppLayout() {
 
   return (
     <DashboardLayout>
-      <Slot />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+          animationDuration: 200,
+        }}
+      />
     </DashboardLayout>
   );
 }
