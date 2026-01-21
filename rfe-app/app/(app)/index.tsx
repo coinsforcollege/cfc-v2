@@ -1,570 +1,431 @@
-import { useRef, useState, useEffect } from 'react';
-import { Pressable, View, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, ScrollView, Image, Dimensions, Pressable, Platform, useColorScheme } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { Heading } from '@/components/ui/heading';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { ScreenContainer } from '@/components/navigation';
-import { ListTodo, GraduationCap, Award, FileText } from '@/components/navigation/icons';
+import { 
+  CreditCard, 
+  TrendingUp, 
+  School, 
+  ChevronRight, 
+  Bell, 
+  ShieldCheck, 
+  Zap,
+  Globe,
+  Wallet,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react-native';
 
-// Banner images
-const bannerSubjectLeft = require('@/assets/images/subject-on-left.jpg');
-const bannerSubjectRight = require('@/assets/images/subject-on-right.webp');
-const bannerCollegeCampus = require('@/assets/images/college-campus.jpg');
+const { width } = Dimensions.get('window');
+const CARD_MARGIN = 16;
+const CARD_WIDTH = width - (CARD_MARGIN * 2);
 
-const navItems = [
-  { name: 'Tasks', icon: ListTodo, href: '/(app)/tasks', bg: 'bg-primary-500', shadow: 'border-primary-700' },
-  { name: 'Colleges', icon: GraduationCap, href: '/(app)/colleges', bg: 'bg-success-500', shadow: 'border-success-700' },
-  { name: 'Offers', icon: Award, href: '/(app)/offers', bg: 'bg-warning-500', shadow: 'border-warning-700' },
-  { name: 'Docs', icon: FileText, href: '/(app)/documents', bg: 'bg-info-500', shadow: 'border-info-700' },
+// --- Mock Data ---
+
+const MOCK_BALANCE = {
+  total: '1,250',
+  currency: 'SP',
+  tier: 'Gold Scholar',
+  change: '+12% this week',
+};
+
+const MOCK_COLLEGES = [
+  { id: 1, name: 'Stanford', location: 'California', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=800&fit=crop', match: '98%' },
+  { id: 2, name: 'Harvard', location: 'Cambridge', image: 'https://images.unsplash.com/photo-1559135197-8a45ea74d367?w=600&h=800&fit=crop', match: '95%' },
+  { id: 3, name: 'MIT', location: 'Massachusetts', image: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?w=600&h=800&fit=crop', match: '92%' },
 ];
 
-const dummyTasks = [
-  { 
-    id: 1, 
-    title: 'Complete your profile', 
-    coins: 50, 
-    difficulty: 'Easy', 
-    completed: false,
-    color: '#3b82f6',
-    image: 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=100&h=100&fit=crop',
-  },
-  { 
-    id: 2, 
-    title: 'Take career assessment quiz', 
-    coins: 100, 
-    difficulty: 'Medium', 
-    completed: false,
-    color: '#8b5cf6',
-    image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=100&h=100&fit=crop',
-  },
-  { 
-    id: 3, 
-    title: 'Upload 10th marksheet', 
-    coins: 75, 
-    difficulty: 'Easy', 
-    completed: true,
-    color: '#10b981',
-    image: 'https://images.unsplash.com/photo-1568792923760-d70635a89fdc?w=100&h=100&fit=crop',
-  },
-  { 
-    id: 4, 
-    title: 'Watch college selection video', 
-    coins: 25, 
-    difficulty: 'Easy', 
-    completed: false,
-    color: '#f59e0b',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100&h=100&fit=crop',
-  },
-  { 
-    id: 5, 
-    title: 'Add 3 colleges to wishlist', 
-    coins: 60, 
-    difficulty: 'Medium', 
-    completed: false,
-    color: '#ec4899',
-    image: 'https://images.unsplash.com/photo-1562774053-701939374585?w=100&h=100&fit=crop',
-  },
+const MOCK_FEED = [
+  { id: 1, type: 'earn', title: 'Physics Quiz Ace', amount: '+50 SP', time: '2m ago', icon: Zap, color: '#10b981', bg: 'bg-success-50' },
+  { id: 2, type: 'info', title: 'New Scholarship Drop', amount: 'INFO', time: '1h ago', icon: Bell, color: '#3b82f6', bg: 'bg-info-50' },
+  { id: 3, type: 'pending', title: 'Upload Transcripts', amount: 'TODO', time: 'Due Today', icon: ShieldCheck, color: '#f59e0b', bg: 'bg-warning-50' },
 ];
 
-interface Task {
-  id: number;
-  title: string;
-  coins: number;
-  difficulty: string;
-  completed: boolean;
-  color: string;
-  image: string;
+const MOCK_OFFERS = [
+  { id: 1, title: 'Future Leaders Grant', amount: '$5,000', deadline: '3 Days' },
+  { id: 2, title: 'STEM Initiative', amount: '$2,500', deadline: '1 Week' },
+];
+
+// Local 3D Icons
+const iconTarget = require('@/assets/images/icons/3dicons-target-dynamic-color.png');
+const iconFolder = require('@/assets/images/icons/3dicons-folder-fav-dynamic-color.png');
+const iconCalendar = require('@/assets/images/icons/3dicons-calender-dynamic-color.png');
+const iconChat = require('@/assets/images/icons/3dicons-chat-bubble-dynamic-color.png');
+
+// --- Components ---
+
+function Header({ user }: { user: any }) {
+  return (
+    <HStack className="justify-between items-center py-4 bg-background-0">
+      <HStack space="sm" className="items-center">
+         <Box className="w-10 h-10 rounded-full bg-primary-100 items-center justify-center border-2 border-primary-200">
+           <Text className="text-primary-700 font-bold text-lg">
+             {user?.name?.[0] || 'S'}
+           </Text>
+         </Box>
+         <VStack>
+           <Text className="text-typography-500 text-[10px] font-bold tracking-widest uppercase">
+             Welcome Back
+           </Text>
+           <Text className="text-typography-900 text-lg font-black leading-5">
+             {user?.name?.split(' ')[0] || 'Scholar'}
+           </Text>
+         </VStack>
+      </HStack>
+      
+      <Pressable style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}>
+        <Box className="w-10 h-10 rounded-full bg-background-50 items-center justify-center border border-outline-200 shadow-sm">
+          <Bell size={20} color="#64748b" />
+          {/* Notification Dot */}
+          <Box className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-error-500 border border-white" />
+        </Box>
+      </Pressable>
+    </HStack>
+  );
 }
 
-function TaskCard({ task }: { task: Task }) {
-  // Use semantic theme variables for colors
-  const bgColor = task.completed 
-    ? 'rgb(var(--color-background-50))' 
-    : `${task.color}15`;
-  const borderColor = task.completed 
-    ? 'rgb(var(--color-outline-200))' 
-    : `${task.color}40`;
-  
+function PassportCard() {
+  return (
+    <Box className="md:mx-0 h-[220px] rounded-2xl overflow-hidden shadow-hard-4 relative my-2 bg-primary-900">
+      {/* Background Image & Overlay */}
+      <Image 
+        source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
+        className="absolute w-full h-full opacity-30 dark:opacity-80"
+        resizeMode="cover"
+      />
+      <Box className="absolute w-full h-full bg-primary-700 dark:bg-primary-0 opacity-80" />
+      
+      {/* Content Container */}
+      <View className="flex-1 p-7 justify-between">
+        {/* Top Row: Tier Badge & Brand */}
+        <HStack className="justify-between items-start">
+          <Box className="bg-white/10 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
+            <HStack space="xs" className="items-center">
+              <Sparkles size={12} color="#fbbf24" fill="#fbbf24" />
+              <Text className="text-white text-[10px] font-bold uppercase tracking-wider">
+                {MOCK_BALANCE.tier}
+              </Text>
+            </HStack>
+          </Box>
+          <CreditCard size={24} color="rgba(255,255,255,0.4)" />
+        </HStack>
+
+        {/* Middle: Big Balance */}
+        <VStack>
+          <Text className="text-white/60 text-xs font-bold uppercase tracking-[0.15em] mb-1">
+            Total Balance
+          </Text>
+          <HStack className="items-baseline">
+            <Text className="text-white text-5xl font-black tracking-tight" style={{ fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'sans-serif' }}>
+              {MOCK_BALANCE.total}
+            </Text>
+            <Text className="text-white/80 text-lg font-bold ml-2">
+              {MOCK_BALANCE.currency}
+            </Text>
+          </HStack>
+        </VStack>
+
+        {/* Bottom: Change & Action */}
+        <HStack className="justify-between items-end">
+          <Box className="bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30 flex-row items-center">
+            <TrendingUp size={12} color="#34d399" />
+            <Text className="text-emerald-300 text-[10px] font-bold ml-1.5 uppercase tracking-wide">
+              {MOCK_BALANCE.change}
+            </Text>
+          </Box>
+          
+          <Pressable 
+             onPress={() => router.push('/(app)/tasks')}
+             style={({pressed}) => ({ opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] })}
+          >
+             <Box className="bg-white px-5 py-3 rounded-2xl shadow-lg flex-row items-center justify-center">
+                <Text className="text-slate-900 font-extrabold text-xs tracking-wider uppercase mr-2.5">
+                  Add Funds
+                </Text>
+                 <Box className="bg-slate-900 rounded-full p-0.5">
+                   <ArrowRight size={10} color="white" strokeWidth={3} />
+                 </Box>
+             </Box>
+          </Pressable>
+        </HStack>
+      </View>
+    </Box>
+  );
+}
+
+// Extracted for robust Hover state
+function ActionButton({ item, isDark }: { item: any, isDark: boolean }) {
   return (
     <Pressable
-      onPress={() => router.push('/(app)/tasks')}
-      style={({ pressed }) => ({ 
-        opacity: pressed ? 0.9 : 1,
-        transform: [{ scale: pressed ? 0.98 : 1 }],
-      })}
+      onPress={() => router.push(item.href as any)}
+      className="md:w-[48%] md:h-[48%] hover:scale-[1.05] active:scale-[0.96] active:opacity-90 transition-transform duration-200"
     >
-      <Box 
-        className={`
-          flex-row rounded-2xl overflow-hidden border-2
-          ${task.completed 
-            ? 'bg-background-50 border-outline-200' 
-            : 'border-transparent'}
-        `}
-        style={!task.completed ? { 
-          backgroundColor: `${task.color}15`,
-          borderColor: `${task.color}40`,
-        } : undefined}
+      {/* Gradient 3D Surface */}
+      <LinearGradient
+        colors={isDark ? item.colorsDark as [string, string] : item.colorsLight as [string, string]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 24 }} 
+        className="w-16 h-16 md:w-full md:h-full mb-2 items-center justify-center rounded-3xl md:rounded-[36px]"
       >
-        {/* Image thumbnail */}
-        <Image
-          source={{ uri: task.image }}
-          style={{
-            width: 70,
-            height: 70,
-            margin: 12,
-            borderRadius: 12,
-            opacity: task.completed ? 0.5 : 1,
-          }}
-        />
-        
-        {/* Content */}
-        <View style={{ flex: 1, paddingVertical: 12, paddingRight: 12, justifyContent: 'center' }}>
-          <Text 
-            className={`
-              text-base font-bold mb-1.5
-              ${task.completed 
-                ? 'text-typography-400 line-through' 
-                : 'text-typography-950'}
-            `}
-          >
-            {task.title}
+          <Image 
+            source={item.image} 
+            style={{ width: Platform.OS === 'web' ? '60%' : 44, height: Platform.OS === 'web' ? '60%' : 44 }} 
+            className="w-11 h-11 md:w-10 md:h-10 md:mb-1" 
+            resizeMode="contain"
+          />
+          {/* Desktop Label (Inside) */}
+          <Text className="hidden md:flex text-typography-800 text-[10px] font-bold uppercase tracking-wider text-center">
+            {item.label}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Box 
-              className={`
-                px-[10px] py-1 rounded-md
-                ${task.completed ? 'bg-outline-200' : ''}
-              `}
-              style={!task.completed ? { backgroundColor: task.color } : undefined}
-            >
-              <Text 
-                className="text-typography-0 text-xs font-extrabold tracking-wider uppercase"
-              >
-                {task.difficulty}
-              </Text>
-            </Box>
-            <Box 
-              className={`
-                px-[10px] py-[4px] rounded-md flex-row items-center
-                ${task.completed ? 'bg-outline-200' : 'bg-warning-400'}
-              `}
-            >
-              <Text 
-                className={`
-                  text-xs font-extrabold
-                  ${task.completed ? 'text-typography-500' : 'text-warning-950'}
-                `}
-              >
-                +{task.coins} SP
-              </Text>
-            </Box>
-          </View>
-        </View>
-        
-        {/* Checkmark for completed */}
-        {task.completed && (
-          <Box 
-            className="w-8 h-8 rounded-full bg-success-500 items-center justify-center self-center mr-3"
-          >
-            <Text className="text-typography-0 text-base font-bold">✓</Text>
-          </Box>
-        )}
-      </Box>
+      </LinearGradient>
+      
+      {/* Mobile Label (Outside) */}
+      <Text className="md:hidden text-typography-600 text-sm font-bold tracking-tight text-center">
+        {item.label}
+      </Text>
     </Pressable>
   );
 }
 
-interface NavCardProps {
-  name: string;
-  icon: React.ComponentType<{ size: number; strokeWidth: number; color: string }>;
-  href: string;
-  bg: string;
-  shadow: string;
+function ActionGrid() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  const actions = [
+    { 
+      label: 'Tasks', 
+      href: '/(app)/tasks', 
+      image: iconTarget,
+      colorsLight: ['#ecfdf5', '#10b981'], // Emerald 50 -> 500
+      colorsDark: ['#064e3b', '#10b981'],   // Emerald 900 -> 500
+    }, 
+    { 
+      label: 'Colleges', 
+      href: '/(app)/colleges', 
+      image: iconCalendar, 
+      colorsLight: ['#eef2ff', '#6366f1'], // Indigo 50 -> 500
+      colorsDark: ['#312e81', '#6366f1'],   // Indigo 900 -> 500
+    },   
+    { 
+      label: 'Offers', 
+      href: '/(app)/offers', 
+      image: iconChat, 
+      colorsLight: ['#fffbeb', '#f59e0b'], // Amber 50 -> 500
+      colorsDark: ['#451a03', '#f59e0b'],   // Amber 900 -> 500
+    },
+    { 
+      label: 'Docs', 
+      href: '/(app)/documents', 
+      image: iconFolder,
+      colorsLight: ['#f0f9ff', '#0ea5e9'], // Sky 50 -> 500
+      colorsDark: ['#0c4a6e', '#0ea5e9'],   // Sky 900 -> 500
+    }, 
+  ];
+
+  return (
+    <View className="my-6 flex-row justify-between items-start md:px-0 md:my-2 md:flex-wrap md:w-[220px] md:h-[220px] md:content-between">
+      {actions.map((item, index) => (
+        <ActionButton key={index} item={item} isDark={isDark} />
+      ))}
+    </View>
+  );
 }
 
-function NavCard({ name, icon: Icon, href, bg, shadow }: NavCardProps) {
+function SectionTitle({ title, action, href }: { title: string, action?: string, href?: string }) {
   return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
-      <Pressable
-        onPress={() => router.push(href as any)}
-        style={({ pressed }) => ({ 
-          transform: [{ scale: pressed ? 0.95 : 1 }],
-        })}
-      >
-        <Box
-          className={`
-            ${bg} ${shadow} 
-            w-14 h-14 rounded-full 
-            items-center justify-center 
-            border-b-[3px]
-          `}
-        >
-          <Icon size={24} strokeWidth={1.5} color="#ffffff" />
-        </Box>
-      </Pressable>
-      <Text 
-        className="text-xs font-semibold text-typography-600 text-center mt-1.5"
-      >
-        {name}
+    <HStack className="mb-4 items-center justify-between">
+      <Text className="text-lg font-black text-typography-900 tracking-tight">
+        {title}
       </Text>
-    </View>
-  );
-}
-
-// Banner 1: Subject on left - text on right side, bold italic style
-function Banner1({ width }: { width: number }) {
-  return (
-    <View style={{ width, height: 160, borderRadius: 16, overflow: 'hidden' }}>
-      <Image
-        source={bannerSubjectLeft}
-        style={{ width: '100%', height: '100%', position: 'absolute' }}
-        resizeMode="cover"
-      />
-      <View style={{ 
-        position: 'absolute', 
-        right: 16, 
-        top: 0, 
-        bottom: 0, 
-        justifyContent: 'center',
-        width: '55%',
-      }}>
-        <Text style={{
-          fontSize: 28,
-          fontWeight: '900',
-          fontStyle: 'italic',
-          color: '#ffffff',
-          textShadowColor: 'rgba(0,0,0,0.8)',
-          textShadowOffset: { width: 2, height: 2 },
-          textShadowRadius: 4,
-          textAlign: 'right',
-        }}>
-          EARN{'\n'}SCHOLARSHIP{'\n'}POINTS
-        </Text>
-        <Text style={{
-          fontSize: 12,
-          fontWeight: '600',
-          color: '#fbbf24',
-          textShadowColor: 'rgba(0,0,0,0.9)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 3,
-          textAlign: 'right',
-          marginTop: 4,
-          letterSpacing: 2,
-        }}>
-          COMPLETE DAILY TASKS
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-// Banner 2: College campus - centered elegant style with overlay
-function Banner2({ width }: { width: number }) {
-  return (
-    <View style={{ width, height: 160, borderRadius: 16, overflow: 'hidden' }}>
-      <Image
-        source={bannerCollegeCampus}
-        style={{ width: '100%', height: '100%', position: 'absolute' }}
-        resizeMode="cover"
-      />
-      {/* Dark overlay for text readability */}
-      <View style={{ 
-        position: 'absolute', 
-        left: 0,
-        right: 0,
-        top: 0, 
-        bottom: 0, 
-        backgroundColor: 'rgba(0,0,0,0.4)',
-      }} />
-      <View style={{ 
-        position: 'absolute', 
-        left: 0,
-        right: 0,
-        top: 0, 
-        bottom: 0, 
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 16,
-      }}>
-        <Text style={{
-          fontSize: 14,
-          fontWeight: '400',
-          color: '#ffffff',
-          textShadowColor: 'rgba(0,0,0,0.9)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 6,
-          letterSpacing: 4,
-          textTransform: 'uppercase',
-        }}>
-          Receive up to
-        </Text>
-        <Text style={{
-          fontSize: 48,
-          fontWeight: '900',
-          color: '#ffffff',
-          textShadowColor: 'rgba(0,0,0,0.9)',
-          textShadowOffset: { width: 3, height: 3 },
-          textShadowRadius: 8,
-        }}>
-          100%
-        </Text>
-        <Text style={{
-          fontSize: 18,
-          fontWeight: '700',
-          color: '#fbbf24',
-          textShadowColor: 'rgba(0,0,0,0.9)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 4,
-          letterSpacing: 1,
-        }}>
-          SCHOLARSHIP
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-// Banner 3: Subject on right - text on left, question style with gradient
-function Banner3({ width }: { width: number }) {
-  return (
-    <View style={{ width, height: 160, borderRadius: 16, overflow: 'hidden' }}>
-      <Image
-        source={bannerSubjectRight}
-        style={{ width: '100%', height: '100%', position: 'absolute' }}
-        resizeMode="cover"
-      />
-      {/* Gradient: dark on left, transparent on right */}
-      <LinearGradient
-        colors={['rgba(0,0,0,0.7)', 'rgba(0,0,0,0.3)', 'transparent']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: '70%',
-        }}
-      />
-      <View style={{ 
-        position: 'absolute', 
-        left: 16, 
-        top: 0, 
-        bottom: 0, 
-        justifyContent: 'center',
-        width: '50%',
-      }}>
-        <Text style={{
-          fontSize: 13,
-          fontWeight: '500',
-          color: '#ffffff',
-          textShadowColor: 'rgba(0,0,0,0.5)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 3,
-          letterSpacing: 3,
-          textTransform: 'uppercase',
-        }}>
-          How ready
-        </Text>
-        <Text style={{
-          fontSize: 13,
-          fontWeight: '500',
-          color: '#ffffff',
-          textShadowColor: 'rgba(0,0,0,0.5)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 3,
-          letterSpacing: 3,
-          textTransform: 'uppercase',
-        }}>
-          are you for
-        </Text>
-        <Text style={{
-          fontSize: 36,
-          fontWeight: '900',
-          color: '#10b981',
-          textShadowColor: 'rgba(0,0,0,0.7)',
-          textShadowOffset: { width: 2, height: 2 },
-          textShadowRadius: 4,
-          marginTop: 2,
-        }}>
-          COLLEGE?
-        </Text>
-        <Text style={{
-          fontSize: 11,
-          fontWeight: '600',
-          color: '#ffffff',
-          textShadowColor: 'rgba(0,0,0,0.5)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 2,
-          marginTop: 6,
-          letterSpacing: 1,
-        }}>
-          Take the readiness quiz
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-// Banner Slider Component
-function BannerSlider() {
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const totalBanners = 3;
-
-  const gap = 12;
-  const snapWidth = containerWidth + gap;
-
-  useEffect(() => {
-    if (containerWidth === 0) return;
-    
-    const interval = setInterval(() => {
-      const nextIndex = (activeIndex + 1) % totalBanners;
-      scrollViewRef.current?.scrollTo({ x: nextIndex * snapWidth, animated: true });
-      setActiveIndex(nextIndex);
-    }, 4000);
-    
-    return () => clearInterval(interval);
-  }, [activeIndex, containerWidth, snapWidth]);
-
-  const handleScroll = (event: any) => {
-    if (containerWidth === 0) return;
-    const contentOffset = event.nativeEvent.contentOffset.x;
-    const index = Math.round(contentOffset / snapWidth);
-    if (index !== activeIndex && index >= 0 && index < totalBanners) {
-      setActiveIndex(index);
-    }
-  };
-
-  const handleLayout = (event: any) => {
-    const { width } = event.nativeEvent.layout;
-    setContainerWidth(width);
-  };
-
-  if (containerWidth === 0) {
-    return (
-      <View onLayout={handleLayout} style={{ width: '100%', height: 160 }} />
-    );
-  }
-
-  return (
-    <VStack space="sm">
-      <View 
-        onLayout={handleLayout}
-        style={{ width: '100%', overflow: 'hidden' }}
-      >
-        <ScrollView
-          ref={scrollViewRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={handleScroll}
-          decelerationRate="fast"
-          snapToInterval={snapWidth}
-          snapToAlignment="start"
-          disableIntervalMomentum={true}
+      {action && href && (
+        <Pressable 
+          onPress={() => router.push(href as any)}
+          hitSlop={10}
         >
-          <View style={{ width: containerWidth, marginRight: gap }}>
-            <Banner1 width={containerWidth} />
-          </View>
-          <View style={{ width: containerWidth, marginRight: gap }}>
-            <Banner2 width={containerWidth} />
-          </View>
-          <View style={{ width: containerWidth }}>
-            <Banner3 width={containerWidth} />
-          </View>
-        </ScrollView>
-      </View>
-    </VStack>
+          <Text className="text-primary-600 text-sm font-bold uppercase tracking-wider">
+            {action}
+          </Text>
+        </Pressable>
+      )}
+    </HStack>
+  );
+}
+
+function MarketplaceCarousel() {
+  return (
+    <Box className="mb-10">
+      <SectionTitle title="Marketplace" action="View All" href="/(app)/colleges" />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
+        decelerationRate="fast"
+        snapToInterval={160 + 16} // card width + gap
+      >
+        {MOCK_COLLEGES.map((college) => (
+          <Pressable 
+            key={college.id}
+            onPress={() => router.push('/(app)/colleges')}
+            style={({pressed}) => ({ opacity: pressed ? 0.9 : 1 })}
+          >
+            <Box 
+              className="w-40 h-[240px] rounded-[24px] overflow-hidden bg-slate-900 relative shadow-hard-2 border border-outline-100"
+            >
+              <Image 
+                source={{ uri: college.image }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.95)']}
+                locations={[0, 0.5, 1]}
+                style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '70%' }}
+              />
+              
+              <View className="absolute top-3 right-3 bg-white/20 backdrop-blur-md px-2 py-1 rounded-lg border border-white/20">
+                <Text className="text-white text-[10px] font-bold">
+                  {college.match}
+                </Text>
+              </View>
+
+              <View className="absolute bottom-4 left-4 right-4">
+                 <Text className="text-white font-bold text-lg leading-6 mb-1">
+                   {college.name}
+                 </Text>
+                 <Text className="text-white/70 text-xs font-medium uppercase tracking-wide">
+                   {college.location}
+                 </Text>
+              </View>
+            </Box>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </Box>
+  );
+}
+
+function LiveFeed() {
+  return (
+    <Box className="mb-10 w-full">
+      <SectionTitle title="Live Activity" />
+      <VStack space="md" className="">
+        {MOCK_FEED.map((item) => (
+          <Pressable key={item.id} style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}>
+             <HStack className="items-center justify-between bg-background-0 p-4 rounded-2xl border border-outline-100 border-opacity-50 shadow-sm">
+               <HStack space="md" className="items-center flex-1">
+                 <Box 
+                   className={`w-12 h-12 rounded-2xl ${item.bg} items-center justify-center`}
+                 >
+                   <item.icon size={20} color={item.color} strokeWidth={2} />
+                 </Box>
+                 <VStack className="flex-1">
+                   <Text className="text-typography-900 font-bold text-sm mb-0.5">
+                     {item.title}
+                   </Text>
+                   <Text className="text-typography-400 text-[11px] font-bold uppercase tracking-wide">
+                     {item.time}
+                   </Text>
+                 </VStack>
+               </HStack>
+               
+               <Box className={`px-2.5 py-1 rounded-lg ${item.type === 'earn' ? 'bg-success-100' : 'bg-background-100'}`}>
+                 <Text className={`text-xs font-bold ${item.type === 'earn' ? 'text-success-700' : 'text-typography-600'}`}>
+                   {item.amount}
+                 </Text>
+               </Box>
+             </HStack>
+          </Pressable>
+        ))}
+      </VStack>
+    </Box>
+  );
+}
+
+function WalletStack() {
+  return (
+    <Box className="mb-24 cursor-default">
+      <SectionTitle title="Wallet" action="View All" href="/(app)/offers" />
+      <VStack space="sm">
+      {MOCK_OFFERS.map((offer) => (
+        <Box 
+          key={offer.id} 
+          className="bg-slate-900 p-6 rounded-[24px] shadow-hard-3 relative overflow-hidden"
+        >
+           {/* Subtle highlight instead of circles */}
+           <LinearGradient
+              colors={['rgba(255,255,255,0.05)', 'transparent']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              style={{ position: 'absolute', width: '100%', height: '100%' }}
+           />
+
+           <HStack className="justify-between items-center relative z-10">
+             <VStack className="flex-1">
+               <Text className="text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">
+                 Scholarship Grant
+               </Text>
+               <Text className="text-white text-xl font-black leading-6">
+                 {offer.title}
+               </Text>
+               <Text className="text-gray-400 text-xs mt-2 font-medium">
+                 Expires: <Text className="text-white font-bold">{offer.deadline}</Text>
+               </Text>
+             </VStack>
+             
+             <View className="border-l border-white/10 pl-5 ml-4 justify-center items-center">
+                <Text className="text-white font-black text-lg">
+                  {offer.amount.split(',')[0]}k
+                </Text>
+                <Box className="bg-white/20 px-2 py-0.5 rounded mt-1">
+                  <Text className="text-white text-[9px] font-bold uppercase">Claim</Text>
+                </Box>
+             </View>
+           </HStack>
+        </Box>
+      ))}
+      </VStack>
+    </Box>
   );
 }
 
 export default function HomeScreen() {
   const { user } = useAuth();
-
+  
   return (
-    <ScreenContainer label="Welcome back" heading={user?.name || 'Student'} showBackButton={false}>
-      {/* Stats cards - Swiss minimal with colors */}
-      <HStack space="sm" className="flex-wrap items-start">
-        <Box 
-          className="
-            flex-1 min-w-[140px] bg-primary-500 
-            px-3.5 py-2.5 
-            border-l-[3px] border-primary-700
-          "
-        >
-          <Text 
-            className="text-xs font-semibold tracking-[0.15em] uppercase text-typography-0/80 mb-0.5"
-          >
-            Pending Tasks
-          </Text>
-          <Text 
-            className="text-3xl font-extrabold text-typography-0 tracking-tighter"
-          >
-            0
-          </Text>
+    <ScreenContainer showHeader={false} showBackButton={false}>
+      <VStack className="flex-1 bg-background-0" space="md">
+        
+        {/* Sticky Header */}
+        <Box className="bg-background-0 z-10">
+          <Header user={user} />
         </Box>
-        <Box 
-          className="
-            flex-1 min-w-[140px] bg-warning-400 
-            px-3.5 py-2.5 
-            border-l-[3px] border-warning-600
-          "
+
+        {/* Content */}
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          className="flex-1"
         >
-          <Text 
-            className="text-xs font-semibold tracking-[0.15em] uppercase text-warning-950/60 mb-0.5"
-          >
-            Scholarship Points
-          </Text>
-          <Text 
-            className="text-3xl font-extrabold text-warning-950 tracking-tighter"
-          >
-            0
-          </Text>
-        </Box>
-      </HStack>
+          <View className="flex-col md:flex-row md:items-center md:justify-center md:gap-8 md:px-8 md:py-6">
+            <Box className="w-full md:flex-1 md:max-w-3xl">
+              <PassportCard />
+            </Box>
+            <Box className="w-full md:w-auto">
+              <ActionGrid />
+            </Box>
+          </View>
+          <MarketplaceCarousel />
+          <LiveFeed />
+          <WalletStack />
+        </ScrollView>
 
-      {/* Navigation row - 4 items */}
-      <HStack space="2xl" className="w-full">
-        {navItems.map((item) => (
-          <NavCard
-            key={item.name}
-            name={item.name}
-            icon={item.icon}
-            href={item.href}
-            bg={item.bg}
-            shadow={item.shadow}
-          />
-        ))}
-      </HStack>
-
-      {/* Banner slider */}
-      <BannerSlider />
-
-      {/* Tasks section */}
-      <VStack space="md">
-        <HStack className="justify-between items-center">
-          <Text 
-            className="text-sm font-medium tracking-[0.15em] uppercase text-typography-400"
-          >
-            Today's Tasks
-          </Text>
-          <Pressable onPress={() => router.push('/(app)/tasks')}>
-            <Text className="text-sm font-medium text-primary-500">View all</Text>
-          </Pressable>
-        </HStack>
-
-        {/* Task cards */}
-        <VStack space="sm">
-          {dummyTasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
-          ))}
-        </VStack>
       </VStack>
     </ScreenContainer>
   );

@@ -2,7 +2,7 @@
 import React from 'react';
 import { ScrollView, Pressable, useWindowDimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, usePathname } from 'expo-router';
+import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
@@ -59,17 +59,14 @@ export function ScreenContainer({
   children, 
   label, 
   heading,
+  header,
   showHeader = true,
   showBackButton = true,
 }: ScreenContainerProps) {
   const { width } = useWindowDimensions();
   const { user } = useAuth();
-  const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const isDesktop = width >= TABLET_BREAKPOINT;
-  
-  // Check if we're on home page
-  const isHome = pathname === '/' || pathname === '/(app)' || pathname === '';
   
   // Use insets with fallback to prevent layout flash on mobile
   const topPadding = isDesktop ? 0 : Math.max(insets.top, DEFAULT_TOP_INSET);
@@ -87,7 +84,7 @@ export function ScreenContainer({
       >
         <Box 
           className={`
-            px-6 py-4
+            px-4 py-4
             ${isDesktop ? 'px-10 py-8' : ''}
           `}
         >
@@ -103,8 +100,8 @@ export function ScreenContainer({
             {showHeader && (
               <HStack className="items-center justify-between">
                 <HStack className="items-center flex-1" space="sm">
-                  {/* Back button - hidden on home and desktop */}
-                  {showBackButton && !isHome && !isDesktop && (
+                  {/* Back button - hidden on desktop */}
+                  {showBackButton && !isDesktop && (
                     <Pressable
                       onPress={() => router.back()}
                       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
