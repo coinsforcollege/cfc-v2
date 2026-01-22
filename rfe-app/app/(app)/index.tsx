@@ -56,52 +56,28 @@ function getGreeting() {
   return 'Good evening';
 }
 
-function HeroSection({ user }: { user: any }) {
+// Sticky header with top portion of gradient
+function StickyHeader({ user, headerHeight }: { user: any; headerHeight: number }) {
   const insets = useSafeAreaInsets();
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
   const firstName = user?.name?.split(' ')[0] || 'Scholar';
 
-  // Pulse animation for pending tasks
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.4,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, [pulseAnim]);
-
   return (
-    <Box className="relative overflow-hidden">
-      {/* Background layers */}
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, height: headerHeight, overflow: 'hidden' }}>
+      {/* Vertical gradient - top portion */}
       <LinearGradient
-        colors={['#1e1b4b', '#312e81', '#3730a3']}
+        colors={['#1e1b4b', '#312e81']}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', width: '100%', height: '100%' }}
+        end={{ x: 0, y: 1 }}
+        style={StyleSheet.absoluteFill}
       />
       <Image
         source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
-        className="absolute w-full h-full"
-        style={{ opacity: 0.05 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 250, opacity: 0.02 }}
         resizeMode="cover"
       />
 
-      {/* Content */}
-      <Box style={{ paddingTop: topPadding }} className="px-5 pb-6">
-        {/* Header */}
+      <View style={{ paddingTop: topPadding, paddingHorizontal: 20, paddingBottom: 12 }}>
         <HStack className="justify-between items-center pt-2">
           {/* Logo + Branding */}
           <HStack space="sm" className="items-center">
@@ -151,9 +127,51 @@ function HeroSection({ user }: { user: any }) {
             </Pressable>
           </HStack>
         </HStack>
+      </View>
+    </View>
+  );
+}
 
-        {/* Points & Tasks Row */}
-        <HStack className="pt-8 justify-between items-end">
+// Points row with bottom portion of gradient
+function PointsRow({ headerHeight }: { headerHeight: number }) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [pulseAnim]);
+
+  return (
+    <View style={{ overflow: 'hidden' }}>
+      {/* Vertical gradient - bottom portion, starts where header ends */}
+      <LinearGradient
+        colors={['#312e81', '#3730a3']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <Image
+        source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
+        style={{ position: 'absolute', top: -headerHeight, left: 0, right: 0, height: 250, opacity: 0.02 }}
+        resizeMode="cover"
+      />
+
+      <View style={{ paddingHorizontal: 20, paddingVertical: 24 }}>
+        <HStack className="justify-between items-end">
           {/* Points Display */}
           <VStack>
             <Text className="text-indigo-300 text-xs font-inter-medium uppercase tracking-widest mb-1">
@@ -184,8 +202,8 @@ function HeroSection({ user }: { user: any }) {
             </HStack>
           </Pressable>
         </HStack>
-      </Box>
-    </Box>
+      </View>
+    </View>
   );
 }
 
@@ -430,28 +448,37 @@ function WalletStack() {
 export default function HomeScreen() {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
+  const headerHeight = topPadding + 60;
 
   return (
-    <Box className="flex-1 bg-background-0">
+    <View style={{ flex: 1, backgroundColor: '#1e1b4b' }}>
+      {/* Sticky Header */}
+      <StickyHeader user={user} headerHeight={headerHeight} />
+
+      {/* Scrollable Content */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 40) }}
-        className="flex-1"
+        contentContainerStyle={{
+          paddingTop: headerHeight,
+          paddingBottom: Math.max(insets.bottom, 40),
+        }}
+        style={{ flex: 1 }}
       >
-        {/* Hero Section - Full Width from Top Edge */}
-        <HeroSection user={user} />
-
-        {/* Action Grid */}
-        <Box className="px-4">
-          <ActionGrid />
-        </Box>
+        {/* Points Row */}
+        <PointsRow headerHeight={headerHeight} />
 
         {/* Rest of Content */}
-        <MarketplaceCarousel />
-        <LiveFeed />
-        <WalletStack />
+        <Box className="bg-background-0">
+          <Box className="px-4">
+            <ActionGrid />
+          </Box>
+          <MarketplaceCarousel />
+          <LiveFeed />
+          <WalletStack />
+        </Box>
       </ScrollView>
-    </Box>
+    </View>
   );
 }
 
