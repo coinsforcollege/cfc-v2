@@ -434,16 +434,49 @@ export default function HomeScreen() {
         {/* Points Row */}
         <PointsRow headerHeight={headerHeight} />
 
-        {/* Rest of Content */}
-        <Box className="bg-background-0">
-          <SpotlightCarousel />
-          <Box className="px-4">
-            <ActionGrid />
-          </Box>
-          
-          <LiveFeed />
-          <WalletStack />
-        </Box>
+        {/* Rest of Content with fade overlay */}
+        <View style={{ position: 'relative' }}>
+          {/* Hero fade overlay - fades from hero color to transparent */}
+          {/* Layer 1: Background */}
+          <Box className="bg-background-0" style={StyleSheet.absoluteFill} />
+
+          {/* Layer 2: Gradient fade from hero to transparent */}
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 250,
+              overflow: 'hidden',
+            }}
+            pointerEvents="none"
+          >
+            <LinearGradient
+              colors={['#3730a3', 'transparent']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <Image
+              source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
+              style={{ position: 'absolute', top: -150, left: 0, right: 0, height: 250, opacity: 0.02 }}
+              resizeMode="cover"
+            />
+          </View>
+
+          {/* Layer 3: Content */}
+          <View>
+            <SpotlightCarousel />
+            <Box className="bg-background-0">
+              <Box className="px-4">
+                <ActionGrid />
+              </Box>
+              <LiveFeed />
+              <WalletStack />
+            </Box>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
