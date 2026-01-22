@@ -17,4 +17,5 @@ export const platformAdminTaskApi = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   deleteTask: (id) => apiClient.delete(`/tasks/${id}`),
+  duplicateTask: (id) => apiClient.post(`/tasks/${id}/duplicate`),
 };

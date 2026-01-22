@@ -30,7 +30,8 @@ import {
   Archive,
   MenuBook,
   Quiz,
-  Description
+  Description,
+  ContentCopy
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { platformAdminTaskApi } from '../../../api/platformAdminTask.api';
@@ -120,6 +121,15 @@ const TaskList = () => {
           } catch (error) {
               console.error(error);
           }
+      }
+  }
+
+  const handleDuplicate = async (id) => {
+      try {
+          await platformAdminTaskApi.duplicateTask(id);
+          fetchTasks();
+      } catch (error) {
+          console.error('Error duplicating task:', error);
       }
   }
 
@@ -258,13 +268,16 @@ const TaskList = () => {
                                     {getStatusChip(task.status, task.expiryDate)}
                                 </TableCell>
                                 <TableCell align="right">
-                                    <IconButton size="small" onClick={() => navigate(`/platform-admin/tasks/${task._id}`)}>
+                                    <IconButton size="small" onClick={() => navigate(`/platform-admin/tasks/${task._id}`)} title="View">
                                         <Visibility fontSize="small" />
                                     </IconButton>
-                                    <IconButton size="small" onClick={() => navigate(`/platform-admin/tasks/edit/${task._id}`)}>
+                                    <IconButton size="small" onClick={() => navigate(`/platform-admin/tasks/edit/${task._id}`)} title="Edit">
                                         <Edit fontSize="small" />
                                     </IconButton>
-                                    <IconButton size="small" onClick={() => handleDelete(task._id)} sx={{ color: '#ef4444' }}>
+                                    <IconButton size="small" onClick={() => handleDuplicate(task._id)} title="Duplicate" sx={{ color: '#6366f1' }}>
+                                        <ContentCopy fontSize="small" />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={() => handleDelete(task._id)} title="Delete" sx={{ color: '#ef4444' }}>
                                         <Delete fontSize="small" />
                                     </IconButton>
                                 </TableCell>

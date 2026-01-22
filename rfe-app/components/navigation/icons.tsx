@@ -32,10 +32,21 @@ import {
   Mail,
   Phone,
   Calendar,
+  Clock,
+  Star,
+  CircleHelp,
+  Play,
+  Send,
+  CheckCircle,
+  Coins,
+  ExternalLink,
+  File,
+  Image as ImageIcon,
 } from 'lucide-react-native';
 
 export {
   Home, ListTodo, GraduationCap, Gift, FileText, User, ChevronLeft, Award, ChevronRight,
   TrendingUp, School, Bell, ShieldCheck, Zap, Globe, Wallet, CreditCard, ArrowRight, Sparkles,
-  Search, Heart, BookOpen, MapPin, Users, X, Facebook, Instagram, Linkedin, Youtube, Mail, Phone, Calendar
+  Search, Heart, BookOpen, MapPin, Users, X, Facebook, Instagram, Linkedin, Youtube, Mail, Phone, Calendar,
+  Clock, Star, CircleHelp, Play, Send, CheckCircle, Coins, ExternalLink, File, ImageIcon
 };

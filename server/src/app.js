@@ -24,6 +24,7 @@ import docsRoutes from './routes/docs.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import taskRoutes from './routes/task.routes.js';
+import studentTaskRoutes from './routes/studentTask.routes.js';
 
 // Import middleware
 import errorHandler from './middlewares/errorHandler.js';
@@ -143,6 +144,7 @@ app.use('/api/docs', docsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/student-tasks', studentTaskRoutes);
 
 // 404
 app.use('*', (req, res) => {

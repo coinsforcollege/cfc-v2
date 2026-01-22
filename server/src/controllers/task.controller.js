@@ -220,14 +220,58 @@ export const deleteTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({ success: false, message: 'Task not found' });
     }
-    
+
     await task.deleteOne();
-    
+
     // Optional: Delete physical files
     // task.files.forEach(file => ...)
-    
+
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const duplicateTask = async (req, res) => {
+  try {
+    const originalTask = await Task.findById(req.params.id);
+    if (!originalTask) {
+      return res.status(404).json({ success: false, message: 'Task not found' });
+    }
+
+    // Create a copy of the task with a new title
+    const duplicatedTask = new Task({
+      title: `${originalTask.title} (Copy)`,
+      description: originalTask.description,
+      categories: originalTask.categories,
+      topic: originalTask.topic,
+      grade: originalTask.grade,
+      difficulty: originalTask.difficulty,
+      activity: originalTask.activity,
+      scholarshipPoints: originalTask.scholarshipPoints,
+      requiresApproval: originalTask.requiresApproval,
+      ctaLink: originalTask.ctaLink,
+      ctaLabel: originalTask.ctaLabel,
+      files: originalTask.files,
+      thumbnail: originalTask.thumbnail,
+      status: originalTask.status,
+      expiryDate: originalTask.expiryDate,
+      createdBy: req.user._id
+    });
+
+    await duplicatedTask.save();
+
+    // Populate categories for response
+    await duplicatedTask.populate('categories', 'name');
+
+    res.status(201).json({
+      success: true,
+      data: duplicatedTask
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };

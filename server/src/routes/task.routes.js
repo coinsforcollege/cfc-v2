@@ -6,7 +6,8 @@ import {
   getAllTasks,
   getTaskById,
   updateTask,
-  deleteTask
+  deleteTask,
+  duplicateTask
 } from '../controllers/task.controller.js';
 
 const router = express.Router();
@@ -22,5 +23,7 @@ router.route('/:id')
   .get(getTaskById)
   .put(taskUpload.array('files'), updateTask)
   .delete(deleteTask);
+
+router.post('/:id/duplicate', duplicateTask);
 
 export default router;
