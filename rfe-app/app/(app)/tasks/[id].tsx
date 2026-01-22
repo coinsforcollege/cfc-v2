@@ -368,7 +368,7 @@ export default function TaskDetailScreen() {
     <Box className="flex-1 bg-background-0">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* Cover Image Header */}
         <Box className="relative" style={{ height: isDesktop ? 280 : 200 }}>
@@ -489,35 +489,111 @@ export default function TaskDetailScreen() {
             </Box>
           )}
 
-          {/* Action Section - CTA Link as button */}
-          {task.ctaLink && task.ctaLink.length > 0 && (
-            <Box className="mt-6">
-              <SectionHeader title="Action" />
-              <Pressable
-                onPress={() => openURL(task.ctaLink!)}
-                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-              >
-                <LinearGradient
-                  colors={['#6366f1', '#8b5cf6']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{
-                    borderRadius: 12,
-                    paddingVertical: 14,
-                    paddingHorizontal: 20,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                  }}
-                >
-                  <ExternalLink size={18} color="white" />
-                  <Text className="text-white font-inter-bold text-sm ml-2">
-                    {task.ctaLabel || 'Open Resource'}
-                  </Text>
-                </LinearGradient>
-              </Pressable>
-            </Box>
-          )}
+          {/* Action Section - CTA Link + Completion Button */}
+          <Box className="mt-6">
+            <SectionHeader title="Action" />
+            <HStack style={{ gap: 12 }}>
+              {/* CTA Link Button */}
+              {task.ctaLink && task.ctaLink.length > 0 && (
+                <Box style={{ flex: 1 }}>
+                  <Pressable
+                    onPress={() => openURL(task.ctaLink!)}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+                  >
+                    <Box
+                      className="rounded-xl py-3.5 items-center justify-center flex-row border-2 border-primary-500"
+                    >
+                      <ExternalLink size={18} color={iconColors.accent} />
+                      <Text className="text-primary-500 font-inter-bold text-sm ml-2" numberOfLines={1}>
+                        {task.ctaLabel || 'Open Link'}
+                      </Text>
+                    </Box>
+                  </Pressable>
+                </Box>
+              )}
+
+              {/* Completion Button */}
+              <Box style={{ flex: 1 }}>
+                {userSubmission?.status === 'approved' ? (
+                  <Box
+                    className="rounded-xl py-3.5 items-center justify-center flex-row"
+                    style={{ backgroundColor: isDark ? 'rgb(22, 101, 52)' : 'rgb(220, 252, 231)' }}
+                  >
+                    <CheckCheck size={18} color={isDark ? '#86efac' : '#166534'} />
+                    <Text
+                      className="font-inter-bold text-sm ml-2"
+                      style={{ color: isDark ? '#86efac' : '#166534' }}
+                    >
+                      Completed
+                    </Text>
+                  </Box>
+                ) : userSubmission?.status === 'pending' ? (
+                  <Box
+                    className="rounded-xl py-3.5 items-center justify-center flex-row"
+                    style={{ backgroundColor: isDark ? 'rgb(120, 53, 15)' : 'rgb(254, 243, 199)' }}
+                  >
+                    <Clock size={18} color={isDark ? '#fcd34d' : '#92400e'} />
+                    <Text
+                      className="font-inter-bold text-sm ml-2"
+                      style={{ color: isDark ? '#fcd34d' : '#92400e' }}
+                    >
+                      In Review
+                    </Text>
+                  </Box>
+                ) : userSubmission?.status === 'rejected' ? (
+                  <Pressable
+                    onPress={handleMarkComplete}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+                  >
+                    <LinearGradient
+                      colors={['#f59e0b', '#d97706']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{
+                        borderRadius: 12,
+                        paddingVertical: 14,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'row',
+                      }}
+                    >
+                      <RotateCcw size={18} color="white" />
+                      <Text className="text-white font-inter-bold text-sm ml-2">
+                        Resubmit
+                      </Text>
+                    </LinearGradient>
+                  </Pressable>
+                ) : (
+                  <Pressable
+                    onPress={handleMarkComplete}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+                  >
+                    <LinearGradient
+                      colors={['#6366f1', '#8b5cf6']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{
+                        borderRadius: 12,
+                        paddingVertical: 14,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'row',
+                      }}
+                    >
+                      <Text className="text-white font-inter-bold text-sm">
+                        {task.requiresApproval ? 'Submit' : 'Mark Done'}
+                      </Text>
+                      {task.scholarshipPoints > 0 && (
+                        <Text className="text-white/80 font-inter-bold text-xs ml-1">
+                          +{task.scholarshipPoints}
+                        </Text>
+                      )}
+                    </LinearGradient>
+                  </Pressable>
+                )}
+              </Box>
+            </HStack>
+          </Box>
 
           {/* Description */}
           {task.description && (
@@ -655,128 +731,6 @@ export default function TaskDetailScreen() {
           )}
         </Box>
       </ScrollView>
-
-      {/* Floating Action Button */}
-      <Box
-        className="absolute left-0 right-0 px-4"
-        style={{
-          bottom: Math.max(insets.bottom, 16) + 16,
-        }}
-      >
-        <Box
-          style={{
-            maxWidth: isDesktop ? 800 : undefined,
-            alignSelf: isDesktop ? 'center' : undefined,
-            width: '100%',
-          }}
-        >
-          {/* Already Completed */}
-          {userSubmission?.status === 'approved' ? (
-            <Box
-              className="rounded-2xl py-4 items-center justify-center flex-row"
-              style={{ backgroundColor: isDark ? 'rgb(22, 101, 52)' : 'rgb(220, 252, 231)' }}
-            >
-              <CheckCheck size={20} color={isDark ? '#86efac' : '#166534'} />
-              <Text
-                className="font-inter-bold text-base ml-2"
-                style={{ color: isDark ? '#86efac' : '#166534' }}
-              >
-                Completed
-              </Text>
-              {userSubmission.pointsAwarded > 0 && (
-                <Text
-                  className="font-inter-bold text-sm ml-2"
-                  style={{ color: isDark ? '#86efac' : '#166534', opacity: 0.8 }}
-                >
-                  +{userSubmission.pointsAwarded} SP
-                </Text>
-              )}
-            </Box>
-          ) : userSubmission?.status === 'pending' ? (
-            /* In Review */
-            <Box
-              className="rounded-2xl py-4 items-center justify-center flex-row"
-              style={{ backgroundColor: isDark ? 'rgb(120, 53, 15)' : 'rgb(254, 243, 199)' }}
-            >
-              <Clock size={20} color={isDark ? '#fcd34d' : '#92400e'} />
-              <Text
-                className="font-inter-bold text-base ml-2"
-                style={{ color: isDark ? '#fcd34d' : '#92400e' }}
-              >
-                In Review
-              </Text>
-            </Box>
-          ) : userSubmission?.status === 'rejected' ? (
-            /* Rejected - Can Resubmit */
-            <Pressable
-              onPress={handleMarkComplete}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.9 : 1,
-                transform: [{ scale: pressed ? 0.98 : 1 }],
-              })}
-            >
-              <LinearGradient
-                colors={['#f59e0b', '#d97706']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'row',
-                  shadowColor: '#f59e0b',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                }}
-              >
-                <RotateCcw size={18} color="white" />
-                <Text className="text-white font-inter-bold text-base ml-2">
-                  Resubmit
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          ) : (
-            /* Not Started - Mark as Done / Submit for Review */
-            <Pressable
-              onPress={handleMarkComplete}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.9 : 1,
-                transform: [{ scale: pressed ? 0.98 : 1 }],
-              })}
-            >
-              <LinearGradient
-                colors={['#6366f1', '#8b5cf6']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'row',
-                  shadowColor: '#6366f1',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                }}
-              >
-                <Text className="text-white font-inter-bold text-base">
-                  {task.requiresApproval ? 'Submit for Review' : 'Mark as Done'}
-                </Text>
-                {task.requiresApproval && task.scholarshipPoints > 0 && (
-                  <Text className="text-white/80 font-inter-bold text-sm ml-2">
-                    +{task.scholarshipPoints} SP
-                  </Text>
-                )}
-              </LinearGradient>
-            </Pressable>
-          )}
-        </Box>
-      </Box>
 
       {/* Submission Sheet */}
       {task && (

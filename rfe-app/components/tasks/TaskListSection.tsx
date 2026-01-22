@@ -285,7 +285,8 @@ export function TaskListSection({
       initialNumToRender={PAGE_SIZE}
       maxToRenderPerBatch={PAGE_SIZE}
       windowSize={5}
-      removeClippedSubviews={true}
+      removeClippedSubviews={false}
+      nestedScrollEnabled={true}
       style={{ flex: 1 }}
     />
   );

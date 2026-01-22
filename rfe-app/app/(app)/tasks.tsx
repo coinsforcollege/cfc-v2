@@ -375,6 +375,8 @@ export default function TasksScreen() {
         contentContainerStyle={{
           width: width * TABS.length,
         }}
+        nestedScrollEnabled={true}
+        removeClippedSubviews={false}
       >
         {/* Active Tab */}
         <Box style={{ width, flex: 1 }}>

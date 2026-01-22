@@ -169,6 +169,8 @@ export function SubmissionListSection({ type }: SubmissionListSectionProps) {
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
       ListEmptyComponent={renderEmpty}
+      nestedScrollEnabled={true}
+      removeClippedSubviews={false}
     />
   );
 }
