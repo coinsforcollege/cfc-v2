@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -7,10 +7,12 @@ import {
   useColorScheme,
   ActivityIndicator,
   Platform,
+  Animated,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
@@ -20,12 +22,8 @@ import {
   ChevronLeft,
   Bell,
   CheckCheck,
-  Coins,
-  AlertCircle,
-  Zap,
-  Gift,
-  Award,
-  CheckCircle,
+  Trash2,
+  Mail,
 } from '@/components/navigation/icons';
 import { notificationsApi, Notification } from '@/src/api/notifications.api';
 import { useAuth } from '@/src/contexts/AuthContext';
@@ -43,31 +41,20 @@ const ICON_COLORS = {
   },
 };
 
-// Notification type config
-const NOTIFICATION_CONFIG: Record<string, { icon: React.ComponentType<any>; color: string; bgColor: string }> = {
-  task_approved: { icon: CheckCircle, color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.15)' },
-  task_rejected: { icon: AlertCircle, color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.15)' },
-  task_points_earned: { icon: Coins, color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' },
-  mining_completed: { icon: Zap, color: '#8b5cf6', bgColor: 'rgba(139, 92, 246, 0.15)' },
-  token_milestone: { icon: Award, color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.15)' },
-  referral_bonus_earned: { icon: Gift, color: '#ec4899', bgColor: 'rgba(236, 72, 153, 0.15)' },
-  default: { icon: Bell, color: '#6366f1', bgColor: 'rgba(99, 102, 241, 0.15)' },
-};
-
 function NotificationCard({
   notification,
   onPress,
-  onMarkRead,
+  onDelete,
+  onMarkUnread,
 }: {
   notification: Notification;
   onPress: () => void;
-  onMarkRead: () => void;
+  onDelete: () => void;
+  onMarkUnread: () => void;
 }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-
-  const config = NOTIFICATION_CONFIG[notification.type] || NOTIFICATION_CONFIG.default;
-  const IconComponent = config.icon;
+  const swipeableRef = useRef<Swipeable>(null);
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -84,75 +71,144 @@ function NotificationCard({
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.9 : 1,
-      })}
-    >
-      <Box
-        className={`mx-4 mb-3 p-4 rounded-2xl border ${
-          notification.isRead
-            ? 'bg-background-0 border-outline-100'
-            : 'bg-primary-50 border-primary-200'
-        }`}
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, -60, 0],
+      outputRange: [1, 0.9, 0.5],
+      extrapolate: 'clamp',
+    });
+
+    const opacity = dragX.interpolate({
+      inputRange: [-60, -20, 0],
+      outputRange: [1, 0.5, 0],
+      extrapolate: 'clamp',
+    });
+
+    const handleDelete = () => {
+      swipeableRef.current?.close();
+      onDelete();
+    };
+
+    return (
+      <Animated.View
+        style={{
+          flex: 1,
+          backgroundColor: '#ef4444',
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          paddingRight: 24,
+          opacity,
+        }}
       >
-        <HStack className="items-start">
-          {/* Icon */}
-          <Box
-            className="w-10 h-10 rounded-full items-center justify-center mr-3"
-            style={{ backgroundColor: config.bgColor }}
-          >
-            <IconComponent size={20} color={config.color} />
+        <Pressable onPress={handleDelete}>
+          <Animated.View style={{ transform: [{ scale }] }}>
+            <Trash2 size={20} color="#ffffff" />
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
+    );
+  };
+
+  const renderLeftActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [0, 60, 80],
+      outputRange: [0.5, 0.9, 1],
+      extrapolate: 'clamp',
+    });
+
+    const opacity = dragX.interpolate({
+      inputRange: [0, 20, 60],
+      outputRange: [0, 0.5, 1],
+      extrapolate: 'clamp',
+    });
+
+    const handleMarkUnread = () => {
+      swipeableRef.current?.close();
+      onMarkUnread();
+    };
+
+    return (
+      <Animated.View
+        style={{
+          flex: 1,
+          backgroundColor: '#3b82f6',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          paddingLeft: 24,
+          opacity,
+        }}
+      >
+        <Pressable onPress={handleMarkUnread}>
+          <Animated.View style={{ transform: [{ scale }] }}>
+            <Mail size={20} color="#ffffff" />
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
+    );
+  };
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      renderLeftActions={renderLeftActions}
+      rightThreshold={60}
+      leftThreshold={60}
+      overshootRight={true}
+      overshootLeft={true}
+      overshootFriction={8}
+      friction={2}
+    >
+      <Pressable
+        onPress={onPress}
+        className="bg-background-0"
+        style={({ pressed }) => ({
+          opacity: pressed ? 0.7 : 1,
+        })}
+      >
+        <HStack className="items-start py-3 mx-4 border-b border-outline-100">
+          {/* Unread dot */}
+          <Box className="w-6 pt-1.5">
+            {!notification.isRead && (
+              <Box className="w-2 h-2 rounded-full bg-primary-500" />
+            )}
           </Box>
 
           {/* Content */}
-          <VStack className="flex-1">
+          <VStack className="flex-1 pr-2">
             <HStack className="justify-between items-start mb-1">
               <Text
-                className={`text-sm font-inter-bold flex-1 mr-2 ${
-                  notification.isRead ? 'text-typography-700' : 'text-typography-900'
+                className={`text-sm flex-1 mr-3 ${
+                  notification.isRead
+                    ? 'font-inter-regular text-typography-600'
+                    : 'font-inter-bold text-typography-900'
                 }`}
                 numberOfLines={2}
               >
                 {notification.title}
               </Text>
-              <Text className="text-typography-400 text-xs">
+              <Text className="text-typography-400 text-xs flex-shrink-0">
                 {formatTime(notification.createdAt)}
               </Text>
             </HStack>
             <Text
-              className={`text-sm ${
-                notification.isRead ? 'text-typography-500' : 'text-typography-600'
+              className={`text-sm pr-2 ${
+                notification.isRead ? 'text-typography-400' : 'text-typography-500'
               }`}
               numberOfLines={2}
             >
               {notification.message}
             </Text>
-
-            {/* Points badge for task_points_earned */}
-            {notification.type === 'task_points_earned' && notification.data?.points && (
-              <Box className="mt-2">
-                <Box
-                  className="self-start px-2 py-1 rounded-full"
-                  style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)' }}
-                >
-                  <Text className="text-xs font-inter-bold" style={{ color: '#f59e0b' }}>
-                    +{notification.data.points} SP
-                  </Text>
-                </Box>
-              </Box>
-            )}
           </VStack>
-
-          {/* Unread indicator */}
-          {!notification.isRead && (
-            <Box className="w-2 h-2 rounded-full bg-primary-500 ml-2 mt-1" />
-          )}
         </HStack>
-      </Box>
-    </Pressable>
+      </Pressable>
+    </Swipeable>
   );
 }
 
@@ -260,6 +316,24 @@ export default function NotificationsScreen() {
     [token]
   );
 
+  const handleDelete = useCallback(
+    async (notificationId: string) => {
+      if (!token) return;
+
+      // Optimistically remove from list
+      setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
+
+      try {
+        await notificationsApi.delete(notificationId, token);
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+        // Refetch on error
+        fetchNotifications(1, true);
+      }
+    },
+    [token, fetchNotifications]
+  );
+
   const handleMarkAllRead = useCallback(async () => {
     if (!token) return;
     try {
@@ -270,15 +344,38 @@ export default function NotificationsScreen() {
     }
   }, [token]);
 
+  const handleMarkUnread = useCallback(
+    async (notificationId: string) => {
+      if (!token) return;
+
+      // Optimistically update
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notificationId ? { ...n, isRead: false } : n))
+      );
+
+      try {
+        await notificationsApi.markAsUnread(notificationId, token);
+      } catch (error) {
+        console.error('Error marking notification as unread:', error);
+        // Revert on error
+        setNotifications((prev) =>
+          prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
+        );
+      }
+    },
+    [token]
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: Notification }) => (
       <NotificationCard
         notification={item}
         onPress={() => handleNotificationPress(item)}
-        onMarkRead={() => {}}
+        onDelete={() => handleDelete(item._id)}
+        onMarkUnread={() => handleMarkUnread(item._id)}
       />
     ),
-    [handleNotificationPress]
+    [handleNotificationPress, handleDelete, handleMarkUnread]
   );
 
   const renderFooter = useCallback(() => {
@@ -386,7 +483,7 @@ export default function NotificationsScreen() {
       {loading ? (
         <VStack className="px-4 pt-4" space="md">
           {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} width="100%" height={90} borderRadius={16} />
+            <Skeleton key={i} width="100%" height={70} borderRadius={8} />
           ))}
         </VStack>
       ) : (
@@ -394,7 +491,7 @@ export default function NotificationsScreen() {
           data={notifications}
           renderItem={renderItem}
           keyExtractor={(item) => item._id}
-          contentContainerStyle={{ paddingTop: 12, paddingBottom: 100, flexGrow: 1 }}
+          contentContainerStyle={{ paddingTop: 8, paddingBottom: 100, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl

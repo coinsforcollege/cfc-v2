@@ -3,6 +3,7 @@ import {
   getNotifications,
   getUnreadCount,
   markAsRead,
+  markAsUnread,
   markAllAsRead,
   deleteNotification,
   clearReadNotifications,
@@ -34,6 +35,9 @@ router.delete('/clear-read', clearReadNotifications);
 
 // Mark single notification as read
 router.put('/:id/read', markAsRead);
+
+// Mark single notification as unread
+router.put('/:id/unread', markAsUnread);
 
 // Delete single notification
 router.delete('/:id', deleteNotification);

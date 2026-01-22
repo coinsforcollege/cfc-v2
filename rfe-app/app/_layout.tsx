@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { AuthProvider } from '@/src/contexts/AuthContext';
 import { useFonts } from 'expo-font';
@@ -32,10 +33,12 @@ export default function RootLayout() {
   }
 
   return (
-    <GluestackUIProvider mode="system">
-      <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-      </AuthProvider>
-    </GluestackUIProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GluestackUIProvider mode="system">
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </AuthProvider>
+      </GluestackUIProvider>
+    </GestureHandlerRootView>
   );
 }

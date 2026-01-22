@@ -111,6 +111,15 @@ export const notificationsApi = {
     );
   },
 
+  // Mark single notification as unread
+  async markAsUnread(id: string, token: string): Promise<NotificationResponse> {
+    return apiRequest<NotificationResponse>(
+      `/notifications/${id}/unread`,
+      { method: 'PUT' },
+      token
+    );
+  },
+
   // Mark all notifications as read
   async markAllAsRead(token: string): Promise<NotificationResponse> {
     return apiRequest<NotificationResponse>(

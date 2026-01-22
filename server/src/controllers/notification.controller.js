@@ -102,6 +102,39 @@ export const markAsRead = async (req, res, next) => {
   }
 };
 
+// @desc    Mark notification as unread
+// @route   PUT /api/notifications/:id/unread
+// @access  Private
+export const markAsUnread = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const notification = await Notification.findOne({
+      _id: id,
+      recipient: userId
+    });
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Notification not found'
+      });
+    }
+
+    notification.isRead = false;
+    await notification.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Notification marked as unread',
+      data: notification
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Mark all notifications as read
 // @route   PUT /api/notifications/mark-all-read
 // @access  Private
