@@ -460,7 +460,7 @@ export default function HomeScreen() {
             />
             <Image
               source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
-              style={{ position: 'absolute', top: -150, left: 0, right: 0, height: 250, opacity: 0.02 }}
+              style={{ position: 'absolute', top: -(headerHeight + 100), left: 0, right: 0, height: 250, opacity: 0.02 }}
               resizeMode="cover"
             />
           </View>
