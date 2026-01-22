@@ -273,7 +273,7 @@ function ActionGrid() {
   ];
 
   return (
-    <View className="my-6 flex-row justify-between items-start md:px-0 md:my-2 md:flex-wrap md:w-[220px] md:h-[220px] md:content-between">
+    <View className=" mb-8 flex-row justify-between items-start md:px-0 md:my-2 md:flex-wrap md:w-[220px] md:h-[220px] md:content-between">
       {actions.map((item, index) => (
         <ActionButton key={index} item={item} isDark={isDark} />
       ))}
@@ -311,11 +311,11 @@ function GradientOverlay() {
   );
 }
 
-function MarketplaceCarousel() {
+function SpotlightCarousel() {
   return (
-    <Box className="mb-10">
+    <Box className="my-6 mb-10">
       <Box className="px-4">
-        <SectionTitle title="Marketplace" action="View All" href="/(app)/colleges" />
+        <SectionTitle title="Spotlight" action="View All" href="/(app)/colleges" />
       </Box>
       <ScrollView
         horizontal
@@ -470,10 +470,11 @@ export default function HomeScreen() {
 
         {/* Rest of Content */}
         <Box className="bg-background-0">
+          <SpotlightCarousel />
           <Box className="px-4">
             <ActionGrid />
           </Box>
-          <MarketplaceCarousel />
+          
           <LiveFeed />
           <WalletStack />
         </Box>
