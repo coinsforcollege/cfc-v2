@@ -55,7 +55,7 @@ export const getAllColleges = async (req, res, next) => {
 
     // Execute query - don't populate admin yet
     const colleges = await College.find(query)
-      .select('name country city logo coverImage description tagline stats status admin type studentLife baseRate referralBonusRate createdAt')
+      .select('name country city logo coverImage description tagline stats status admin type studentLife baseRate referralBonusRate departments isFeatured createdAt')
       .sort(sortOrder)
       .limit(parseInt(limit))
       .skip(skip)
@@ -271,6 +271,40 @@ export const getGlobalStats = async (req, res, next) => {
         },
         recentColleges
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get featured colleges for carousel
+// @route   GET /api/colleges/featured
+// @access  Public
+export const getFeaturedColleges = async (req, res, next) => {
+  try {
+    const { limit = 10 } = req.query;
+
+    // Get featured colleges first
+    let colleges = await College.find({ isFeatured: true })
+      .select('name shortName country city logo coverImage tagline departments type')
+      .limit(parseInt(limit));
+
+    // If not enough featured colleges, fill with top colleges by miners
+    if (colleges.length < parseInt(limit)) {
+      const featuredIds = colleges.map(c => c._id);
+      const additionalColleges = await College.find({
+        _id: { $nin: featuredIds }
+      })
+        .select('name shortName country city logo coverImage tagline departments type')
+        .sort({ 'stats.totalMiners': -1 })
+        .limit(parseInt(limit) - colleges.length);
+
+      colleges = [...colleges, ...additionalColleges];
+    }
+
+    res.status(200).json({
+      success: true,
+      data: colleges
     });
   } catch (error) {
     next(error);

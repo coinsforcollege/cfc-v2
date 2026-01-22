@@ -280,6 +280,11 @@ const collegeSchema = new mongoose.Schema({
     enum: ['Unaffiliated', 'Waitlist', 'Building', 'Live'],
     default: 'Unaffiliated'
   },
+  // Featured flag for carousel display
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
   // Earning Rates (per college)
   baseRate: {
     type: Number,
@@ -318,6 +323,9 @@ collegeSchema.index({ 'stats.totalTokensMined': -1 });
 
 // Index for status-based filtering
 collegeSchema.index({ status: 1 });
+
+// Index for featured colleges
+collegeSchema.index({ isFeatured: 1 });
 
 const College = mongoose.model('College', collegeSchema);
 

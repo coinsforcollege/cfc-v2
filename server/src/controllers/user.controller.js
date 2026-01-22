@@ -479,3 +479,267 @@ export const completeOnboarding = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Follow a college
+// @route   POST /api/user/colleges/follow
+// @access  Private (Student only)
+export const followCollege = async (req, res, next) => {
+  try {
+    const { collegeId } = req.body;
+    const userId = req.user.id;
+
+    if (!collegeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'College ID is required'
+      });
+    }
+
+    // Check if college exists
+    const college = await College.findById(collegeId);
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: 'College not found'
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    // Check if already following
+    const alreadyFollowing = user.userProfile.followedColleges?.some(
+      fc => fc.college.toString() === collegeId
+    );
+
+    if (alreadyFollowing) {
+      return res.status(400).json({
+        success: false,
+        message: 'You are already following this college'
+      });
+    }
+
+    // Add to followed colleges
+    if (!user.userProfile.followedColleges) {
+      user.userProfile.followedColleges = [];
+    }
+    user.userProfile.followedColleges.push({
+      college: collegeId,
+      followedAt: new Date()
+    });
+    await user.save();
+
+    // Populate and return
+    await user.populate('userProfile.followedColleges.college', 'name country logo coverImage');
+
+    res.status(200).json({
+      success: true,
+      message: 'College followed successfully',
+      data: {
+        followedColleges: user.userProfile.followedColleges
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Unfollow a college
+// @route   DELETE /api/user/colleges/follow/:collegeId
+// @access  Private (Student only)
+export const unfollowCollege = async (req, res, next) => {
+  try {
+    const { collegeId } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $pull: {
+          'userProfile.followedColleges': { college: collegeId }
+        }
+      },
+      { new: true }
+    ).populate('userProfile.followedColleges.college', 'name country logo coverImage');
+
+    res.status(200).json({
+      success: true,
+      message: 'College unfollowed successfully',
+      data: {
+        followedColleges: user.userProfile.followedColleges
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Express interest to study at a college
+// @route   POST /api/user/colleges/interested
+// @access  Private (Student only)
+export const expressInterest = async (req, res, next) => {
+  try {
+    const { collegeId } = req.body;
+    const userId = req.user.id;
+
+    if (!collegeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'College ID is required'
+      });
+    }
+
+    // Check if college exists
+    const college = await College.findById(collegeId);
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: 'College not found'
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    // Check if already interested
+    const alreadyInterested = user.userProfile.interestedColleges?.some(
+      ic => ic.college.toString() === collegeId
+    );
+
+    if (alreadyInterested) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already expressed interest in this college'
+      });
+    }
+
+    // Add to interested colleges
+    if (!user.userProfile.interestedColleges) {
+      user.userProfile.interestedColleges = [];
+    }
+    user.userProfile.interestedColleges.push({
+      college: collegeId,
+      interestedAt: new Date()
+    });
+    await user.save();
+
+    // Populate and return
+    await user.populate('userProfile.interestedColleges.college', 'name country logo coverImage');
+
+    res.status(200).json({
+      success: true,
+      message: 'Interest expressed successfully',
+      data: {
+        interestedColleges: user.userProfile.interestedColleges
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove interest from a college
+// @route   DELETE /api/user/colleges/interested/:collegeId
+// @access  Private (Student only)
+export const removeInterest = async (req, res, next) => {
+  try {
+    const { collegeId } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $pull: {
+          'userProfile.interestedColleges': { college: collegeId }
+        }
+      },
+      { new: true }
+    ).populate('userProfile.interestedColleges.college', 'name country logo coverImage');
+
+    res.status(200).json({
+      success: true,
+      message: 'Interest removed successfully',
+      data: {
+        interestedColleges: user.userProfile.interestedColleges
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get user's followed colleges
+// @route   GET /api/user/colleges/followed
+// @access  Private (Student only)
+export const getFollowedColleges = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId)
+      .populate('userProfile.followedColleges.college', 'name country logo coverImage departments tagline');
+
+    const followedColleges = user.userProfile.followedColleges?.filter(fc => fc.college) || [];
+
+    res.status(200).json({
+      success: true,
+      data: {
+        followedColleges,
+        count: followedColleges.length
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get user's interested colleges
+// @route   GET /api/user/colleges/interested
+// @access  Private (Student only)
+export const getInterestedColleges = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId)
+      .populate('userProfile.interestedColleges.college', 'name country logo coverImage departments tagline');
+
+    const interestedColleges = user.userProfile.interestedColleges?.filter(ic => ic.college) || [];
+
+    res.status(200).json({
+      success: true,
+      data: {
+        interestedColleges,
+        count: interestedColleges.length
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get college interaction status for a student
+// @route   GET /api/user/colleges/:collegeId/status
+// @access  Private (Student only)
+export const getCollegeStatus = async (req, res, next) => {
+  try {
+    const { collegeId } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+
+    const isFollowing = user.userProfile.followedColleges?.some(
+      fc => fc.college.toString() === collegeId
+    ) || false;
+
+    const isInterested = user.userProfile.interestedColleges?.some(
+      ic => ic.college.toString() === collegeId
+    ) || false;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        isFollowing,
+        isInterested
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

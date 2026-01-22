@@ -19,9 +19,23 @@ import {
   CreditCard,
   ArrowRight,
   Sparkles,
+  Search,
+  Heart,
+  BookOpen,
+  MapPin,
+  Users,
+  X,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Mail,
+  Phone,
+  Calendar,
 } from 'lucide-react-native';
 
-export { 
+export {
   Home, ListTodo, GraduationCap, Gift, FileText, User, ChevronLeft, Award, ChevronRight,
-  TrendingUp, School, Bell, ShieldCheck, Zap, Globe, Wallet, CreditCard, ArrowRight, Sparkles 
+  TrendingUp, School, Bell, ShieldCheck, Zap, Globe, Wallet, CreditCard, ArrowRight, Sparkles,
+  Search, Heart, BookOpen, MapPin, Users, X, Facebook, Instagram, Linkedin, Youtube, Mail, Phone, Calendar
 };

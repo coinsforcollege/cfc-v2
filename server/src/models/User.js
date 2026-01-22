@@ -88,7 +88,29 @@ const userSchema = new mongoose.Schema({
     onboardingCompleted: {
       type: Boolean,
       default: false
-    }
+    },
+    // Colleges the student follows
+    followedColleges: [{
+      college: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'College'
+      },
+      followedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    // Colleges where the student wants to study
+    interestedColleges: [{
+      college: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'College'
+      },
+      interestedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }]
   },
   isActive: {
     type: Boolean,
@@ -112,6 +134,12 @@ userSchema.index({ role: 1 });
 
 // Index for mining colleges lookup (critical for WebSocket queries)
 userSchema.index({ 'userProfile.miningColleges.college': 1 });
+
+// Index for followed colleges lookup
+userSchema.index({ 'userProfile.followedColleges.college': 1 });
+
+// Index for interested colleges lookup
+userSchema.index({ 'userProfile.interestedColleges.college': 1 });
 
 // Compound index for active user queries with role filter
 userSchema.index({ role: 1, isActive: 1 });
