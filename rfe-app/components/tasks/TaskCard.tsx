@@ -201,7 +201,7 @@ export function TaskCard({ task, index }: TaskCardProps) {
                       style={{
                         backgroundColor: isActive
                           ? difficultyColor
-                          : isDark ? 'rgb(64, 64, 64)' : 'rgb(229, 229, 229)',
+                          : isDark ? 'rgb(82, 82, 82)' : 'rgb(200, 200, 200)',
                       }}
                     />
                   );

@@ -9,7 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   Linking,
-  View,
+  ImageBackground,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,16 +21,12 @@ import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonText } from '@/components/ui/button';
 import {
   ChevronLeft,
-  Coins,
   CircleHelp,
   BookOpen,
   Send,
   Play,
-  Clock,
-  Star,
   ExternalLink,
   File,
-  ImageIcon,
   CheckCircle,
   Calendar,
 } from '@/components/navigation/icons';
@@ -55,6 +51,34 @@ const FALLBACK_GRADIENTS: [string, string][] = [
   ['#43e97b', '#38f9d7'],
   ['#fa709a', '#fee140'],
 ];
+
+// Difficulty color classes - using tokens (green -> yellow -> orange -> red)
+const DIFFICULTY_COLORS = {
+  light: [
+    'rgb(34, 197, 94)',   // 1-2: success-500
+    'rgb(34, 197, 94)',
+    'rgb(234, 179, 8)',   // 3-4: warning-500
+    'rgb(234, 179, 8)',
+    'rgb(249, 115, 22)',  // 5-6: orange
+    'rgb(249, 115, 22)',
+    'rgb(239, 68, 68)',   // 7-8: error-500
+    'rgb(239, 68, 68)',
+    'rgb(220, 38, 38)',   // 9-10: error-600
+    'rgb(220, 38, 38)',
+  ],
+  dark: [
+    'rgb(74, 222, 128)',  // 1-2: success-400
+    'rgb(74, 222, 128)',
+    'rgb(250, 204, 21)',  // 3-4: warning-400
+    'rgb(250, 204, 21)',
+    'rgb(251, 146, 60)',  // 5-6: orange-400
+    'rgb(251, 146, 60)',
+    'rgb(248, 113, 113)', // 7-8: error-400
+    'rgb(248, 113, 113)',
+    'rgb(239, 68, 68)',   // 9-10: error-500
+    'rgb(239, 68, 68)',
+  ],
+};
 
 // Theme colors
 const ICON_COLORS = {
@@ -81,17 +105,47 @@ function SectionHeader({ title }: { title: string }) {
   );
 }
 
+// Difficulty Dots Component
+function DifficultyDots({ difficulty, isDark }: { difficulty: number; isDark: boolean }) {
+  const colorPalette = isDark ? DIFFICULTY_COLORS.dark : DIFFICULTY_COLORS.light;
+  const difficultyColor = colorPalette[Math.min(difficulty - 1, 9)];
+
+  return (
+    <HStack className="items-center">
+      <Box className="flex-row items-center">
+        {[...Array(5)].map((_, i) => {
+          const isActive = i < Math.ceil(difficulty / 2);
+          return (
+            <Box
+              key={i}
+              className="w-2 h-2 rounded-full mr-1"
+              style={{
+                backgroundColor: isActive
+                  ? difficultyColor
+                  : isDark ? 'rgb(82, 82, 82)' : 'rgb(200, 200, 200)',
+              }}
+            />
+          );
+        })}
+      </Box>
+      <Text className="text-typography-500 text-xs ml-1">
+        {difficulty}/10
+      </Text>
+    </HStack>
+  );
+}
+
 // Stat Card Component
-function StatCard({ icon, value, label, color }: { icon: React.ReactNode; value: string | number; label: string; color?: string }) {
+function StatCard({ value, label, children }: { value?: string | number; label: string; children?: React.ReactNode }) {
   return (
     <VStack className="flex-1 items-center py-3">
-      <Box className="mb-1">
-        {icon}
-      </Box>
-      <Text className="text-typography-900 font-inter-bold text-lg" style={color ? { color } : undefined}>
-        {value}
-      </Text>
-      <Text className="text-typography-500 text-xs text-center">
+      {children}
+      {value !== undefined && (
+        <Text className="text-typography-900 font-inter-bold text-lg">
+          {value}
+        </Text>
+      )}
+      <Text className="text-typography-500 text-xs text-center mt-1">
         {label}
       </Text>
     </VStack>
@@ -198,19 +252,23 @@ export default function TaskDetailScreen() {
     <Box className="flex-1 bg-background-0">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 140 }}
       >
         {/* Cover Image Header */}
         <Box className="relative" style={{ height: isDesktop ? 280 : 200 }}>
           {showGradient ? (
-            <LinearGradient
-              colors={gradientColors}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+            <ImageBackground
+              source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
             >
-              <ActivityIcon size={64} color="rgba(255,255,255,0.4)" />
-            </LinearGradient>
+              <LinearGradient
+                colors={[gradientColors[0], 'transparent', gradientColors[1]]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ width: '100%', height: '100%', opacity: 0.7 }}
+              />
+            </ImageBackground>
           ) : (
             <Image
               source={{ uri: thumbnailUrl! }}
@@ -282,13 +340,12 @@ export default function TaskDetailScreen() {
               {task.title}
             </Text>
 
-            {/* Points Badge */}
+            {/* Points Badge - no icon */}
             {task.scholarshipPoints > 0 && (
               <HStack className="items-center">
-                <Box className="bg-warning-500 px-3 py-1 rounded-full flex-row items-center">
-                  <Coins size={14} color="white" />
-                  <Text className="text-white font-inter-bold text-sm ml-1">
-                    {task.scholarshipPoints} Points
+                <Box className="bg-warning-500 px-3 py-1 rounded-full">
+                  <Text className="text-white font-inter-bold text-sm">
+                    {task.scholarshipPoints} Scholarship Points
                   </Text>
                 </Box>
               </HStack>
@@ -298,54 +355,28 @@ export default function TaskDetailScreen() {
 
         {/* Content */}
         <Box className={`px-4 ${isDesktop ? 'max-w-[800px] self-center w-full' : ''}`}>
-          {/* Custom CTA Link - Shown prominently after title */}
-          {task.ctaLink && task.ctaLink.length > 0 && (
-            <Pressable
-              onPress={() => openURL(task.ctaLink!)}
-              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-            >
-              <Box className="mt-4 bg-primary-50 border border-primary-200 rounded-xl p-4 flex-row items-center">
-                <Box className="w-10 h-10 rounded-full bg-primary-500 items-center justify-center mr-3">
-                  <ExternalLink size={20} color="white" />
-                </Box>
-                <VStack className="flex-1">
-                  <Text className="text-primary-700 font-inter-bold text-sm">
-                    {task.ctaLabel || 'View Resource'}
-                  </Text>
-                  <Text className="text-primary-500 text-xs" numberOfLines={1}>
-                    {task.ctaLink}
-                  </Text>
-                </VStack>
-                <ChevronLeft
-                  size={20}
-                  color={iconColors.accent}
-                  style={{ transform: [{ rotate: '180deg' }] }}
-                />
-              </Box>
-            </Pressable>
-          )}
-
           {/* Quick Stats Row */}
           <HStack className="bg-background-100 rounded-2xl mt-4">
-            <StatCard
-              icon={<Star size={18} color={iconColors.accent} />}
-              value={`${task.difficulty}/10`}
-              label="Difficulty"
-            />
+            <StatCard label="Difficulty">
+              <DifficultyDots difficulty={task.difficulty} isDark={isDark} />
+            </StatCard>
             <Box className="w-px bg-outline-200 my-3" />
-            <StatCard
-              icon={<ActivityIcon size={18} color={activityConfig.color} />}
-              value={activityConfig.label}
-              label="Type"
-            />
+            <StatCard label="Type">
+              <HStack className="items-center mb-1">
+                <ActivityIcon size={18} color={activityConfig.color} />
+                <Text className="text-typography-900 font-inter-bold text-sm ml-1">
+                  {activityConfig.label}
+                </Text>
+              </HStack>
+            </StatCard>
             {task.requiresApproval && (
               <>
                 <Box className="w-px bg-outline-200 my-3" />
-                <StatCard
-                  icon={<CheckCircle size={18} color="#10b981" />}
-                  value="Yes"
-                  label="Approval"
-                />
+                <StatCard label="Required">
+                  <Text className="text-typography-900 font-inter-bold text-base mb-1">
+                    Approval
+                  </Text>
+                </StatCard>
               </>
             )}
           </HStack>
@@ -360,6 +391,36 @@ export default function TaskDetailScreen() {
             </Box>
           )}
 
+          {/* Action Section - CTA Link as button */}
+          {task.ctaLink && task.ctaLink.length > 0 && (
+            <Box className="mt-6">
+              <SectionHeader title="Action" />
+              <Pressable
+                onPress={() => openURL(task.ctaLink!)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+              >
+                <LinearGradient
+                  colors={['#6366f1', '#8b5cf6']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    borderRadius: 12,
+                    paddingVertical: 14,
+                    paddingHorizontal: 20,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'row',
+                  }}
+                >
+                  <ExternalLink size={18} color="white" />
+                  <Text className="text-white font-inter-bold text-sm ml-2">
+                    {task.ctaLabel || 'Open Resource'}
+                  </Text>
+                </LinearGradient>
+              </Pressable>
+            </Box>
+          )}
+
           {/* Description */}
           {task.description && (
             <Box className="mt-6">
@@ -370,59 +431,67 @@ export default function TaskDetailScreen() {
             </Box>
           )}
 
-          {/* Categories */}
-          {task.categories.length > 0 && (
+          {/* Categories, Topics & Grades - Flexible Layout */}
+          {(task.categories.length > 0 || (task.topic && task.topic.length > 0) || task.grade.length > 0) && (
             <Box className="mt-6">
-              <SectionHeader title="Categories" />
-              <HStack className="flex-wrap gap-2">
-                {task.categories.map((cat) => (
-                  <Box
-                    key={cat._id}
-                    className="px-3 py-1.5 rounded-full bg-primary-100"
-                  >
-                    <Text className="text-primary-700 text-sm font-inter-medium">
-                      {cat.name}
+              <SectionHeader title="Details" />
+              <HStack className="flex-wrap items-center gap-2">
+                {/* Categories */}
+                {task.categories.length > 0 && (
+                  <>
+                    <Text className="text-typography-500 text-xs font-inter-medium">
+                      Category:
                     </Text>
-                  </Box>
-                ))}
-              </HStack>
-            </Box>
-          )}
+                    {task.categories.map((cat) => (
+                      <Box
+                        key={cat._id}
+                        className="px-3 py-1.5 rounded-full bg-primary-100"
+                      >
+                        <Text className="text-primary-700 text-sm font-inter-medium">
+                          {cat.name}
+                        </Text>
+                      </Box>
+                    ))}
+                  </>
+                )}
 
-          {/* Topics */}
-          {task.topic && task.topic.length > 0 && (
-            <Box className="mt-6">
-              <SectionHeader title="Topics" />
-              <HStack className="flex-wrap gap-2">
-                {task.topic.map((topic, index) => (
-                  <Box
-                    key={index}
-                    className="px-3 py-1.5 rounded-full bg-background-100 border border-outline-200"
-                  >
-                    <Text className="text-typography-700 text-sm font-inter-medium">
-                      #{topic}
+                {/* Topics */}
+                {task.topic && task.topic.length > 0 && (
+                  <>
+                    <Text className="text-typography-500 text-xs font-inter-medium ml-1">
+                      Topics:
                     </Text>
-                  </Box>
-                ))}
-              </HStack>
-            </Box>
-          )}
+                    {task.topic.map((topic, index) => (
+                      <Box
+                        key={index}
+                        className="px-3 py-1.5 rounded-full bg-background-100 border border-outline-200"
+                      >
+                        <Text className="text-typography-700 text-sm font-inter-medium">
+                          #{topic}
+                        </Text>
+                      </Box>
+                    ))}
+                  </>
+                )}
 
-          {/* Grade Levels */}
-          {task.grade.length > 0 && (
-            <Box className="mt-6">
-              <SectionHeader title="Grade Levels" />
-              <HStack className="flex-wrap gap-2">
-                {task.grade.map((grade, index) => (
-                  <Box
-                    key={index}
-                    className="w-9 h-9 rounded-lg bg-background-100 items-center justify-center"
-                  >
-                    <Text className="text-typography-700 text-sm font-inter-bold">
-                      {grade === 'K' ? 'K' : grade}
+                {/* Grade Levels */}
+                {task.grade.length > 0 && (
+                  <>
+                    <Text className="text-typography-500 text-xs font-inter-medium ml-1">
+                      Grades:
                     </Text>
-                  </Box>
-                ))}
+                    {task.grade.map((grade, index) => (
+                      <Box
+                        key={index}
+                        className="w-8 h-8 rounded-lg bg-background-100 items-center justify-center"
+                      >
+                        <Text className="text-typography-700 text-xs font-inter-bold">
+                          {grade === 'K' ? 'K' : grade}
+                        </Text>
+                      </Box>
+                    ))}
+                  </>
+                )}
               </HStack>
             </Box>
           )}
@@ -498,13 +567,11 @@ export default function TaskDetailScreen() {
         </Box>
       </ScrollView>
 
-      {/* Sticky Mark Complete Button */}
+      {/* Floating Mark Complete Button - no background box */}
       <Box
-        className="absolute left-0 right-0 bg-background-0 border-t border-outline-100 px-4"
+        className="absolute left-0 right-0 px-4"
         style={{
-          bottom: 0,
-          paddingBottom: Math.max(insets.bottom, 16),
-          paddingTop: 12,
+          bottom: Math.max(insets.bottom, 16) + 16,
         }}
       >
         <Box
@@ -531,19 +598,20 @@ export default function TaskDetailScreen() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexDirection: 'row',
+                shadowColor: '#10b981',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
               }}
             >
-              <CheckCircle size={22} color="white" />
-              <Text className="text-white font-inter-bold text-base ml-2">
+              <Text className="text-white font-inter-bold text-base">
                 Mark Complete
               </Text>
               {task.scholarshipPoints > 0 && (
-                <Box className="bg-white/20 px-2 py-0.5 rounded-full ml-2 flex-row items-center">
-                  <Coins size={12} color="white" />
-                  <Text className="text-white font-inter-bold text-xs ml-1">
-                    +{task.scholarshipPoints}
-                  </Text>
-                </Box>
+                <Text className="text-white/80 font-inter-bold text-sm ml-2">
+                  +{task.scholarshipPoints} SP
+                </Text>
               )}
             </LinearGradient>
           </Pressable>
