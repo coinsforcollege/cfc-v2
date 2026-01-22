@@ -13,7 +13,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#8b5cf6',
+    backgroundColor: '#0a0f2e',
   },
   ios: {
     supportsTablet: true,
@@ -25,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#8b5cf6',
+      backgroundColor: '#0a0f2e',
     },
     package: 'com.rewardsforeducation.app',
   },

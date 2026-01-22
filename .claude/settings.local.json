@@ -21,7 +21,8 @@
       "Bash(python3:*)",
       "Bash(ls:*)",
       "Bash(find:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(file:*)"
     ],
     "deny": [],
     "ask": []

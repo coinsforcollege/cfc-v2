@@ -124,8 +124,8 @@ export default function CollegesScreen() {
               {/* Logo */}
               <Box className="flex-row items-center">
                 <Image
-                  source={require('@/assets/icon.png')}
-                  style={{ width: 32, height: 32, borderRadius: 8 }}
+                  source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
+                  style={{ width: 32, height: 32 }}
                   resizeMode="contain"
                 />
                 <Text className="text-lg font-black text-typography-900 ml-2 tracking-tight">

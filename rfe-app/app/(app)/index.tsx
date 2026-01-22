@@ -63,28 +63,43 @@ const iconChat = require('@/assets/images/icons/3dicons-chat-bubble-dynamic-colo
 function Header({ user }: { user: any }) {
   return (
     <HStack className="justify-between items-center py-4 bg-background-0">
+      {/* App Branding */}
       <HStack space="sm" className="items-center">
-         <Box className="w-10 h-10 rounded-full bg-primary-100 items-center justify-center border-2 border-primary-200">
-           <Text className="text-primary-700 font-bold text-lg">
-             {user?.name?.[0] || 'S'}
-           </Text>
-         </Box>
-         <VStack>
-           <Text className="text-typography-500 text-[10px] font-bold tracking-widest uppercase">
-             Welcome Back
-           </Text>
-           <Text className="text-typography-900 text-lg font-black leading-5">
-             {user?.name?.split(' ')[0] || 'Scholar'}
-           </Text>
-         </VStack>
+        <Image
+          source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
+          style={{ width: 36, height: 36 }}
+          resizeMode="contain"
+        />
+        <VStack>
+          <Text className="text-typography-900 text-base font-black leading-4 tracking-tight">
+            Rewards For
+          </Text>
+          <Text className="text-primary-600 text-base font-black leading-4 tracking-tight">
+            Education
+          </Text>
+        </VStack>
       </HStack>
-      
-      <Pressable style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}>
-        <Box className="w-10 h-10 rounded-full bg-background-50 items-center justify-center border border-outline-200 shadow-sm">
-          <Bell size={20} color="#64748b" />
-          <Box className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-error-500 border border-white" />
-        </Box>
-      </Pressable>
+
+      {/* User & Notifications */}
+      <HStack space="sm" className="items-center">
+        <Pressable style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}>
+          <Box className="w-10 h-10 rounded-full bg-background-50 items-center justify-center border border-outline-200 shadow-sm">
+            <Bell size={20} color="#64748b" />
+            <Box className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-error-500 border border-white" />
+          </Box>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.push('/(app)/profile')}
+          style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <Box className="w-10 h-10 rounded-full bg-primary-100 items-center justify-center border-2 border-primary-200">
+            <Text className="text-primary-700 font-bold text-lg">
+              {user?.name?.[0] || 'S'}
+            </Text>
+          </Box>
+        </Pressable>
+      </HStack>
     </HStack>
   );
 }
