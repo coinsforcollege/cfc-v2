@@ -75,16 +75,9 @@ function NotificationCard({
     progress: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
   ) => {
-    const scale = dragX.interpolate({
-      inputRange: [-80, -60, 0],
-      outputRange: [1, 0.9, 0.5],
-      extrapolate: 'clamp',
-    });
-
-    const opacity = dragX.interpolate({
-      inputRange: [-60, -20, 0],
-      outputRange: [1, 0.5, 0],
-      extrapolate: 'clamp',
+    const trans = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [72, 0],
     });
 
     const handleDelete = () => {
@@ -95,18 +88,23 @@ function NotificationCard({
     return (
       <Animated.View
         style={{
-          flex: 1,
+          width: 72,
           backgroundColor: '#ef4444',
           justifyContent: 'center',
-          alignItems: 'flex-end',
-          paddingRight: 24,
-          opacity,
+          alignItems: 'center',
+          transform: [{ translateX: trans }],
         }}
       >
-        <Pressable onPress={handleDelete}>
-          <Animated.View style={{ transform: [{ scale }] }}>
-            <Trash2 size={20} color="#ffffff" />
-          </Animated.View>
+        <Pressable
+          onPress={handleDelete}
+          style={{
+            flex: 1,
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Trash2 size={20} color="#ffffff" />
         </Pressable>
       </Animated.View>
     );
@@ -116,16 +114,9 @@ function NotificationCard({
     progress: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
   ) => {
-    const scale = dragX.interpolate({
-      inputRange: [0, 60, 80],
-      outputRange: [0.5, 0.9, 1],
-      extrapolate: 'clamp',
-    });
-
-    const opacity = dragX.interpolate({
-      inputRange: [0, 20, 60],
-      outputRange: [0, 0.5, 1],
-      extrapolate: 'clamp',
+    const trans = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [-72, 0],
     });
 
     const handleMarkUnread = () => {
@@ -136,18 +127,23 @@ function NotificationCard({
     return (
       <Animated.View
         style={{
-          flex: 1,
+          width: 72,
           backgroundColor: '#3b82f6',
           justifyContent: 'center',
-          alignItems: 'flex-start',
-          paddingLeft: 24,
-          opacity,
+          alignItems: 'center',
+          transform: [{ translateX: trans }],
         }}
       >
-        <Pressable onPress={handleMarkUnread}>
-          <Animated.View style={{ transform: [{ scale }] }}>
-            <Mail size={20} color="#ffffff" />
-          </Animated.View>
+        <Pressable
+          onPress={handleMarkUnread}
+          style={{
+            flex: 1,
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Mail size={20} color="#ffffff" />
         </Pressable>
       </Animated.View>
     );
@@ -157,13 +153,12 @@ function NotificationCard({
     <Swipeable
       ref={swipeableRef}
       renderRightActions={renderRightActions}
-      renderLeftActions={renderLeftActions}
-      rightThreshold={60}
-      leftThreshold={60}
+      renderLeftActions={notification.isRead ? renderLeftActions : undefined}
+      rightThreshold={40}
+      leftThreshold={notification.isRead ? 40 : 200}
       overshootRight={true}
       overshootLeft={true}
-      overshootFriction={8}
-      friction={2}
+      overshootFriction={4}
     >
       <Pressable
         onPress={onPress}

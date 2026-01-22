@@ -1,13 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { notificationsApi } from '@/src/api/notifications.api';
 import {
   Bell,
   ShieldCheck,
@@ -56,7 +57,7 @@ function getGreeting() {
 }
 
 // Sticky header with top portion of gradient
-function StickyHeader({ user, headerHeight }: { user: any; headerHeight: number }) {
+function StickyHeader({ user, headerHeight, unreadCount }: { user: any; headerHeight: number; unreadCount: number }) {
   const insets = useSafeAreaInsets();
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
   const firstName = user?.name?.split(' ')[0] || 'Scholar';
@@ -124,7 +125,9 @@ function StickyHeader({ user, headerHeight }: { user: any; headerHeight: number 
             >
               <Box className="w-10 h-10 rounded-full bg-white/10 items-center justify-center">
                 <Bell size={18} color="rgba(255,255,255,0.9)" />
-                <Box className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400" />
+                {unreadCount > 0 && (
+                  <Box className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400" />
+                )}
               </Box>
             </Pressable>
           </HStack>
@@ -415,15 +418,34 @@ function WalletStack() {
 }
 
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const insets = useSafeAreaInsets();
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
   const headerHeight = topPadding + 60;
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await notificationsApi.getUnreadCount(token);
+      if (response.success) {
+        setUnreadCount(response.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  }, [token]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnreadCount();
+    }, [fetchUnreadCount])
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: '#1e1b4b' }}>
       {/* Sticky Header */}
-      <StickyHeader user={user} headerHeight={headerHeight} />
+      <StickyHeader user={user} headerHeight={headerHeight} unreadCount={unreadCount} />
 
       {/* Scrollable Content */}
       <ScrollView
