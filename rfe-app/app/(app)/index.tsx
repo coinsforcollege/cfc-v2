@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, useColorScheme, Animated } from 'react-native';
+import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,10 @@ import {
   ShieldCheck,
   Zap,
   CircleDot,
+  ListTodo,
+  Building2,
+  GraduationCap,
+  FolderOpen,
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -41,11 +45,6 @@ const MOCK_OFFERS = [
   { id: 2, title: 'STEM Initiative', amount: '$2,500', deadline: '1 Week' },
 ];
 
-// Local 3D Icons
-const iconTarget = require('@/assets/images/icons/3dicons-target-dynamic-color.png');
-const iconFolder = require('@/assets/images/icons/3dicons-folder-fav-dynamic-color.png');
-const iconCalendar = require('@/assets/images/icons/3dicons-calender-dynamic-color.png');
-const iconChat = require('@/assets/images/icons/3dicons-chat-bubble-dynamic-color.png');
 
 // --- Components ---
 
@@ -207,30 +206,23 @@ function PointsRow({ headerHeight }: { headerHeight: number }) {
   );
 }
 
-function ActionButton({ item, isDark }: { item: any; isDark: boolean }) {
+function ActionButton({ item }: { item: any }) {
+  const IconComponent = item.icon;
   return (
     <Pressable
       onPress={() => router.push(item.href as any)}
       className="md:w-[48%] md:h-[48%] active:scale-[0.96] active:opacity-90 transition-transform duration-200"
     >
-      <LinearGradient
-        colors={isDark ? item.colorsDark : item.colorsLight}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="w-16 h-16 md:w-full md:h-full mb-2 items-center justify-center rounded-3xl"
-        style={Platform.OS === 'web' ? {} : { borderRadius: 36 }}
+      <Box
+        className="w-16 h-16 md:w-full md:h-full mb-2 items-center justify-center rounded-3xl bg-primary-600"
+        style={Platform.OS === 'web' ? {} : { borderRadius: 18 }}
       >
-          <Image 
-            source={item.image} 
-            style={{ width: Platform.OS === 'web' ? '60%' : 44, height: Platform.OS === 'web' ? '60%' : 44 }} 
-            className="w-11 h-11 md:w-10 md:h-10 md:mb-1" 
-            resizeMode="contain"
-          />
-          <Text className="hidden md:flex text-typography-800 text-[10px] font-inter-bold uppercase tracking-wider text-center">
-            {item.label}
-          </Text>
-      </LinearGradient>
-      
+        <IconComponent size={28} color="#FFFFFF" strokeWidth={1} />
+        <Text className="hidden md:flex text-white text-[10px] font-inter-bold uppercase tracking-wider text-center mt-1">
+          {item.label}
+        </Text>
+      </Box>
+
       <Text className="md:hidden text-typography-600 text-sm font-inter-bold tracking-tight text-center">
         {item.label}
       </Text>
@@ -239,43 +231,17 @@ function ActionButton({ item, isDark }: { item: any; isDark: boolean }) {
 }
 
 function ActionGrid() {
-  const isDark = useColorScheme() === 'dark';
-
   const actions = [
-    { 
-      label: 'Tasks', 
-      href: '/(app)/tasks', 
-      image: iconTarget,
-      colorsLight: ['#ecfdf5', '#10b981'],
-      colorsDark: ['#064e3b', '#10b981'],
-    }, 
-    { 
-      label: 'Colleges', 
-      href: '/(app)/colleges', 
-      image: iconCalendar, 
-      colorsLight: ['#eef2ff', '#6366f1'],
-      colorsDark: ['#312e81', '#6366f1'],
-    },   
-    { 
-      label: 'Offers', 
-      href: '/(app)/offers', 
-      image: iconChat, 
-      colorsLight: ['#fffbeb', '#f59e0b'],
-      colorsDark: ['#451a03', '#f59e0b'],
-    },
-    { 
-      label: 'Docs', 
-      href: '/(app)/documents', 
-      image: iconFolder,
-      colorsLight: ['#f0f9ff', '#0ea5e9'],
-      colorsDark: ['#0c4a6e', '#0ea5e9'],
-    }, 
+    { label: 'Tasks', href: '/(app)/tasks', icon: ListTodo },
+    { label: 'Colleges', href: '/(app)/colleges', icon: Building2 },
+    { label: 'Offers', href: '/(app)/offers', icon: GraduationCap },
+    { label: 'Docs', href: '/(app)/documents', icon: FolderOpen },
   ];
 
   return (
-    <View className=" mb-8 flex-row justify-between items-start md:px-0 md:my-2 md:flex-wrap md:w-[220px] md:h-[220px] md:content-between">
+    <View className="mb-8 flex-row justify-between items-start md:px-0 md:my-2 md:flex-wrap md:w-[220px] md:h-[220px] md:content-between">
       {actions.map((item, index) => (
-        <ActionButton key={index} item={item} isDark={isDark} />
+        <ActionButton key={index} item={item} />
       ))}
     </View>
   );
