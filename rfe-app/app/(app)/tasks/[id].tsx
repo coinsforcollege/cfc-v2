@@ -105,6 +105,95 @@ function SectionHeader({ title }: { title: string }) {
   );
 }
 
+// Grade Display Component - smart pattern detection
+function GradeDisplay({ grades }: { grades: string[] }) {
+  const gradePattern = getGradePattern(grades);
+
+  return (
+    <Box className="px-3 py-1.5 rounded-full bg-background-100 border border-outline-200">
+      <Text className="text-typography-700 text-sm font-inter-medium">
+        {gradePattern}
+      </Text>
+    </Box>
+  );
+}
+
+// Helper function to detect grade patterns
+function getGradePattern(grades: string[]): string {
+  if (!grades || grades.length === 0) return '';
+
+  // Sort grades numerically (K = 0)
+  const gradeOrder = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+  const sortedGrades = [...grades].sort((a, b) =>
+    gradeOrder.indexOf(a) - gradeOrder.indexOf(b)
+  );
+
+  const hasK = sortedGrades.includes('K');
+  const numericGrades = sortedGrades.filter(g => g !== 'K').map(Number);
+
+  // Check if all grades are selected (K-12 or 1-12)
+  if (sortedGrades.length === 13 && hasK) {
+    return 'All Grades (K-12)';
+  }
+  if (sortedGrades.length === 12 && !hasK && numericGrades[0] === 1 && numericGrades[numericGrades.length - 1] === 12) {
+    return 'All Grades (1-12)';
+  }
+
+  // Check for consecutive range
+  const isConsecutive = (nums: number[]) => {
+    if (nums.length <= 1) return true;
+    for (let i = 1; i < nums.length; i++) {
+      if (nums[i] !== nums[i - 1] + 1) return false;
+    }
+    return true;
+  };
+
+  // If only K
+  if (grades.length === 1 && hasK) {
+    return 'Kindergarten';
+  }
+
+  // If only one numeric grade
+  if (grades.length === 1 && !hasK) {
+    return `Grade ${grades[0]}`;
+  }
+
+  // Check for K + consecutive
+  if (hasK && numericGrades.length > 0) {
+    if (numericGrades[0] === 1 && isConsecutive(numericGrades)) {
+      const lastGrade = numericGrades[numericGrades.length - 1];
+      if (lastGrade === 12) {
+        return 'All Grades (K-12)';
+      }
+      return `Grades K-${lastGrade}`;
+    }
+  }
+
+  // Pure numeric consecutive range
+  if (!hasK && isConsecutive(numericGrades)) {
+    const first = numericGrades[0];
+    const last = numericGrades[numericGrades.length - 1];
+
+    if (first === last) {
+      return `Grade ${first}`;
+    }
+    if (last === 12) {
+      return `Grade ${first} & Above`;
+    }
+    if (first === 1) {
+      return `Up to Grade ${last}`;
+    }
+    return `Grades ${first}-${last}`;
+  }
+
+  // Non-consecutive - show as comma separated if few, otherwise count
+  if (grades.length <= 4) {
+    return `Grades ${sortedGrades.join(', ')}`;
+  }
+
+  return `${grades.length} Grade Levels`;
+}
+
 // Difficulty Dots Component
 function DifficultyDots({ difficulty, isDark }: { difficulty: number; isDark: boolean }) {
   const colorPalette = isDark ? DIFFICULTY_COLORS.dark : DIFFICULTY_COLORS.light;
@@ -309,24 +398,6 @@ export default function TaskDetailScreen() {
             <ChevronLeft size={24} color="white" strokeWidth={2.5} />
           </Pressable>
 
-          {/* Activity Badge - Top Right */}
-          <Box
-            className="absolute px-3 py-1.5 rounded-lg flex-row items-center"
-            style={{
-              top: insets.top + 12,
-              right: 16,
-              backgroundColor: activityConfig.bgColor,
-            }}
-          >
-            <ActivityIcon size={16} color={activityConfig.color} />
-            <Text
-              className="text-sm font-inter-bold ml-1.5"
-              style={{ color: activityConfig.color }}
-            >
-              {task.activity}
-            </Text>
-          </Box>
-
           {/* Title & Points on Cover */}
           <Box
             className="absolute left-0 right-0 px-4"
@@ -436,9 +507,9 @@ export default function TaskDetailScreen() {
             <Box className="mt-6">
               <SectionHeader title="Details" />
               <HStack className="flex-wrap items-center gap-2">
-                {/* Categories */}
+                {/* Categories - wrapped together */}
                 {task.categories.length > 0 && (
-                  <>
+                  <HStack className="flex-wrap items-center gap-1.5">
                     <Text className="text-typography-500 text-xs font-inter-medium">
                       Category:
                     </Text>
@@ -452,13 +523,13 @@ export default function TaskDetailScreen() {
                         </Text>
                       </Box>
                     ))}
-                  </>
+                  </HStack>
                 )}
 
-                {/* Topics */}
+                {/* Topics - wrapped together */}
                 {task.topic && task.topic.length > 0 && (
-                  <>
-                    <Text className="text-typography-500 text-xs font-inter-medium ml-1">
+                  <HStack className="flex-wrap items-center gap-1.5">
+                    <Text className="text-typography-500 text-xs font-inter-medium">
                       Topics:
                     </Text>
                     {task.topic.map((topic, index) => (
@@ -471,26 +542,17 @@ export default function TaskDetailScreen() {
                         </Text>
                       </Box>
                     ))}
-                  </>
+                  </HStack>
                 )}
 
-                {/* Grade Levels */}
+                {/* Grade Levels - with smart pattern display */}
                 {task.grade.length > 0 && (
-                  <>
-                    <Text className="text-typography-500 text-xs font-inter-medium ml-1">
+                  <HStack className="flex-wrap items-center gap-1.5">
+                    <Text className="text-typography-500 text-xs font-inter-medium">
                       Grades:
                     </Text>
-                    {task.grade.map((grade, index) => (
-                      <Box
-                        key={index}
-                        className="w-8 h-8 rounded-lg bg-background-100 items-center justify-center"
-                      >
-                        <Text className="text-typography-700 text-xs font-inter-bold">
-                          {grade === 'K' ? 'K' : grade}
-                        </Text>
-                      </Box>
-                    ))}
-                  </>
+                    <GradeDisplay grades={task.grade} />
+                  </HStack>
                 )}
               </HStack>
             </Box>
