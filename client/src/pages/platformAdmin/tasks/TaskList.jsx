@@ -17,7 +17,9 @@ import {
   IconButton,
   TextField,
   InputAdornment,
-  Pagination
+  Pagination,
+  Checkbox,
+  Alert
 } from '@mui/material';
 import {
   Add,
@@ -45,6 +47,8 @@ const TaskList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [stats, setStats] = useState({ active: 0, expired: 0, library: 0 });
+  const [selected, setSelected] = useState([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -83,6 +87,40 @@ const TaskList = () => {
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setPage(1);
+    setSelected([]);
+  };
+
+  const handleSelectAll = (event) => {
+    if (event.target.checked) {
+      setSelected(tasks.map(t => t._id));
+    } else {
+      setSelected([]);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    setSelected(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(x => x !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selected.length} task(s)?`)) return;
+
+    try {
+      setBulkDeleting(true);
+      await platformAdminTaskApi.bulkDeleteTasks(selected);
+      setSelected([]);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error bulk deleting tasks:', error);
+    } finally {
+      setBulkDeleting(false);
+    }
   };
 
   const getActivityIcon = (type) => {
@@ -213,6 +251,27 @@ const TaskList = () => {
           </Box>
       </Card>
 
+      {/* Bulk Action Bar */}
+      {selected.length > 0 && (
+        <Alert
+          severity="info"
+          sx={{ mb: 2, borderRadius: 2 }}
+          action={
+            <Button
+              color="error"
+              size="small"
+              startIcon={<Delete />}
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+            >
+              {bulkDeleting ? 'Deleting...' : `Delete ${selected.length} selected`}
+            </Button>
+          }
+        >
+          {selected.length} task(s) selected
+        </Alert>
+      )}
+
       {/* List */}
       <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <CardContent>
@@ -220,6 +279,13 @@ const TaskList = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                indeterminate={selected.length > 0 && selected.length < tasks.length}
+                                checked={tasks.length > 0 && selected.length === tasks.length}
+                                onChange={handleSelectAll}
+                              />
+                            </TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Task Title</TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Grade</TableCell>
@@ -231,7 +297,17 @@ const TaskList = () => {
                     </TableHead>
                     <TableBody>
                         {tasks.map((task) => (
-                            <TableRow key={task._id} hover>
+                            <TableRow
+                              key={task._id}
+                              hover
+                              selected={selected.includes(task._id)}
+                            >
+                                <TableCell padding="checkbox">
+                                  <Checkbox
+                                    checked={selected.includes(task._id)}
+                                    onChange={() => handleSelectOne(task._id)}
+                                  />
+                                </TableCell>
                                 <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         {task.thumbnail && (
@@ -285,7 +361,7 @@ const TaskList = () => {
                         ))}
                          {tasks.length === 0 && !loading && (
                             <TableRow>
-                            <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                            <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                                 <Typography color="text.secondary">No tasks found</Typography>
                             </TableCell>
                             </TableRow>

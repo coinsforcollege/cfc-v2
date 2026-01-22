@@ -7,6 +7,7 @@ import {
   getTaskById,
   updateTask,
   deleteTask,
+  bulkDeleteTasks,
   duplicateTask
 } from '../controllers/task.controller.js';
 
@@ -18,6 +19,8 @@ router.use(authorize('platform_admin', 'admin'));
 router.route('/')
   .post(taskUpload.array('files'), createTask)
   .get(getAllTasks);
+
+router.post('/bulk-delete', bulkDeleteTasks);
 
 router.route('/:id')
   .get(getTaskById)
