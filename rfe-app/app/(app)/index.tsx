@@ -132,7 +132,7 @@ function PassportCard() {
             Total Balance
           </Text>
           <HStack className="items-baseline">
-            <Text className="text-white text-5xl font-black tracking-tight" style={{ fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'sans-serif' }}>
+            <Text className="text-white text-5xl font-inter-black tracking-tight">
               {MOCK_BALANCE.total}
             </Text>
             <Text className="text-white/80 text-lg font-inter-bold ml-2">
@@ -154,7 +154,7 @@ function PassportCard() {
              style={({pressed}) => ({ opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] })}
           >
              <Box className="bg-white px-5 py-3 rounded-2xl shadow-lg flex-row items-center justify-center">
-                <Text className="text-slate-900 font-extrabold text-xs tracking-wider uppercase mr-2.5">
+                <Text className="text-slate-900 font-inter-extrabold text-xs tracking-wider uppercase mr-2.5">
                   Add Funds
                 </Text>
                  <Box className="bg-slate-900 rounded-full p-0.5">
@@ -245,7 +245,7 @@ function ActionGrid() {
 function SectionTitle({ title, action, href }: { title: string, action?: string, href?: string }) {
   return (
     <HStack className="mb-4 items-center justify-between">
-      <Text className="text-lg font-black text-typography-900 tracking-tight">
+      <Text className="text-lg font-inter-regular text-typography-900 tracking-tight">
         {title}
       </Text>
       {action && href && (
@@ -309,7 +309,7 @@ function MarketplaceCarousel() {
                  <Text className="text-white font-inter-bold text-lg leading-6 mb-1">
                    {college.name}
                  </Text>
-                 <Text className="text-white/70 text-xs font-medium uppercase tracking-wide">
+                 <Text className="text-white/70 text-xs font-inter-medium uppercase tracking-wide">
                    {college.location}
                  </Text>
               </View>
@@ -380,16 +380,16 @@ function WalletStack() {
                <Text className="text-amber-500 text-[10px] font-inter-bold uppercase tracking-widest mb-1.5">
                  Scholarship Grant
                </Text>
-               <Text className="text-white text-xl font-black leading-6">
+               <Text className="text-white text-xl font-inter-black leading-6">
                  {offer.title}
                </Text>
-               <Text className="text-gray-400 text-xs mt-2 font-medium">
+               <Text className="text-gray-400 text-xs mt-2 font-inter-medium">
                  Expires: <Text className="text-white font-inter-bold">{offer.deadline}</Text>
                </Text>
              </VStack>
              
              <View className="border-l border-white/10 pl-5 ml-4 justify-center items-center">
-                <Text className="text-white font-black text-lg">
+                <Text className="text-white font-inter-black text-lg">
                   {offer.amount.split(',')[0]}k
                 </Text>
                 <Box className="bg-white/20 px-2 py-0.5 rounded mt-1">

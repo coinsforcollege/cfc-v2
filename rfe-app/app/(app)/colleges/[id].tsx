@@ -92,7 +92,7 @@ function getDepartments(college: College): string[] {
 // Section Header Component
 function SectionHeader({ title }: { title: string }) {
   return (
-    <Text className="text-typography-900 font-bold text-base mb-3">
+    <Text className="text-typography-900 font-inter-bold text-base mb-3">
       {title}
     </Text>
   );
@@ -107,7 +107,7 @@ function InfoRow({ icon, label, value, onPress }: { icon: React.ReactNode; label
       </Box>
       <VStack className="flex-1">
         <Text className="text-typography-500 text-xs">{label}</Text>
-        <Text className={`text-typography-900 text-sm font-medium ${onPress ? 'text-primary-600' : ''}`} numberOfLines={1}>
+        <Text className={`text-typography-900 text-sm font-inter-medium ${onPress ? 'text-primary-600' : ''}`} numberOfLines={1}>
           {value}
         </Text>
       </VStack>
@@ -129,7 +129,7 @@ function InfoRow({ icon, label, value, onPress }: { icon: React.ReactNode; label
 function StatCard({ value, label }: { value: string | number; label: string }) {
   return (
     <VStack className="flex-1 items-center py-3">
-      <Text className="text-typography-900 font-bold text-lg">
+      <Text className="text-typography-900 font-inter-bold text-lg">
         {value}
       </Text>
       <Text className="text-typography-500 text-xs text-center">
@@ -266,7 +266,7 @@ export default function CollegeDetailScreen() {
     return (
       <Box className="flex-1 bg-background-0 items-center justify-center px-6">
         <School size={64} color={iconColors.muted} />
-        <Text className="text-typography-900 text-lg font-semibold mt-4">
+        <Text className="text-typography-900 text-lg font-inter-semibold mt-4">
           College not found
         </Text>
         <Text className="text-typography-500 text-sm text-center mt-2">
@@ -316,7 +316,7 @@ export default function CollegeDetailScreen() {
               end={{ x: 1, y: 1 }}
               style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Text className="text-white/60 font-black text-5xl tracking-wider">
+              <Text className="text-white/60 font-inter-black text-5xl tracking-wider">
                 {getAcronym(college.name, college.shortName)}
               </Text>
             </LinearGradient>
@@ -391,7 +391,7 @@ export default function CollegeDetailScreen() {
                       justifyContent: 'center',
                     }}
                   >
-                    <Text className="text-white font-black text-2xl">
+                    <Text className="text-white font-inter-black text-2xl">
                       {college.name.charAt(0)}
                     </Text>
                   </LinearGradient>
@@ -408,7 +408,7 @@ export default function CollegeDetailScreen() {
               {/* Name & Location */}
               <VStack className="flex-1 mb-1">
                 <Text
-                  className="text-white font-bold text-xl leading-tight"
+                  className="text-white font-inter-bold text-xl leading-tight"
                   numberOfLines={2}
                   style={{ textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }}
                 >
@@ -446,7 +446,7 @@ export default function CollegeDetailScreen() {
                       color={status.isFollowing ? '#ef4444' : iconColors.secondary}
                       fill={status.isFollowing ? '#ef4444' : 'none'}
                     />
-                    <Text className={`ml-2 text-sm font-medium ${status.isFollowing ? 'text-error-500' : 'text-typography-700'}`}>
+                    <Text className={`ml-2 text-sm font-inter-medium ${status.isFollowing ? 'text-error-500' : 'text-typography-700'}`}>
                       {status.isFollowing ? 'Following' : 'Follow'}
                     </Text>
                   </>
@@ -468,7 +468,7 @@ export default function CollegeDetailScreen() {
                       size={20}
                       color={status.isInterested ? iconColors.success : iconColors.secondary}
                     />
-                    <Text className={`ml-2 text-sm font-medium ${status.isInterested ? 'text-success-600' : 'text-typography-700'}`}>
+                    <Text className={`ml-2 text-sm font-inter-medium ${status.isInterested ? 'text-success-600' : 'text-typography-700'}`}>
                       {status.isInterested ? 'Interested' : 'Study here'}
                     </Text>
                   </>
@@ -514,7 +514,7 @@ export default function CollegeDetailScreen() {
                 {college.admissions.acceptanceRate && (
                   <HStack className="items-center justify-between mb-2">
                     <Text className="text-typography-600 text-sm">Acceptance Rate</Text>
-                    <Text className="text-typography-900 font-semibold">
+                    <Text className="text-typography-900 font-inter-semibold">
                       {college.admissions.acceptanceRate}%
                     </Text>
                   </HStack>
@@ -522,7 +522,7 @@ export default function CollegeDetailScreen() {
                 {college.admissions.applicationDeadline && (
                   <HStack className="items-center justify-between mb-2">
                     <Text className="text-typography-600 text-sm">Application Deadline</Text>
-                    <Text className="text-typography-900 font-semibold">
+                    <Text className="text-typography-900 font-inter-semibold">
                       {college.admissions.applicationDeadline}
                     </Text>
                   </HStack>
@@ -530,12 +530,71 @@ export default function CollegeDetailScreen() {
                 {college.admissions.tuitionFee?.international && (
                   <HStack className="items-center justify-between">
                     <Text className="text-typography-600 text-sm">Tuition (International)</Text>
-                    <Text className="text-typography-900 font-semibold">
+                    <Text className="text-typography-900 font-inter-semibold">
                       {college.admissions.tuitionFee.currency || '$'}{college.admissions.tuitionFee.international.toLocaleString()}
                     </Text>
                   </HStack>
                 )}
               </Box>
+            </Box>
+          )}
+
+          {/* Social Media */}
+          {hasSocialMedia && (
+            <Box className="mb-6">
+              <SectionHeader title="Follow Us" />
+              <HStack space="md">
+                {college.socialMedia?.facebook && (
+                  <Pressable
+                    onPress={() => openURL(college.socialMedia!.facebook!)}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <Box className="w-11 h-11 rounded-full items-center justify-center" style={{ backgroundColor: '#1877f2' }}>
+                      <Facebook size={20} color="white" />
+                    </Box>
+                  </Pressable>
+                )}
+                {college.socialMedia?.twitter && (
+                  <Pressable
+                    onPress={() => openURL(college.socialMedia!.twitter!)}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <Box className="w-11 h-11 rounded-full items-center justify-center bg-typography-900">
+                      <Text className="text-typography-0 font-inter-extrabold text-base">X</Text>
+                    </Box>
+                  </Pressable>
+                )}
+                {college.socialMedia?.instagram && (
+                  <Pressable
+                    onPress={() => openURL(college.socialMedia!.instagram!)}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <Box className="w-11 h-11 rounded-full items-center justify-center" style={{ backgroundColor: '#E4405F' }}>
+                      <Instagram size={20} color="white" />
+                    </Box>
+                  </Pressable>
+                )}
+                {college.socialMedia?.linkedin && (
+                  <Pressable
+                    onPress={() => openURL(college.socialMedia!.linkedin!)}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <Box className="w-11 h-11 rounded-full items-center justify-center" style={{ backgroundColor: '#0A66C2' }}>
+                      <Linkedin size={20} color="white" />
+                    </Box>
+                  </Pressable>
+                )}
+                {college.socialMedia?.youtube && (
+                  <Pressable
+                    onPress={() => openURL(college.socialMedia!.youtube!)}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <Box className="w-11 h-11 rounded-full items-center justify-center" style={{ backgroundColor: '#FF0000' }}>
+                      <Youtube size={20} color="white" />
+                    </Box>
+                  </Pressable>
+                )}
+              </HStack>
             </Box>
           )}
 
@@ -580,7 +639,7 @@ export default function CollegeDetailScreen() {
                   key={dept}
                   className="px-3 py-1.5 rounded-full bg-primary-100"
                 >
-                  <Text className="text-primary-700 text-sm font-medium">
+                  <Text className="text-primary-700 text-sm font-inter-medium">
                     {dept}
                   </Text>
                 </Box>
@@ -636,7 +695,7 @@ export default function CollegeDetailScreen() {
                     <MapPin size={20} color={iconColors.accent} />
                   </Box>
                   <VStack>
-                    <Text className="text-typography-900 font-bold text-lg">
+                    <Text className="text-typography-900 font-inter-bold text-lg">
                       {college.campusSize.value} {college.campusSize.unit}
                     </Text>
                     <Text className="text-typography-500 text-xs">
@@ -681,94 +740,6 @@ export default function CollegeDetailScreen() {
             </Box>
           )}
 
-          {/* Social Media */}
-          {hasSocialMedia && (
-            <Box className="mb-6">
-              <SectionHeader title="Follow Us" />
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                {college.socialMedia?.facebook && (
-                  <Pressable
-                    onPress={() => openURL(college.socialMedia!.facebook!)}
-                    style={({ pressed }) => ({
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: '#1877f2',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: pressed ? 0.8 : 1,
-                    })}
-                  >
-                    <Facebook size={20} color="white" />
-                  </Pressable>
-                )}
-                {college.socialMedia?.twitter && (
-                  <Pressable
-                    onPress={() => openURL(college.socialMedia!.twitter!)}
-                    style={({ pressed }) => ({
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: isDark ? '#ffffff' : '#000000',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: pressed ? 0.8 : 1,
-                    })}
-                  >
-                    <Text style={{ color: isDark ? '#000000' : '#ffffff', fontWeight: '800', fontSize: 16 }}>X</Text>
-                  </Pressable>
-                )}
-                {college.socialMedia?.instagram && (
-                  <Pressable
-                    onPress={() => openURL(college.socialMedia!.instagram!)}
-                    style={({ pressed }) => ({
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: '#E4405F',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: pressed ? 0.8 : 1,
-                    })}
-                  >
-                    <Instagram size={20} color="white" />
-                  </Pressable>
-                )}
-                {college.socialMedia?.linkedin && (
-                  <Pressable
-                    onPress={() => openURL(college.socialMedia!.linkedin!)}
-                    style={({ pressed }) => ({
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: '#0A66C2',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: pressed ? 0.8 : 1,
-                    })}
-                  >
-                    <Linkedin size={20} color="white" />
-                  </Pressable>
-                )}
-                {college.socialMedia?.youtube && (
-                  <Pressable
-                    onPress={() => openURL(college.socialMedia!.youtube!)}
-                    style={({ pressed }) => ({
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: '#FF0000',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: pressed ? 0.8 : 1,
-                    })}
-                  >
-                    <Youtube size={20} color="white" />
-                  </Pressable>
-                )}
-              </View>
-            </Box>
-          )}
         </Box>
       </ScrollView>
     </Box>

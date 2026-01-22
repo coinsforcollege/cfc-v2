@@ -11,9 +11,13 @@ import {
 } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Globe } from '@/components/navigation/icons';
 import { CollegeCard } from './CollegeCard';
 import { collegesApi, College } from '@/src/api/colleges.api';
+
+const CARD_HEIGHT = 230;
+const IMAGE_HEIGHT = 115;
 
 // Theme colors (from config.ts)
 const THEME_COLORS = {
@@ -49,6 +53,43 @@ interface CollegeListSectionProps {
 }
 
 const PAGE_SIZE = 20;
+
+function SkeletonCollegeCard({ width }: { width: number }) {
+  return (
+    <Box
+      className="bg-background-0 rounded-2xl overflow-hidden border border-outline-100"
+      style={{ height: CARD_HEIGHT, width }}
+    >
+      {/* Image skeleton */}
+      <Box style={{ height: IMAGE_HEIGHT }}>
+        <Skeleton width="100%" height={IMAGE_HEIGHT} borderRadius={0} />
+        {/* Country badge */}
+        <Box className="absolute top-2 right-2">
+          <Skeleton width={36} height={18} borderRadius={4} />
+        </Box>
+        {/* Logo overlay */}
+        <Box className="absolute" style={{ bottom: 8, left: 8 }}>
+          <Skeleton width={28} height={28} borderRadius={14} />
+        </Box>
+      </Box>
+
+      {/* Content skeleton */}
+      <Box className="px-2.5 pt-2.5 pb-1.5">
+        {/* Title - 2 lines */}
+        <Skeleton width="100%" height={16} borderRadius={4} style={{ marginBottom: 4 }} />
+        <Skeleton width="70%" height={16} borderRadius={4} style={{ marginBottom: 6 }} />
+        {/* City */}
+        <Skeleton width="50%" height={12} borderRadius={4} style={{ marginBottom: 8 }} />
+        {/* Department chips */}
+        <Box className="flex-row flex-wrap gap-1">
+          <Skeleton width={60} height={18} borderRadius={4} />
+          <Skeleton width={45} height={18} borderRadius={4} />
+          <Skeleton width={70} height={18} borderRadius={4} />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 export function CollegeListSection({
   searchQuery,
@@ -172,16 +213,37 @@ export function CollegeListSection({
     );
   }, [loadingMore, themeColors.indicator]);
 
-  const renderEmptyList = useCallback(() => {
-    if (loading) {
-      return (
-        <Box className="py-12 items-center">
-          <ActivityIndicator size="large" color={themeColors.indicator} />
-          <Text className="text-typography-500 text-sm mt-3">
-            Loading colleges...
-          </Text>
+  const renderSkeletonGrid = useCallback(() => {
+    const skeletonCount = numColumns * 3; // 3 rows of skeletons
+    const rows = [];
+    for (let i = 0; i < skeletonCount; i += numColumns) {
+      const rowItems = [];
+      for (let j = 0; j < numColumns && i + j < skeletonCount; j++) {
+        rowItems.push(
+          <Box
+            key={i + j}
+            style={{
+              width: cardWidth,
+              marginRight: j < numColumns - 1 ? gap : 0,
+              marginBottom: gap,
+            }}
+          >
+            <SkeletonCollegeCard width={cardWidth} />
+          </Box>
+        );
+      }
+      rows.push(
+        <Box key={`row-${i}`} className="flex-row">
+          {rowItems}
         </Box>
       );
+    }
+    return <Box style={{ paddingHorizontal: horizontalPadding }}>{rows}</Box>;
+  }, [numColumns, cardWidth, gap, horizontalPadding]);
+
+  const renderEmptyList = useCallback(() => {
+    if (loading) {
+      return renderSkeletonGrid();
     }
 
     if (error) {
@@ -199,7 +261,7 @@ export function CollegeListSection({
 
     return (
       <Box className="py-12 items-center px-4">
-        <Text className="text-typography-900 text-base font-bold mb-1">
+        <Text className="text-typography-900 text-base font-inter-bold mb-1">
           No colleges found
         </Text>
         <Text className="text-typography-500 text-sm text-center">
@@ -209,7 +271,7 @@ export function CollegeListSection({
         </Text>
       </Box>
     );
-  }, [loading, error, themeColors.indicator, debouncedSearch]);
+  }, [loading, error, debouncedSearch, renderSkeletonGrid]);
 
   const keyExtractor = useCallback((item: College) => item._id, []);
 
@@ -224,7 +286,7 @@ export function CollegeListSection({
       {/* All Colleges Section */}
       <Box style={{ marginTop: 24 }}>
         <Box className="px-4 mb-3">
-          <Text className="text-typography-900 font-black text-lg tracking-tight">
+          <Text className="text-typography-900 font-inter-regular text-lg tracking-tight">
             All Colleges
           </Text>
         </Box>
@@ -264,7 +326,7 @@ export function CollegeListSection({
                     </Text>
                   ) : null}
                   <Text
-                    className={`text-xs font-semibold ${
+                    className={`text-xs font-inter-semibold ${
                       isSelected ? 'text-typography-0' : 'text-typography-700'
                     }`}
                   >

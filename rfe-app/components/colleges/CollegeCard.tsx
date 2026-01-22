@@ -102,7 +102,7 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
               end={{ x: 1, y: 1 }}
               style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Text className="text-white/80 font-black text-2xl tracking-wider">
+              <Text className="text-white/80 font-inter-black text-2xl tracking-wider">
                 {getAcronym(college.name, college.shortName)}
               </Text>
             </LinearGradient>
@@ -129,7 +129,7 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
 
           {/* Country Badge */}
           <Box className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-primary-500">
-            <Text className="text-typography-0 text-2xs font-bold uppercase">
+            <Text className="text-typography-0 text-2xs font-inter-bold uppercase">
               {college.country.length > 10
                 ? college.country.substring(0, 3)
                 : college.country}
@@ -148,7 +148,7 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
                 end={{ x: 1, y: 1 }}
                 style={{ position: 'absolute', width: '100%', height: '100%' }}
               />
-              <Text className="text-typography-0 font-bold text-xs">
+              <Text className="text-typography-0 font-inter-bold text-xs">
                 {college.name.charAt(0)}
               </Text>
             </Box>
@@ -171,7 +171,7 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
         <Box className="px-2.5 pt-2.5 pb-1.5 flex-1">
           {/* College Name - always 2 lines */}
           <Text
-            className="text-typography-900 font-bold text-base leading-tight"
+            className="text-typography-900 font-inter-bold text-base leading-tight"
             numberOfLines={2}
             style={{ minHeight: 40 }}
           >
@@ -194,7 +194,7 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
                 className="px-1.5 py-0.5 rounded bg-background-100 self-start"
               >
                 <Text
-                  className="text-2xs font-medium text-typography-600"
+                  className="text-2xs font-inter-medium text-typography-600"
                   numberOfLines={1}
                 >
                   {dept}

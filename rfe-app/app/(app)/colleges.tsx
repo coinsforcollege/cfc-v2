@@ -47,7 +47,7 @@ function UserAvatar({ name }: { name: string }) {
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <Box className="w-9 h-9 rounded-full bg-primary-500 items-center justify-center">
-        <Text className="text-xs font-bold text-typography-0">
+        <Text className="text-xs font-inter-bold text-typography-0">
           {initials || 'U'}
         </Text>
       </Box>
@@ -128,7 +128,7 @@ export default function CollegesScreen() {
                   style={{ width: 32, height: 32 }}
                   resizeMode="contain"
                 />
-                <Text className="text-lg font-black text-typography-900 ml-2 tracking-tight">
+                <Text className="text-lg font-inter-black text-typography-900 ml-2 tracking-tight">
                   Colleges
                 </Text>
               </Box>
@@ -159,7 +159,7 @@ export default function CollegesScreen() {
                   flex: 1,
                   marginLeft: 10,
                   fontSize: 15,
-                  fontFamily: 'Inter',
+                  fontFamily: 'Inter-Regular',
                   color: isDark ? 'rgb(245, 245, 245)' : 'rgb(38, 38, 39)',
                   paddingVertical: Platform.OS === 'ios' ? 6 : 4,
                 },

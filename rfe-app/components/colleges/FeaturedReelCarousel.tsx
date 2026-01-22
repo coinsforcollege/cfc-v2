@@ -5,8 +5,9 @@ import {
   Pressable,
   Animated,
   useColorScheme,
-  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
@@ -45,6 +46,46 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=600&fit=crop',
   'https://images.unsplash.com/photo-1592280771884-f3da7e189874?w=400&h=600&fit=crop',
 ];
+
+function SkeletonReelCard() {
+  return (
+    <Box
+      className="rounded-3xl overflow-hidden mr-3 relative bg-background-100"
+      style={{
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
+      }}
+    >
+      {/* Full background skeleton */}
+      <Skeleton width={CARD_WIDTH} height={CARD_HEIGHT} borderRadius={24} />
+
+      {/* Overlay content skeleton */}
+      <Box className="absolute inset-0 p-2.5">
+        {/* Top badges */}
+        <Box className="flex-row justify-between">
+          <Skeleton width={30} height={20} borderRadius={6} />
+          <Skeleton width={36} height={20} borderRadius={6} />
+        </Box>
+
+        {/* Bottom content */}
+        <Box className="absolute left-2.5 right-2.5" style={{ bottom: 44 }}>
+          <Skeleton width={28} height={28} borderRadius={14} style={{ marginBottom: 6 }} />
+          <Skeleton width={120} height={16} borderRadius={4} style={{ marginBottom: 4 }} />
+          <Skeleton width={80} height={12} borderRadius={4} />
+        </Box>
+
+        {/* Bottom actions */}
+        <Box
+          className="absolute left-2.5 right-2.5 flex-row justify-between items-center"
+          style={{ bottom: 10 }}
+        >
+          <Skeleton width={50} height={14} borderRadius={4} />
+          <Skeleton width={24} height={24} borderRadius={12} />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 interface ReelCardProps {
   college: College;
@@ -104,7 +145,7 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
             backgroundColor: 'rgba(255,255,255,0.2)',
           }}
         >
-          <Text style={{ color: 'white', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Inter-Bold', textTransform: 'uppercase', letterSpacing: 0.5 }}>
             #{index + 1}
           </Text>
         </Box>
@@ -118,7 +159,7 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
             backgroundColor: 'rgb(81, 100, 246)',
           }}
         >
-          <Text style={{ color: 'white', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Inter-Bold', textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {college.country.substring(0, 3)}
           </Text>
         </Box>
@@ -137,14 +178,14 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
               className="flex-1 rounded-full items-center justify-center"
               style={{ backgroundColor: 'rgb(81, 100, 246)' }}
             >
-              <Text style={{ color: 'white', fontWeight: '900', fontSize: 12 }}>
+              <Text style={{ color: 'white', fontFamily: 'Inter-Black', fontSize: 12 }}>
                 {college.name.charAt(0)}
               </Text>
             </Box>
           </Box>
 
           <Text
-            style={{ color: 'white', fontWeight: '700', fontSize: 14, lineHeight: 18, marginBottom: 2 }}
+            style={{ color: 'white', fontFamily: 'Inter-Bold', fontSize: 14, lineHeight: 18, marginBottom: 2 }}
             numberOfLines={2}
           >
             {college.shortName || college.name}
@@ -161,7 +202,7 @@ function ReelCard({ college, index, onPress }: ReelCardProps) {
         >
           <Box className="flex-row items-center">
             <Globe size={10} color="white" />
-            <Text style={{ color: 'white', fontWeight: '600', fontSize: 10, marginLeft: 4 }}>
+            <Text style={{ color: 'white', fontFamily: 'Inter-SemiBold', fontSize: 10, marginLeft: 4 }}>
               {college.type}
             </Text>
           </Box>
@@ -224,8 +265,20 @@ export function FeaturedReelCarousel() {
 
   if (loading) {
     return (
-      <Box className="h-[270px] items-center justify-center bg-background-0">
-        <ActivityIndicator size="small" color={themeColors.indicator} />
+      <Box className="pt-4 pb-6 bg-background-0">
+        <Box className="px-4 mb-3">
+          <Skeleton width={140} height={22} borderRadius={4} />
+        </Box>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 32 }}
+          scrollEnabled={false}
+        >
+          {[1, 2, 3, 4].map((i) => (
+            <SkeletonReelCard key={i} />
+          ))}
+        </ScrollView>
       </Box>
     );
   }
@@ -238,7 +291,7 @@ export function FeaturedReelCarousel() {
     <Box className="pt-4 pb-6 bg-background-0">
       {/* Section Header */}
       <Box className="px-4 mb-3">
-        <Text className="text-typography-900 font-black text-lg tracking-tight">
+        <Text className="text-typography-900 font-inter-regular text-lg tracking-tight">
           Featured Colleges
         </Text>
       </Box>
