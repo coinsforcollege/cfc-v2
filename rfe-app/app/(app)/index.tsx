@@ -71,10 +71,10 @@ function Header({ user }: { user: any }) {
           resizeMode="contain"
         />
         <VStack>
-          <Text className="text-typography-900 text-base font-black leading-4 tracking-tight">
+          <Text className="text-typography-900 text-xl font-inter-bold leading-5 tracking-tight uppercase">
             Rewards For
           </Text>
-          <Text className="text-primary-600 text-base font-black leading-4 tracking-tight">
+          <Text className="text-primary-600 text-xl font-inter-bold leading-5 tracking-tight uppercase">
             Education
           </Text>
         </VStack>
@@ -94,7 +94,7 @@ function Header({ user }: { user: any }) {
           style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Box className="w-10 h-10 rounded-full bg-primary-100 items-center justify-center border-2 border-primary-200">
-            <Text className="text-primary-700 font-bold text-lg">
+            <Text className="text-primary-700 font-inter-bold text-lg">
               {user?.name?.[0] || 'S'}
             </Text>
           </Box>
@@ -119,7 +119,7 @@ function PassportCard() {
           <Box className="bg-white/10 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
             <HStack space="xs" className="items-center">
               <Sparkles size={12} color="#fbbf24" fill="#fbbf24" />
-              <Text className="text-white text-[10px] font-bold uppercase tracking-wider">
+              <Text className="text-white text-[10px] font-inter-bold uppercase tracking-wider">
                 {MOCK_BALANCE.tier}
               </Text>
             </HStack>
@@ -128,14 +128,14 @@ function PassportCard() {
         </HStack>
 
         <VStack>
-          <Text className="text-white/60 text-xs font-bold uppercase tracking-[0.15em] mb-1">
+          <Text className="text-white/60 text-xs font-inter-bold uppercase tracking-[0.15em] mb-1">
             Total Balance
           </Text>
           <HStack className="items-baseline">
             <Text className="text-white text-5xl font-black tracking-tight" style={{ fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'sans-serif' }}>
               {MOCK_BALANCE.total}
             </Text>
-            <Text className="text-white/80 text-lg font-bold ml-2">
+            <Text className="text-white/80 text-lg font-inter-bold ml-2">
               {MOCK_BALANCE.currency}
             </Text>
           </HStack>
@@ -144,7 +144,7 @@ function PassportCard() {
         <HStack className="justify-between items-end">
           <Box className="bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30 flex-row items-center">
             <TrendingUp size={12} color="#34d399" />
-            <Text className="text-emerald-300 text-[10px] font-bold ml-1.5 uppercase tracking-wide">
+            <Text className="text-emerald-300 text-[10px] font-inter-bold ml-1.5 uppercase tracking-wide">
               {MOCK_BALANCE.change}
             </Text>
           </Box>
@@ -187,12 +187,12 @@ function ActionButton({ item, isDark }: { item: any; isDark: boolean }) {
             className="w-11 h-11 md:w-10 md:h-10 md:mb-1" 
             resizeMode="contain"
           />
-          <Text className="hidden md:flex text-typography-800 text-[10px] font-bold uppercase tracking-wider text-center">
+          <Text className="hidden md:flex text-typography-800 text-[10px] font-inter-bold uppercase tracking-wider text-center">
             {item.label}
           </Text>
       </LinearGradient>
       
-      <Text className="md:hidden text-typography-600 text-sm font-bold tracking-tight text-center">
+      <Text className="md:hidden text-typography-600 text-sm font-inter-bold tracking-tight text-center">
         {item.label}
       </Text>
     </Pressable>
@@ -253,7 +253,7 @@ function SectionTitle({ title, action, href }: { title: string, action?: string,
           onPress={() => router.push(href as any)}
           hitSlop={10}
         >
-          <Text className="text-primary-600 text-sm font-bold uppercase tracking-wider">
+          <Text className="text-primary-600 text-sm font-inter-bold uppercase tracking-wider">
             {action}
           </Text>
         </Pressable>
@@ -300,13 +300,13 @@ function MarketplaceCarousel() {
               <GradientOverlay />
               
               <View className="absolute top-3 right-3 bg-white/20 backdrop-blur-md px-2 py-1 rounded-lg border border-white/20">
-                <Text className="text-white text-[10px] font-bold">
+                <Text className="text-white text-[10px] font-inter-bold">
                   {college.match}
                 </Text>
               </View>
 
               <View className="absolute bottom-4 left-4 right-4">
-                 <Text className="text-white font-bold text-lg leading-6 mb-1">
+                 <Text className="text-white font-inter-bold text-lg leading-6 mb-1">
                    {college.name}
                  </Text>
                  <Text className="text-white/70 text-xs font-medium uppercase tracking-wide">
@@ -336,17 +336,17 @@ function LiveFeed() {
                    <item.icon size={20} color={item.color} strokeWidth={2} />
                  </Box>
                  <VStack className="flex-1">
-                   <Text className="text-typography-900 font-bold text-sm mb-0.5">
+                   <Text className="text-typography-900 font-inter-bold text-sm mb-0.5">
                      {item.title}
                    </Text>
-                   <Text className="text-typography-400 text-[11px] font-bold uppercase tracking-wide">
+                   <Text className="text-typography-400 text-[11px] font-inter-bold uppercase tracking-wide">
                      {item.time}
                    </Text>
                  </VStack>
                </HStack>
                
                <Box className={`px-2.5 py-1 rounded-lg ${item.type === 'earn' ? 'bg-success-100' : 'bg-background-100'}`}>
-                 <Text className={`text-xs font-bold ${item.type === 'earn' ? 'text-success-700' : 'text-typography-600'}`}>
+                 <Text className={`text-xs font-inter-bold ${item.type === 'earn' ? 'text-success-700' : 'text-typography-600'}`}>
                    {item.amount}
                  </Text>
                </Box>
@@ -377,14 +377,14 @@ function WalletStack() {
 
            <HStack className="justify-between items-center relative z-10">
              <VStack className="flex-1">
-               <Text className="text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">
+               <Text className="text-amber-500 text-[10px] font-inter-bold uppercase tracking-widest mb-1.5">
                  Scholarship Grant
                </Text>
                <Text className="text-white text-xl font-black leading-6">
                  {offer.title}
                </Text>
                <Text className="text-gray-400 text-xs mt-2 font-medium">
-                 Expires: <Text className="text-white font-bold">{offer.deadline}</Text>
+                 Expires: <Text className="text-white font-inter-bold">{offer.deadline}</Text>
                </Text>
              </VStack>
              
@@ -393,7 +393,7 @@ function WalletStack() {
                   {offer.amount.split(',')[0]}k
                 </Text>
                 <Box className="bg-white/20 px-2 py-0.5 rounded mt-1">
-                  <Text className="text-white text-[9px] font-bold uppercase">Claim</Text>
+                  <Text className="text-white text-[9px] font-inter-bold uppercase">Claim</Text>
                 </Box>
              </View>
            </HStack>

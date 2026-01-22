@@ -22,7 +22,10 @@
       "Bash(ls:*)",
       "Bash(find:*)",
       "Bash(xargs ls:*)",
-      "Bash(file:*)"
+      "Bash(file:*)",
+      "Bash(fc-query:*)",
+      "Bash(done)",
+      "Bash(unzip:*)"
     ],
     "deny": [],
     "ask": []
