@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Search, ChevronLeft, X } from '@/components/navigation/icons';
 import { TaskListSection } from '@/components/tasks/TaskListSection';
+import { SubmissionListSection } from '@/components/tasks/SubmissionListSection';
 import { tasksApi, CategoryWithCount } from '@/src/api/tasks.api';
 
 const TABLET_BREAKPOINT = 768;
@@ -395,28 +396,12 @@ export default function TasksScreen() {
 
         {/* In Review Tab */}
         <Box style={{ width, flex: 1 }}>
-          <Box className="flex-1 items-center justify-center px-6">
-            <Text className="text-typography-400 text-5xl mb-4">...</Text>
-            <Text className="text-typography-900 text-lg font-inter-bold text-center mb-2">
-              No Tasks In Review
-            </Text>
-            <Text className="text-typography-500 text-sm text-center">
-              Tasks you submit for review will appear here
-            </Text>
-          </Box>
+          <SubmissionListSection type="pending" />
         </Box>
 
         {/* Completed Tab */}
         <Box style={{ width, flex: 1 }}>
-          <Box className="flex-1 items-center justify-center px-6">
-            <Text className="text-typography-400 text-5xl mb-4">-</Text>
-            <Text className="text-typography-900 text-lg font-inter-bold text-center mb-2">
-              No Completed Tasks
-            </Text>
-            <Text className="text-typography-500 text-sm text-center">
-              Complete tasks to earn scholarship points
-            </Text>
-          </Box>
+          <SubmissionListSection type="completed" />
         </Box>
       </ScrollView>
     </Box>

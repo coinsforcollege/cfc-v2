@@ -8,6 +8,11 @@ server/public/images/logo/*
 !server/public/images/logo/.gitkeep
 server/public/images/cover/*
 !server/public/images/cover/.gitkeep
+server/public/images/content-library/*
+server/public/images/submissions/*
+server/public/documents/content-library/*
+server/public/documents/submissions/*
+server/public/videos/submissions/*
 
 # Ignored Scripts
 server/scripts/

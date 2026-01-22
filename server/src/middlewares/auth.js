@@ -68,3 +68,30 @@ export const authorize = (...roles) => {
   };
 };
 
+// Optional authentication - doesn't block if no token, but sets req.user if valid token present
+export const optionalAuth = async (req, res, next) => {
+  try {
+    let token;
+
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (token) {
+      try {
+        const decoded = verifyToken(token);
+        const user = await User.findById(decoded.id).select('-password');
+        if (user && user.isActive) {
+          req.user = user;
+        }
+      } catch (error) {
+        // Invalid token - just continue without user
+      }
+    }
+
+    next();
+  } catch (error) {
+    next();
+  }
+};
+

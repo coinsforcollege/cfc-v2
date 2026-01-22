@@ -7,11 +7,13 @@ import {
   ActivityIndicator,
   useWindowDimensions,
 } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { TaskCard } from './TaskCard';
 import { tasksApi, Task } from '@/src/api/tasks.api';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 const CARD_HEIGHT = 200;
 
@@ -68,6 +70,7 @@ export function TaskListSection({
   selectedCategory,
   numColumns = 2,
 }: TaskListSectionProps) {
+  const { token } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -106,7 +109,7 @@ export function TaskListSection({
 
   const fetchTasks = useCallback(async (pageNum: number = 1, isRefresh: boolean = false) => {
     try {
-      if (pageNum === 1) {
+      if (pageNum === 1 && !isRefresh) {
         setLoading(true);
       }
       setError(null);
@@ -116,7 +119,7 @@ export function TaskListSection({
         search: debouncedSearch,
         page: pageNum,
         limit: PAGE_SIZE,
-      });
+      }, token || undefined);
 
       const newTasks = response.data;
       const pagination = response.pagination;
@@ -136,7 +139,7 @@ export function TaskListSection({
       setRefreshing(false);
       setLoadingMore(false);
     }
-  }, [debouncedSearch, selectedCategory]);
+  }, [debouncedSearch, selectedCategory, token]);
 
   // Refetch when search or category changes
   useEffect(() => {
@@ -144,6 +147,16 @@ export function TaskListSection({
     setHasMore(true);
     fetchTasks(1, true);
   }, [debouncedSearch, selectedCategory]);
+
+  // Refetch when screen is focused (e.g., returning from task detail after completing)
+  useFocusEffect(
+    useCallback(() => {
+      // Only refetch if not already loading
+      if (!loading && !refreshing) {
+        fetchTasks(1, true);
+      }
+    }, [fetchTasks, loading, refreshing])
+  );
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

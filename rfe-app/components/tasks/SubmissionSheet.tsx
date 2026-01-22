@@ -1,0 +1,379 @@
+'use client';
+import React, { useState, useCallback } from 'react';
+import {
+  Modal,
+  Pressable,
+  useColorScheme,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+  Image,
+  Alert,
+  Platform,
+  KeyboardAvoidingView,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { Box } from '@/components/ui/box';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
+import { Button, ButtonText } from '@/components/ui/button';
+import {
+  X,
+  Upload,
+  Image as ImageIcon,
+  File,
+  Video,
+  Trash2,
+  Send,
+} from '@/components/navigation/icons';
+import { Task, tasksApi } from '@/src/api/tasks.api';
+import { useAuth } from '@/src/contexts/AuthContext';
+
+interface SelectedFile {
+  uri: string;
+  name: string;
+  type: string;
+  size?: number;
+}
+
+interface SubmissionSheetProps {
+  visible: boolean;
+  onClose: () => void;
+  task: Task;
+  onSubmitSuccess: (message: string, pointsAwarded: number) => void;
+}
+
+const ICON_COLORS = {
+  light: {
+    primary: 'rgb(38, 38, 39)',
+    secondary: 'rgb(115, 115, 115)',
+    muted: 'rgb(163, 163, 163)',
+  },
+  dark: {
+    primary: 'rgb(245, 245, 245)',
+    secondary: 'rgb(212, 212, 212)',
+    muted: 'rgb(140, 140, 140)',
+  },
+};
+
+export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: SubmissionSheetProps) {
+  const { token } = useAuth();
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
+
+  const [comment, setComment] = useState('');
+  const [files, setFiles] = useState<SelectedFile[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const pickImage = useCallback(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Please grant photo library access to upload images.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsMultipleSelection: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets) {
+      const newFiles = result.assets.map((asset) => ({
+        uri: asset.uri,
+        name: asset.fileName || `file_${Date.now()}.${asset.uri.split('.').pop()}`,
+        type: asset.mimeType || (asset.type === 'video' ? 'video/mp4' : 'image/jpeg'),
+        size: asset.fileSize,
+      }));
+      setFiles((prev) => [...prev, ...newFiles]);
+    }
+  }, []);
+
+  const pickDocument = useCallback(async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'],
+        multiple: true,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newFiles = result.assets.map((asset) => ({
+          uri: asset.uri,
+          name: asset.name,
+          type: asset.mimeType || 'application/octet-stream',
+          size: asset.size,
+        }));
+        setFiles((prev) => [...prev, ...newFiles]);
+      }
+    } catch (error) {
+      console.error('Document picker error:', error);
+    }
+  }, []);
+
+  const removeFile = useCallback((index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
+    if (!token) {
+      Alert.alert('Error', 'Please log in to submit tasks');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await tasksApi.submitTask(task._id, token, {
+        comment: comment.trim() || undefined,
+        files: files.length > 0 ? files : undefined,
+      });
+
+      if (response.success) {
+        onSubmitSuccess(response.message, response.data.pointsAwarded);
+        setComment('');
+        setFiles([]);
+        onClose();
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to submit task');
+    } finally {
+      setLoading(false);
+    }
+  }, [token, task._id, comment, files, onSubmitSuccess, onClose]);
+
+  const getFileIcon = (type: string) => {
+    if (type.startsWith('image/')) return <ImageIcon size={20} color="rgba(255, 255, 255, 0.8)" />;
+    if (type.startsWith('video/')) return <Video size={20} color="rgba(255, 255, 255, 0.8)" />;
+    return <File size={20} color="rgba(255, 255, 255, 0.8)" />;
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <Box className="flex-1 justify-end bg-black/50">
+          <Box
+            className="rounded-t-3xl bg-primary-400"
+            style={{ paddingBottom: insets.bottom + 16 }}
+          >
+          {/* Header */}
+          <HStack className="items-center justify-between px-4 py-4 border-b border-white/20">
+            <VStack>
+              <Text className="text-white font-inter-bold text-lg">
+                {task.requiresApproval ? 'Submit for Review' : 'Complete Task'}
+              </Text>
+              <Text className="text-white/70 text-sm">
+                {task.requiresApproval
+                  ? 'Your submission will be reviewed by admin'
+                  : `You will earn ${task.scholarshipPoints} SP`}
+              </Text>
+            </VStack>
+            <Pressable
+              onPress={onClose}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <X size={20} color="white" />
+            </Pressable>
+          </HStack>
+
+          <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+            <VStack className="px-4 py-4" space="md">
+              {/* Comment Input */}
+              <VStack space="xs">
+                <Text className="text-white/90 font-inter-medium text-sm">
+                  Comment (optional)
+                </Text>
+                <Box
+                  className="rounded-xl p-3"
+                  style={{ minHeight: 100, backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                >
+                  <TextInput
+                    placeholder="Add a comment about your submission..."
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    value={comment}
+                    onChangeText={setComment}
+                    multiline
+                    style={{
+                      color: 'white',
+                      fontFamily: 'Inter-Regular',
+                      fontSize: 14,
+                      minHeight: 80,
+                      textAlignVertical: 'top',
+                    }}
+                  />
+                </Box>
+              </VStack>
+
+              {/* File Upload Buttons */}
+              <VStack space="xs">
+                <Text className="text-white/90 font-inter-medium text-sm">
+                  Attachments (optional)
+                </Text>
+                <HStack space="sm">
+                  <Pressable
+                    onPress={pickImage}
+                    style={({ pressed }) => ({
+                      flex: 1,
+                      opacity: pressed ? 0.8 : 1,
+                    })}
+                  >
+                    <Box
+                      className="rounded-xl py-3 px-4 flex-row items-center justify-center"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    >
+                      <ImageIcon size={18} color="rgba(255, 255, 255, 0.8)" />
+                      <Text className="text-white/80 font-inter-medium text-sm ml-2">
+                        Photos/Videos
+                      </Text>
+                    </Box>
+                  </Pressable>
+                  <Pressable
+                    onPress={pickDocument}
+                    style={({ pressed }) => ({
+                      flex: 1,
+                      opacity: pressed ? 0.8 : 1,
+                    })}
+                  >
+                    <Box
+                      className="rounded-xl py-3 px-4 flex-row items-center justify-center"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    >
+                      <File size={18} color="rgba(255, 255, 255, 0.8)" />
+                      <Text className="text-white/80 font-inter-medium text-sm ml-2">
+                        Documents
+                      </Text>
+                    </Box>
+                  </Pressable>
+                </HStack>
+              </VStack>
+
+              {/* Selected Files */}
+              {files.length > 0 && (
+                <VStack space="sm">
+                  <Text className="text-white/70 text-xs">
+                    {files.length} file{files.length > 1 ? 's' : ''} selected
+                  </Text>
+                  {files.map((file, index) => (
+                    <HStack
+                      key={index}
+                      className="rounded-xl p-3 items-center"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    >
+                      {file.type.startsWith('image/') ? (
+                        <Image
+                          source={{ uri: file.uri }}
+                          style={{ width: 40, height: 40, borderRadius: 8 }}
+                        />
+                      ) : (
+                        <Box
+                          className="w-10 h-10 rounded-lg items-center justify-center"
+                          style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                        >
+                          {getFileIcon(file.type)}
+                        </Box>
+                      )}
+                      <VStack className="flex-1 ml-3">
+                        <Text
+                          className="text-white text-sm font-inter-medium"
+                          numberOfLines={1}
+                        >
+                          {file.name}
+                        </Text>
+                        {file.size && (
+                          <Text className="text-white/60 text-xs">
+                            {formatFileSize(file.size)}
+                          </Text>
+                        )}
+                      </VStack>
+                      <Pressable
+                        onPress={() => removeFile(index)}
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 16,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Trash2 size={18} color="#fca5a5" />
+                      </Pressable>
+                    </HStack>
+                  ))}
+                </VStack>
+              )}
+            </VStack>
+          </ScrollView>
+
+          {/* Submit Button */}
+          <Box className="px-4 pt-2">
+            <Pressable
+              onPress={handleSubmit}
+              disabled={loading}
+              style={({ pressed }) => ({
+                opacity: pressed || loading ? 0.8 : 1,
+              })}
+            >
+              <LinearGradient
+                colors={task.requiresApproval ? ['#6366f1', '#8b5cf6'] : ['#10b981', '#059669']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  borderRadius: 14,
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'row',
+                }}
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <>
+                    <Send size={18} color="white" />
+                    <Text className="text-white font-inter-bold text-base ml-2">
+                      {task.requiresApproval ? 'Submit for Review' : 'Mark Completed'}
+                    </Text>
+                    {task.scholarshipPoints > 0 && (
+                      <Text className="text-white/80 font-inter-bold text-sm ml-2">
+                        +{task.scholarshipPoints} SP
+                      </Text>
+                    )}
+                  </>
+                )}
+              </LinearGradient>
+            </Pressable>
+          </Box>
+        </Box>
+      </Box>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+export default SubmissionSheet;

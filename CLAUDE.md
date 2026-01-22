@@ -13,7 +13,7 @@ Step 7 - ask user to test the frontend
 Step 8 - if it requires backend modification, work on one endpoint at once only
 and so on.
 
-# Never try to suggest or apply a workaround
+# NEVER apply workarounds, hacks, or dummy solutions - if something doesn't work, investigate the real cause and fix it properly, or ask the user for guidance
 # never interact with git or github
 # Never use emojis, in code or conversation
 # Always build in chunks - build - test - fix - build - text and so on

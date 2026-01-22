@@ -77,6 +77,7 @@ import TaskList from './pages/platformAdmin/tasks/TaskList';
 import TaskCreate from './pages/platformAdmin/tasks/TaskCreate';
 import CategoryManager from './pages/platformAdmin/tasks/CategoryManager';
 import TaskView from './pages/platformAdmin/tasks/TaskView';
+import TaskReviews from './pages/platformAdmin/tasks/TaskReviews';
   
 const darkTheme = createTheme({
   palette: {
@@ -158,6 +159,7 @@ function App() {
       <Route path="platform-admin/tasks" element={<ProtectedRoute allowedRoles={['platform_admin']}><TasksLayout /></ProtectedRoute>}>
           <Route index element={<TaskList />} />
           <Route path="categories" element={<CategoryManager />} />
+          <Route path="reviews" element={<TaskReviews />} />
           <Route path="create" element={<TaskCreate />} />
           <Route path="edit/:id" element={<TaskCreate />} />
           <Route path=":id" element={<TaskView />} />

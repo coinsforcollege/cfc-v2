@@ -5,7 +5,9 @@ import {
   markAsRead,
   markAllAsRead,
   deleteNotification,
-  clearReadNotifications
+  clearReadNotifications,
+  registerPushTokenHandler,
+  removePushTokenHandler
 } from '../controllers/notification.controller.js';
 import { protect } from '../middlewares/auth.js';
 
@@ -19,6 +21,10 @@ router.get('/', getNotifications);
 
 // Get unread count
 router.get('/unread-count', getUnreadCount);
+
+// Push token management
+router.post('/push-token', registerPushTokenHandler);
+router.delete('/push-token', removePushTokenHandler);
 
 // Mark all as read
 router.put('/mark-all-read', markAllAsRead);

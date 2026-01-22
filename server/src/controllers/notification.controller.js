@@ -1,4 +1,5 @@
 import Notification from '../models/Notification.js';
+import { registerPushToken, removePushToken } from '../services/pushNotification.service.js';
 
 // @desc    Get user notifications (paginated)
 // @route   GET /api/notifications
@@ -174,6 +175,65 @@ export const clearReadNotifications = async (req, res, next) => {
       data: {
         deletedCount: result.deletedCount
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Register push notification token
+// @route   POST /api/notifications/push-token
+// @access  Private
+export const registerPushTokenHandler = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { token, platform, deviceId } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Push token is required'
+      });
+    }
+
+    const result = await registerPushToken(userId, token, platform, deviceId);
+
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message || result.error
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove push notification token
+// @route   DELETE /api/notifications/push-token
+// @access  Private
+export const removePushTokenHandler = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Push token is required'
+      });
+    }
+
+    const result = await removePushToken(userId, token);
+
+    res.status(200).json({
+      success: true,
+      message: result.message
     });
   } catch (error) {
     next(error);

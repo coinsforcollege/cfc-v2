@@ -18,4 +18,11 @@ export const platformAdminTaskApi = {
   }),
   deleteTask: (id) => apiClient.delete(`/tasks/${id}`),
   duplicateTask: (id) => apiClient.post(`/tasks/${id}/duplicate`),
+
+  // Task Reviews
+  getReviewStats: () => apiClient.get('/task-reviews/stats'),
+  getPendingSubmissions: (params) => apiClient.get('/task-reviews', { params }),
+  getSubmissionById: (id) => apiClient.get(`/task-reviews/${id}`),
+  approveSubmission: (id) => apiClient.put(`/task-reviews/${id}/approve`),
+  rejectSubmission: (id, feedback) => apiClient.put(`/task-reviews/${id}/reject`, { feedback }),
 };

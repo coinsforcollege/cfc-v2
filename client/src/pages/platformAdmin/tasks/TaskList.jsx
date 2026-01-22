@@ -154,7 +154,7 @@ const TaskList = () => {
           </Button>
           <Button
             variant="outlined"
-            onClick={() => {}} // Placeholder
+            onClick={() => navigate('/platform-admin/tasks/reviews')}
             sx={{ borderRadius: 2 }}
           >
             Review Requests

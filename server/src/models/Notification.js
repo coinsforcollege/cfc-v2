@@ -24,6 +24,11 @@ const notificationSchema = new mongoose.Schema({
       'college_miner_milestone',
       'ambassador_status_changed',
 
+      // Task notifications (student)
+      'task_approved',
+      'task_rejected',
+      'task_points_earned',
+
       // College Admin notifications
       'new_miner_joined',
       'miner_milestone',
@@ -57,7 +62,7 @@ const notificationSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['mining', 'referral', 'college', 'milestone', 'ambassador', 'system'],
+    enum: ['mining', 'referral', 'college', 'milestone', 'ambassador', 'system', 'task'],
     required: true,
     index: true
   },

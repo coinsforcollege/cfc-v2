@@ -118,7 +118,10 @@ function StickyHeader({ user, headerHeight }: { user: any; headerHeight: number 
               </HStack>
             </Pressable>
 
-            <Pressable style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+            <Pressable
+              onPress={() => router.push('/(app)/notifications')}
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
               <Box className="w-10 h-10 rounded-full bg-white/10 items-center justify-center">
                 <Bell size={18} color="rgba(255,255,255,0.9)" />
                 <Box className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400" />

@@ -124,7 +124,27 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['en', 'zh'],
     default: 'en'
-  }
+  },
+  // Expo push notification tokens (array for multiple devices)
+  expoPushTokens: [{
+    token: {
+      type: String,
+      required: true
+    },
+    deviceId: {
+      type: String,
+      default: null
+    },
+    platform: {
+      type: String,
+      enum: ['ios', 'android', 'web'],
+      default: 'android'
+    },
+    addedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

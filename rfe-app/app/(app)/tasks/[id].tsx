@@ -29,9 +29,15 @@ import {
   File,
   CheckCircle,
   Calendar,
+  Clock,
+  RotateCcw,
+  CheckCheck,
 } from '@/components/navigation/icons';
-import { tasksApi, Task } from '@/src/api/tasks.api';
+import { tasksApi, Task, TaskSubmission } from '@/src/api/tasks.api';
 import config from '@/src/config';
+import { useAuth } from '@/src/contexts/AuthContext';
+import { SubmissionSheet } from '@/components/tasks/SubmissionSheet';
+import { Alert } from 'react-native';
 
 const TABLET_BREAKPOINT = 768;
 
@@ -249,10 +255,14 @@ export default function TaskDetailScreen() {
   const isDark = colorScheme === 'dark';
   const isDesktop = width >= TABLET_BREAKPOINT;
 
+  const { token, isAuthenticated } = useAuth();
+
   const [task, setTask] = useState<Task | null>(null);
+  const [userSubmission, setUserSubmission] = useState<TaskSubmission | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [thumbnailError, setThumbnailError] = useState(false);
+  const [showSubmissionSheet, setShowSubmissionSheet] = useState(false);
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
 
@@ -266,8 +276,16 @@ export default function TaskDetailScreen() {
     try {
       setLoading(true);
       setError(null);
-      const response = await tasksApi.getById(id!);
-      setTask(response.data);
+
+      // If authenticated, get task with submission status
+      if (isAuthenticated && token) {
+        const response = await tasksApi.getTaskWithStatus(id!, token);
+        setTask(response.data);
+        setUserSubmission(response.data.userSubmission || null);
+      } else {
+        const response = await tasksApi.getById(id!);
+        setTask(response.data);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load task');
     } finally {
@@ -283,9 +301,18 @@ export default function TaskDetailScreen() {
   }, []);
 
   const handleMarkComplete = useCallback(() => {
-    // TODO: Implement mark complete functionality
-    console.log('Mark complete pressed for task:', id);
-  }, [id]);
+    if (!isAuthenticated) {
+      Alert.alert('Login Required', 'Please log in to complete tasks.');
+      return;
+    }
+    setShowSubmissionSheet(true);
+  }, [isAuthenticated]);
+
+  const handleSubmitSuccess = useCallback((message: string, pointsAwarded: number) => {
+    Alert.alert('Success', message);
+    // Refresh task data to get updated submission status
+    fetchTask();
+  }, []);
 
   if (loading) {
     return (
@@ -629,7 +656,7 @@ export default function TaskDetailScreen() {
         </Box>
       </ScrollView>
 
-      {/* Floating Mark Complete Button - no background box */}
+      {/* Floating Action Button */}
       <Box
         className="absolute left-0 right-0 px-4"
         style={{
@@ -643,42 +670,123 @@ export default function TaskDetailScreen() {
             width: '100%',
           }}
         >
-          <Pressable
-            onPress={handleMarkComplete}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-            })}
-          >
-            <LinearGradient
-              colors={['#10b981', '#059669']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: 16,
-                paddingVertical: 16,
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'row',
-                shadowColor: '#10b981',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 8,
-              }}
+          {/* Already Completed */}
+          {userSubmission?.status === 'approved' ? (
+            <Box
+              className="rounded-2xl py-4 items-center justify-center flex-row"
+              style={{ backgroundColor: isDark ? 'rgb(22, 101, 52)' : 'rgb(220, 252, 231)' }}
             >
-              <Text className="text-white font-inter-bold text-base">
-                Mark Complete
+              <CheckCheck size={20} color={isDark ? '#86efac' : '#166534'} />
+              <Text
+                className="font-inter-bold text-base ml-2"
+                style={{ color: isDark ? '#86efac' : '#166534' }}
+              >
+                Completed
               </Text>
-              {task.scholarshipPoints > 0 && (
-                <Text className="text-white/80 font-inter-bold text-sm ml-2">
-                  +{task.scholarshipPoints} SP
+              {userSubmission.pointsAwarded > 0 && (
+                <Text
+                  className="font-inter-bold text-sm ml-2"
+                  style={{ color: isDark ? '#86efac' : '#166534', opacity: 0.8 }}
+                >
+                  +{userSubmission.pointsAwarded} SP
                 </Text>
               )}
-            </LinearGradient>
-          </Pressable>
+            </Box>
+          ) : userSubmission?.status === 'pending' ? (
+            /* In Review */
+            <Box
+              className="rounded-2xl py-4 items-center justify-center flex-row"
+              style={{ backgroundColor: isDark ? 'rgb(120, 53, 15)' : 'rgb(254, 243, 199)' }}
+            >
+              <Clock size={20} color={isDark ? '#fcd34d' : '#92400e'} />
+              <Text
+                className="font-inter-bold text-base ml-2"
+                style={{ color: isDark ? '#fcd34d' : '#92400e' }}
+              >
+                In Review
+              </Text>
+            </Box>
+          ) : userSubmission?.status === 'rejected' ? (
+            /* Rejected - Can Resubmit */
+            <Pressable
+              onPress={handleMarkComplete}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.9 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              })}
+            >
+              <LinearGradient
+                colors={['#f59e0b', '#d97706']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'row',
+                  shadowColor: '#f59e0b',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
+              >
+                <RotateCcw size={18} color="white" />
+                <Text className="text-white font-inter-bold text-base ml-2">
+                  Resubmit
+                </Text>
+              </LinearGradient>
+            </Pressable>
+          ) : (
+            /* Not Started - Mark as Done / Submit for Review */
+            <Pressable
+              onPress={handleMarkComplete}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.9 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              })}
+            >
+              <LinearGradient
+                colors={['#6366f1', '#8b5cf6']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'row',
+                  shadowColor: '#6366f1',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
+              >
+                <Text className="text-white font-inter-bold text-base">
+                  {task.requiresApproval ? 'Submit for Review' : 'Mark as Done'}
+                </Text>
+                {task.requiresApproval && task.scholarshipPoints > 0 && (
+                  <Text className="text-white/80 font-inter-bold text-sm ml-2">
+                    +{task.scholarshipPoints} SP
+                  </Text>
+                )}
+              </LinearGradient>
+            </Pressable>
+          )}
         </Box>
       </Box>
+
+      {/* Submission Sheet */}
+      {task && (
+        <SubmissionSheet
+          visible={showSubmissionSheet}
+          onClose={() => setShowSubmissionSheet(false)}
+          task={task}
+          onSubmitSuccess={handleSubmitSuccess}
+        />
+      )}
     </Box>
   );
 }

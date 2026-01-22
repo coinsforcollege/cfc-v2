@@ -25,6 +25,8 @@ import notificationRoutes from './routes/notification.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import taskRoutes from './routes/task.routes.js';
 import studentTaskRoutes from './routes/studentTask.routes.js';
+import scholarshipWalletRoutes from './routes/scholarshipWallet.routes.js';
+import taskReviewRoutes from './routes/taskReview.routes.js';
 
 // Import middleware
 import errorHandler from './middlewares/errorHandler.js';
@@ -38,6 +40,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files from public directory
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use('/documents', express.static(path.join(__dirname, '../public/documents')));
+app.use('/videos', express.static(path.join(__dirname, '../public/videos')));
 
 // ---------- CORS FIX ----------
 // 1. Base default allowed list (Production)
@@ -145,6 +149,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/student-tasks', studentTaskRoutes);
+app.use('/api/scholarship', scholarshipWalletRoutes);
+app.use('/api/task-reviews', taskReviewRoutes);
 
 // 404
 app.use('*', (req, res) => {
