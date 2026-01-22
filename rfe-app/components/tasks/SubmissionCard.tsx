@@ -47,12 +47,18 @@ interface SubmissionCardProps {
 export function SubmissionCard({ submission, index }: SubmissionCardProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const task = submission.task;
 
   const handlePress = useCallback(() => {
-    router.push(`/(app)/tasks/${submission.task._id}`);
-  }, [submission.task._id]);
+    if (task) {
+      router.push(`/(app)/tasks/${task._id}`);
+    }
+  }, [task]);
 
-  const task = submission.task;
+  // Skip rendering if task was deleted
+  if (!task) {
+    return null;
+  }
   const activityConfig = ACTIVITY_CONFIG[task.activity] || ACTIVITY_CONFIG['Learn'];
   const ActivityIcon = activityConfig.icon;
 

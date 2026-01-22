@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "984647617784",
-    "project_id": "rewards-for-education-21cbb",
-    "storage_bucket": "rewards-for-education-21cbb.firebasestorage.app"
+    "project_number": "738140787175",
+    "project_id": "rewards-for-education-8218c",
+    "storage_bucket": "rewards-for-education-8218c.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:984647617784:android:c3be88fe69f03007e73f0d",
+        "mobilesdk_app_id": "1:738140787175:android:baeff3df46aec9e70e6d42",
         "android_client_info": {
           "package_name": "com.rewardsforeducation.app"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "984647617784-ol3ilbia859mki3np4h65m86lptnm44c.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAlzbBoVPDHAcKl3ZUxVmzsNg8jrhu7Iao"
+          "current_key": "AIzaSyBRhIOfUx4KM75AfejoHLiH7KE9efHM4gQ"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "984647617784-ol3ilbia859mki3np4h65m86lptnm44c.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

@@ -12,12 +12,17 @@ const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
  */
 export const sendPushNotification = async (userId, { title, body, data = {} }) => {
   try {
+    console.log(`[PUSH] Sending push notification to user ${userId}`);
+    console.log(`[PUSH] Title: ${title}, Body: ${body}`);
+
     const user = await User.findById(userId).select('expoPushTokens');
 
     if (!user || !user.expoPushTokens || user.expoPushTokens.length === 0) {
-      console.log(`No push tokens found for user ${userId}`);
+      console.log(`[PUSH] No push tokens found for user ${userId}`);
       return { success: false, message: 'No push tokens found' };
     }
+
+    console.log(`[PUSH] Found ${user.expoPushTokens.length} token(s) for user`);
 
     // Build messages for all user's devices
     const messages = user.expoPushTokens.map(tokenObj => ({
@@ -42,6 +47,7 @@ export const sendPushNotification = async (userId, { title, body, data = {} }) =
     });
 
     const result = await response.json();
+    console.log(`[PUSH] Expo API response:`, JSON.stringify(result, null, 2));
 
     // Check for errors and handle invalid tokens
     if (result.data) {
