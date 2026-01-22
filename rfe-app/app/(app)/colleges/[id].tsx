@@ -42,6 +42,16 @@ const TABLET_BREAKPOINT = 768;
 // Fallback image
 const FALLBACK_COVER = 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=400&fit=crop';
 
+// Get acronym from college name (skip common words)
+function getAcronym(name: string, shortName?: string): string {
+  if (shortName && shortName.length <= 6) return shortName.toUpperCase();
+
+  const skipWords = ['of', 'the', 'and', 'for', 'at', 'in', 'a', 'an'];
+  const words = name.split(/[\s,]+/).filter(w => !skipWords.includes(w.toLowerCase()));
+  const acronym = words.map(w => w.charAt(0)).join('').toUpperCase();
+  return acronym.slice(0, 5);
+}
+
 // Department list for fallback
 const DEPARTMENT_LIST = [
   'Humanities', 'Arts', 'Science', 'Technology', 'Engineering',
@@ -147,6 +157,8 @@ export default function CollegeDetailScreen() {
   });
   const [actionLoading, setActionLoading] = useState<'follow' | 'interest' | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [coverError, setCoverError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
 
@@ -271,6 +283,9 @@ export default function CollegeDetailScreen() {
     ? college.coverImage
     : FALLBACK_COVER;
 
+  const showCoverGradient = coverError;
+  const showLogoFallback = !college.logo || college.logo.length <= 5 || logoError;
+
   const departments = getDepartments(college);
   const hasContactInfo = college.website || college.email || college.phone;
   const hasSocialMedia = college.socialMedia && (
@@ -294,11 +309,25 @@ export default function CollegeDetailScreen() {
       >
         {/* Cover Image Header */}
         <Box className="relative" style={{ height: isDesktop ? 300 : 220 }}>
-          <Image
-            source={{ uri: coverImage }}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="cover"
-          />
+          {showCoverGradient ? (
+            <LinearGradient
+              colors={['#3b82f6', '#1e40af']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text className="text-white/60 font-black text-5xl tracking-wider">
+                {getAcronym(college.name, college.shortName)}
+              </Text>
+            </LinearGradient>
+          ) : (
+            <Image
+              source={{ uri: coverImage }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+              onError={() => setCoverError(true)}
+            />
+          )}
           <LinearGradient
             colors={['rgba(0,0,0,0.4)', 'transparent', 'rgba(0,0,0,0.7)']}
             locations={[0, 0.3, 1]}
@@ -350,18 +379,14 @@ export default function CollegeDetailScreen() {
                   elevation: 8,
                 }}
               >
-                {college.logo && college.logo.length > 5 ? (
-                  <Image
-                    source={{ uri: college.logo }}
-                    style={{ width: '100%', height: '100%', borderRadius: 13 }}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View
+                {showLogoFallback ? (
+                  <LinearGradient
+                    colors={['#3b82f6', '#1e40af']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
                     style={{
                       flex: 1,
                       borderRadius: 13,
-                      backgroundColor: '#6366f1',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
@@ -369,7 +394,14 @@ export default function CollegeDetailScreen() {
                     <Text className="text-white font-black text-2xl">
                       {college.name.charAt(0)}
                     </Text>
-                  </View>
+                  </LinearGradient>
+                ) : (
+                  <Image
+                    source={{ uri: college.logo! }}
+                    style={{ width: '100%', height: '100%', borderRadius: 13 }}
+                    resizeMode="cover"
+                    onError={() => setLogoError(true)}
+                  />
                 )}
               </View>
 

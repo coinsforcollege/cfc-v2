@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
@@ -30,6 +30,16 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=400&h=300&fit=crop',
 ];
 
+// Get acronym from college name (skip common words)
+function getAcronym(name: string, shortName?: string): string {
+  if (shortName && shortName.length <= 6) return shortName.toUpperCase();
+
+  const skipWords = ['of', 'the', 'and', 'for', 'at', 'in', 'a', 'an'];
+  const words = name.split(/[\s,]+/).filter(w => !skipWords.includes(w.toLowerCase()));
+  const acronym = words.map(w => w.charAt(0)).join('').toUpperCase();
+  return acronym.slice(0, 4);
+}
+
 // Get departments - real ones first, then fill with random
 function getDepartments(college: College, collegeId: string): string[] {
   if (college.departments && college.departments.length > 0) {
@@ -51,6 +61,9 @@ interface CollegeCardProps {
 }
 
 export function CollegeCard({ college, index }: CollegeCardProps) {
+  const [coverError, setCoverError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+
   const departments = useMemo(
     () => getDepartments(college, college._id),
     [college._id, college.departments]
@@ -63,6 +76,9 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
   const coverImage = college.coverImage && college.coverImage.length > 10
     ? college.coverImage
     : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+
+  const showCoverGradient = coverError;
+  const showLogoFallback = !college.logo || college.logo.length <= 5 || logoError;
 
   return (
     <Pressable
@@ -79,11 +95,25 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
       >
         {/* Thumbnail Image - 50% */}
         <Box className="relative" style={{ height: 115 }}>
-          <Image
-            source={{ uri: coverImage }}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="cover"
-          />
+          {showCoverGradient ? (
+            <LinearGradient
+              colors={['#3b82f6', '#1e40af']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text className="text-white/80 font-black text-2xl tracking-wider">
+                {getAcronym(college.name, college.shortName)}
+              </Text>
+            </LinearGradient>
+          ) : (
+            <Image
+              source={{ uri: coverImage }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+              onError={() => setCoverError(true)}
+            />
+          )}
 
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.6)']}
@@ -107,25 +137,32 @@ export function CollegeCard({ college, index }: CollegeCardProps) {
           </Box>
 
           {/* Logo Overlay */}
-          {college.logo && college.logo.length > 5 ? (
+          {showLogoFallback ? (
+            <Box
+              className="absolute rounded-full overflow-hidden items-center justify-center"
+              style={{ bottom: 8, left: 8, width: 28, height: 28 }}
+            >
+              <LinearGradient
+                colors={['#3b82f6', '#1e40af']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ position: 'absolute', width: '100%', height: '100%' }}
+              />
+              <Text className="text-typography-0 font-bold text-xs">
+                {college.name.charAt(0)}
+              </Text>
+            </Box>
+          ) : (
             <Box
               className="absolute rounded-full bg-background-0 p-0.5"
               style={{ bottom: 8, left: 8, width: 28, height: 28 }}
             >
               <Image
-                source={{ uri: college.logo }}
+                source={{ uri: college.logo! }}
                 style={{ width: '100%', height: '100%', borderRadius: 12 }}
                 resizeMode="cover"
+                onError={() => setLogoError(true)}
               />
-            </Box>
-          ) : (
-            <Box
-              className="absolute rounded-full bg-primary-500 items-center justify-center"
-              style={{ bottom: 8, left: 8, width: 28, height: 28 }}
-            >
-              <Text className="text-typography-0 font-bold text-xs">
-                {college.name.charAt(0)}
-              </Text>
             </Box>
           )}
         </Box>
