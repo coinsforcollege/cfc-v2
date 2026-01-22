@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, useColorScheme } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, useColorScheme, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,13 +9,10 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/src/contexts/AuthContext';
 import {
-  CreditCard,
-  TrendingUp,
   Bell,
   ShieldCheck,
   Zap,
-  ArrowRight,
-  Sparkles
+  CircleDot,
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -25,8 +22,6 @@ const { width } = Dimensions.get('window');
 const MOCK_BALANCE = {
   total: '1,250',
   currency: 'SP',
-  tier: 'Bronze Scholar',
-  change: '+12% this week',
 };
 
 const MOCK_COLLEGES = [
@@ -54,120 +49,141 @@ const iconChat = require('@/assets/images/icons/3dicons-chat-bubble-dynamic-colo
 
 // --- Components ---
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 function HeroSection({ user }: { user: any }) {
   const insets = useSafeAreaInsets();
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
+  const firstName = user?.name?.split(' ')[0] || 'Scholar';
+
+  // Pulse animation for pending tasks
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [pulseAnim]);
 
   return (
     <Box className="relative overflow-hidden">
-      {/* Background */}
+      {/* Background layers */}
+      <LinearGradient
+        colors={['#1e1b4b', '#312e81', '#3730a3']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
       <Image
         source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
         className="absolute w-full h-full"
-        style={{ opacity: 0.4 }}
+        style={{ opacity: 0.05 }}
         resizeMode="cover"
-      />
-      <LinearGradient
-        colors={['rgba(81, 100, 246, 0.95)', 'rgba(49, 46, 129, 0.98)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={{ position: 'absolute', width: '100%', height: '100%' }}
       />
 
       {/* Content */}
-      <Box style={{ paddingTop: topPadding }} className="px-4 pb-6">
-        {/* Header Row */}
-        <HStack className="justify-between items-center py-4">
-          {/* App Branding */}
+      <Box style={{ paddingTop: topPadding }} className="px-5 pb-6">
+        {/* Header */}
+        <HStack className="justify-between items-center pt-2">
+          {/* Logo + Branding */}
           <HStack space="sm" className="items-center">
             <Image
               source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
-              style={{ width: 36, height: 36 }}
+              style={{ width: 32, height: 32 }}
               resizeMode="contain"
             />
             <VStack>
-              <Text className="text-white text-xl font-inter-bold leading-5 tracking-tight uppercase">
+              <Text className="text-white text-base font-inter-bold leading-4 tracking-tight uppercase">
                 Rewards For
               </Text>
-              <Text className="text-amber-300 text-xl font-inter-bold leading-5 tracking-tight uppercase">
+              <Text className="text-amber-300 text-base font-inter-bold leading-4 tracking-tight uppercase">
                 Education
               </Text>
             </VStack>
           </HStack>
 
-          {/* User & Notifications */}
+          {/* Right - Profile & Notification */}
           <HStack space="sm" className="items-center">
-            <Pressable style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
-              <Box className="w-10 h-10 rounded-full bg-white/10 items-center justify-center border border-white/20">
-                <Bell size={20} color="white" />
-                <Box className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-400 border border-white" />
-              </Box>
-            </Pressable>
-
             <Pressable
               onPress={() => router.push('/(app)/profile')}
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
             >
-              <Box className="w-10 h-10 rounded-full bg-white/20 items-center justify-center border-2 border-white/30">
-                <Text className="text-white font-inter-bold text-lg">
-                  {user?.name?.[0] || 'S'}
-                </Text>
+              <HStack space="sm" className="items-center">
+                <VStack className="items-end">
+                  <Text className="text-indigo-300 text-[10px] font-inter-medium">
+                    {getGreeting()}
+                  </Text>
+                  <Text className="text-white text-sm font-inter-bold">
+                    {firstName}
+                  </Text>
+                </VStack>
+                <Box className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: '#f59e0b' }}>
+                  <Text className="text-white font-inter-bold text-base">
+                    {user?.name?.[0]?.toUpperCase() || 'S'}
+                  </Text>
+                </Box>
+              </HStack>
+            </Pressable>
+
+            <Pressable style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+              <Box className="w-10 h-10 rounded-full bg-white/10 items-center justify-center">
+                <Bell size={18} color="rgba(255,255,255,0.9)" />
+                <Box className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400" />
               </Box>
             </Pressable>
           </HStack>
         </HStack>
 
-        {/* Balance Card */}
-        <Box className="mt-2">
-          <HStack className="justify-between items-start mb-4">
-            <Box className="bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
-              <HStack space="xs" className="items-center">
-                <Sparkles size={12} color="#fbbf24" fill="#fbbf24" />
-                <Text className="text-white text-[10px] font-inter-bold uppercase tracking-wider">
-                  {MOCK_BALANCE.tier}
-                </Text>
-              </HStack>
-            </Box>
-            <CreditCard size={24} color="rgba(255,255,255,0.4)" />
-          </HStack>
-
-          <VStack className="mb-5">
-            <Text className="text-white/60 text-xs font-inter-bold uppercase tracking-[0.15em] mb-1">
+        {/* Points & Tasks Row */}
+        <HStack className="pt-8 justify-between items-end">
+          {/* Points Display */}
+          <VStack>
+            <Text className="text-indigo-300 text-xs font-inter-medium uppercase tracking-widest mb-1">
               Scholarship Points
             </Text>
             <HStack className="items-baseline">
-              <Text className="text-white text-5xl font-inter-black tracking-tight">
+              <Text className="text-white text-4xl font-inter-bold">
                 {MOCK_BALANCE.total}
               </Text>
-              <Text className="text-white/80 text-lg font-inter-bold ml-2">
+              <Text className="text-indigo-300 text-base font-inter-medium ml-1.5">
                 {MOCK_BALANCE.currency}
               </Text>
             </HStack>
           </VStack>
 
-          <HStack className="justify-between items-end">
-            <Box className="bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30 flex-row items-center">
-              <TrendingUp size={12} color="#34d399" />
-              <Text className="text-emerald-300 text-[10px] font-inter-bold ml-1.5 uppercase tracking-wide">
-                {MOCK_BALANCE.change}
+          {/* Pending Tasks */}
+          <Pressable
+            onPress={() => router.push('/(app)/tasks')}
+            style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+          >
+            <HStack space="sm" className="items-center bg-white/10 px-4 py-2.5 rounded-full">
+              <Animated.View style={{ opacity: pulseAnim }}>
+                <CircleDot size={16} color="#fbbf24" />
+              </Animated.View>
+              <Text className="text-white text-sm font-inter-semibold">
+                3 pending tasks
               </Text>
-            </Box>
-
-            <Pressable
-              onPress={() => router.push('/(app)/tasks')}
-              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] })}
-            >
-              <Box className="bg-white px-5 py-3 rounded-2xl shadow-lg flex-row items-center justify-center">
-                <Text className="text-slate-900 font-inter-extrabold text-xs tracking-wider uppercase mr-2.5">
-                  View Tasks
-                </Text>
-                <Box className="bg-slate-900 rounded-full p-0.5">
-                  <ArrowRight size={10} color="white" strokeWidth={3} />
-                </Box>
-              </Box>
-            </Pressable>
-          </HStack>
-        </Box>
+            </HStack>
+          </Pressable>
+        </HStack>
       </Box>
     </Box>
   );
