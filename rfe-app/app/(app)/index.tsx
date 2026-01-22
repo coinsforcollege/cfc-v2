@@ -247,18 +247,18 @@ function ActionGrid() {
   );
 }
 
-function SectionTitle({ title, action, href }: { title: string, action?: string, href?: string }) {
+function SectionTitle({ title, action, href, onDark }: { title: string, action?: string, href?: string, onDark?: boolean }) {
   return (
     <HStack className="mb-4 items-center justify-between">
-      <Text className="text-lg font-inter-regular text-typography-900 tracking-tight">
+      <Text className={`text-lg font-inter-regular tracking-tight ${onDark ? 'text-white' : 'text-typography-900'}`}>
         {title}
       </Text>
       {action && href && (
-        <Pressable 
+        <Pressable
           onPress={() => router.push(href as any)}
           hitSlop={10}
         >
-          <Text className="text-primary-600 text-sm font-inter-bold uppercase tracking-wider">
+          <Text className={`text-sm font-inter-bold uppercase tracking-wider ${onDark ? 'text-indigo-300' : 'text-primary-600'}`}>
             {action}
           </Text>
         </Pressable>
@@ -281,7 +281,7 @@ function SpotlightCarousel() {
   return (
     <Box className="my-6 mb-10">
       <Box className="px-4">
-        <SectionTitle title="Spotlight" action="View All" href="/(app)/colleges" />
+        <SectionTitle title="Spotlight" action="View All" href="/(app)/colleges" onDark />
       </Box>
       <ScrollView
         horizontal
@@ -437,8 +437,16 @@ export default function HomeScreen() {
         {/* Rest of Content with fade overlay */}
         <View style={{ position: 'relative' }}>
           {/* Hero fade overlay - fades from hero color to transparent */}
-          {/* Layer 1: Background */}
+          {/* Layer 1a: Light background for content area */}
           <Box className="bg-background-0" style={StyleSheet.absoluteFill} />
+
+          {/* Layer 1b: Dark backing gradient (fades with hero gradient) */}
+          <LinearGradient
+            colors={['#1e1b4b', 'rgba(30, 27, 75, 0)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 250 }}
+          />
 
           {/* Layer 2: Gradient fade from hero to transparent */}
           <View
