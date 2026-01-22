@@ -1,37 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, useColorScheme } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { ScreenContainer } from '@/components/navigation';
-import { 
-  CreditCard, 
-  TrendingUp, 
-  School, 
-  ChevronRight, 
-  Bell, 
-  ShieldCheck, 
+import {
+  CreditCard,
+  TrendingUp,
+  Bell,
+  ShieldCheck,
   Zap,
-  Globe,
-  Wallet,
   ArrowRight,
   Sparkles
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
-const CARD_MARGIN = 16;
-const CARD_WIDTH = width - (CARD_MARGIN * 2);
 
 // --- Mock Data ---
 
 const MOCK_BALANCE = {
   total: '1,250',
   currency: 'SP',
-  tier: 'Gold Scholar',
+  tier: 'Bronze Scholar',
   change: '+12% this week',
 };
 
@@ -60,110 +54,121 @@ const iconChat = require('@/assets/images/icons/3dicons-chat-bubble-dynamic-colo
 
 // --- Components ---
 
-function Header({ user }: { user: any }) {
+function HeroSection({ user }: { user: any }) {
+  const insets = useSafeAreaInsets();
+  const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
+
   return (
-    <HStack className="justify-between items-center py-4 bg-background-0">
-      {/* App Branding */}
-      <HStack space="sm" className="items-center">
-        <Image
-          source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
-          style={{ width: 36, height: 36 }}
-          resizeMode="contain"
-        />
-        <VStack>
-          <Text className="text-typography-900 text-xl font-inter-bold leading-5 tracking-tight uppercase">
-            Rewards For
-          </Text>
-          <Text className="text-primary-600 text-xl font-inter-bold leading-5 tracking-tight uppercase">
-            Education
-          </Text>
-        </VStack>
-      </HStack>
-
-      {/* User & Notifications */}
-      <HStack space="sm" className="items-center">
-        <Pressable style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}>
-          <Box className="w-10 h-10 rounded-full bg-background-50 items-center justify-center border border-outline-200 shadow-sm">
-            <Bell size={20} color="#64748b" />
-            <Box className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-error-500 border border-white" />
-          </Box>
-        </Pressable>
-
-        <Pressable
-          onPress={() => router.push('/(app)/profile')}
-          style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}
-        >
-          <Box className="w-10 h-10 rounded-full bg-primary-100 items-center justify-center border-2 border-primary-200">
-            <Text className="text-primary-700 font-inter-bold text-lg">
-              {user?.name?.[0] || 'S'}
-            </Text>
-          </Box>
-        </Pressable>
-      </HStack>
-    </HStack>
-  );
-}
-
-function PassportCard() {
-  return (
-    <Box className="md:mx-0 h-[220px] rounded-2xl overflow-hidden shadow-hard-4 relative my-2 bg-primary-900">
-      <Image 
+    <Box className="relative overflow-hidden">
+      {/* Background */}
+      <Image
         source={require('@/assets/images/elegant-blue-wavy-pattern-background.png')}
-        className="absolute w-full h-full opacity-30 dark:opacity-80"
+        className="absolute w-full h-full"
+        style={{ opacity: 0.4 }}
         resizeMode="cover"
       />
-      <Box className="absolute w-full h-full bg-primary-700 dark:bg-primary-0 opacity-80" />
-      
-      <View className="flex-1 p-7 justify-between">
-        <HStack className="justify-between items-start">
-          <Box className="bg-white/10 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
-            <HStack space="xs" className="items-center">
-              <Sparkles size={12} color="#fbbf24" fill="#fbbf24" />
-              <Text className="text-white text-[10px] font-inter-bold uppercase tracking-wider">
-                {MOCK_BALANCE.tier}
+      <LinearGradient
+        colors={['rgba(81, 100, 246, 0.95)', 'rgba(49, 46, 129, 0.98)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Content */}
+      <Box style={{ paddingTop: topPadding }} className="px-4 pb-6">
+        {/* Header Row */}
+        <HStack className="justify-between items-center py-4">
+          {/* App Branding */}
+          <HStack space="sm" className="items-center">
+            <Image
+              source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
+              style={{ width: 36, height: 36 }}
+              resizeMode="contain"
+            />
+            <VStack>
+              <Text className="text-white text-xl font-inter-bold leading-5 tracking-tight uppercase">
+                Rewards For
+              </Text>
+              <Text className="text-amber-300 text-xl font-inter-bold leading-5 tracking-tight uppercase">
+                Education
+              </Text>
+            </VStack>
+          </HStack>
+
+          {/* User & Notifications */}
+          <HStack space="sm" className="items-center">
+            <Pressable style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+              <Box className="w-10 h-10 rounded-full bg-white/10 items-center justify-center border border-white/20">
+                <Bell size={20} color="white" />
+                <Box className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-amber-400 border border-white" />
+              </Box>
+            </Pressable>
+
+            <Pressable
+              onPress={() => router.push('/(app)/profile')}
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Box className="w-10 h-10 rounded-full bg-white/20 items-center justify-center border-2 border-white/30">
+                <Text className="text-white font-inter-bold text-lg">
+                  {user?.name?.[0] || 'S'}
+                </Text>
+              </Box>
+            </Pressable>
+          </HStack>
+        </HStack>
+
+        {/* Balance Card */}
+        <Box className="mt-2">
+          <HStack className="justify-between items-start mb-4">
+            <Box className="bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+              <HStack space="xs" className="items-center">
+                <Sparkles size={12} color="#fbbf24" fill="#fbbf24" />
+                <Text className="text-white text-[10px] font-inter-bold uppercase tracking-wider">
+                  {MOCK_BALANCE.tier}
+                </Text>
+              </HStack>
+            </Box>
+            <CreditCard size={24} color="rgba(255,255,255,0.4)" />
+          </HStack>
+
+          <VStack className="mb-5">
+            <Text className="text-white/60 text-xs font-inter-bold uppercase tracking-[0.15em] mb-1">
+              Scholarship Points
+            </Text>
+            <HStack className="items-baseline">
+              <Text className="text-white text-5xl font-inter-black tracking-tight">
+                {MOCK_BALANCE.total}
+              </Text>
+              <Text className="text-white/80 text-lg font-inter-bold ml-2">
+                {MOCK_BALANCE.currency}
               </Text>
             </HStack>
-          </Box>
-          <CreditCard size={24} color="rgba(255,255,255,0.4)" />
-        </HStack>
+          </VStack>
 
-        <VStack>
-          <Text className="text-white/60 text-xs font-inter-bold uppercase tracking-[0.15em] mb-1">
-            Total Balance
-          </Text>
-          <HStack className="items-baseline">
-            <Text className="text-white text-5xl font-inter-black tracking-tight">
-              {MOCK_BALANCE.total}
-            </Text>
-            <Text className="text-white/80 text-lg font-inter-bold ml-2">
-              {MOCK_BALANCE.currency}
-            </Text>
-          </HStack>
-        </VStack>
+          <HStack className="justify-between items-end">
+            <Box className="bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30 flex-row items-center">
+              <TrendingUp size={12} color="#34d399" />
+              <Text className="text-emerald-300 text-[10px] font-inter-bold ml-1.5 uppercase tracking-wide">
+                {MOCK_BALANCE.change}
+              </Text>
+            </Box>
 
-        <HStack className="justify-between items-end">
-          <Box className="bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30 flex-row items-center">
-            <TrendingUp size={12} color="#34d399" />
-            <Text className="text-emerald-300 text-[10px] font-inter-bold ml-1.5 uppercase tracking-wide">
-              {MOCK_BALANCE.change}
-            </Text>
-          </Box>
-          
-          <Pressable 
-             onPress={() => router.push('/(app)/tasks')}
-             style={({pressed}) => ({ opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] })}
-          >
-             <Box className="bg-white px-5 py-3 rounded-2xl shadow-lg flex-row items-center justify-center">
+            <Pressable
+              onPress={() => router.push('/(app)/tasks')}
+              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] })}
+            >
+              <Box className="bg-white px-5 py-3 rounded-2xl shadow-lg flex-row items-center justify-center">
                 <Text className="text-slate-900 font-inter-extrabold text-xs tracking-wider uppercase mr-2.5">
-                  Add Funds
+                  View Tasks
                 </Text>
-                 <Box className="bg-slate-900 rounded-full p-0.5">
-                   <ArrowRight size={10} color="white" strokeWidth={3} />
-                 </Box>
-             </Box>
-          </Pressable>
-        </HStack>
-      </View>
+                <Box className="bg-slate-900 rounded-full p-0.5">
+                  <ArrowRight size={10} color="white" strokeWidth={3} />
+                </Box>
+              </Box>
+            </Pressable>
+          </HStack>
+        </Box>
+      </Box>
     </Box>
   );
 }
@@ -275,7 +280,9 @@ function GradientOverlay() {
 function MarketplaceCarousel() {
   return (
     <Box className="mb-10">
-      <SectionTitle title="Marketplace" action="View All" href="/(app)/colleges" />
+      <Box className="px-4">
+        <SectionTitle title="Marketplace" action="View All" href="/(app)/colleges" />
+      </Box>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -323,7 +330,7 @@ function MarketplaceCarousel() {
 
 function LiveFeed() {
   return (
-    <Box className="mb-10 w-full">
+    <Box className="mb-10 w-full px-4">
       <SectionTitle title="Live Activity" />
       <VStack space="md" className="">
         {MOCK_FEED.map((item) => (
@@ -360,7 +367,7 @@ function LiveFeed() {
 
 function WalletStack() {
   return (
-    <Box className="mb-24 cursor-default">
+    <Box className="mb-24 cursor-default px-4">
       <SectionTitle title="Wallet" action="View All" href="/(app)/offers" />
       <VStack space="sm">
       {MOCK_OFFERS.map((offer) => (
@@ -406,35 +413,29 @@ function WalletStack() {
 
 export default function HomeScreen() {
   const { user } = useAuth();
-  
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScreenContainer showHeader={false} showBackButton={false}>
-      <VStack className="flex-1 bg-background-0" space="md">
-        
-        <Box className="bg-background-0 z-10">
-          <Header user={user} />
+    <Box className="flex-1 bg-background-0">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 40) }}
+        className="flex-1"
+      >
+        {/* Hero Section - Full Width from Top Edge */}
+        <HeroSection user={user} />
+
+        {/* Action Grid */}
+        <Box className="px-4">
+          <ActionGrid />
         </Box>
 
-        <ScrollView 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          className="flex-1"
-        >
-          <View className="flex-col md:flex-row md:items-center md:justify-center md:gap-8 md:px-8 md:py-6">
-            <Box className="w-full md:flex-1 md:max-w-3xl">
-              <PassportCard />
-            </Box>
-            <Box className="w-full md:w-auto">
-              <ActionGrid />
-            </Box>
-          </View>
-          <MarketplaceCarousel />
-          <LiveFeed />
-          <WalletStack />
-        </ScrollView>
-
-      </VStack>
-    </ScreenContainer>
+        {/* Rest of Content */}
+        <MarketplaceCarousel />
+        <LiveFeed />
+        <WalletStack />
+      </ScrollView>
+    </Box>
   );
 }
 
