@@ -50,7 +50,11 @@
       "Bash(__NEW_LINE_0c72146e4559a121__ echo \"\")",
       "Bash(SUBMISSION_ID=\"69725c28dc227d65024c6c41\")",
       "Bash(__NEW_LINE_99bb6634fcc2395d__ echo \"=== Admin: Reject Submission with Feedback ===\")",
-      "Bash(STUDENT_TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmEyNmY4N2ZiNDM3MTNlOWJjZjk5MSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzY5MTAyMTE4LCJleHAiOjE3NzE2OTQxMTh9.uILrLZvxnSiL6vdTVLTt8f0-_Sjsma2vJX2Qt_rc8X0\" __NEW_LINE_a085289ce4f4fb15__ echo \"=== Student Notifications ===\" curl -s http://localhost:4000/api/notifications -H \"Authorization: Bearer $STUDENT_TOKEN\")"
+      "Bash(STUDENT_TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmEyNmY4N2ZiNDM3MTNlOWJjZjk5MSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzY5MTAyMTE4LCJleHAiOjE3NzE2OTQxMTh9.uILrLZvxnSiL6vdTVLTt8f0-_Sjsma2vJX2Qt_rc8X0\" __NEW_LINE_a085289ce4f4fb15__ echo \"=== Student Notifications ===\" curl -s http://localhost:4000/api/notifications -H \"Authorization: Bearer $STUDENT_TOKEN\")",
+      "Bash(npx eas:*)",
+      "WebFetch(domain:docs.expo.dev)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs"
     ],
     "deny": [],
     "ask": []

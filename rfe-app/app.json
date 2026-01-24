@@ -17,10 +17,10 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.rewardsforeducation.app",
+      "package": "com.coins.education",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0a0f2e"
+        "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -39,6 +39,7 @@
           "color": "#6366f1"
         }
       ]
-    ]
+    ],
+    "owner": "mniac"
   }
 }

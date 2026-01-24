@@ -4,20 +4,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Rewards For Education',
   slug: 'rfe-app',
-  version: '1.0.0',
+  version: '2.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'rfe',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
   splash: {
-    image: './assets/splash-icon.png',
+    image: './assets/splash-small.png',
     resizeMode: 'contain',
-    backgroundColor: '#0a0f2e',
+    backgroundColor: '#ffffff',
   },
   ios: {
     supportsTablet: true,
-    bundleIdentifier: 'com.rewardsforeducation.app',
+    bundleIdentifier: 'com.CoinsForCollege',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
@@ -25,16 +25,26 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#0a0f2e',
+      backgroundColor: '#ffffff',
     },
-    package: 'com.rewardsforeducation.app',
+    package: 'com.coins.education',
+    googleServicesFile: './google-services.json',
   },
   web: {
     bundler: 'metro',
     output: 'single',
     favicon: './assets/favicon.png',
   },
-  plugins: ['expo-router'],
+  plugins: [
+    'expo-router',
+    [
+      'expo-notifications',
+      {
+        icon: './assets/adaptive-icon.png',
+        color: '#6366f1',
+      },
+    ],
+  ],
   experiments: {
     typedRoutes: true,
   },
@@ -43,7 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       origin: false,
     },
     eas: {
-      projectId: process.env.EAS_PROJECT_ID,
+      projectId: '3c23c42a-731f-44f5-afa6-a1f681406918',
     },
     // Environment-specific configuration
     // These can be set via EAS Build secrets or .env files
