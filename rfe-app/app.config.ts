@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Rewards For Education',
   slug: 'rfe-app',
-  version: '2.0.0',
+  version: '3.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'rfe',
