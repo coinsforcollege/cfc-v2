@@ -110,7 +110,25 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
       }
-    }]
+    }],
+    // Student's country
+    country: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    // Student's grade level
+    gradeLevel: {
+      type: String,
+      enum: ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', null],
+      default: null
+    },
+    // Storage used for documents (in bytes)
+    storageUsed: {
+      type: Number,
+      default: 0,
+      min: 0
+    }
   },
   isActive: {
     type: Boolean,

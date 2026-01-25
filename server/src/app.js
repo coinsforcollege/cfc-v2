@@ -27,6 +27,8 @@ import taskRoutes from './routes/task.routes.js';
 import studentTaskRoutes from './routes/studentTask.routes.js';
 import scholarshipWalletRoutes from './routes/scholarshipWallet.routes.js';
 import taskReviewRoutes from './routes/taskReview.routes.js';
+import studentDocumentRoutes from './routes/studentDocument.routes.js';
+import studentOfferRoutes from './routes/studentOffer.routes.js';
 
 // Import middleware
 import errorHandler from './middlewares/errorHandler.js';
@@ -151,6 +153,8 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/student-tasks', studentTaskRoutes);
 app.use('/api/scholarship', scholarshipWalletRoutes);
 app.use('/api/task-reviews', taskReviewRoutes);
+app.use('/api/student-documents', studentDocumentRoutes);
+app.use('/api/student-offers', studentOfferRoutes);
 
 // 404
 app.use('*', (req, res) => {

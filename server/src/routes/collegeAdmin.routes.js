@@ -6,7 +6,18 @@ import {
   updateTokenPreferences,
   addCollegeImages,
   viewCommunity,
-  getLeaderboard
+  getLeaderboard,
+  getStudents,
+  getStudentDetails,
+  getStudentPointsHistory,
+  getStudentDocuments,
+  getLetterTemplate,
+  createOffer,
+  getOffers,
+  getOfferDetails,
+  updateOffer,
+  deleteOffer,
+  getOfferResponses
 } from '../controllers/collegeAdmin.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -26,6 +37,21 @@ router.put('/college/token-preferences', updateTokenPreferences);
 router.post('/college/images', addCollegeImages);
 router.get('/community', viewCommunity);
 router.get('/leaderboard', getLeaderboard);
+
+// Student browsing routes
+router.get('/students', getStudents);
+router.get('/students/:id', getStudentDetails);
+router.get('/students/:id/points-history', getStudentPointsHistory);
+router.get('/students/:id/documents', getStudentDocuments);
+
+// Offer management routes
+router.get('/offers/letter-template', getLetterTemplate);
+router.get('/offers', getOffers);
+router.post('/offers', createOffer);
+router.get('/offers/:id', getOfferDetails);
+router.put('/offers/:id', updateOffer);
+router.delete('/offers/:id', deleteOffer);
+router.get('/offers/:id/responses', getOfferResponses);
 
 export default router;
 

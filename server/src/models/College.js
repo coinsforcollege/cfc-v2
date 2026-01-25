@@ -310,6 +310,17 @@ const collegeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
+  },
+  // Scholarship offer tracking - 5 recommended slots per month
+  recommendedOffersUsedThisMonth: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  recommendedOffersResetDate: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
