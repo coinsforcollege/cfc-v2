@@ -61,6 +61,9 @@ import CollegeAdminSettings from './pages/collegeAdmin/Settings';
 import CollegeAdminStudents from './pages/collegeAdmin/Students';
 import CollegeAdminStudentView from './pages/collegeAdmin/StudentView';
 import CollegeAdminAcceptedStudents from './pages/collegeAdmin/AcceptedStudents';
+import CollegeAdminOffers from './pages/collegeAdmin/Offers';
+import CollegeAdminOfferCreate from './pages/collegeAdmin/OfferCreate';
+import CollegeAdminOfferView from './pages/collegeAdmin/OfferView';
 import PlatformAdminDashboard from './pages/platformAdmin/PlatformAdminDashboard';
 import PlatformAdminUsers from './pages/platformAdmin/Users';
 import PlatformAdminUserView from './pages/platformAdmin/UserView';
@@ -151,6 +154,10 @@ function App() {
       <Route path="college-admin/students" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminStudents /></ProtectedRoute>} />
       <Route path="college-admin/students/:id" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminStudentView /></ProtectedRoute>} />
       <Route path="college-admin/accepted-students" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminAcceptedStudents /></ProtectedRoute>} />
+      <Route path="college-admin/offers" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOffers /></ProtectedRoute>} />
+      <Route path="college-admin/offers/create" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOfferCreate /></ProtectedRoute>} />
+      <Route path="college-admin/offers/:id" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOfferView /></ProtectedRoute>} />
+      <Route path="college-admin/offers/:id/edit" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOfferCreate /></ProtectedRoute>} />
       <Route path="platform-admin/dashboard" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminDashboard /></ProtectedRoute>} />
       <Route path="platform-admin/users" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUsers /></ProtectedRoute>} />
       <Route path="platform-admin/users/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUserView /></ProtectedRoute>} />
