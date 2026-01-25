@@ -48,6 +48,8 @@ import {
   AlertCircle,
   CheckCheck,
   RotateCcw,
+  Folder,
+  FolderOpen,
 } from 'lucide-react-native';
 
 export {
@@ -55,5 +57,5 @@ export {
   TrendingUp, School, Bell, ShieldCheck, Zap, Globe, Wallet, CreditCard, ArrowRight, Sparkles,
   Search, Heart, BookOpen, MapPin, Users, X, Facebook, Instagram, Linkedin, Youtube, Mail, Phone, Calendar,
   Clock, Star, CircleHelp, Play, Send, CheckCircle, Coins, ExternalLink, File, Image, Video, Trash2, Upload,
-  AlertCircle, CheckCheck, RotateCcw
+  AlertCircle, CheckCheck, RotateCcw, Folder, FolderOpen
 };

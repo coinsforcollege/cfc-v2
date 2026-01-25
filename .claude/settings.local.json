@@ -121,7 +121,9 @@
       "Bash(__NEW_LINE_105ff231389027ae__ echo \"=== TEST 7: College Admin - Get Offer Responses ===\")",
       "Bash(__NEW_LINE_6e2aa1456bbf2bd8__ echo \"=== Create Another Offer for Reject Test ===\")",
       "Bash(OFFER_ID=\"69762e2f3061e7c115b34976\":*)",
-      "Bash(__NEW_LINE_1909b0a29b635756__ echo \"=== TEST 8: Reject Offer ===\")"
+      "Bash(__NEW_LINE_1909b0a29b635756__ echo \"=== TEST 8: Reject Offer ===\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NzYzZGU4MTk2YjU3NjNiMWJhOTQ5NiIsInJvbGUiOiJjb2xsZWdlX2FkbWluIiwiaWF0IjoxNzY5MzU2Nzc2LCJleHAiOjE3NzE5NDg3NzZ9.TL8_Pu5ol0WKptM1HzzP4ly0ZpC3gEblhjtbpkNqctc\":*)",
+      "Bash(__NEW_LINE_fd050603445c8491__ curl -s -X POST \"http://192.168.0.16:4000/api/college-admin/select-college\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer $TOKEN\" -d '{\n    \"\"newCollege\"\": \"\"{\\\\\"\"name\\\\\"\": \\\\\"\"Westbrook College\\\\\"\", \\\\\"\"country\\\\\"\": \\\\\"\"United States\\\\\"\"}\"\"\n  }')"
     ],
     "deny": [],
     "ask": []
