@@ -8,11 +8,13 @@ import {
   ActivityIndicator,
   Platform,
   Animated,
+  Image,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { Swipeable } from 'react-native-gesture-handler';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
@@ -24,9 +26,16 @@ import {
   CheckCheck,
   Trash2,
   Mail,
+  CheckCircle,
+  XCircle,
+  Gift,
+  Award,
+  Users,
+  Zap,
 } from '@/components/navigation/icons';
 import { notificationsApi, Notification } from '@/src/api/notifications.api';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { config } from '@/src/config';
 
 const ICON_COLORS = {
   light: {
@@ -39,6 +48,29 @@ const ICON_COLORS = {
     secondary: 'rgb(212, 212, 212)',
     muted: 'rgb(140, 140, 140)',
   },
+};
+
+// Category-based gradient colors for fallback thumbnails
+const CATEGORY_GRADIENTS: Record<string, [string, string]> = {
+  task: ['#8b5cf6', '#6366f1'],
+  scholarship: ['#10b981', '#059669'],
+  mining: ['#f59e0b', '#d97706'],
+  referral: ['#3b82f6', '#2563eb'],
+  college: ['#ec4899', '#db2777'],
+  milestone: ['#f97316', '#ea580c'],
+  ambassador: ['#14b8a6', '#0d9488'],
+  system: ['#6b7280', '#4b5563'],
+};
+
+// Get fallback icon based on notification type/category
+const getFallbackIcon = (type: string, category: string) => {
+  if (type === 'task_approved') return CheckCircle;
+  if (type === 'task_rejected') return XCircle;
+  if (type === 'scholarship_offer_received') return Gift;
+  if (category === 'milestone') return Award;
+  if (category === 'referral') return Users;
+  if (category === 'mining') return Zap;
+  return Bell;
 };
 
 function NotificationCard({
@@ -55,6 +87,19 @@ function NotificationCard({
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const swipeableRef = useRef<Swipeable>(null);
+  const [imageError, setImageError] = useState(false);
+
+  // Build thumbnail URL
+  const rawThumbnail = notification.data?.thumbnail;
+  const thumbnailUrl = rawThumbnail
+    ? rawThumbnail.startsWith('http')
+      ? rawThumbnail
+      : `${config.apiUrl.replace('/api', '')}${rawThumbnail}`
+    : null;
+
+  const showFallback = !thumbnailUrl || imageError;
+  const gradientColors = CATEGORY_GRADIENTS[notification.category] || CATEGORY_GRADIENTS.system;
+  const FallbackIcon = getFallbackIcon(notification.type, notification.category);
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -169,9 +214,38 @@ function NotificationCard({
       >
         <HStack className="items-start py-3 mx-4 border-b border-outline-100">
           {/* Unread dot */}
-          <Box className="w-6 pt-1.5">
+          <Box className="w-3 pt-2">
             {!notification.isRead && (
               <Box className="w-2 h-2 rounded-full bg-primary-500" />
+            )}
+          </Box>
+
+          {/* Thumbnail */}
+          <Box
+            className="w-11 h-11 rounded-lg overflow-hidden mr-3"
+            style={{ flexShrink: 0 }}
+          >
+            {showFallback ? (
+              <LinearGradient
+                colors={gradientColors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <FallbackIcon size={20} color="#ffffff" />
+              </LinearGradient>
+            ) : (
+              <Image
+                source={{ uri: thumbnailUrl! }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+                onError={() => setImageError(true)}
+              />
             )}
           </Box>
 
@@ -306,6 +380,12 @@ export default function NotificationsScreen() {
         }
       } else if (notification.type === 'task_points_earned') {
         router.push('/(app)/tasks');
+      } else if (notification.type === 'scholarship_offer_received') {
+        if (notification.data?.offerId) {
+          router.push(`/(app)/offers/${notification.data.offerId}`);
+        } else {
+          router.push('/(app)/offers');
+        }
       }
     },
     [token]

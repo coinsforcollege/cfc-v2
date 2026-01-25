@@ -8,7 +8,7 @@ export interface Notification {
   message: string;
   data: Record<string, any>;
   isRead: boolean;
-  category: 'mining' | 'referral' | 'college' | 'milestone' | 'ambassador' | 'system' | 'task';
+  category: 'mining' | 'referral' | 'college' | 'milestone' | 'ambassador' | 'system' | 'task' | 'scholarship';
   priority: 'low' | 'medium' | 'high';
   actionUrl?: string;
   createdAt: string;

@@ -159,7 +159,8 @@ export const approveSubmission = async (req, res) => {
       data: {
         taskId: task._id,
         submissionId: submission._id,
-        points: pointsToAward
+        points: pointsToAward,
+        thumbnail: task.thumbnail || null
       },
       actionUrl: `/tasks/${task._id}`
     });
@@ -241,7 +242,8 @@ export const rejectSubmission = async (req, res) => {
       data: {
         taskId: task._id,
         submissionId: submission._id,
-        feedback: feedback || ''
+        feedback: feedback || '',
+        thumbnail: task.thumbnail || null
       },
       actionUrl: `/tasks/${task._id}`
     });

@@ -94,6 +94,12 @@ export function usePushNotifications() {
       }
     } else if (data?.type === 'task_points_earned') {
       router.push('/(app)/tasks');
+    } else if (data?.type === 'scholarship_offer_received') {
+      if (data?.offerId) {
+        router.push(`/(app)/offers/${data.offerId}`);
+      } else {
+        router.push('/(app)/offers');
+      }
     } else {
       // Default: go to notifications page
       router.push('/(app)/notifications');

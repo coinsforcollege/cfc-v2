@@ -12,6 +12,7 @@ import StudentOfferResponse from '../models/StudentOfferResponse.js';
 import Notification from '../models/Notification.js';
 import path from 'path';
 import { createBulkNotifications } from '../services/notification.service.js';
+import { sendPushNotificationToMany } from '../services/pushNotification.service.js';
 
 // @desc    Select or create college for admin
 // @route   POST /api/college-admin/select-college
@@ -1126,6 +1127,112 @@ export const getAcceptedStudents = async (req, res, next) => {
 
 // ==================== OFFER MANAGEMENT ENDPOINTS ====================
 
+// Helper function to find target students based on offer targeting
+const findTargetStudents = async (targeting) => {
+  try {
+    const { type, students, countries, gradeLevels, pointsRange } = targeting;
+
+    // For individual targeting, return the specified students
+    if (type === 'individual' && students && students.length > 0) {
+      return students;
+    }
+
+    // Build query for other targeting types
+    const query = {
+      role: { $in: ['student', 'user'] },
+      isActive: true
+    };
+
+    // Apply country filter
+    if ((type === 'country' || type === 'combined') && countries && countries.length > 0) {
+      query['userProfile.country'] = { $in: countries.map(c => new RegExp(c, 'i')) };
+    }
+
+    // Apply grade level filter
+    if ((type === 'gradeLevel' || type === 'combined') && gradeLevels && gradeLevels.length > 0) {
+      query['userProfile.gradeLevel'] = { $in: gradeLevels };
+    }
+
+    // Get students matching basic criteria
+    let studentIds = await User.find(query).distinct('_id');
+
+    // Apply points range filter if needed
+    if ((type === 'pointsRange' || type === 'combined') && (pointsRange?.min !== null || pointsRange?.max !== null)) {
+      const walletQuery = { user: { $in: studentIds } };
+
+      if (pointsRange.min !== null) {
+        walletQuery.balance = walletQuery.balance || {};
+        walletQuery.balance.$gte = pointsRange.min;
+      }
+      if (pointsRange.max !== null) {
+        walletQuery.balance = walletQuery.balance || {};
+        walletQuery.balance.$lte = pointsRange.max;
+      }
+
+      const eligibleWallets = await ScholarshipWallet.find(walletQuery).distinct('user');
+      studentIds = eligibleWallets;
+    }
+
+    return studentIds;
+  } catch (error) {
+    console.error('Error finding target students:', error);
+    return [];
+  }
+};
+
+// Helper function to send offer notifications to students
+const sendOfferNotifications = async (offer, college, targetStudentIds) => {
+  try {
+    if (!targetStudentIds || targetStudentIds.length === 0) {
+      console.log('[OFFER NOTIFICATION] No target students found');
+      return;
+    }
+
+    console.log(`[OFFER NOTIFICATION] Sending notifications to ${targetStudentIds.length} students`);
+
+    // Create in-app notifications
+    const notifications = targetStudentIds.map(studentId => ({
+      recipient: studentId,
+      type: 'scholarship_offer_received',
+      title: `New Scholarship Offer from ${college.name}`,
+      message: `${college.name} has sent you a scholarship offer: "${offer.title}" worth ${offer.currency} ${offer.totalValue.toLocaleString()}. Review and respond now!`,
+      data: {
+        offerId: offer._id,
+        collegeId: college._id,
+        collegeName: college.name,
+        offerTitle: offer.title,
+        totalValue: offer.totalValue,
+        currency: offer.currency,
+        thumbnail: college.logo || college.coverImage || null
+      },
+      category: 'scholarship',
+      priority: 'high',
+      actionUrl: `/offers/${offer._id}`
+    }));
+
+    await createBulkNotifications(notifications);
+    console.log(`[OFFER NOTIFICATION] Created ${notifications.length} in-app notifications`);
+
+    // Send push notifications
+    const pushNotification = {
+      title: `New Scholarship Offer`,
+      body: `${college.name} sent you a ${offer.currency} ${offer.totalValue.toLocaleString()} scholarship offer!`,
+      data: {
+        type: 'scholarship_offer_received',
+        offerId: offer._id.toString(),
+        screen: 'offers'
+      }
+    };
+
+    await sendPushNotificationToMany(targetStudentIds, pushNotification);
+    console.log(`[OFFER NOTIFICATION] Sent push notifications`);
+
+  } catch (error) {
+    console.error('[OFFER NOTIFICATION] Error sending notifications:', error);
+    // Don't throw - notification failure shouldn't fail offer creation
+  }
+};
+
 // Helper function to generate letter template
 const generateLetterTemplate = (collegeName, offerTitle, totalValue, currency) => {
   return `Dear [Student Name],
@@ -1268,6 +1375,12 @@ export const createOffer = async (req, res, next) => {
       await College.findByIdAndUpdate(admin.managedCollege._id, {
         $inc: { recommendedOffersUsedThisMonth: 1 }
       });
+    }
+
+    // Send notifications to target students if offer is active
+    if (offer.status === 'active') {
+      const targetStudentIds = await findTargetStudents(offer.targeting);
+      await sendOfferNotifications(offer, admin.managedCollege, targetStudentIds);
     }
 
     res.status(201).json({
@@ -1457,6 +1570,9 @@ export const updateOffer = async (req, res, next) => {
       }
     }
 
+    // Track if status is changing from draft to active
+    const wasNotActive = offer.status !== 'active';
+
     // Update fields
     if (title !== undefined) offer.title = title;
     if (totalValue !== undefined) offer.totalValue = totalValue;
@@ -1471,6 +1587,12 @@ export const updateOffer = async (req, res, next) => {
     if (isRecommended !== undefined) offer.isRecommended = isRecommended;
 
     await offer.save();
+
+    // Send notifications if offer just became active
+    if (wasNotActive && offer.status === 'active') {
+      const targetStudentIds = await findTargetStudents(offer.targeting);
+      await sendOfferNotifications(offer, admin.managedCollege, targetStudentIds);
+    }
 
     res.status(200).json({
       success: true,

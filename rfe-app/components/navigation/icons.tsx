@@ -38,6 +38,7 @@ import {
   Play,
   Send,
   CheckCircle,
+  XCircle,
   Coins,
   ExternalLink,
   File,
@@ -56,6 +57,6 @@ export {
   Home, ListTodo, GraduationCap, Gift, FileText, User, ChevronLeft, Award, ChevronRight,
   TrendingUp, School, Bell, ShieldCheck, Zap, Globe, Wallet, CreditCard, ArrowRight, Sparkles,
   Search, Heart, BookOpen, MapPin, Users, X, Facebook, Instagram, Linkedin, Youtube, Mail, Phone, Calendar,
-  Clock, Star, CircleHelp, Play, Send, CheckCircle, Coins, ExternalLink, File, Image, Video, Trash2, Upload,
+  Clock, Star, CircleHelp, Play, Send, CheckCircle, XCircle, Coins, ExternalLink, File, Image, Video, Trash2, Upload,
   AlertCircle, CheckCheck, RotateCcw, Folder, FolderOpen
 };
