@@ -751,9 +751,9 @@ export const getStudents = async (req, res, next) => {
       limit = 20
     } = req.query;
 
-    // Build query for students (role: 'student' or 'user')
+    // Build query for students only
     const query = {
-      role: { $in: ['student', 'user'] },
+      role: 'student',
       isActive: true
     };
 
@@ -840,7 +840,7 @@ export const getStudentDetails = async (req, res, next) => {
 
     const student = await User.findOne({
       _id: id,
-      role: { $in: ['student', 'user'] }
+      role: 'student'
     }).select('name email phone userProfile createdAt lastLogin');
 
     if (!student) {
@@ -867,6 +867,8 @@ export const getStudentDetails = async (req, res, next) => {
           phone: student.phone,
           country: student.userProfile?.country,
           gradeLevel: student.userProfile?.gradeLevel,
+          referralCode: student.userProfile?.referralCode,
+          totalReferrals: student.userProfile?.totalReferrals || 0,
           createdAt: student.createdAt,
           lastLogin: student.lastLogin
         },
@@ -956,12 +958,12 @@ export const getStudentPointsHistory = async (req, res, next) => {
 export const getStudentDocuments = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { folderId, page = 1, limit = 50 } = req.query;
+    const { page = 1, limit = 50 } = req.query;
 
     // Verify student exists
     const student = await User.findOne({
       _id: id,
-      role: { $in: ['student', 'user'] }
+      role: 'student'
     });
 
     if (!student) {
@@ -971,52 +973,23 @@ export const getStudentDocuments = async (req, res, next) => {
       });
     }
 
-    // Build query - only show PUBLIC documents
+    // Get ALL public documents for this student (flat list, no folder filtering)
     const query = {
       user: id,
       isPublic: true
     };
 
-    // Filter by folder if provided
-    if (folderId && folderId !== 'root') {
-      query.folder = folderId;
-    } else {
-      query.folder = null;
-    }
-
     const documents = await Document.find(query)
+      .populate('folder', 'name path')
       .sort({ createdAt: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit));
 
     const total = await Document.countDocuments(query);
 
-    // Get folders in current location (only if they contain public docs)
-    const folders = await Folder.find({
-      user: id,
-      parent: folderId && folderId !== 'root' ? folderId : null
-    }).sort({ name: 1 });
-
-    // Filter folders to only show those with public documents
-    const foldersWithPublicDocs = [];
-    for (const folder of folders) {
-      const publicDocCount = await Document.countDocuments({
-        user: id,
-        folder: folder._id,
-        isPublic: true
-      });
-      if (publicDocCount > 0) {
-        foldersWithPublicDocs.push({
-          ...folder.toObject(),
-          publicDocCount
-        });
-      }
-    }
-
     res.status(200).json({
       success: true,
       data: {
-        folders: foldersWithPublicDocs,
         documents
       },
       pagination: {

@@ -58,6 +58,8 @@ import CollegeAdminCollegeProfile from './pages/collegeAdmin/CollegeProfile';
 import CollegeAdminTokenPreferences from './pages/collegeAdmin/TokenPreferences';
 import CollegeAdminLeaderboard from './pages/collegeAdmin/Leaderboard';
 import CollegeAdminSettings from './pages/collegeAdmin/Settings';
+import CollegeAdminStudents from './pages/collegeAdmin/Students';
+import CollegeAdminStudentView from './pages/collegeAdmin/StudentView';
 import PlatformAdminDashboard from './pages/platformAdmin/PlatformAdminDashboard';
 import PlatformAdminUsers from './pages/platformAdmin/Users';
 import PlatformAdminUserView from './pages/platformAdmin/UserView';
@@ -145,6 +147,8 @@ function App() {
       <Route path="college-admin/token" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminTokenPreferences /></ProtectedRoute>} />
       <Route path="college-admin/leaderboard" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminLeaderboard /></ProtectedRoute>} />
       <Route path="college-admin/settings" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminSettings /></ProtectedRoute>} />
+      <Route path="college-admin/students" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminStudents /></ProtectedRoute>} />
+      <Route path="college-admin/students/:id" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminStudentView /></ProtectedRoute>} />
       <Route path="platform-admin/dashboard" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminDashboard /></ProtectedRoute>} />
       <Route path="platform-admin/users" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUsers /></ProtectedRoute>} />
       <Route path="platform-admin/users/:id" element={<ProtectedRoute allowedRoles={['platform_admin']}><PlatformAdminUserView /></ProtectedRoute>} />

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Pressable,
   TextInput,
@@ -14,13 +14,16 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
+import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { Search, ChevronLeft, X } from '@/components/navigation/icons';
+import { Search, ChevronLeft, X, Award } from '@/components/navigation/icons';
 import { OfferListSection } from '@/components/offers/OfferListSection';
 import { RecommendedOfferCard } from '@/components/offers/RecommendedOfferCard';
+import { offersApi } from '@/src/api/offers.api';
 
 const TABLET_BREAKPOINT = 768;
 
@@ -69,9 +72,20 @@ function UserAvatar({ name }: { name: string }) {
   );
 }
 
+// Format currency
+function formatCurrency(value: number, currency: string = 'USD'): string {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return formatter.format(value);
+}
+
 export default function OffersScreen() {
   const { width } = useWindowDimensions();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -81,6 +95,8 @@ export default function OffersScreen() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [totalScholarship, setTotalScholarship] = useState<number>(0);
+  const [scholarshipCurrency, setScholarshipCurrency] = useState<string>('USD');
 
   // Refs for scroll sync
   const scrollViewRef = useRef<ScrollView>(null);
@@ -88,6 +104,44 @@ export default function OffersScreen() {
   const isTabPressScroll = useRef(false);
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
+
+  const [scholarshipLabel, setScholarshipLabel] = useState<'accepted' | 'received'>('received');
+
+  // Fetch total scholarship value - accepted takes priority, otherwise show active (received)
+  const fetchTotalScholarship = useCallback(async () => {
+    if (!token) return;
+    try {
+      // First check accepted offers
+      const acceptedResponse = await offersApi.getOffers(token, { status: 'accepted', limit: 100 });
+      if (acceptedResponse.data && acceptedResponse.data.length > 0) {
+        const total = acceptedResponse.data.reduce((sum, offer) => sum + offer.totalValue, 0);
+        setTotalScholarship(total);
+        setScholarshipCurrency(acceptedResponse.data[0].currency || 'USD');
+        setScholarshipLabel('accepted');
+      } else {
+        // No accepted offers, show active (received) offers total
+        const activeResponse = await offersApi.getOffers(token, { status: 'active', limit: 100 });
+        if (activeResponse.data && activeResponse.data.length > 0) {
+          const total = activeResponse.data.reduce((sum, offer) => sum + offer.totalValue, 0);
+          setTotalScholarship(total);
+          setScholarshipCurrency(activeResponse.data[0].currency || 'USD');
+          setScholarshipLabel('received');
+        } else {
+          setTotalScholarship(0);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch scholarship total:', err);
+    }
+  }, [token]);
+
+  // Auto-refresh when screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      setRefreshTrigger(prev => prev + 1);
+      fetchTotalScholarship();
+    }, [fetchTotalScholarship])
+  );
 
   const handleSearch = useCallback((text: string) => {
     setSearchQuery(text);
@@ -163,7 +217,7 @@ export default function OffersScreen() {
             width: '100%',
           }}
         >
-          {/* Top Row: Back, Logo, Profile */}
+          {/* Top Row: Back, Logo, Scholarship Total, Profile */}
           <Box className="flex-row items-center justify-between mb-3">
             <Box className="flex-row items-center">
               {!isDesktop && (
@@ -194,7 +248,27 @@ export default function OffersScreen() {
               </Box>
             </Box>
 
-            {!isDesktop && <UserAvatar name={user?.name || 'User'} />}
+            <HStack className="items-center" space="md">
+              {/* Total Scholarship Badge */}
+              {totalScholarship > 0 && (
+                <Box
+                  className={`flex-row items-center px-3 py-1.5 rounded-full ${
+                    scholarshipLabel === 'accepted' ? 'bg-success-100' : 'bg-primary-100'
+                  }`}
+                >
+                  <Award size={16} color={scholarshipLabel === 'accepted' ? '#16a34a' : '#6366f1'} />
+                  <Text
+                    className={`font-inter-bold text-sm ml-1.5 ${
+                      scholarshipLabel === 'accepted' ? 'text-success-700' : 'text-primary-700'
+                    }`}
+                  >
+                    {formatCurrency(totalScholarship, scholarshipCurrency)}
+                  </Text>
+                </Box>
+              )}
+
+              {!isDesktop && <UserAvatar name={user?.name || 'User'} />}
+            </HStack>
           </Box>
 
           {/* Search Bar */}

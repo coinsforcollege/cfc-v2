@@ -13,7 +13,6 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Box } from '@/components/ui/box';
@@ -147,9 +146,9 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
   }, [token, task._id, comment, files, onSubmitSuccess, onClose]);
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <ImageIcon size={20} color="rgba(255, 255, 255, 0.8)" />;
-    if (type.startsWith('video/')) return <Video size={20} color="rgba(255, 255, 255, 0.8)" />;
-    return <File size={20} color="rgba(255, 255, 255, 0.8)" />;
+    if (type.startsWith('image/')) return <ImageIcon size={20} color={iconColors.secondary} />;
+    if (type.startsWith('video/')) return <Video size={20} color={iconColors.secondary} />;
+    return <File size={20} color={iconColors.secondary} />;
   };
 
   const formatFileSize = (bytes?: number) => {
@@ -172,16 +171,24 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
       >
         <Box className="flex-1 justify-end bg-black/50">
           <Box
-            className="rounded-t-3xl bg-primary-400"
+            className={`rounded-t-3xl ${isDark ? 'bg-background-50' : 'bg-white'}`}
             style={{ paddingBottom: insets.bottom + 16 }}
           >
+          {/* Handle bar */}
+          <Box className="items-center pt-3 pb-2">
+            <Box
+              className="w-10 h-1 rounded-full"
+              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }}
+            />
+          </Box>
+
           {/* Header */}
-          <HStack className="items-center justify-between px-4 py-4 border-b border-white/20">
+          <HStack className="items-center justify-between px-5 pb-4">
             <VStack>
-              <Text className="text-white font-inter-bold text-lg">
+              <Text className="text-typography-900 font-inter-bold text-xl">
                 {task.requiresApproval ? 'Submit for Review' : 'Complete Task'}
               </Text>
-              <Text className="text-white/70 text-sm">
+              <Text className="text-typography-500 text-sm mt-0.5">
                 {task.requiresApproval
                   ? 'Your submission will be reviewed by admin'
                   : `You will earn ${task.scholarshipPoints} SP`}
@@ -189,38 +196,42 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
             </VStack>
             <Pressable
               onPress={onClose}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              className="w-8 h-8 rounded-full items-center justify-center"
+              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
             >
-              <X size={20} color="white" />
+              <X size={18} color={isDark ? '#a1a1aa' : '#71717a'} />
             </Pressable>
           </HStack>
 
+          {/* Divider */}
+          <Box
+            className="h-px mx-5"
+            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
+          />
+
           <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
-            <VStack className="px-4 py-4" space="md">
+            <VStack className="px-5 py-4" space="md">
               {/* Comment Input */}
-              <VStack space="xs">
-                <Text className="text-white/90 font-inter-medium text-sm">
+              <VStack space="sm">
+                <Text className="text-typography-700 font-inter-medium text-sm">
                   Comment (optional)
                 </Text>
                 <Box
-                  className="rounded-xl p-3"
-                  style={{ minHeight: 100, backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                  className="rounded-xl p-3 border"
+                  style={{
+                    minHeight: 100,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                  }}
                 >
                   <TextInput
                     placeholder="Add a comment about your submission..."
-                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    placeholderTextColor={isDark ? '#6b7280' : '#9ca3af'}
                     value={comment}
                     onChangeText={setComment}
                     multiline
                     style={{
-                      color: 'white',
+                      color: isDark ? '#f5f5f5' : '#171717',
                       fontFamily: 'Inter-Regular',
                       fontSize: 14,
                       minHeight: 80,
@@ -231,8 +242,8 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
               </VStack>
 
               {/* File Upload Buttons */}
-              <VStack space="xs">
-                <Text className="text-white/90 font-inter-medium text-sm">
+              <VStack space="sm">
+                <Text className="text-typography-700 font-inter-medium text-sm">
                   Attachments (optional)
                 </Text>
                 <HStack space="sm">
@@ -244,11 +255,14 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
                     })}
                   >
                     <Box
-                      className="rounded-xl py-3 px-4 flex-row items-center justify-center"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                      className="rounded-xl py-3 px-4 flex-row items-center justify-center border"
+                      style={{
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                      }}
                     >
-                      <ImageIcon size={18} color="rgba(255, 255, 255, 0.8)" />
-                      <Text className="text-white/80 font-inter-medium text-sm ml-2">
+                      <ImageIcon size={18} color={iconColors.secondary} />
+                      <Text className="text-typography-700 font-inter-medium text-sm ml-2">
                         Photos/Videos
                       </Text>
                     </Box>
@@ -261,11 +275,14 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
                     })}
                   >
                     <Box
-                      className="rounded-xl py-3 px-4 flex-row items-center justify-center"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                      className="rounded-xl py-3 px-4 flex-row items-center justify-center border"
+                      style={{
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                      }}
                     >
-                      <File size={18} color="rgba(255, 255, 255, 0.8)" />
-                      <Text className="text-white/80 font-inter-medium text-sm ml-2">
+                      <File size={18} color={iconColors.secondary} />
+                      <Text className="text-typography-700 font-inter-medium text-sm ml-2">
                         Documents
                       </Text>
                     </Box>
@@ -276,14 +293,17 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
               {/* Selected Files */}
               {files.length > 0 && (
                 <VStack space="sm">
-                  <Text className="text-white/70 text-xs">
+                  <Text className="text-typography-500 text-xs">
                     {files.length} file{files.length > 1 ? 's' : ''} selected
                   </Text>
                   {files.map((file, index) => (
                     <HStack
                       key={index}
-                      className="rounded-xl p-3 items-center"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                      className="rounded-xl p-3 items-center border"
+                      style={{
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
+                      }}
                     >
                       {file.type.startsWith('image/') ? (
                         <Image
@@ -293,20 +313,20 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
                       ) : (
                         <Box
                           className="w-10 h-10 rounded-lg items-center justify-center"
-                          style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
                         >
                           {getFileIcon(file.type)}
                         </Box>
                       )}
                       <VStack className="flex-1 ml-3">
                         <Text
-                          className="text-white text-sm font-inter-medium"
+                          className="text-typography-900 text-sm font-inter-medium"
                           numberOfLines={1}
                         >
                           {file.name}
                         </Text>
                         {file.size && (
-                          <Text className="text-white/60 text-xs">
+                          <Text className="text-typography-500 text-xs">
                             {formatFileSize(file.size)}
                           </Text>
                         )}
@@ -321,7 +341,7 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
                           justifyContent: 'center',
                         }}
                       >
-                        <Trash2 size={18} color="#fca5a5" />
+                        <Trash2 size={18} color="#ef4444" />
                       </Pressable>
                     </HStack>
                   ))}
@@ -331,42 +351,34 @@ export function SubmissionSheet({ visible, onClose, task, onSubmitSuccess }: Sub
           </ScrollView>
 
           {/* Submit Button */}
-          <Box className="px-4 pt-2">
+          <Box className="px-5 pt-4">
             <Pressable
               onPress={handleSubmit}
               disabled={loading}
               style={({ pressed }) => ({
-                opacity: pressed || loading ? 0.8 : 1,
+                opacity: loading ? 0.5 : pressed ? 0.9 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
               })}
             >
-              <LinearGradient
-                colors={task.requiresApproval ? ['#6366f1', '#8b5cf6'] : ['#10b981', '#059669']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 14,
-                  paddingVertical: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'row',
-                }}
+              <Box
+                className={`rounded-xl py-4 items-center justify-center flex-row ${task.requiresApproval ? 'bg-primary-500' : 'bg-success-500'}`}
               >
                 {loading ? (
                   <ActivityIndicator color="white" />
                 ) : (
                   <>
                     <Send size={18} color="white" />
-                    <Text className="text-white font-inter-bold text-base ml-2">
+                    <Text className="text-white font-inter-semibold text-base ml-2">
                       {task.requiresApproval ? 'Submit for Review' : 'Mark Completed'}
                     </Text>
                     {task.scholarshipPoints > 0 && (
-                      <Text className="text-white/80 font-inter-bold text-sm ml-2">
+                      <Text className="text-white/80 font-inter-semibold text-sm ml-2">
                         +{task.scholarshipPoints} SP
                       </Text>
                     )}
                   </>
                 )}
-              </LinearGradient>
+              </Box>
             </Pressable>
           </Box>
         </Box>

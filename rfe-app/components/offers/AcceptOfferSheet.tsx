@@ -298,48 +298,56 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
       >
         <Box className="flex-1 justify-end bg-black/50">
           <Box
-            className="rounded-t-3xl bg-primary-400"
+            className={`rounded-t-3xl ${isDark ? 'bg-background-50' : 'bg-white'}`}
             style={{ paddingBottom: insets.bottom + 16 }}
           >
+            {/* Handle bar */}
+            <Box className="items-center pt-3 pb-2">
+              <Box
+                className="w-10 h-1 rounded-full"
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }}
+              />
+            </Box>
+
             {/* Header */}
-            <HStack className="items-center justify-between px-4 py-4 border-b border-white/20">
+            <HStack className="items-center justify-between px-5 pb-4">
               <VStack className="flex-1 mr-4">
-                <Text className="text-white font-inter-bold text-lg">
+                <Text className="text-typography-900 font-inter-bold text-xl">
                   Accept Scholarship
                 </Text>
-                <Text className="text-white/70 text-sm" numberOfLines={1}>
+                <Text className="text-typography-500 text-sm mt-0.5" numberOfLines={1}>
                   {offer.title}
                 </Text>
               </VStack>
               <Pressable
                 onPress={onClose}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                className="w-8 h-8 rounded-full items-center justify-center"
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
               >
-                <X size={20} color="white" />
+                <X size={18} color={isDark ? '#a1a1aa' : '#71717a'} />
               </Pressable>
             </HStack>
 
+            {/* Divider */}
+            <Box
+              className="h-px mx-5"
+              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
+            />
+
             <ScrollView style={{ maxHeight: 450 }} showsVerticalScrollIndicator={false}>
-              <VStack className="px-4 py-4" space="md">
+              <VStack className="px-5 py-4" space="md">
                 {/* Progress indicator */}
                 {requiredCount > 0 && (
                   <Box
                     className="rounded-xl p-3 flex-row items-center"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
                   >
                     {filledRequiredCount === requiredCount ? (
-                      <CheckCircle size={20} color="#86efac" />
+                      <CheckCircle size={20} color="#22c55e" />
                     ) : (
-                      <AlertCircle size={20} color="#fcd34d" />
+                      <AlertCircle size={20} color="#f59e0b" />
                     )}
-                    <Text className="text-white/90 text-sm font-inter-medium ml-2">
+                    <Text className="text-typography-700 text-sm font-inter-medium ml-2">
                       {filledRequiredCount} of {requiredCount} required documents attached
                     </Text>
                   </Box>
@@ -347,7 +355,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
 
                 {/* Required Documents List */}
                 <VStack space="sm">
-                  <Text className="text-white/90 font-inter-semibold text-sm">
+                  <Text className="text-typography-700 font-inter-semibold text-sm">
                     Documents to Submit
                   </Text>
 
@@ -360,19 +368,22 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                     return (
                       <Box key={reqDoc._id}>
                         <Box
-                          className="rounded-xl p-4"
-                          style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                          className="rounded-xl p-4 border"
+                          style={{
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                            borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'
+                          }}
                         >
                           <HStack className="items-start mb-3">
                             <Box
                               className="w-8 h-8 rounded-lg items-center justify-center mr-3"
-                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
                             >
-                              <FileText size={18} color="white" />
+                              <FileText size={18} color={iconColors.secondary} />
                             </Box>
                             <VStack className="flex-1">
                               <HStack className="items-center">
-                                <Text className="text-white font-inter-semibold text-sm flex-1">
+                                <Text className="text-typography-900 font-inter-semibold text-sm flex-1">
                                   {reqDoc.name}
                                 </Text>
                                 {selected ? (
@@ -382,7 +393,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                                     </Text>
                                   </Box>
                                 ) : reqDoc.required ? (
-                                  <Box className="bg-error-500/80 px-2 py-0.5 rounded ml-2">
+                                  <Box className="bg-error-500 px-2 py-0.5 rounded ml-2">
                                     <Text className="text-white text-2xs font-inter-bold">
                                       Required
                                     </Text>
@@ -390,7 +401,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                                 ) : null}
                               </HStack>
                               {reqDoc.description && (
-                                <Text className="text-white/60 text-xs mt-1">
+                                <Text className="text-typography-500 text-xs mt-1">
                                   {reqDoc.description}
                                 </Text>
                               )}
@@ -401,7 +412,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                           {selected ? (
                             <Box
                               className="rounded-lg p-3 flex-row items-center"
-                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }}
                             >
                               {existingDoc ? (
                                 <>
@@ -413,16 +424,16 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                                   ) : (
                                     <Box
                                       className="w-10 h-10 rounded-lg items-center justify-center"
-                                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
                                     >
-                                      <File size={20} color="white" />
+                                      <File size={20} color={iconColors.secondary} />
                                     </Box>
                                   )}
                                   <VStack className="flex-1 ml-3">
-                                    <Text className="text-white text-sm font-inter-medium" numberOfLines={1}>
+                                    <Text className="text-typography-900 text-sm font-inter-medium" numberOfLines={1}>
                                       {existingDoc.name}
                                     </Text>
-                                    <Text className="text-white/60 text-xs">
+                                    <Text className="text-typography-500 text-xs">
                                       From your documents
                                     </Text>
                                   </VStack>
@@ -431,19 +442,19 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                                 <>
                                   <Box
                                     className="w-10 h-10 rounded-lg items-center justify-center"
-                                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
                                   >
                                     {selected.newFile.type.startsWith('image/') ? (
-                                      <ImageIcon size={20} color="white" />
+                                      <ImageIcon size={20} color={iconColors.secondary} />
                                     ) : (
-                                      <File size={20} color="white" />
+                                      <File size={20} color={iconColors.secondary} />
                                     )}
                                   </Box>
                                   <VStack className="flex-1 ml-3">
-                                    <Text className="text-white text-sm font-inter-medium" numberOfLines={1}>
+                                    <Text className="text-typography-900 text-sm font-inter-medium" numberOfLines={1}>
                                       {selected.newFile.name}
                                     </Text>
-                                    <Text className="text-white/60 text-xs">
+                                    <Text className="text-typography-500 text-xs">
                                       New upload
                                     </Text>
                                   </VStack>
@@ -459,7 +470,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                                   justifyContent: 'center',
                                 }}
                               >
-                                <Trash2 size={18} color="#fca5a5" />
+                                <Trash2 size={18} color="#ef4444" />
                               </Pressable>
                             </Box>
                           ) : (
@@ -471,10 +482,11 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                               style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
                             >
                               <Box
-                                className="rounded-lg py-3 flex-row items-center justify-center border border-dashed border-white/40"
+                                className="rounded-lg py-3 flex-row items-center justify-center border border-dashed"
+                                style={{ borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }}
                               >
-                                <Upload size={18} color="rgba(255, 255, 255, 0.7)" />
-                                <Text className="text-white/70 font-inter-medium text-sm ml-2">
+                                <Upload size={18} color={iconColors.muted} />
+                                <Text className="text-typography-500 font-inter-medium text-sm ml-2">
                                   Attach Document
                                 </Text>
                               </Box>
@@ -489,24 +501,24 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
             </ScrollView>
 
             {/* Submit Button */}
-            <Box className="px-4 pt-2">
+            <Box className="px-5 pt-4">
               <Pressable
                 onPress={handleSubmit}
                 disabled={loading}
                 style={({ pressed }) => ({
-                  opacity: pressed || loading ? 0.8 : 1,
+                  opacity: loading ? 0.5 : pressed ? 0.9 : 1,
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
                 })}
               >
                 <Box
-                  className="rounded-xl py-4 items-center justify-center flex-row"
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)' }}
+                  className="rounded-xl py-4 items-center justify-center flex-row bg-success-500"
                 >
                   {loading ? (
-                    <ActivityIndicator color="#6366f1" />
+                    <ActivityIndicator color="white" />
                   ) : (
                     <>
-                      <CheckCircle size={18} color="#6366f1" />
-                      <Text className="text-primary-500 font-inter-bold text-base ml-2">
+                      <CheckCircle size={18} color="white" />
+                      <Text className="text-white font-inter-semibold text-base ml-2">
                         Accept Scholarship
                       </Text>
                     </>
@@ -531,11 +543,19 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
           >
             <Box className="flex-1 justify-end bg-black/50">
               <Box
-                className={`rounded-t-3xl ${isDark ? 'bg-background-900' : 'bg-background-0'}`}
+                className={`rounded-t-3xl ${isDark ? 'bg-background-50' : 'bg-white'}`}
                 style={{ paddingBottom: insets.bottom + 16, maxHeight: '70%' }}
               >
-                <HStack className="items-center justify-between px-4 py-4 border-b border-outline-200">
-                  <Text className="text-typography-900 font-inter-bold text-lg flex-1 mr-3" numberOfLines={1}>
+                {/* Handle bar */}
+                <Box className="items-center pt-3 pb-2">
+                  <Box
+                    className="w-10 h-1 rounded-full"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }}
+                  />
+                </Box>
+
+                <HStack className="items-center justify-between px-5 pb-4">
+                  <Text className="text-typography-900 font-inter-bold text-xl flex-1 mr-3" numberOfLines={1}>
                     Select {offer.requiredDocuments.find(d => d._id === activeRequiredDocId)?.name || 'Document'}
                   </Text>
                   <Pressable
@@ -544,21 +564,21 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                       setActiveRequiredDocId(null);
                       resetFolderNavigation();
                     }}
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
+                    className="w-8 h-8 rounded-full items-center justify-center"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
                   >
-                    <X size={20} color={iconColors.primary} />
+                    <X size={18} color={isDark ? '#a1a1aa' : '#71717a'} />
                   </Pressable>
                 </HStack>
 
+                {/* Divider */}
+                <Box
+                  className="h-px mx-5"
+                  style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
+                />
+
                 {/* Upload Options */}
-                <VStack className="px-4 py-4" space="sm">
+                <VStack className="px-5 py-4" space="sm">
                   <Text className="text-typography-500 text-sm font-inter-medium mb-2">
                     Upload New
                   </Text>
@@ -589,7 +609,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                 </VStack>
 
                 {/* Existing Documents */}
-                <Box className="px-4">
+                <Box className="px-5">
                   {/* Breadcrumb / Back Navigation */}
                   <HStack className="items-center mb-3">
                     {folderPath.length > 1 && (

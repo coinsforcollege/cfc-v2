@@ -13,7 +13,9 @@ import {
   Mail,
   HelpCircle,
   Home,
-  ClipboardList
+  ClipboardList,
+  UserSearch,
+  FileText
 } from 'lucide-react';
 import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
@@ -45,6 +47,8 @@ const DashboardSidebar = ({ stats = {}, onNavigate }) => {
     ],
     college_admin: [
       { id: 'overview', label: t('dashboard.overview'), icon: LayoutDashboard, path: '/college-admin/dashboard' },
+      { id: 'students', label: 'Students', icon: UserSearch, badge: stats.studentsCount, path: '/college-admin/students' },
+      { id: 'offers', label: 'Scholarship Offers', icon: FileText, badge: stats.offersCount, path: '/college-admin/offers' },
       { id: 'community', label: t('dashboard.community'), icon: Users, badge: stats.communityCount, path: '/college-admin/community' },
       { id: 'college', label: t('collegeAdmin.collegeProfile'), icon: School, path: '/college-admin/college' },
       { id: 'token', label: t('collegeAdmin.tokenPreferences'), icon: Coins, path: '/college-admin/token' },
