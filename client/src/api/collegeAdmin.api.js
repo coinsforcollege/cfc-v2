@@ -24,6 +24,9 @@ export const collegeAdminApi = {
   getStudentPointsHistory: (id, params) => apiClient.get(`/college-admin/students/${id}/points-history`, { params }),
   getStudentDocuments: (id) => apiClient.get(`/college-admin/students/${id}/documents`),
 
+  // Accepted students
+  getAcceptedStudents: (params) => apiClient.get('/college-admin/accepted-students', { params }),
+
   // Offer management
   getLetterTemplate: () => apiClient.get('/college-admin/offers/letter-template'),
   getOffers: (params) => apiClient.get('/college-admin/offers', { params }),

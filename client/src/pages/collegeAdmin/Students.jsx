@@ -24,7 +24,9 @@ import {
   Select,
   MenuItem,
   Collapse,
-  Avatar
+  Avatar,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Search,
@@ -35,31 +37,13 @@ import {
   ExpandMore,
   ExpandLess,
   School,
-  EmojiEvents
+  EmojiEvents,
+  CheckCircle
 } from '@mui/icons-material';
 import { collegeAdminApi } from '../../api/collegeAdmin.api';
 import { useToast } from '../../contexts/ToastContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
-
-// List of countries
-const COUNTRIES = [
-  'All Countries',
-  'United States',
-  'United Kingdom',
-  'Canada',
-  'Australia',
-  'Germany',
-  'France',
-  'Netherlands',
-  'Singapore',
-  'Japan',
-  'India',
-  'China',
-  'South Korea',
-  'Brazil',
-  'Mexico',
-  'Other'
-];
+import { COUNTRIES } from '../../constants/countries';
 
 // Grade levels
 const GRADE_LEVELS = [
@@ -83,7 +67,10 @@ const Students = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  // State for students list
+  // Tab state
+  const [activeTab, setActiveTab] = useState(0);
+
+  // State for students list (Browse tab)
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -91,6 +78,15 @@ const Students = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [total, setTotal] = useState(0);
+
+  // State for accepted students (Accepted tab)
+  const [acceptedStudents, setAcceptedStudents] = useState([]);
+  const [acceptedLoading, setAcceptedLoading] = useState(false);
+  const [acceptedError, setAcceptedError] = useState('');
+  const [acceptedSearch, setAcceptedSearch] = useState('');
+  const [acceptedPage, setAcceptedPage] = useState(0);
+  const [acceptedRowsPerPage, setAcceptedRowsPerPage] = useState(25);
+  const [acceptedTotal, setAcceptedTotal] = useState(0);
 
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
@@ -139,9 +135,37 @@ const Students = () => {
     }
   };
 
+  // Fetch accepted students
+  const fetchAcceptedStudents = async () => {
+    try {
+      setAcceptedLoading(true);
+      setAcceptedError('');
+
+      const response = await collegeAdminApi.getAcceptedStudents({
+        search: acceptedSearch,
+        page: acceptedPage + 1,
+        limit: acceptedRowsPerPage,
+      });
+
+      if (response.success) {
+        setAcceptedStudents(response.data || []);
+        setAcceptedTotal(response.pagination?.total || 0);
+      }
+    } catch (err) {
+      setAcceptedError(err.message || 'Failed to load accepted students');
+      showToast(err.message || 'Failed to load accepted students', 'error');
+    } finally {
+      setAcceptedLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchStudents();
-  }, [page, rowsPerPage]);
+    if (activeTab === 0) {
+      fetchStudents();
+    } else {
+      fetchAcceptedStudents();
+    }
+  }, [activeTab, page, rowsPerPage, acceptedPage, acceptedRowsPerPage]);
 
   const handleSearch = () => {
     setPage(0);
@@ -210,6 +234,19 @@ const Students = () => {
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
+              variant="contained"
+              onClick={() => navigate('/college-admin/accepted-students')}
+              sx={{
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                fontWeight: 600,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                }
+              }}
+            >
+              Accepted Students
+            </Button>
+            <Button
               variant="outlined"
               startIcon={showFilters ? <ExpandLess /> : <FilterList />}
               onClick={() => setShowFilters(!showFilters)}
@@ -258,6 +295,7 @@ const Students = () => {
                     label="Country"
                     onChange={(e) => setCountry(e.target.value)}
                   >
+                    <MenuItem value="All Countries">All Countries</MenuItem>
                     {COUNTRIES.map((c) => (
                       <MenuItem key={c} value={c}>{c}</MenuItem>
                     ))}

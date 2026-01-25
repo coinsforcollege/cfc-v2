@@ -11,6 +11,7 @@ import {
   getStudentDetails,
   getStudentPointsHistory,
   getStudentDocuments,
+  getAcceptedStudents,
   getLetterTemplate,
   createOffer,
   getOffers,
@@ -43,6 +44,9 @@ router.get('/students', getStudents);
 router.get('/students/:id', getStudentDetails);
 router.get('/students/:id/points-history', getStudentPointsHistory);
 router.get('/students/:id/documents', getStudentDocuments);
+
+// Accepted students route
+router.get('/accepted-students', getAcceptedStudents);
 
 // Offer management routes
 router.get('/offers/letter-template', getLetterTemplate);

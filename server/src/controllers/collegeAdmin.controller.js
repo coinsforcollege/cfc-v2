@@ -838,9 +838,21 @@ export const getStudentDetails = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    // Check if user is a student OR has accepted an offer from this college
+    const acceptedOffer = await StudentOfferResponse.findOne({
+      student: id,
+      status: 'accepted'
+    }).populate('offer');
+
+    const hasAcceptedFromThisCollege = acceptedOffer &&
+      acceptedOffer.offer?.college?.toString() === req.user.managedCollege?.toString();
+
     const student = await User.findOne({
       _id: id,
-      role: 'student'
+      $or: [
+        { role: 'student' },
+        ...(hasAcceptedFromThisCollege ? [{ _id: id }] : [])
+      ]
     }).select('name email phone userProfile createdAt lastLogin');
 
     if (!student) {
@@ -960,10 +972,21 @@ export const getStudentDocuments = async (req, res, next) => {
     const { id } = req.params;
     const { page = 1, limit = 50 } = req.query;
 
-    // Verify student exists
+    // Check if user is a student OR has accepted an offer from this college
+    const acceptedOffer = await StudentOfferResponse.findOne({
+      student: id,
+      status: 'accepted'
+    }).populate('offer');
+
+    const hasAcceptedFromThisCollege = acceptedOffer &&
+      acceptedOffer.offer?.college?.toString() === req.user.managedCollege?.toString();
+
     const student = await User.findOne({
       _id: id,
-      role: 'student'
+      $or: [
+        { role: 'student' },
+        ...(hasAcceptedFromThisCollege ? [{ _id: id }] : [])
+      ]
     });
 
     if (!student) {
@@ -992,6 +1015,103 @@ export const getStudentDocuments = async (req, res, next) => {
       data: {
         documents
       },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get students who have accepted offers from this college
+// @route   GET /api/college-admin/accepted-students
+// @access  Private (College Admin only)
+export const getAcceptedStudents = async (req, res, next) => {
+  try {
+    const collegeId = req.user.managedCollege;
+    const { search, page = 1, limit = 25 } = req.query;
+
+    // Find all accepted responses for offers from this college
+    const matchStage = {
+      status: 'accepted'
+    };
+
+    // Build aggregation pipeline
+    const pipeline = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'scholarshipoffers',
+          localField: 'offer',
+          foreignField: '_id',
+          as: 'offerData'
+        }
+      },
+      { $unwind: '$offerData' },
+      { $match: { 'offerData.college': new mongoose.Types.ObjectId(collegeId) } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'student',
+          foreignField: '_id',
+          as: 'studentData'
+        }
+      },
+      { $unwind: '$studentData' }
+    ];
+
+    // Add search filter if provided
+    if (search) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'studentData.name': { $regex: search, $options: 'i' } },
+            { 'studentData.email': { $regex: search, $options: 'i' } }
+          ]
+        }
+      });
+    }
+
+    // Get total count
+    const countPipeline = [...pipeline, { $count: 'total' }];
+    const countResult = await StudentOfferResponse.aggregate(countPipeline);
+    const total = countResult[0]?.total || 0;
+
+    // Add pagination and projection
+    pipeline.push(
+      { $sort: { respondedAt: -1, updatedAt: -1 } },
+      { $skip: (parseInt(page) - 1) * parseInt(limit) },
+      { $limit: parseInt(limit) },
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          respondedAt: 1,
+          updatedAt: 1,
+          student: {
+            _id: '$studentData._id',
+            name: '$studentData.name',
+            email: '$studentData.email'
+          },
+          offer: {
+            _id: '$offerData._id',
+            title: '$offerData.title',
+            totalValue: '$offerData.totalValue',
+            currency: '$offerData.currency'
+          }
+        }
+      }
+    );
+
+    const responses = await StudentOfferResponse.aggregate(pipeline);
+
+    res.status(200).json({
+      success: true,
+      data: responses,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),

@@ -15,7 +15,8 @@ import {
   Home,
   ClipboardList,
   UserSearch,
-  FileText
+  FileText,
+  UserCheck
 } from 'lucide-react';
 import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
