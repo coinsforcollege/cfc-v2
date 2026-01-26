@@ -32,6 +32,8 @@ import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { hugoChatApi, ChatMessage, Suggestion } from '@/src/api/hugoChat.api';
+import { studentApi } from '@/src/api/student.api';
+import config from '@/src/config';
 import { ChevronLeft, Bot } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -48,48 +50,159 @@ const ICON_COLORS = {
   },
 };
 
-function MessageBubble({ message, isDark }: { message: ChatMessage; isDark: boolean }) {
+function ChatAvatar({ 
+  profilePicture, 
+  name, 
+  size = 24,
+  iconSource
+}: { 
+  profilePicture: string | null; 
+  name: string; 
+  size?: number;
+  iconSource?: any;
+}) {
+  const initials = name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  const getProfilePictureUrl = () => {
+    if (!profilePicture) return null;
+    if (profilePicture.startsWith('http')) return profilePicture;
+    const baseUrl = config.apiUrl.replace('/api', '');
+    return `${baseUrl}${profilePicture}`;
+  };
+
+  const imageUrl = getProfilePictureUrl();
+
+  // If iconSource is provided (e.g., for Hugo), use it
+  if (iconSource) {
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          overflow: 'hidden',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Image
+          source={iconSource}
+          style={{
+            width: size,
+            height: size,
+          }}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: imageUrl ? 'transparent' : '#6366f1',
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {imageUrl ? (
+        <Image
+          source={{ uri: imageUrl }}
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+          }}
+          resizeMode="cover"
+        />
+      ) : (
+        <Text
+          className="font-inter-bold text-white"
+          style={{ fontSize: size * 0.4 }}
+        >
+          {initials || 'U'}
+        </Text>
+      )}
+    </View>
+  );
+}
+
+function MessageBubble({ 
+  message, 
+  isDark, 
+  userProfilePicture, 
+  userName 
+}: { 
+  message: ChatMessage; 
+  isDark: boolean;
+  userProfilePicture: string | null;
+  userName: string;
+}) {
   const isUser = message.role === 'user';
 
   return (
     <View
       style={{
+        flexDirection: 'row',
         alignSelf: isUser ? 'flex-end' : 'flex-start',
         maxWidth: '85%',
         marginVertical: 6,
+        alignItems: 'flex-start',
+        gap: 8,
       }}
     >
       {!isUser && (
-        <HStack className="items-center mb-1.5" space="xs">
-          <Image
-            source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
-            style={{ width: 20, height: 20 }}
-            resizeMode="contain"
-          />
-          <Text className="text-xs font-inter-semibold text-primary-500">Hugo</Text>
-        </HStack>
+        <ChatAvatar
+          profilePicture={null}
+          name="Hugo"
+          size={24}
+          iconSource={require('@/assets/images/icons/app-icon-transparent-bg.png')}
+        />
       )}
-      <View
-        style={{
-          backgroundColor: isUser
-            ? '#4f46e5'
-            : isDark
-            ? 'rgba(255, 255, 255, 0.08)'
-            : '#f3f4f6',
-          paddingHorizontal: 14,
-          paddingVertical: 10,
-          borderRadius: 16,
-          borderTopRightRadius: isUser ? 4 : 16,
-          borderTopLeftRadius: isUser ? 16 : 4,
-        }}
-      >
-        <Text
-          className={isUser ? 'text-white' : 'text-typography-900'}
-          style={{ fontSize: 15, lineHeight: 22 }}
+      <View style={{ flex: 1 }}>
+        {!isUser && (
+          <HStack className="items-center mb-1.5" space="xs">
+            <Text className="text-xs font-inter-semibold text-primary-500">Hugo</Text>
+          </HStack>
+        )}
+        <View
+          style={{
+            backgroundColor: isUser
+              ? '#4f46e5'
+              : isDark
+              ? 'rgba(255, 255, 255, 0.08)'
+              : '#f3f4f6',
+            paddingHorizontal: 14,
+            paddingVertical: 10,
+            borderRadius: 16,
+            borderTopRightRadius: isUser ? 4 : 16,
+            borderTopLeftRadius: isUser ? 16 : 4,
+          }}
         >
-          {message.content}
-        </Text>
+          <Text
+            className={isUser ? 'text-white' : 'text-typography-900'}
+            style={{ fontSize: 15, lineHeight: 22 }}
+          >
+            {message.content}
+          </Text>
+        </View>
       </View>
+      {isUser && (
+        <ChatAvatar
+          profilePicture={userProfilePicture}
+          name={userName}
+          size={24}
+        />
+      )}
     </View>
   );
 }
@@ -190,7 +303,7 @@ function SuggestionCard({ suggestion, onPress }: { suggestion: Suggestion; onPre
 }
 
 export default function HugoChatScreen() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -202,6 +315,7 @@ export default function HugoChatScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
 
@@ -229,6 +343,21 @@ export default function HugoChatScreen() {
       }
     };
     fetchSuggestions();
+  }, [token]);
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!token) return;
+      try {
+        const response = await studentApi.getProfile(token);
+        if (response.success) {
+          setProfilePicture(response.data.profilePicture || null);
+        }
+      } catch (error) {
+        // Silently fail - avatar will show initials
+      }
+    };
+    fetchProfilePicture();
   }, [token]);
 
   useEffect(() => {
@@ -391,7 +520,13 @@ export default function HugoChatScreen() {
 
           {/* Messages */}
           {messages.map((message, index) => (
-            <MessageBubble key={index} message={message} isDark={isDark} />
+            <MessageBubble 
+              key={index} 
+              message={message} 
+              isDark={isDark}
+              userProfilePicture={profilePicture}
+              userName={user?.name || 'User'}
+            />
           ))}
 
           {/* Typing Indicator */}
