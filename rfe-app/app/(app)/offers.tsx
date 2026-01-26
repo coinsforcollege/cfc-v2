@@ -11,6 +11,7 @@ import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  InteractionManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -88,6 +89,15 @@ export default function OffersScreen() {
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
 
   const [scholarshipLabel, setScholarshipLabel] = useState<'accepted' | 'received'>('received');
+  const [isReady, setIsReady] = useState(false);
+
+  // Delay heavy content until after navigation animation completes
+  useEffect(() => {
+    const interaction = InteractionManager.runAfterInteractions(() => {
+      setIsReady(true);
+    });
+    return () => interaction.cancel();
+  }, []);
 
   // Fetch total scholarship value - accepted takes priority, otherwise show active (received)
   const fetchTotalScholarship = useCallback(async () => {
@@ -357,79 +367,83 @@ export default function OffersScreen() {
       </Box>
 
       {/* Swipable Content */}
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        onMomentumScrollEnd={handleScrollEnd}
-        scrollEventThrottle={16}
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          width: width * TABS.length,
-        }}
-        nestedScrollEnabled={true}
-        removeClippedSubviews={false}
-      >
-        {/* Active Tab */}
-        <Box style={{ width, flex: 1 }}>
-          <Box
-            className="flex-1"
-            style={{
-              maxWidth: isDesktop ? 1200 : undefined,
-              alignSelf: isDesktop ? 'center' : undefined,
-              width: '100%',
-            }}
-          >
-            <OfferListSection
-              status="active"
-              searchQuery={searchQuery}
-              refreshTrigger={refreshTrigger}
-              numColumns={isDesktop ? 4 : 2}
-              ListHeaderComponent={<ActiveTabHeader />}
-            />
+      {isReady ? (
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          onMomentumScrollEnd={handleScrollEnd}
+          scrollEventThrottle={16}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            width: width * TABS.length,
+          }}
+          nestedScrollEnabled={true}
+          removeClippedSubviews={false}
+        >
+          {/* Active Tab */}
+          <Box style={{ width, flex: 1 }}>
+            <Box
+              className="flex-1"
+              style={{
+                maxWidth: isDesktop ? 1200 : undefined,
+                alignSelf: isDesktop ? 'center' : undefined,
+                width: '100%',
+              }}
+            >
+              <OfferListSection
+                status="active"
+                searchQuery={searchQuery}
+                refreshTrigger={refreshTrigger}
+                numColumns={isDesktop ? 4 : 2}
+                ListHeaderComponent={<ActiveTabHeader />}
+              />
+            </Box>
           </Box>
-        </Box>
 
-        {/* Accepted Tab */}
-        <Box style={{ width, flex: 1 }}>
-          <Box
-            className="flex-1"
-            style={{
-              maxWidth: isDesktop ? 1200 : undefined,
-              alignSelf: isDesktop ? 'center' : undefined,
-              width: '100%',
-            }}
-          >
-            <OfferListSection
-              status="accepted"
-              searchQuery={searchQuery}
-              refreshTrigger={refreshTrigger}
-              numColumns={isDesktop ? 4 : 2}
-            />
+          {/* Accepted Tab */}
+          <Box style={{ width, flex: 1 }}>
+            <Box
+              className="flex-1"
+              style={{
+                maxWidth: isDesktop ? 1200 : undefined,
+                alignSelf: isDesktop ? 'center' : undefined,
+                width: '100%',
+              }}
+            >
+              <OfferListSection
+                status="accepted"
+                searchQuery={searchQuery}
+                refreshTrigger={refreshTrigger}
+                numColumns={isDesktop ? 4 : 2}
+              />
+            </Box>
           </Box>
-        </Box>
 
-        {/* Rejected Tab */}
-        <Box style={{ width, flex: 1 }}>
-          <Box
-            className="flex-1"
-            style={{
-              maxWidth: isDesktop ? 1200 : undefined,
-              alignSelf: isDesktop ? 'center' : undefined,
-              width: '100%',
-            }}
-          >
-            <OfferListSection
-              status="rejected"
-              searchQuery={searchQuery}
-              refreshTrigger={refreshTrigger}
-              numColumns={isDesktop ? 4 : 2}
-            />
+          {/* Rejected Tab */}
+          <Box style={{ width, flex: 1 }}>
+            <Box
+              className="flex-1"
+              style={{
+                maxWidth: isDesktop ? 1200 : undefined,
+                alignSelf: isDesktop ? 'center' : undefined,
+                width: '100%',
+              }}
+            >
+              <OfferListSection
+                status="rejected"
+                searchQuery={searchQuery}
+                refreshTrigger={refreshTrigger}
+                numColumns={isDesktop ? 4 : 2}
+              />
+            </Box>
           </Box>
-        </Box>
-      </ScrollView>
+        </ScrollView>
+      ) : (
+        <Box className="flex-1" />
+      )}
     </Box>
   );
 }

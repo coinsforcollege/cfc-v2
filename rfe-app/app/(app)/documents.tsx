@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   TextInput,
   View,
+  InteractionManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -89,6 +90,15 @@ export default function DocumentsScreen() {
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
+  const [isReady, setIsReady] = useState(false);
+
+  // Delay heavy content until after navigation animation completes
+  useEffect(() => {
+    const interaction = InteractionManager.runAfterInteractions(() => {
+      setIsReady(true);
+    });
+    return () => interaction.cancel();
+  }, []);
 
   // State
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -458,52 +468,58 @@ export default function DocumentsScreen() {
       </Box>
 
       {/* Document List */}
-      <DocumentListSection
-        currentFolderId={currentFolderId}
-        onFolderPress={handleFolderPress}
-        onDocumentPress={handleDocumentPress}
-        onFolderLongPress={handleFolderLongPress}
-        onDocumentLongPress={handleDocumentLongPress}
-        numColumns={isDesktop ? 4 : 2}
-        refreshTrigger={refreshTrigger}
-        searchQuery={searchQuery}
-      />
+      {isReady ? (
+        <>
+          <DocumentListSection
+            currentFolderId={currentFolderId}
+            onFolderPress={handleFolderPress}
+            onDocumentPress={handleDocumentPress}
+            onFolderLongPress={handleFolderLongPress}
+            onDocumentLongPress={handleDocumentLongPress}
+            numColumns={isDesktop ? 4 : 2}
+            refreshTrigger={refreshTrigger}
+            searchQuery={searchQuery}
+          />
 
-      {/* Create Folder Sheet */}
-      <CreateFolderSheet
-        visible={showCreateFolder}
-        onClose={() => setShowCreateFolder(false)}
-        onSuccess={handleRefresh}
-        currentFolderId={currentFolderId}
-      />
+          {/* Create Folder Sheet */}
+          <CreateFolderSheet
+            visible={showCreateFolder}
+            onClose={() => setShowCreateFolder(false)}
+            onSuccess={handleRefresh}
+            currentFolderId={currentFolderId}
+          />
 
-      {/* Action Sheet */}
-      <DocumentActionSheet
-        visible={showActionSheet}
-        onClose={() => {
-          setShowActionSheet(false);
-          setSelectedItem(null);
-          setSelectedItemType(null);
-        }}
-        onSuccess={handleRefresh}
-        item={selectedItem}
-        itemType={selectedItemType}
-        onMovePress={handleMovePress}
-      />
+          {/* Action Sheet */}
+          <DocumentActionSheet
+            visible={showActionSheet}
+            onClose={() => {
+              setShowActionSheet(false);
+              setSelectedItem(null);
+              setSelectedItemType(null);
+            }}
+            onSuccess={handleRefresh}
+            item={selectedItem}
+            itemType={selectedItemType}
+            onMovePress={handleMovePress}
+          />
 
-      {/* Move Sheet */}
-      <MoveToSheet
-        visible={showMoveSheet}
-        onClose={() => {
-          setShowMoveSheet(false);
-          setSelectedItem(null);
-          setSelectedItemType(null);
-        }}
-        onSuccess={handleRefresh}
-        items={selectedItem ? [selectedItem] : []}
-        itemType={selectedItemType || 'document'}
-        currentFolderId={currentFolderId}
-      />
+          {/* Move Sheet */}
+          <MoveToSheet
+            visible={showMoveSheet}
+            onClose={() => {
+              setShowMoveSheet(false);
+              setSelectedItem(null);
+              setSelectedItemType(null);
+            }}
+            onSuccess={handleRefresh}
+            items={selectedItem ? [selectedItem] : []}
+            itemType={selectedItemType || 'document'}
+            currentFolderId={currentFolderId}
+          />
+        </>
+      ) : (
+        <Box className="flex-1" />
+      )}
 
       {/* Overlay */}
       {showFabMenu && (

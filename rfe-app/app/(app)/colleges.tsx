@@ -7,6 +7,7 @@ import {
   useColorScheme,
   Platform,
   Image,
+  InteractionManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -47,6 +48,15 @@ export default function CollegesScreen() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  // Delay heavy content until after navigation animation completes
+  useEffect(() => {
+    const interaction = InteractionManager.runAfterInteractions(() => {
+      setIsReady(true);
+    });
+    return () => interaction.cancel();
+  }, []);
 
   // Get themed icon colors
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
@@ -190,20 +200,24 @@ export default function CollegesScreen() {
       </Box>
 
       {/* Content - Single scrollable area */}
-      <Box
-        className="flex-1"
-        style={{
-          maxWidth: isDesktop ? 1200 : undefined,
-          alignSelf: isDesktop ? 'center' : undefined,
-          width: '100%',
-        }}
-      >
-        <CollegeListSection
-          searchQuery={searchQuery}
-          numColumns={isDesktop ? 4 : 2}
-          ListHeaderComponent={ListHeader}
-        />
-      </Box>
+      {isReady ? (
+        <Box
+          className="flex-1"
+          style={{
+            maxWidth: isDesktop ? 1200 : undefined,
+            alignSelf: isDesktop ? 'center' : undefined,
+            width: '100%',
+          }}
+        >
+          <CollegeListSection
+            searchQuery={searchQuery}
+            numColumns={isDesktop ? 4 : 2}
+            ListHeaderComponent={ListHeader}
+          />
+        </Box>
+      ) : (
+        <Box className="flex-1" />
+      )}
     </Box>
   );
 }

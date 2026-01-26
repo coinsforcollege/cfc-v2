@@ -11,6 +11,7 @@ import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  InteractionManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -74,6 +75,15 @@ export default function TasksScreen() {
   const isTabPressScroll = useRef(false);
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
+  const [isReady, setIsReady] = useState(false);
+
+  // Delay heavy content until after navigation animation completes
+  useEffect(() => {
+    const interaction = InteractionManager.runAfterInteractions(() => {
+      setIsReady(true);
+    });
+    return () => interaction.cancel();
+  }, []);
 
   // Fetch categories and profile picture on mount
   useEffect(() => {
@@ -357,49 +367,53 @@ export default function TasksScreen() {
       </Box>
 
       {/* Swipable Content */}
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        onMomentumScrollEnd={handleScrollEnd}
-        scrollEventThrottle={16}
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          width: width * TABS.length,
-        }}
-        nestedScrollEnabled={true}
-        removeClippedSubviews={false}
-      >
-        {/* Active Tab */}
-        <Box style={{ width, flex: 1 }}>
-          <Box
-            className="flex-1"
-            style={{
-              maxWidth: isDesktop ? 1200 : undefined,
-              alignSelf: isDesktop ? 'center' : undefined,
-              width: '100%',
-            }}
-          >
-            <TaskListSection
-              searchQuery={searchQuery}
-              selectedCategory={selectedCategory}
-              numColumns={isDesktop ? 4 : 2}
-            />
+      {isReady ? (
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          onMomentumScrollEnd={handleScrollEnd}
+          scrollEventThrottle={16}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            width: width * TABS.length,
+          }}
+          nestedScrollEnabled={true}
+          removeClippedSubviews={false}
+        >
+          {/* Active Tab */}
+          <Box style={{ width, flex: 1 }}>
+            <Box
+              className="flex-1"
+              style={{
+                maxWidth: isDesktop ? 1200 : undefined,
+                alignSelf: isDesktop ? 'center' : undefined,
+                width: '100%',
+              }}
+            >
+              <TaskListSection
+                searchQuery={searchQuery}
+                selectedCategory={selectedCategory}
+                numColumns={isDesktop ? 4 : 2}
+              />
+            </Box>
           </Box>
-        </Box>
 
-        {/* In Review Tab */}
-        <Box style={{ width, flex: 1 }}>
-          <SubmissionListSection type="pending" />
-        </Box>
+          {/* In Review Tab */}
+          <Box style={{ width, flex: 1 }}>
+            <SubmissionListSection type="pending" />
+          </Box>
 
-        {/* Completed Tab */}
-        <Box style={{ width, flex: 1 }}>
-          <SubmissionListSection type="completed" />
-        </Box>
-      </ScrollView>
+          {/* Completed Tab */}
+          <Box style={{ width, flex: 1 }}>
+            <SubmissionListSection type="completed" />
+          </Box>
+        </ScrollView>
+      ) : (
+        <Box className="flex-1" />
+      )}
     </Box>
   );
 }
