@@ -27,6 +27,7 @@ import { Search, ChevronLeft, X, Award } from '@/components/navigation/icons';
 import { OfferListSection } from '@/components/offers/OfferListSection';
 import { RecommendedOfferCard } from '@/components/offers/RecommendedOfferCard';
 import { offersApi } from '@/src/api/offers.api';
+import { HugoAIFab } from '@/components/navigation';
 
 const TABLET_BREAKPOINT = 768;
 
@@ -444,6 +445,9 @@ export default function OffersScreen() {
       ) : (
         <Box className="flex-1" />
       )}
+
+      {/* Hugo AI FAB */}
+      <HugoAIFab />
     </Box>
   );
 }

@@ -31,6 +31,7 @@ import studentDocumentRoutes from './routes/studentDocument.routes.js';
 import studentOfferRoutes from './routes/studentOffer.routes.js';
 import studentRoutes from './routes/student.routes.js';
 import collegeReadinessRoutes from './routes/collegeReadiness.routes.js';
+import hugoChatRoutes from './routes/hugoChat.routes.js';
 
 // Import middleware
 import errorHandler from './middlewares/errorHandler.js';
@@ -159,6 +160,7 @@ app.use('/api/student-documents', studentDocumentRoutes);
 app.use('/api/student-offers', studentOfferRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/college-readiness', collegeReadinessRoutes);
+app.use('/api/hugo-chat', hugoChatRoutes);
 
 // 404
 app.use('*', (req, res) => {

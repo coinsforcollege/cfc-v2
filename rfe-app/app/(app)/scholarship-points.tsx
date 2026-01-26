@@ -44,6 +44,7 @@ import {
   ChevronRight,
   Info,
 } from 'lucide-react-native';
+import { HugoAIFab } from '@/components/navigation';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_WIDTH = SCREEN_WIDTH - 32;
@@ -722,6 +723,9 @@ export default function ScholarshipPointsScreen() {
           ) : null
         }
       />
+
+      {/* Hugo AI FAB */}
+      <HugoAIFab />
     </Box>
   );
 }

@@ -146,7 +146,12 @@
       "Bash(CHECKLIST_ID=\"697754267d7a771f8c0b5916\")",
       "Bash(__NEW_LINE_6ab59f206918123c__ echo \"=== Update Item \\(mark complete\\) ===\")",
       "Bash(__NEW_LINE_9656307d3f0a7e91__ echo \"=== Try to regenerate \\(should be rate limited\\) ===\")",
-      "Bash(__NEW_LINE_3e0f572eb16b9edf__ echo \"=== Check Basic Data \\(should show active checklist\\) ===\")"
+      "Bash(__NEW_LINE_3e0f572eb16b9edf__ echo \"=== Check Basic Data \\(should show active checklist\\) ===\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmEyNmY4N2ZiNDM3MTNlOWJjZjk5MSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzY5NDQwNzY2LCJleHAiOjE3NzIwMzI3NjZ9.WWfjliWapNJGZT2J8lHIGPjkQFpcRESc3ewwS60lwpw\")",
+      "Bash(__NEW_LINE_0b7e96603cabeac3__ curl -s -X GET \"http://192.168.0.16:4000/api/hugo-chat/suggestions\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_f2579f5b6257110f__ curl -s -X GET \"http://192.168.0.16:4000/api/hugo-chat/suggestions\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_80d4182c045a5f20__ curl -s -X POST \"http://192.168.0.16:4000/api/hugo-chat\" -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"message\"\":\"\"Hello! What can you help me with?\"\"}')",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []

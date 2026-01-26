@@ -26,6 +26,7 @@ import { TaskListSection } from '@/components/tasks/TaskListSection';
 import { SubmissionListSection } from '@/components/tasks/SubmissionListSection';
 import { tasksApi, CategoryWithCount } from '@/src/api/tasks.api';
 import { studentApi } from '@/src/api/student.api';
+import { HugoAIFab } from '@/components/navigation';
 
 const TABLET_BREAKPOINT = 768;
 
@@ -414,6 +415,9 @@ export default function TasksScreen() {
       ) : (
         <Box className="flex-1" />
       )}
+
+      {/* Hugo AI FAB */}
+      <HugoAIFab />
     </Box>
   );
 }

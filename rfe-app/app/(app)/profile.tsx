@@ -41,6 +41,7 @@ import {
   School,
   Globe,
 } from 'lucide-react-native';
+import { HugoAIFab } from '@/components/navigation';
 
 const ICON_COLORS = {
   light: {
@@ -603,6 +604,9 @@ export default function ProfileScreen() {
           )}
         </VStack>
       </ScrollView>
+
+      {/* Hugo AI FAB */}
+      <HugoAIFab />
     </Box>
   );
 }

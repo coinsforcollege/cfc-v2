@@ -4,3 +4,4 @@ export { Sidebar } from './Sidebar';
 export { BottomNav } from './BottomNav';
 export { DashboardLayout, useIsDesktop } from './DashboardLayout';
 export { ScreenContainer } from './ScreenContainer';
+export { HugoAIFab } from './HugoAIFab';

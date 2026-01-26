@@ -26,6 +26,7 @@ import {
   ChevronRight,
   Target,
 } from 'lucide-react-native';
+import { HugoAIFab } from '@/components/navigation';
 
 // Format currency helper
 function formatCurrency(value: number, currency: string = 'USD'): string {
@@ -410,6 +411,9 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Hugo AI FAB */}
+      <HugoAIFab />
     </View>
   );
 }

@@ -19,6 +19,7 @@ import { FeaturedReelCarousel } from '@/components/colleges/FeaturedReelCarousel
 import { CollegeListSection } from '@/components/colleges/CollegeListSection';
 import { UserAvatar } from '@/components/navigation/UserAvatar';
 import { studentApi } from '@/src/api/student.api';
+import { HugoAIFab } from '@/components/navigation';
 
 const TABLET_BREAKPOINT = 768;
 
@@ -218,6 +219,9 @@ export default function CollegesScreen() {
       ) : (
         <Box className="flex-1" />
       )}
+
+      {/* Hugo AI FAB */}
+      <HugoAIFab />
     </Box>
   );
 }

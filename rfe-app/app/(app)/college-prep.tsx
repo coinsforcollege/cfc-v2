@@ -51,6 +51,7 @@ import {
   Clock,
   RefreshCw,
 } from 'lucide-react-native';
+import { HugoAIFab } from '@/components/navigation';
 
 const ICON_COLORS = {
   light: {
@@ -1008,6 +1009,9 @@ export default function CollegePrepScreen() {
       </ScrollView>
 
       {renderBasicDataSheet()}
+
+      {/* Hugo AI FAB */}
+      <HugoAIFab />
     </Box>
   );
 }
