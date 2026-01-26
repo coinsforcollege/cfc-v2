@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet, Animated } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, ScrollView, Image, Dimensions, Pressable, Platform, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,26 +10,34 @@ import { Text } from '@/components/ui/text';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { notificationsApi } from '@/src/api/notifications.api';
 import { studentApi } from '@/src/api/student.api';
+import { scholarshipApi } from '@/src/api/scholarship.api';
+import { offersApi } from '@/src/api/offers.api';
 import { UserAvatar } from '@/components/navigation/UserAvatar';
 import {
   Bell,
   ShieldCheck,
   Zap,
-  CircleDot,
   ListTodo,
   Building2,
   GraduationCap,
   FolderOpen,
+  ChevronRight,
 } from 'lucide-react-native';
+
+// Format currency helper
+function formatCurrency(value: number, currency: string = 'USD'): string {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return formatter.format(value);
+}
 
 const { width } = Dimensions.get('window');
 
 // --- Mock Data ---
-
-const MOCK_BALANCE = {
-  total: '1,250',
-  currency: 'SP',
-};
 
 const MOCK_COLLEGES = [
   { id: 1, name: 'Stanford', location: 'California', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=800&fit=crop', match: '98%' },
@@ -121,7 +129,7 @@ function StickyHeader({ user, headerHeight, unreadCount, profilePicture }: { use
               onPress={() => router.push('/(app)/notifications')}
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Box className="w-10 h-10 rounded-full bg-white/10 items-center justify-center">
+              <Box className="rounded-full bg-white/10 items-center justify-center" style={{ width: 40, height: 40 }}>
                 <Bell size={18} color="rgba(255,255,255,0.9)" />
                 {unreadCount > 0 && (
                   <Box className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400" />
@@ -136,28 +144,19 @@ function StickyHeader({ user, headerHeight, unreadCount, profilePicture }: { use
 }
 
 // Points row with bottom portion of gradient
-function PointsRow({ headerHeight }: { headerHeight: number }) {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.4,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, [pulseAnim]);
-
+function PointsRow({
+  headerHeight,
+  balance,
+  loading,
+  potentialValue,
+  potentialCurrency,
+}: {
+  headerHeight: number;
+  balance: number;
+  loading: boolean;
+  potentialValue: number;
+  potentialCurrency: string;
+}) {
   return (
     <View style={{ overflow: 'hidden' }}>
       {/* Vertical gradient - bottom portion, starts where header ends */}
@@ -174,35 +173,49 @@ function PointsRow({ headerHeight }: { headerHeight: number }) {
       />
 
       <View style={{ paddingHorizontal: 20, paddingVertical: 24 }}>
-        <HStack className="justify-between items-end">
-          {/* Points Display */}
-          <VStack>
-            <Text className="text-indigo-300 text-xs font-inter-medium uppercase tracking-widest mb-1">
-              Scholarship Points
-            </Text>
-            <HStack className="items-baseline">
-              <Text className="text-white text-4xl font-inter-bold">
-                {MOCK_BALANCE.total}
-              </Text>
-              <Text className="text-indigo-300 text-base font-inter-medium ml-1.5">
-                {MOCK_BALANCE.currency}
-              </Text>
-            </HStack>
-          </VStack>
-
-          {/* Pending Tasks */}
+        <HStack className="justify-between items-start">
+          {/* Points Display - Tappable */}
           <Pressable
-            onPress={() => router.push('/(app)/tasks')}
+            onPress={() => router.push('/(app)/scholarship-points')}
             style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
           >
-            <HStack space="sm" className="items-center bg-white/10 px-4 py-2.5 rounded-full">
-              <Animated.View style={{ opacity: pulseAnim }}>
-                <CircleDot size={16} color="#fbbf24" />
-              </Animated.View>
-              <Text className="text-white text-sm font-inter-semibold">
-                3 pending tasks
-              </Text>
-            </HStack>
+            <VStack>
+              <HStack className="items-center mb-1">
+                <Text className="text-indigo-300 text-xs font-inter-medium uppercase tracking-widest">
+                  Scholarship Points
+                </Text>
+                <ChevronRight size={16} color="rgba(199, 210, 254, 0.6)" style={{ marginLeft: 4 }} />
+              </HStack>
+              <HStack className="items-baseline">
+                {loading ? (
+                  <Text className="text-white text-4xl font-inter-bold">---</Text>
+                ) : (
+                  <Text className="text-white text-4xl font-inter-bold">
+                    {balance.toLocaleString()}
+                  </Text>
+                )}
+                <Text className="text-indigo-300 text-base font-inter-medium ml-1.5">
+                  SP
+                </Text>
+              </HStack>
+            </VStack>
+          </Pressable>
+
+          {/* Potential Value - Tappable to offers */}
+          <Pressable
+            onPress={() => router.push('/(app)/offers')}
+            style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+          >
+            <Box className="bg-white/10 px-4 py-3 rounded-2xl">
+              <VStack className="items-end">
+                <Text className="text-indigo-300 text-[10px] font-inter-medium uppercase tracking-wider mb-1">
+                  Potential Value
+                </Text>
+                <Text className="text-amber-400 text-xl font-inter-bold">
+                  {loading ? '---' : formatCurrency(potentialValue, potentialCurrency)}
+                </Text>
+              </VStack>
+            </Box>
           </Pressable>
         </HStack>
       </View>
@@ -422,6 +435,10 @@ export default function HomeScreen() {
   const headerHeight = topPadding + 60;
   const [unreadCount, setUnreadCount] = useState(0);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [scholarshipBalance, setScholarshipBalance] = useState(0);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+  const [potentialValue, setPotentialValue] = useState(0);
+  const [potentialCurrency, setPotentialCurrency] = useState('USD');
 
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
@@ -447,11 +464,55 @@ export default function HomeScreen() {
     }
   }, [token]);
 
+  const fetchScholarshipBalance = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await scholarshipApi.getWallet(token);
+      if (response.success) {
+        setScholarshipBalance(response.data.balance);
+      }
+    } catch (error) {
+      console.error('Error fetching scholarship balance:', error);
+    } finally {
+      setBalanceLoading(false);
+    }
+  }, [token]);
+
+  const fetchOffersTotal = useCallback(async () => {
+    if (!token) return;
+    try {
+      // Fetch both accepted and active offers
+      const [acceptedResponse, activeResponse] = await Promise.all([
+        offersApi.getOffers(token, { status: 'accepted', limit: 100 }),
+        offersApi.getOffers(token, { status: 'active', limit: 100 }),
+      ]);
+
+      // Combine all offers
+      const allOffers = [
+        ...(acceptedResponse.success ? acceptedResponse.data : []),
+        ...(activeResponse.success ? activeResponse.data : []),
+      ];
+
+      if (allOffers.length > 0) {
+        const highest = Math.max(...allOffers.map(offer => offer.totalValue));
+        const highestOffer = allOffers.find(o => o.totalValue === highest);
+        setPotentialValue(highest);
+        setPotentialCurrency(highestOffer?.currency || 'USD');
+      } else {
+        setPotentialValue(0);
+      }
+    } catch (error) {
+      console.error('Error fetching offers:', error);
+    }
+  }, [token]);
+
   useFocusEffect(
     useCallback(() => {
       fetchUnreadCount();
       fetchProfilePicture();
-    }, [fetchUnreadCount, fetchProfilePicture])
+      fetchScholarshipBalance();
+      fetchOffersTotal();
+    }, [fetchUnreadCount, fetchProfilePicture, fetchScholarshipBalance, fetchOffersTotal])
   );
 
   return (
@@ -469,7 +530,13 @@ export default function HomeScreen() {
         style={{ flex: 1 }}
       >
         {/* Points Row */}
-        <PointsRow headerHeight={headerHeight} />
+        <PointsRow
+          headerHeight={headerHeight}
+          balance={scholarshipBalance}
+          loading={balanceLoading}
+          potentialValue={potentialValue}
+          potentialCurrency={potentialCurrency}
+        />
 
         {/* Rest of Content with fade overlay */}
         <View style={{ position: 'relative' }}>

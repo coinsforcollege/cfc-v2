@@ -1,35 +1,8 @@
 import TaskSubmission from '../models/TaskSubmission.js';
 import Task from '../models/Task.js';
-import ScholarshipWallet from '../models/ScholarshipWallet.js';
-import ScholarshipTransaction from '../models/ScholarshipTransaction.js';
 import Notification from '../models/Notification.js';
 import { sendPushNotification } from '../services/pushNotification.service.js';
-
-// Helper function to award scholarship points
-const awardScholarshipPoints = async (userId, amount, source, reference, referenceModel, description) => {
-  let wallet = await ScholarshipWallet.findOne({ user: userId });
-  if (!wallet) {
-    wallet = new ScholarshipWallet({ user: userId, balance: 0, totalEarned: 0, totalSpent: 0 });
-  }
-
-  wallet.balance += amount;
-  wallet.totalEarned += amount;
-  await wallet.save();
-
-  const transaction = new ScholarshipTransaction({
-    user: userId,
-    type: 'earned',
-    amount,
-    source,
-    reference,
-    referenceModel,
-    description,
-    balanceAfter: wallet.balance
-  });
-  await transaction.save();
-
-  return wallet;
-};
+import { awardScholarshipPoints } from '../utils/scholarshipPoints.js';
 
 // Get all pending submissions for review
 export const getPendingSubmissions = async (req, res) => {
@@ -138,13 +111,30 @@ export const approveSubmission = async (req, res) => {
 
     // Award points
     if (pointsToAward > 0) {
+      // Populate task categories with parent for metadata
+      await task.populate({
+        path: 'categories',
+        select: 'name parent',
+        populate: { path: 'parent', select: 'name' }
+      });
+
+      // Build category metadata (use first category if multiple)
+      const category = task.categories && task.categories[0];
+      const metadata = category ? {
+        category: category.name,
+        categoryId: category._id,
+        parentCategory: category.parent?.name || null,
+        parentCategoryId: category.parent?._id || null
+      } : {};
+
       await awardScholarshipPoints(
         submission.user,
         pointsToAward,
         'task_approval',
         task._id,
         'Task',
-        `Task approved: ${task.title}`
+        `Task approved: ${task.title}`,
+        metadata
       );
     }
 

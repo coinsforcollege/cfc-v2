@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const KEYS = {
   AUTH_TOKEN: '@rfe_auth_token',
   USER_DATA: '@rfe_user_data',
+  SCHOLARSHIP_TIER: '@rfe_scholarship_tier',
 };
 
 export const storage = {
@@ -52,6 +53,22 @@ export const storage = {
       await AsyncStorage.multiRemove([KEYS.AUTH_TOKEN, KEYS.USER_DATA]);
     } catch (error) {
       console.error('Error clearing auth:', error);
+    }
+  },
+
+  async getScholarshipTier(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem(KEYS.SCHOLARSHIP_TIER);
+    } catch {
+      return null;
+    }
+  },
+
+  async setScholarshipTier(tier: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.SCHOLARSHIP_TIER, tier);
+    } catch (error) {
+      console.error('Error saving scholarship tier:', error);
     }
   },
 };

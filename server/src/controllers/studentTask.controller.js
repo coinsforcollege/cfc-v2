@@ -1,9 +1,8 @@
 import Task from '../models/Task.js';
 import TaskCategory from '../models/TaskCategory.js';
 import TaskSubmission from '../models/TaskSubmission.js';
-import ScholarshipWallet from '../models/ScholarshipWallet.js';
-import ScholarshipTransaction from '../models/ScholarshipTransaction.js';
 import Notification from '../models/Notification.js';
+import { awardScholarshipPoints } from '../utils/scholarshipPoints.js';
 
 // Get all active tasks with optional category filter and search
 // If user is authenticated (req.user exists), exclude tasks they've already completed
@@ -158,35 +157,6 @@ export const getPublicCategories = async (req, res) => {
   }
 };
 
-// Helper function to award scholarship points
-const awardScholarshipPoints = async (userId, amount, source, reference, referenceModel, description) => {
-  // Get or create wallet
-  let wallet = await ScholarshipWallet.findOne({ user: userId });
-  if (!wallet) {
-    wallet = new ScholarshipWallet({ user: userId, balance: 0, totalEarned: 0, totalSpent: 0 });
-  }
-
-  // Update wallet
-  wallet.balance += amount;
-  wallet.totalEarned += amount;
-  await wallet.save();
-
-  // Create transaction record
-  const transaction = new ScholarshipTransaction({
-    user: userId,
-    type: 'earned',
-    amount,
-    source,
-    reference,
-    referenceModel,
-    description,
-    balanceAfter: wallet.balance
-  });
-  await transaction.save();
-
-  return wallet;
-};
-
 // Submit a task (mark complete or submit for review)
 export const submitTask = async (req, res) => {
   try {
@@ -254,13 +224,30 @@ export const submitTask = async (req, res) => {
 
     // If no approval required, award points immediately
     if (!task.requiresApproval && task.scholarshipPoints > 0) {
+      // Populate categories with parent for metadata
+      await task.populate({
+        path: 'categories',
+        select: 'name parent',
+        populate: { path: 'parent', select: 'name' }
+      });
+
+      // Build category metadata (use first category if multiple)
+      const category = task.categories && task.categories[0];
+      const metadata = category ? {
+        category: category.name,
+        categoryId: category._id,
+        parentCategory: category.parent?.name || null,
+        parentCategoryId: category.parent?._id || null
+      } : {};
+
       await awardScholarshipPoints(
         userId,
         task.scholarshipPoints,
         'task_completion',
         task._id,
         'Task',
-        `Completed task: ${task.title}`
+        `Completed task: ${task.title}`,
+        metadata
       );
 
       // Create notification for points earned
