@@ -10,8 +10,12 @@ import {
   ActivityIndicator,
   Keyboard,
   Image,
-  KeyboardAvoidingView,
 } from 'react-native';
+import {
+  KeyboardStickyView,
+  useReanimatedKeyboardAnimation,
+} from 'react-native-keyboard-controller';
+import Animated, { useAnimatedStyle, interpolate } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
@@ -126,7 +130,15 @@ export default function HugoChatScreen() {
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
 
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
-  const bottomPadding = Math.max(insets.bottom, 8);
+
+  // Animate padding based on keyboard state
+  const { progress } = useReanimatedKeyboardAnimation();
+
+  const inputWrapperStyle = useAnimatedStyle(() => {
+    return {
+      paddingBottom: interpolate(progress.value, [0, 1], [insets.bottom + 8, 8]),
+    };
+  });
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -200,11 +212,7 @@ export default function HugoChatScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: isDark ? '#09090b' : '#ffffff' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
-    >
+    <View style={{ flex: 1, backgroundColor: isDark ? '#09090b' : '#ffffff' }}>
       {/* Header */}
       <View
         style={{
@@ -242,19 +250,19 @@ export default function HugoChatScreen() {
       </View>
 
       {/* Chat Area */}
-      <View style={{ flex: 1 }}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 16,
-            paddingBottom: 16,
-            flexGrow: 1,
-          }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+      <ScrollView
+        ref={scrollViewRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 16,
+          flexGrow: 1,
+        }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+      >
           {/* Welcome Screen */}
           {messages.length === 0 && (
             <View style={{ paddingVertical: 20 }}>
@@ -330,73 +338,76 @@ export default function HugoChatScreen() {
               </HStack>
             </View>
           )}
-        </ScrollView>
-      </View>
+      </ScrollView>
 
-      {/* Input Area - Fixed at bottom */}
-      <View
-        style={{
-          backgroundColor: isDark ? '#09090b' : '#ffffff',
-          borderTopWidth: 1,
-          borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-          paddingHorizontal: 16,
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 8,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
+      {/* Input Area - Sticks to keyboard */}
+      <KeyboardStickyView>
+        <Animated.View
+          style={[
+            {
+              backgroundColor: isDark ? '#09090b' : '#ffffff',
+              borderTopWidth: 1,
+              borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+              paddingHorizontal: 16,
+              paddingTop: 8,
+            },
+            inputWrapperStyle,
+          ]}
         >
           <View
             style={{
-              flex: 1,
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6',
-              borderRadius: 24,
-              paddingHorizontal: 18,
-              paddingVertical: 12,
-              marginRight: 12,
-              minHeight: 48,
-              maxHeight: 120,
-              justifyContent: 'center',
+              flexDirection: 'row',
+              alignItems: 'center',
             }}
           >
-            <TextInput
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="Ask Hugo anything..."
-              placeholderTextColor={iconColors.muted}
-              multiline
+            <View
               style={{
-                fontSize: 15,
-                color: isDark ? '#f5f5f5' : '#262627',
-                fontFamily: 'Inter-Regular',
-                maxHeight: 96,
-                paddingVertical: 0,
+                flex: 1,
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6',
+                borderRadius: 24,
+                paddingHorizontal: 18,
+                paddingVertical: 12,
+                marginRight: 12,
+                minHeight: 48,
+                maxHeight: 120,
+                justifyContent: 'center',
               }}
-              editable={!isLoading}
-            />
-          </View>
+            >
+              <TextInput
+                value={inputText}
+                onChangeText={setInputText}
+                placeholder="Ask Hugo anything..."
+                placeholderTextColor={iconColors.muted}
+                multiline
+                style={{
+                  fontSize: 15,
+                  color: isDark ? '#f5f5f5' : '#262627',
+                  fontFamily: 'Inter-Regular',
+                  maxHeight: 96,
+                  paddingVertical: 0,
+                }}
+                editable={!isLoading}
+              />
+            </View>
 
-          <Pressable
-            onPress={handleSend}
-            disabled={!inputText.trim() || isLoading}
-            style={({ pressed }) => ({
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: isDark ? '#18181b' : '#f3f4f6',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed ? 0.8 : 1,
-            })}
-          >
-            <Ionicons name="send" size={20} color="#4f46e5" />
-          </Pressable>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+            <Pressable
+              onPress={handleSend}
+              disabled={!inputText.trim() || isLoading}
+              style={({ pressed }) => ({
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: isDark ? '#18181b' : '#f3f4f6',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.8 : 1,
+              })}
+            >
+              <Ionicons name="send" size={20} color="#4f46e5" />
+            </Pressable>
+          </View>
+        </Animated.View>
+      </KeyboardStickyView>
+    </View>
   );
 }
