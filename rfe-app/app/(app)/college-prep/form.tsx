@@ -174,22 +174,14 @@ export default function CollegePrepFormScreen() {
 
     setSubmitting(true);
     try {
-      const response = await collegeReadinessApi.generateChecklist(token, {
-        fieldOfStudy: selectedField,
-        targetTier: selectedTier as any,
-        languagesKnown: selectedLanguages,
-        preferredColleges,
-      });
+      // Check rate limit first
+      const canGenerateResponse = await collegeReadinessApi.checkCanGenerate(token);
 
-      if (response.success) {
-        // Navigate back to college-prep to show the checklist
-        router.replace('/(app)/college-prep');
-      }
-    } catch (error: any) {
-      if (error.status === 429) {
+      if (!canGenerateResponse.data.canGenerate) {
+        // Rate limited - show alert
         let message = 'You can only generate a checklist once per week.';
-        if (error.data?.nextAvailableAt) {
-          const nextDate = new Date(error.data.nextAvailableAt);
+        if (canGenerateResponse.data.nextAvailableAt) {
+          const nextDate = new Date(canGenerateResponse.data.nextAvailableAt);
           const formattedDate = nextDate.toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
@@ -201,15 +193,33 @@ export default function CollegePrepFormScreen() {
             hour12: true,
           });
           message = `You can regenerate your checklist on ${formattedDate} at ${formattedTime}.`;
-        } else if (error.data?.daysRemaining) {
-          const days = error.data.daysRemaining;
+        } else if (canGenerateResponse.data.daysRemaining) {
+          const days = canGenerateResponse.data.daysRemaining;
           message = `You can regenerate your checklist in ${days} ${days === 1 ? 'day' : 'days'}.`;
         }
         Alert.alert('Limit Reached', message);
-      } else {
-        Alert.alert('Error', error.message || 'Failed to generate checklist');
+        setSubmitting(false);
+        return;
       }
-    } finally {
+
+      // Store timestamp before firing request
+      const generationStartedAt = Date.now();
+
+      // Fire generate request without awaiting
+      collegeReadinessApi.generateChecklist(token, {
+        fieldOfStudy: selectedField,
+        targetTier: selectedTier as any,
+        languagesKnown: selectedLanguages,
+        preferredColleges,
+      }).catch((error: any) => {
+        // Log error but don't block - generating page will handle polling
+        console.error('Generate checklist error:', error);
+      });
+
+      // Navigate immediately to generating page with timestamp
+      router.replace(`/(app)/college-prep/generating?startedAt=${generationStartedAt}`);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to check generation eligibility');
       setSubmitting(false);
     }
   };

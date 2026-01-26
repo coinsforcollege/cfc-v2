@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
@@ -31,12 +31,16 @@ const LOADING_MESSAGES = [
 
 export default function GeneratingScreen() {
   const { token } = useAuth();
+  const { startedAt } = useLocalSearchParams<{ startedAt: string }>();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
   const [messageIndex, setMessageIndex] = useState(0);
   const [hasChecklist, setHasChecklist] = useState(false);
+
+  // Parse the startedAt timestamp
+  const generationStartedAt = startedAt ? parseInt(startedAt, 10) : Date.now();
 
   // Animation values
   const beamPosition = useRef(new Animated.Value(0)).current;
@@ -123,12 +127,17 @@ export default function GeneratingScreen() {
 
     try {
       const response = await collegeReadinessApi.getChecklist(token);
-      if (response.success && response.data.hasChecklist) {
-        setHasChecklist(true);
-        // Small delay before navigating for smooth transition
-        setTimeout(() => {
-          router.replace('/(app)/college-prep');
-        }, 500);
+      if (response.success && response.data.hasChecklist && response.data.checklist) {
+        // Check if this is a NEW checklist (generated after we started)
+        const checklistGeneratedAt = new Date(response.data.checklist.lastGeneratedAt).getTime();
+
+        if (checklistGeneratedAt > generationStartedAt) {
+          setHasChecklist(true);
+          // Small delay before navigating for smooth transition
+          setTimeout(() => {
+            router.replace('/(app)/college-prep');
+          }, 500);
+        }
       }
     } catch (error) {
       // Keep waiting

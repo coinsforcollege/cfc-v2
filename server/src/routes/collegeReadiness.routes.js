@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  checkCanGenerate,
   checkBasicData,
   updateBasicData,
   getFormOptions,
@@ -17,6 +18,9 @@ const router = express.Router();
 
 // All routes require student authentication
 router.use(protect, authorize('student'));
+
+// Check if user can generate a checklist (rate limit check)
+router.get('/can-generate', checkCanGenerate);
 
 // Check if user has required basic data (grade, country, desiredCollegeCountries)
 router.get('/check-basic-data', checkBasicData);

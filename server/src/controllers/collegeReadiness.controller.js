@@ -5,6 +5,9 @@ import Document from '../models/Document.js';
 import ScholarshipWallet from '../models/ScholarshipWallet.js';
 import { generateCollegeReadinessChecklist } from '../utils/openai.js';
 
+// Email addresses exempt from rate limiting (for testing)
+const RATE_LIMIT_EXEMPT_EMAILS = ['23@mail.com'];
+
 // Fields of study options
 const FIELDS_OF_STUDY = [
   'Humanities',
@@ -74,6 +77,79 @@ const COMMON_LANGUAGES = [
   'Polish',
   'Swedish'
 ];
+
+/**
+ * @desc    Check if user can generate a checklist (rate limit check)
+ * @route   GET /api/college-readiness/can-generate
+ * @access  Private (Student)
+ */
+export const checkCanGenerate = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user is exempt from rate limiting
+    const isExempt = RATE_LIMIT_EXEMPT_EMAILS.includes(user.email);
+
+    if (isExempt) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          canGenerate: true,
+          isExempt: true
+        }
+      });
+    }
+
+    // Check if user has an existing checklist
+    const existingChecklist = await CollegeReadinessChecklist.findOne({ user: req.user.id });
+
+    if (!existingChecklist) {
+      // First time generating - allowed
+      return res.status(200).json({
+        success: true,
+        data: {
+          canGenerate: true,
+          isFirstGeneration: true
+        }
+      });
+    }
+
+    // Check rate limit using the model's static method
+    const canRegenerateResult = await CollegeReadinessChecklist.canRegenerate(req.user.id);
+
+    if (canRegenerateResult.canRegenerate) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          canGenerate: true
+        }
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        canGenerate: false,
+        nextAvailableAt: canRegenerateResult.nextAvailableAt,
+        daysRemaining: canRegenerateResult.daysRemaining
+      }
+    });
+  } catch (error) {
+    console.error('Error checking can generate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking generation eligibility',
+      error: error.message
+    });
+  }
+};
 
 /**
  * @desc    Check if user has required basic data for college readiness
@@ -331,7 +407,6 @@ export const generateChecklist = async (req, res) => {
     }
 
     // Check regeneration rate limit (skip if this is first generation or test account)
-    const RATE_LIMIT_EXEMPT_EMAILS = ['23@mail.com'];
     const isExemptFromRateLimit = RATE_LIMIT_EXEMPT_EMAILS.includes(user.email);
 
     const existingChecklist = await CollegeReadinessChecklist.findOne({ user: req.user.id });
@@ -767,7 +842,6 @@ export const linkDocumentToItem = async (req, res) => {
 export const regenerateChecklist = async (req, res) => {
   try {
     // Check rate limit (skip for exempt test accounts)
-    const RATE_LIMIT_EXEMPT_EMAILS = ['23@mail.com'];
     const user = await User.findById(req.user.id);
     const isExemptFromRateLimit = user && RATE_LIMIT_EXEMPT_EMAILS.includes(user.email);
 

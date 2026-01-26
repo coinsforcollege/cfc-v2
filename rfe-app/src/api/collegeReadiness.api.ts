@@ -36,6 +36,17 @@ export interface BasicDataUpdate {
   desiredCollegeCountries?: string[];
 }
 
+export interface CheckCanGenerateResponse {
+  success: boolean;
+  data: {
+    canGenerate: boolean;
+    isExempt?: boolean;
+    isFirstGeneration?: boolean;
+    nextAvailableAt?: string;
+    daysRemaining?: number;
+  };
+}
+
 export interface FormOptions {
   fieldsOfStudy: string[];
   tiers: TierConfig[];
@@ -268,6 +279,15 @@ async function apiRequest<T>(
 
 // College Readiness API functions
 export const collegeReadinessApi = {
+  // Check if user can generate a checklist (rate limit check)
+  async checkCanGenerate(token: string): Promise<CheckCanGenerateResponse> {
+    return apiRequest<CheckCanGenerateResponse>(
+      '/college-readiness/can-generate',
+      {},
+      token
+    );
+  },
+
   // Check if user has required basic data
   async checkBasicData(token: string): Promise<CheckBasicDataResponse> {
     return apiRequest<CheckBasicDataResponse>(
