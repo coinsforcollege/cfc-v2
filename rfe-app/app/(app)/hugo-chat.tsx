@@ -7,15 +7,23 @@ import {
   Pressable,
   Platform,
   useColorScheme,
-  ActivityIndicator,
   Keyboard,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import {
   KeyboardStickyView,
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller';
-import Animated, { useAnimatedStyle, interpolate } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+  withDelay,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
@@ -82,6 +90,72 @@ function MessageBubble({ message, isDark }: { message: ChatMessage; isDark: bool
           {message.content}
         </Text>
       </View>
+    </View>
+  );
+}
+
+function TypingDot({ delay }: { delay: number }) {
+  const translateY = useSharedValue(0);
+
+  React.useEffect(() => {
+    translateY.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(-4, { duration: 300 }),
+          withTiming(0, { duration: 300 })
+        ),
+        -1,
+        false
+      )
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: '#4f46e5',
+          marginHorizontal: 2,
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+}
+
+function TypingIndicator({ isDark }: { isDark: boolean }) {
+  return (
+    <View style={{ alignSelf: 'flex-start', marginVertical: 6 }}>
+      <HStack className="items-center" space="xs">
+        <Image
+          source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
+          style={{ width: 20, height: 20 }}
+          resizeMode="contain"
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6',
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            borderRadius: 16,
+            borderTopLeftRadius: 4,
+          }}
+        >
+          <TypingDot delay={0} />
+          <TypingDot delay={150} />
+          <TypingDot delay={300} />
+        </View>
+      </HStack>
     </View>
   );
 }
@@ -321,23 +395,7 @@ export default function HugoChatScreen() {
           ))}
 
           {/* Typing Indicator */}
-          {isLoading && (
-            <View style={{ alignSelf: 'flex-start', marginVertical: 6 }}>
-              <HStack className="items-center" space="xs">
-                <Image
-                  source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
-                  style={{ width: 20, height: 20 }}
-                  resizeMode="contain"
-                />
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <ActivityIndicator size="small" color="#4f46e5" />
-                  <Text className="text-xs font-inter-medium text-primary-500 ml-2">
-                    Hugo is typing...
-                  </Text>
-                </View>
-              </HStack>
-            </View>
-          )}
+          {isLoading && <TypingIndicator isDark={isDark} />}
       </ScrollView>
 
       {/* Input Area - Sticks to keyboard */}
