@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Pressable,
-  Platform,
   useColorScheme,
   Animated,
   Easing,
-  Dimensions,
+  Image,
+  StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -15,9 +14,6 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { collegeReadinessApi } from '@/src/api/collegeReadiness.api';
-import { Sparkles } from 'lucide-react-native';
-
-const { width, height } = Dimensions.get('window');
 
 const LOADING_MESSAGES = [
   'Analyzing your profile...',
@@ -43,15 +39,21 @@ export default function GeneratingScreen() {
   const generationStartedAt = startedAt ? parseInt(startedAt, 10) : Date.now();
 
   // Animation values
-  const beamPosition = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0.3)).current;
+
+  // Gradient overlay opacity animations for smooth color shifting
+  const gradientOpacity1 = useRef(new Animated.Value(0)).current;
+  const gradientOpacity2 = useRef(new Animated.Value(0)).current;
+  const gradientOpacity3 = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Start animations
-    startBeamAnimation();
     startPulseAnimation();
+    startRotateAnimation();
     startFadeAnimation();
+    startGradientOpacityAnimations();
 
     // Cycle through messages
     const messageInterval = setInterval(() => {
@@ -75,33 +77,33 @@ export default function GeneratingScreen() {
     };
   }, []);
 
-  const startBeamAnimation = () => {
-    Animated.loop(
-      Animated.timing(beamPosition, {
-        toValue: 1,
-        duration: 3000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-  };
-
   const startPulseAnimation = () => {
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 1000,
+          toValue: 1.15,
+          duration: 1200,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 1000,
+          duration: 1200,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
       ])
+    ).start();
+  };
+
+  const startRotateAnimation = () => {
+    Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 8000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
     ).start();
   };
 
@@ -120,6 +122,67 @@ export default function GeneratingScreen() {
         }),
       ])
     ).start();
+  };
+
+  const startGradientOpacityAnimations = () => {
+    // Staggered opacity animations for smooth gradient color transitions
+    // Gradient 1: Purple tint - fades in and out
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(gradientOpacity1, {
+          toValue: 1,
+          duration: 4000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(gradientOpacity1, {
+          toValue: 0,
+          duration: 4000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Gradient 2: Pink/Magenta tint - offset timing
+    setTimeout(() => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(gradientOpacity2, {
+            toValue: 1,
+            duration: 5000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(gradientOpacity2, {
+            toValue: 0,
+            duration: 5000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }, 2000);
+
+    // Gradient 3: Teal tint - different offset
+    setTimeout(() => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(gradientOpacity3, {
+            toValue: 1,
+            duration: 6000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(gradientOpacity3, {
+            toValue: 0,
+            duration: 6000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }, 3000);
   };
 
   const checkForChecklist = async () => {
@@ -144,126 +207,132 @@ export default function GeneratingScreen() {
     }
   };
 
-  // Calculate beam translation for border effect
-  const beamTranslateX = beamPosition.interpolate({
-    inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: [0, width - 100, width - 100, 0, 0],
-  });
-
-  const beamTranslateY = beamPosition.interpolate({
-    inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: [0, 0, height - 200, height - 200, 0],
+  const rotation = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
   });
 
   return (
     <Box className="flex-1">
+      {/* Base gradient */}
       <LinearGradient
-        colors={isDark ? ['#1e1b4b', '#312e81', '#4c1d95'] : ['#eef2ff', '#e0e7ff', '#c7d2fe']}
+        colors={isDark ? ['#0f0a1e', '#1a1333', '#0f172a'] : ['#f8fafc', '#eef2ff', '#e0e7ff']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={{ flex: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* Animated gradient overlays - full screen, fading in/out for color shift effect */}
+      {/* Purple/Violet overlay */}
+      <Animated.View style={[StyleSheet.absoluteFill, { opacity: gradientOpacity1 }]}>
+        <LinearGradient
+          colors={isDark
+            ? ['rgba(139, 92, 246, 0.25)', 'rgba(139, 92, 246, 0.1)', 'transparent']
+            : ['rgba(139, 92, 246, 0.2)', 'rgba(139, 92, 246, 0.05)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+
+      {/* Pink/Magenta overlay */}
+      <Animated.View style={[StyleSheet.absoluteFill, { opacity: gradientOpacity2 }]}>
+        <LinearGradient
+          colors={isDark
+            ? ['transparent', 'rgba(236, 72, 153, 0.2)', 'rgba(236, 72, 153, 0.15)']
+            : ['transparent', 'rgba(236, 72, 153, 0.12)', 'rgba(236, 72, 153, 0.08)']}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+
+      {/* Teal/Cyan overlay */}
+      <Animated.View style={[StyleSheet.absoluteFill, { opacity: gradientOpacity3 }]}>
+        <LinearGradient
+          colors={isDark
+            ? ['rgba(6, 182, 212, 0.15)', 'transparent', 'rgba(6, 182, 212, 0.2)']
+            : ['rgba(6, 182, 212, 0.1)', 'transparent', 'rgba(6, 182, 212, 0.12)']}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+
+      {/* Content */}
+      <VStack
+        className="flex-1 items-center justify-center px-8"
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
       >
-        {/* Animated border beam */}
+        {/* Animated Logo - Pulse and Rotate */}
         <Animated.View
           style={{
-            position: 'absolute',
-            width: 100,
-            height: 4,
-            borderRadius: 2,
             transform: [
-              { translateX: beamTranslateX },
-              { translateY: beamTranslateY },
+              { scale: pulseAnim },
+              { rotate: rotation },
             ],
+            marginBottom: 32,
           }}
         >
-          <LinearGradient
-            colors={['#8B5CF6', '#EC4899', '#F59E0B', '#10B981']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ flex: 1, borderRadius: 2 }}
-          />
+          <Box className="w-28 h-28 rounded-full bg-white/20 items-center justify-center">
+            <Image
+              source={require('@/assets/images/icons/app-icon-transparent-bg.png')}
+              style={{ width: 72, height: 72 }}
+              resizeMode="contain"
+            />
+          </Box>
         </Animated.View>
 
-        {/* Content */}
-        <VStack
-          className="flex-1 items-center justify-center px-8"
-          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+        {/* Title */}
+        <Text
+          className={`text-2xl font-inter-bold text-center mb-4 ${
+            isDark ? 'text-white' : 'text-primary-900'
+          }`}
         >
-          {/* Animated Icon */}
-          <Animated.View
-            style={{
-              transform: [{ scale: pulseAnim }],
-              marginBottom: 32,
-            }}
-          >
-            <Box className="w-24 h-24 rounded-full bg-white/20 items-center justify-center">
-              <Sparkles size={48} color={isDark ? '#fff' : '#8B5CF6'} />
-            </Box>
-          </Animated.View>
+          Creating Your Checklist
+        </Text>
 
-          {/* Title */}
+        {/* Animated Message */}
+        <Animated.View style={{ opacity: fadeAnim }}>
           <Text
-            className={`text-2xl font-inter-bold text-center mb-4 ${
-              isDark ? 'text-white' : 'text-primary-900'
+            className={`text-lg font-inter-medium text-center ${
+              isDark ? 'text-white/80' : 'text-primary-700'
             }`}
           >
-            Creating Your Checklist
+            {LOADING_MESSAGES[messageIndex]}
           </Text>
+        </Animated.View>
 
-          {/* Animated Message */}
-          <Animated.View style={{ opacity: fadeAnim }}>
-            <Text
-              className={`text-lg font-inter-medium text-center ${
-                isDark ? 'text-white/80' : 'text-primary-700'
-              }`}
-            >
-              {LOADING_MESSAGES[messageIndex]}
-            </Text>
-          </Animated.View>
+        {/* Progress dots */}
+        <Box className="flex-row mt-8" style={{ gap: 8 }}>
+          {[0, 1, 2].map((i) => (
+            <Animated.View
+              key={i}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(139,92,246,0.5)',
+                opacity: fadeAnim.interpolate({
+                  inputRange: [0.3, 0.65, 1],
+                  outputRange: i === 0 ? [1, 0.5, 1] : i === 1 ? [0.5, 1, 0.5] : [1, 0.5, 1],
+                }),
+              }}
+            />
+          ))}
+        </Box>
 
-          {/* Progress dots */}
-          <Box className="flex-row mt-8" style={{ gap: 8 }}>
-            {[0, 1, 2].map((i) => (
-              <Animated.View
-                key={i}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(139,92,246,0.5)',
-                  opacity: fadeAnim.interpolate({
-                    inputRange: [0, 0.5, 1],
-                    outputRange: i === 0 ? [1, 0.5, 1] : i === 1 ? [0.5, 1, 0.5] : [1, 0.5, 1],
-                  }),
-                }}
-              />
-            ))}
-          </Box>
-
-          {/* Subtitle */}
-          <Text
-            className={`text-sm font-inter-regular text-center mt-8 px-4 ${
-              isDark ? 'text-white/60' : 'text-primary-600'
-            }`}
-          >
-            Our AI is crafting a personalized roadmap based on your profile and goals
-          </Text>
-        </VStack>
-
-        {/* Decorative elements */}
-        <Box
-          className="absolute top-20 left-10 w-20 h-20 rounded-full opacity-20"
-          style={{ backgroundColor: '#EC4899' }}
-        />
-        <Box
-          className="absolute bottom-40 right-10 w-32 h-32 rounded-full opacity-20"
-          style={{ backgroundColor: '#8B5CF6' }}
-        />
-        <Box
-          className="absolute top-1/3 right-20 w-16 h-16 rounded-full opacity-20"
-          style={{ backgroundColor: '#10B981' }}
-        />
-      </LinearGradient>
+        {/* Subtitle */}
+        <Text
+          className={`text-sm font-inter-regular text-center mt-8 px-4 ${
+            isDark ? 'text-white/60' : 'text-primary-600'
+          }`}
+        >
+          Our AI is crafting a personalized roadmap based on your profile and goals
+        </Text>
+      </VStack>
     </Box>
   );
 }
+
+const styles = StyleSheet.create({});
