@@ -22,6 +22,7 @@ import {
   GraduationCap,
   FolderOpen,
   ChevronRight,
+  Target,
 } from 'lucide-react-native';
 
 // Format currency helper
@@ -228,19 +229,19 @@ function ActionButton({ item }: { item: any }) {
   return (
     <Pressable
       onPress={() => router.push(item.href as any)}
-      className="md:w-[48%] md:h-[48%] active:scale-[0.96] active:opacity-90 transition-transform duration-200"
+      className="items-center md:w-[48%] md:h-[48%] active:scale-[0.96] active:opacity-90 transition-transform duration-200"
     >
       <Box
-        className="w-16 h-16 md:w-full md:h-full mb-2 items-center justify-center rounded-3xl bg-primary-600"
-        style={Platform.OS === 'web' ? {} : { borderRadius: 18 }}
+        className="w-14 h-14 md:w-full md:h-full mb-1.5 items-center justify-center rounded-2xl bg-primary-600"
+        style={Platform.OS === 'web' ? {} : { borderRadius: 14 }}
       >
-        <IconComponent size={28} color="#FFFFFF" strokeWidth={1} />
+        <IconComponent size={24} color="#FFFFFF" strokeWidth={1} />
         <Text className="hidden md:flex text-white text-[10px] font-inter-bold uppercase tracking-wider text-center mt-1">
           {item.label}
         </Text>
       </Box>
 
-      <Text className="md:hidden text-typography-600 text-sm font-inter-bold tracking-tight text-center">
+      <Text className="md:hidden text-typography-600 text-xs font-inter-bold tracking-tight text-center">
         {item.label}
       </Text>
     </Pressable>
@@ -253,6 +254,7 @@ function ActionGrid() {
     { label: 'Colleges', href: '/(app)/colleges', icon: Building2 },
     { label: 'Offers', href: '/(app)/offers', icon: GraduationCap },
     { label: 'Docs', href: '/(app)/documents', icon: FolderOpen },
+    { label: 'Readiness', href: '/(app)/college-prep', icon: Target },
   ];
 
   return (

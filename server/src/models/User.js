@@ -146,7 +146,23 @@ const userSchema = new mongoose.Schema({
     desiredCollegeCountries: [{
       type: String,
       trim: true
-    }]
+    }],
+    // College readiness feature tracking
+    collegeReadiness: {
+      hasGeneratedChecklist: {
+        type: Boolean,
+        default: false
+      },
+      lastChecklistGeneratedAt: {
+        type: Date,
+        default: null
+      },
+      activeChecklistId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CollegeReadinessChecklist',
+        default: null
+      }
+    }
   },
   isActive: {
     type: Boolean,

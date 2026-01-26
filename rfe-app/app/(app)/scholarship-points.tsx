@@ -80,53 +80,45 @@ function TierSelector({
   selectedTier: TierId;
   onSelectTier: (tier: TierId) => void;
 }) {
-  const cardWidth = (SCREEN_WIDTH - 32 - 24) / 4;
-
   return (
-    <Box className="px-4">
-      <Box className="flex-row">
-        {TIER_CONFIGS.map((tier, index) => {
-          const isSelected = selectedTier === tier.id;
-          return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+    >
+      {TIER_CONFIGS.map((tier) => {
+        const isSelected = selectedTier === tier.id;
+        return (
+          <Pressable
+            key={tier.id}
+            onPress={() => onSelectTier(tier.id)}
+            style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+          >
             <Box
-              key={tier.id}
-              style={{
-                width: cardWidth,
-                marginRight: index < 3 ? 8 : 0,
-              }}
+              className={`py-1.5 px-3 rounded-full flex-row items-center ${
+                isSelected ? '' : 'bg-background-100 border border-outline-200'
+              }`}
+              style={isSelected ? { backgroundColor: tier.color } : undefined}
             >
-              <Pressable
-                onPress={() => onSelectTier(tier.id)}
-                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+              <Text
+                className={`text-xs font-inter-semibold ${
+                  isSelected ? 'text-white' : 'text-typography-700'
+                }`}
               >
-                <Box
-                  className={`py-4 rounded-xl items-center ${
-                    isSelected ? '' : 'bg-background-100 border border-outline-200'
-                  }`}
-                  style={isSelected ? { backgroundColor: tier.color } : undefined}
-                >
-                  <Text
-                    className={`text-sm font-inter-bold text-center ${
-                      isSelected ? 'text-white' : 'text-typography-700'
-                    }`}
-                    numberOfLines={1}
-                  >
-                    {tier.name}
-                  </Text>
-                  <Text
-                    className={`text-xs font-inter-medium mt-1 ${
-                      isSelected ? 'text-white/80' : 'text-typography-400'
-                    }`}
-                  >
-                    {tier.weeklyRate}/wk
-                  </Text>
-                </Box>
-              </Pressable>
+                {tier.name}
+              </Text>
+              <Text
+                className={`text-xs font-inter-medium ml-1 ${
+                  isSelected ? 'text-white/80' : 'text-typography-400'
+                }`}
+              >
+                {tier.weeklyRate}/wk
+              </Text>
             </Box>
-          );
-        })}
-      </Box>
-    </Box>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
   );
 }
 
@@ -134,9 +126,11 @@ function TierSelector({
 function PointsChart({
   analytics,
   selectedTier,
+  isDark,
 }: {
   analytics: ScholarshipAnalytics;
   selectedTier: TierId;
+  isDark: boolean;
 }) {
   const tier = getTierById(selectedTier);
   const chartData = analytics.chartData;
@@ -198,12 +192,12 @@ function PointsChart({
         width={CHART_WIDTH}
         height={200}
         chartConfig={{
-          backgroundColor: '#ffffff',
-          backgroundGradientFrom: '#ffffff',
-          backgroundGradientTo: '#f8fafc',
+          backgroundColor: isDark ? '#18181b' : '#ffffff',
+          backgroundGradientFrom: isDark ? '#18181b' : '#ffffff',
+          backgroundGradientTo: isDark ? '#27272a' : '#f8fafc',
           decimalPlaces: 0,
           color: (opacity = 1) => `rgba(99, 102, 241, ${opacity})`,
-          labelColor: () => '#6b7280',
+          labelColor: () => isDark ? '#a1a1aa' : '#6b7280',
           style: {
             borderRadius: 16,
           },
@@ -214,7 +208,7 @@ function PointsChart({
           },
           propsForBackgroundLines: {
             strokeDasharray: '',
-            stroke: '#e5e7eb',
+            stroke: isDark ? '#3f3f46' : '#e5e7eb',
             strokeWidth: 1,
           },
         }}
@@ -687,7 +681,7 @@ export default function ScholarshipPointsScreen() {
                 <Skeleton width={CHART_WIDTH} height={200} borderRadius={16} />
               </Box>
             ) : analytics ? (
-              <PointsChart analytics={analytics} selectedTier={selectedTier} />
+              <PointsChart analytics={analytics} selectedTier={selectedTier} isDark={isDark} />
             ) : null}
 
             {/* Category Breakdown */}
