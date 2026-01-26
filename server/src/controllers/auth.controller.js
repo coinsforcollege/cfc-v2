@@ -6,7 +6,7 @@ import { generateToken } from '../utils/jwt.js';
 import jwt from 'jsonwebtoken';
 import { createNotification } from '../services/notification.service.js';
 import { verifyRecaptcha } from '../utils/recaptcha.js';
-import { sendWelcomeEmail } from '../utils/emailService.js';
+import { sendWelcomeEmail, sendAccountDeletionRequestEmail } from '../utils/emailService.js';
 
 // @desc    Register a new user
 // @route   POST /api/auth/register/user
@@ -1112,6 +1112,299 @@ export const resetPassword = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Password reset successfully. You can now login with your new password.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Change email address (requires OTP verification + password)
+// @route   PUT /api/auth/change-email
+// @access  Private
+export const changeEmail = async (req, res, next) => {
+  try {
+    const { newEmail, password, verificationToken } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!newEmail || !password || !verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide new email, password, and verification token'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(newEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    // Find user with password
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Password is incorrect'
+      });
+    }
+
+    // Verify token
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token. Please verify OTP again.'
+      });
+    }
+
+    // Verify token type and email
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'email_change') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    const normalizedNewEmail = newEmail.toLowerCase();
+
+    if (tokenData.email !== normalizedNewEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token does not match the new email'
+      });
+    }
+
+    // Check if new email is same as current
+    if (normalizedNewEmail === user.email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'New email must be different from current email'
+      });
+    }
+
+    // Check if new email is already taken
+    const existingUser = await User.findOne({ email: normalizedNewEmail });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'This email is already registered'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: normalizedNewEmail,
+      role: 'email_change',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email verification not found. Please verify OTP again.'
+      });
+    }
+
+    // Store old email for potential rollback
+    const oldEmail = user.email;
+
+    // Update email
+    user.email = normalizedNewEmail;
+    await user.save();
+
+    // Clean up OTP
+    await OTPVerification.deleteMany({ email: normalizedNewEmail, role: 'email_change' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Email changed successfully',
+      data: {
+        oldEmail,
+        newEmail: normalizedNewEmail
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Request account deletion
+// @route   POST /api/auth/request-account-deletion
+// @access  Private
+export const requestAccountDeletion = async (req, res, next) => {
+  try {
+    const { reason, verificationToken } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide verification token'
+      });
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if already has pending deletion request
+    if (user.accountDeletionRequest?.status === 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'You already have a pending account deletion request'
+      });
+    }
+
+    // Verify token
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token. Please verify OTP again.'
+      });
+    }
+
+    // Verify token type
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'account_deletion') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    if (tokenData.email !== user.email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token does not match user email'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: user.email.toLowerCase(),
+      role: 'account_deletion',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification not found. Please verify OTP again.'
+      });
+    }
+
+    // Set account deletion request
+    user.accountDeletionRequest = {
+      requestedAt: new Date(),
+      status: 'pending',
+      reason: reason || null,
+      processedAt: null,
+      processedBy: null
+    };
+    await user.save();
+
+    // Clean up OTP
+    await OTPVerification.deleteMany({ email: user.email.toLowerCase(), role: 'account_deletion' });
+
+    // Notify platform admins about the deletion request
+    const platformAdmins = await User.find({ role: 'platform_admin', isActive: true });
+    for (const admin of platformAdmins) {
+      await createNotification({
+        recipient: admin._id,
+        type: 'account_deletion_request',
+        title: 'Account Deletion Request',
+        message: `${user.name} (${user.email}) has requested account deletion.${reason ? ` Reason: ${reason}` : ''}`,
+        data: {
+          userId: user._id,
+          userName: user.name,
+          userEmail: user.email,
+          userRole: user.role,
+          reason: reason || null
+        },
+        category: 'system',
+        priority: 'medium',
+        actionUrl: '/platform-admin/users'
+      });
+    }
+
+    // Send confirmation email to user (if email service supports it)
+    if (typeof sendAccountDeletionRequestEmail === 'function') {
+      await sendAccountDeletionRequestEmail(user.email, user.name);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deletion request submitted successfully. You will be logged out.',
+      data: {
+        status: 'pending',
+        requestedAt: user.accountDeletionRequest.requestedAt
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Cancel account deletion request
+// @route   POST /api/auth/cancel-account-deletion
+// @access  Private
+export const cancelAccountDeletion = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if has pending deletion request
+    if (user.accountDeletionRequest?.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'No pending account deletion request found'
+      });
+    }
+
+    // Cancel the request
+    user.accountDeletionRequest = {
+      requestedAt: null,
+      status: null,
+      reason: null,
+      processedAt: null,
+      processedBy: null
+    };
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deletion request cancelled successfully'
     });
   } catch (error) {
     next(error);

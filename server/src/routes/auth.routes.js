@@ -10,7 +10,10 @@ import {
   changePassword,
   changePasswordWithOTP,
   updateLanguagePreference,
-  resetPassword
+  resetPassword,
+  changeEmail,
+  requestAccountDeletion,
+  cancelAccountDeletion
 } from '../controllers/auth.controller.js';
 import {
   sendOTPForUser,
@@ -22,7 +25,11 @@ import {
   verifyOTPForPasswordChange,
   resendOTPForPasswordChange,
   sendOTPForForgotPassword,
-  verifyOTPForForgotPassword
+  verifyOTPForForgotPassword,
+  sendOTPForEmailChange,
+  verifyOTPForEmailChange,
+  sendOTPForAccountDeletion,
+  verifyOTPForAccountDeletion
 } from '../controllers/otp.controller.js';
 import { protect } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -42,6 +49,10 @@ router.post('/otp/verify/forgot-password', verifyOTPForForgotPassword);
 router.post('/otp/send/password-change', protect, sendOTPForPasswordChange);
 router.post('/otp/verify/password-change', protect, verifyOTPForPasswordChange);
 router.post('/otp/resend/password-change', protect, resendOTPForPasswordChange);
+router.post('/otp/send/email-change', protect, sendOTPForEmailChange);
+router.post('/otp/verify/email-change', protect, verifyOTPForEmailChange);
+router.post('/otp/send/account-deletion', protect, sendOTPForAccountDeletion);
+router.post('/otp/verify/account-deletion', protect, verifyOTPForAccountDeletion);
 
 // Public routes
 router.post('/register/user', registerUser);
@@ -57,6 +68,9 @@ router.put('/profile', protect, updateProfile);
 router.put('/change-password', protect, changePassword);
 router.put('/change-password-with-otp', protect, changePasswordWithOTP);
 router.put('/language', protect, updateLanguagePreference);
+router.put('/change-email', protect, changeEmail);
+router.post('/request-account-deletion', protect, requestAccountDeletion);
+router.post('/cancel-account-deletion', protect, cancelAccountDeletion);
 
 export default router;
 

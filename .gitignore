@@ -9,6 +9,7 @@ server/public/images/logo/*
 server/public/images/cover/*
 !server/public/images/cover/.gitkeep
 server/public/images/content-library/*
+server/public/images/user-avatar/*
 server/public/images/student-docs/*
 server/public/documents/student-docs/*
 server/public/videos/student-docs/*

@@ -809,6 +809,360 @@ export const sendOTPForForgotPassword = async (req, res, next) => {
   }
 };
 
+// @desc    Send OTP for email change (sends to NEW email)
+// @route   POST /api/auth/otp/send/email-change
+// @access  Private
+export const sendOTPForEmailChange = async (req, res, next) => {
+  try {
+    const { newEmail, password } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!newEmail || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide new email and current password'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(newEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    // Find user with password
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Check if new email is same as current
+    if (newEmail.toLowerCase() === user.email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'New email must be different from current email'
+      });
+    }
+
+    // Check if new email is already taken
+    const existingUser = await User.findOne({ email: newEmail.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'This email is already registered'
+      });
+    }
+
+    // Delete any existing OTP for this new email and email_change role
+    await OTPVerification.deleteMany({ email: newEmail.toLowerCase(), role: 'email_change' });
+
+    // Generate OTP
+    const otp = generateOTP();
+    console.log('OTP for email change:', newEmail.toLowerCase(), otp);
+
+    // Save OTP to database with additional metadata
+    const otpDoc = await OTPVerification.create({
+      email: newEmail.toLowerCase(),
+      otp,
+      role: 'email_change',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    });
+
+    // Send OTP email to the NEW email
+    const emailResult = await sendOTPEmail(newEmail, user.name, otp);
+
+    if (!emailResult.success) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully to your new email address',
+      data: {
+        email: newEmail.toLowerCase(),
+        expiresIn: 600
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP for email change
+// @route   POST /api/auth/otp/verify/email-change
+// @access  Private
+export const verifyOTPForEmailChange = async (req, res, next) => {
+  try {
+    const { newEmail, otp } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!newEmail || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide new email and OTP'
+      });
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Find OTP document
+    const otpDoc = await OTPVerification.findOne({
+      email: newEmail.toLowerCase(),
+      role: 'email_change',
+      isVerified: false
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP not found or already verified. Please request a new OTP.'
+      });
+    }
+
+    // Check if expired
+    if (otpDoc.isExpired()) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired. Please request a new one.'
+      });
+    }
+
+    // Check attempts
+    if (otpDoc.attempts >= 5) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum verification attempts exceeded. Please request a new OTP.'
+      });
+    }
+
+    // Verify OTP
+    if (otpDoc.otp !== otp) {
+      await otpDoc.incrementAttempts();
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP. Please try again.',
+        attemptsRemaining: 5 - (otpDoc.attempts + 1)
+      });
+    }
+
+    // Mark as verified
+    otpDoc.isVerified = true;
+    await otpDoc.save();
+
+    // Generate verification token that includes the new email
+    const verificationToken = generateVerificationToken(newEmail.toLowerCase(), 'email_change');
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully',
+      data: {
+        verificationToken,
+        newEmail: newEmail.toLowerCase()
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Send OTP for account deletion
+// @route   POST /api/auth/otp/send/account-deletion
+// @access  Private
+export const sendOTPForAccountDeletion = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your password'
+      });
+    }
+
+    // Find user with password
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if already has pending deletion request
+    if (user.accountDeletionRequest?.status === 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'You already have a pending account deletion request'
+      });
+    }
+
+    // Verify password
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Password is incorrect'
+      });
+    }
+
+    // Delete any existing OTP for this email and account_deletion role
+    await OTPVerification.deleteMany({ email: user.email.toLowerCase(), role: 'account_deletion' });
+
+    // Generate OTP
+    const otp = generateOTP();
+    console.log('OTP for account deletion:', user.email.toLowerCase(), otp);
+
+    // Save OTP to database
+    const otpDoc = await OTPVerification.create({
+      email: user.email.toLowerCase(),
+      otp,
+      role: 'account_deletion',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    });
+
+    // Send OTP email
+    const emailResult = await sendOTPEmail(user.email, user.name, otp);
+
+    if (!emailResult.success) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully to your email',
+      data: {
+        email: user.email.toLowerCase(),
+        expiresIn: 600
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP for account deletion
+// @route   POST /api/auth/otp/verify/account-deletion
+// @access  Private
+export const verifyOTPForAccountDeletion = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (!otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide OTP'
+      });
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Find OTP document
+    const otpDoc = await OTPVerification.findOne({
+      email: user.email.toLowerCase(),
+      role: 'account_deletion',
+      isVerified: false
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP not found or already verified. Please request a new OTP.'
+      });
+    }
+
+    // Check if expired
+    if (otpDoc.isExpired()) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired. Please request a new one.'
+      });
+    }
+
+    // Check attempts
+    if (otpDoc.attempts >= 5) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum verification attempts exceeded. Please request a new OTP.'
+      });
+    }
+
+    // Verify OTP
+    if (otpDoc.otp !== otp) {
+      await otpDoc.incrementAttempts();
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP. Please try again.',
+        attemptsRemaining: 5 - (otpDoc.attempts + 1)
+      });
+    }
+
+    // Mark as verified
+    otpDoc.isVerified = true;
+    await otpDoc.save();
+
+    // Generate verification token
+    const verificationToken = generateVerificationToken(user.email.toLowerCase(), 'account_deletion');
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully',
+      data: {
+        verificationToken,
+        email: user.email.toLowerCase()
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Verify OTP for forgot password
 // @route   POST /api/auth/otp/verify/forgot-password
 // @access  Public

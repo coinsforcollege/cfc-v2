@@ -320,3 +320,46 @@ export const sendCollegeAdminRemovedEmail = async (toEmail, toName, collegeName,
 
   return await sendEmail(toEmail, toName, t.collegeAdminRemoved.subject, emailBody);
 };
+
+export const sendAccountDeletionRequestEmail = async (toEmail, toName, language = 'en') => {
+  const emailBody = `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="${styles.wrapperTable}">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="${styles.containerTable}">
+            <tr>
+              <td style="${styles.container}">
+                <div style="${styles.header}">
+                  <img src="https://cdn-icons-png.flaticon.com/512/3588/3588294.png" alt="Account Deletion" style="${styles.icon}" />
+                  <h1 style="${styles.title}">Account Deletion Request Received</h1>
+                </div>
+
+                <div style="${styles.content}">
+                  <p style="${styles.text}">Hi ${toName},</p>
+                  <p style="${styles.text}">We have received your request to delete your account. Your request is now pending review by our team.</p>
+
+                  <div style="${styles.highlightBox}; background-color: #fef3c7; border-color: #fde68a;">
+                    <p style="${styles.text}; margin: 0; color: #92400e; font-weight: 600;">What happens next?</p>
+                    <p style="${styles.text}; margin: 10px 0 0; color: #92400e; font-size: 14px;">
+                      Our team will review your request and process it within 7 business days. You can still log in to your account until the deletion is completed.
+                    </p>
+                  </div>
+
+                  <p style="${styles.text}; font-size: 14px; color: #6b7280;">
+                    Changed your mind? You can cancel your deletion request anytime by logging into your account and going to Settings.
+                  </p>
+                </div>
+
+                <div style="${styles.footer}">
+                  <p style="margin: 0;">Coins For College Team</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  return await sendEmail(toEmail, toName, 'Account Deletion Request Received', emailBody);
+};

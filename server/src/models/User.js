@@ -128,7 +128,25 @@ const userSchema = new mongoose.Schema({
       type: Number,
       default: 0,
       min: 0
-    }
+    },
+    // Student's school details
+    school: {
+      name: {
+        type: String,
+        trim: true,
+        default: null
+      },
+      address: {
+        type: String,
+        trim: true,
+        default: null
+      }
+    },
+    // Countries where student wants to study
+    desiredCollegeCountries: [{
+      type: String,
+      trim: true
+    }]
   },
   isActive: {
     type: Boolean,
@@ -142,6 +160,36 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['en', 'zh'],
     default: 'en'
+  },
+  // Profile picture path (stored in public/images/user-avatar)
+  profilePicture: {
+    type: String,
+    default: null
+  },
+  // Account deletion request tracking
+  accountDeletionRequest: {
+    requestedAt: {
+      type: Date,
+      default: null
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'cancelled', null],
+      default: null
+    },
+    processedAt: {
+      type: Date,
+      default: null
+    },
+    processedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    reason: {
+      type: String,
+      default: null
+    }
   },
   // Expo push notification tokens (array for multiple devices)
   expoPushTokens: [{
@@ -181,6 +229,9 @@ userSchema.index({ 'userProfile.interestedColleges.college': 1 });
 
 // Compound index for active user queries with role filter
 userSchema.index({ role: 1, isActive: 1 });
+
+// Index for account deletion requests (for admin queries)
+userSchema.index({ 'accountDeletionRequest.status': 1, 'accountDeletionRequest.requestedAt': 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {

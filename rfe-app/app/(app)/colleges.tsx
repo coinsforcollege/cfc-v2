@@ -13,7 +13,7 @@ import { router } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { Search, ChevronLeft, X } from '@/components/navigation/icons';
+import { Search, ChevronLeft, X, Heart } from '@/components/navigation/icons';
 import { FeaturedReelCarousel } from '@/components/colleges/FeaturedReelCarousel';
 import { CollegeListSection } from '@/components/colleges/CollegeListSection';
 
@@ -134,7 +134,21 @@ export default function CollegesScreen() {
               </Box>
             </Box>
 
-            {!isDesktop && <UserAvatar name={user?.name || 'User'} />}
+            {!isDesktop && (
+              <Box className="flex-row items-center">
+                <Pressable
+                  onPress={() => router.push('/(app)/favorites')}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  className="flex-row items-center mr-3"
+                >
+                  <Heart size={18} color="#ef4444" fill="#ef4444" />
+                  <Text className="text-sm font-inter-medium text-typography-900 ml-1">
+                    Favorites
+                  </Text>
+                </Pressable>
+                <UserAvatar name={user?.name || 'User'} />
+              </Box>
+            )}
           </Box>
 
           {/* Search Bar */}

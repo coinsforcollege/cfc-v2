@@ -123,7 +123,16 @@
       "Bash(OFFER_ID=\"69762e2f3061e7c115b34976\":*)",
       "Bash(__NEW_LINE_1909b0a29b635756__ echo \"=== TEST 8: Reject Offer ===\")",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NzYzZGU4MTk2YjU3NjNiMWJhOTQ5NiIsInJvbGUiOiJjb2xsZWdlX2FkbWluIiwiaWF0IjoxNzY5MzU2Nzc2LCJleHAiOjE3NzE5NDg3NzZ9.TL8_Pu5ol0WKptM1HzzP4ly0ZpC3gEblhjtbpkNqctc\":*)",
-      "Bash(__NEW_LINE_fd050603445c8491__ curl -s -X POST \"http://192.168.0.16:4000/api/college-admin/select-college\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer $TOKEN\" -d '{\n    \"\"newCollege\"\": \"\"{\\\\\"\"name\\\\\"\": \\\\\"\"Westbrook College\\\\\"\", \\\\\"\"country\\\\\"\": \\\\\"\"United States\\\\\"\"}\"\"\n  }')"
+      "Bash(__NEW_LINE_fd050603445c8491__ curl -s -X POST \"http://192.168.0.16:4000/api/college-admin/select-college\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer $TOKEN\" -d '{\n    \"\"newCollege\"\": \"\"{\\\\\"\"name\\\\\"\": \\\\\"\"Westbrook College\\\\\"\", \\\\\"\"country\\\\\"\": \\\\\"\"United States\\\\\"\"}\"\"\n  }')",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmEyNmY4N2ZiNDM3MTNlOWJjZjk5MSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzY5NDExNTU4LCJleHAiOjE3NzIwMDM1NTh9.da7GLBLcaviFFA9RKXWXcrldXdbUJE_hBzNP_Jbxx_k\" __NEW_LINE_8fe0a80bd916cef8__ echo \"=== 1. GET /api/student/profile ===\" curl -s http://localhost:4000/api/student/profile -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmEyNmY4N2ZiNDM3MTNlOWJjZjk5MSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzY5NDExNTU4LCJleHAiOjE3NzIwMDM1NTh9.da7GLBLcaviFFA9RKXWXcrldXdbUJE_hBzNP_Jbxx_k\")",
+      "Bash(__NEW_LINE_00cfd21b55956192__ echo \"=== Test auth/me to verify token works ===\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmEyNmY4N2ZiNDM3MTNlOWJjZjk5MSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzY5NDExNjk2LCJleHAiOjE3NzIwMDM2OTZ9.5maAXWrh9rBkcZgU0DvEqljedAE0z9vTXsCNdmZasEM\")",
+      "Bash(__NEW_LINE_3aa125bbd23d450e__ echo \"=== Test GET /api/student/profile ===\")",
+      "Bash(head -c 500 __NEW_LINE_6d62e2fd6019b067__ echo \"\" echo \"\" echo \"=== Test GET /api/student/grade-levels \\(public\\) ===\" curl -s -X GET http://localhost:4000/api/student/grade-levels)",
+      "Bash(__NEW_LINE_5ac2d0c8cce49f32__ echo \"\")",
+      "Bash(__NEW_LINE_5ac2d0c8cce49f32__ curl -s -X PUT http://localhost:4000/api/student/profile -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" -d '{\n    \"\"country\"\": \"\"United States\"\",\n    \"\"gradeLevel\"\": \"\"11\"\",\n    \"\"school\"\": {\"\"name\"\": \"\"Test High School\"\", \"\"address\"\": \"\"123 Test St\"\"},\n    \"\"desiredCollegeCountries\"\": [\"\"United States\"\", \"\"United Kingdom\"\"]\n  }')",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmEyNmY4N2ZiNDM3MTNlOWJjZjk5MSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzY5NDExNjk2LCJleHAiOjE3NzIwMDM2OTZ9.5maAXWrh9rBkcZgU0DvEqljedAE0z9vTXsCNdmZasEM\" __NEW_LINE_bb444e38210317ac__ echo \"=== Verify profile was updated ===\" curl -s -X GET http://localhost:4000/api/student/profile -H \"Authorization: Bearer $TOKEN\")"
     ],
     "deny": [],
     "ask": []

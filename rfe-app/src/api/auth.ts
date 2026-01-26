@@ -132,6 +132,93 @@ export const authApi = {
       body: JSON.stringify({ email, newPassword, verificationToken }),
     });
   },
+
+  // Password Change with OTP (protected)
+  async sendPasswordChangeOTP(token: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>('/auth/otp/send/password-change', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  async verifyPasswordChangeOTP(token: string, otp: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>('/auth/otp/verify/password-change', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ otp }),
+    });
+  },
+
+  async resendPasswordChangeOTP(token: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>('/auth/otp/resend/password-change', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  async changePasswordWithOTP(token: string, newPassword: string, verificationToken: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>('/auth/change-password-with-otp', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ newPassword, verificationToken }),
+    });
+  },
+
+  // Email Change with OTP (protected)
+  async sendEmailChangeOTP(token: string, newEmail: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>('/auth/otp/send/email-change', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ newEmail }),
+    });
+  },
+
+  async verifyEmailChangeOTP(token: string, otp: string, newEmail: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>('/auth/otp/verify/email-change', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ otp, newEmail }),
+    });
+  },
+
+  async changeEmail(token: string, newEmail: string, password: string, verificationToken: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>('/auth/change-email', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ newEmail, password, verificationToken }),
+    });
+  },
+
+  // Account Deletion (protected)
+  async sendAccountDeletionOTP(token: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>('/auth/otp/send/account-deletion', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  async verifyAccountDeletionOTP(token: string, otp: string): Promise<OTPResponse> {
+    return apiRequest<OTPResponse>('/auth/otp/verify/account-deletion', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ otp }),
+    });
+  },
+
+  async requestAccountDeletion(token: string, verificationToken: string, reason?: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>('/auth/request-account-deletion', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ verificationToken, reason }),
+    });
+  },
+
+  async cancelAccountDeletion(token: string): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>('/auth/cancel-account-deletion', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
 };
 
 export default authApi;
