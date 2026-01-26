@@ -363,7 +363,7 @@ export default function CollegePrepFormScreen() {
                   </Text>
                 </HStack>
                 {selectedTier === tier.id && (
-                  <CheckCircle2 size={20} color="#8B5CF6" />
+                  <CheckCircle2 size={20} color={isDark ? '#a78bfa' : '#7c3aed'} />
                 )}
               </HStack>
               <Text className="text-sm text-typography-500 font-inter-regular mb-2">
@@ -413,7 +413,7 @@ export default function CollegePrepFormScreen() {
           onPress={() => addLanguage(languageInput)}
           disabled={!languageInput.trim()}
         >
-          <Plus size={24} color={languageInput.trim() ? '#8B5CF6' : iconColors.muted} />
+          <Plus size={24} color={languageInput.trim() ? (isDark ? '#a78bfa' : '#7c3aed') : iconColors.muted} />
         </Pressable>
       </HStack>
 
@@ -427,12 +427,15 @@ export default function CollegePrepFormScreen() {
             {selectedLanguages.map((lang) => (
               <HStack
                 key={lang}
-                className="bg-primary-100 rounded-full px-3 py-1.5 items-center"
+                className="rounded-full px-3 py-1.5 items-center"
+                style={{
+                  backgroundColor: isDark ? 'rgba(139, 92, 246, 0.2)' : '#ede9fe',
+                }}
                 space="xs"
               >
-                <Text className="text-sm font-inter-medium text-primary-700">{lang}</Text>
+                <Text style={{ color: isDark ? '#c4b5fd' : '#6d28d9' }} className="text-sm font-inter-medium">{lang}</Text>
                 <Pressable onPress={() => removeLanguage(lang)}>
-                  <X size={14} color="#7c3aed" />
+                  <X size={14} color={isDark ? '#a78bfa' : '#7c3aed'} />
                 </Pressable>
               </HStack>
             ))}
@@ -486,7 +489,7 @@ export default function CollegePrepFormScreen() {
             marginLeft: 8,
           }}
         />
-        {searchingColleges && <ActivityIndicator size="small" color="#8B5CF6" />}
+        {searchingColleges && <ActivityIndicator size="small" color={isDark ? '#a78bfa' : '#7c3aed'} />}
       </HStack>
 
       {/* Search Results */}
@@ -509,9 +512,17 @@ export default function CollegePrepFormScreen() {
             </VStack>
           ) : !searchingColleges ? (
             <Pressable onPress={addManualCollege}>
-              <HStack className="bg-primary-50 border border-primary-200 rounded-xl p-4 items-center" space="sm">
-                <Plus size={20} color="#8B5CF6" />
-                <Text className="text-base font-inter-medium text-primary-700">
+              <HStack
+                className="rounded-xl p-4 items-center"
+                style={{
+                  backgroundColor: isDark ? 'rgba(139, 92, 246, 0.15)' : '#f5f3ff',
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(139, 92, 246, 0.3)' : '#ddd6fe',
+                }}
+                space="sm"
+              >
+                <Plus size={20} color={isDark ? '#a78bfa' : '#7c3aed'} />
+                <Text style={{ color: isDark ? '#c4b5fd' : '#6d28d9' }} className="text-base font-inter-medium">
                   Add "{collegeSearch}" manually
                 </Text>
               </HStack>
@@ -570,7 +581,7 @@ export default function CollegePrepFormScreen() {
   if (loading) {
     return (
       <Box className="flex-1 bg-background-50 items-center justify-center">
-        <ActivityIndicator size="large" color="#8B5CF6" />
+        <ActivityIndicator size="large" color={isDark ? '#a78bfa' : '#7c3aed'} />
       </Box>
     );
   }
@@ -604,14 +615,14 @@ export default function CollegePrepFormScreen() {
         {renderStepIndicator()}
 
         {/* Content */}
-        <Box className="flex-1">
+        <Box className="flex-1 pt-4 pb-6">
           {renderStep()}
         </Box>
 
         {/* Bottom Buttons */}
         <Box
           className="px-5 py-4 bg-background-50 border-t border-outline-100"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          style={{ paddingBottom: Math.max(insets.bottom + 16, 32) }}
         >
           {step === 'colleges' ? (
             <Pressable
@@ -621,13 +632,13 @@ export default function CollegePrepFormScreen() {
             >
               <Box className="bg-primary-500 py-4 rounded-xl items-center">
                 {submitting ? (
-                  <ActivityIndicator color="white" />
+                  <ActivityIndicator color="#ffffff" />
                 ) : (
                   <HStack className="items-center" space="sm">
-                    <Text className="text-typography-0 text-base font-inter-bold">
+                    <Text className="text-white text-base font-inter-bold">
                       Generate Checklist
                     </Text>
-                    <ChevronRight size={20} color="white" />
+                    <ChevronRight size={20} color="#ffffff" />
                   </HStack>
                 )}
               </Box>
@@ -639,10 +650,10 @@ export default function CollegePrepFormScreen() {
             >
               <Box className="bg-primary-500 py-4 rounded-xl items-center">
                 <HStack className="items-center" space="sm">
-                  <Text className="text-typography-0 text-base font-inter-bold">
+                  <Text className="text-white text-base font-inter-bold">
                     Continue
                   </Text>
-                  <ChevronRight size={20} color="white" />
+                  <ChevronRight size={20} color="#ffffff" />
                 </HStack>
               </Box>
             </Pressable>

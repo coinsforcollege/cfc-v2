@@ -330,9 +330,12 @@ export const generateChecklist = async (req, res) => {
       });
     }
 
-    // Check regeneration rate limit (skip if this is first generation)
+    // Check regeneration rate limit (skip if this is first generation or test account)
+    const RATE_LIMIT_EXEMPT_EMAILS = ['23@mail.com'];
+    const isExemptFromRateLimit = RATE_LIMIT_EXEMPT_EMAILS.includes(user.email);
+
     const existingChecklist = await CollegeReadinessChecklist.findOne({ user: req.user.id });
-    if (existingChecklist) {
+    if (existingChecklist && !isExemptFromRateLimit) {
       const canRegenerateResult = await CollegeReadinessChecklist.canRegenerate(req.user.id);
       if (!canRegenerateResult.canRegenerate) {
         return res.status(429).json({
@@ -763,18 +766,24 @@ export const linkDocumentToItem = async (req, res) => {
  */
 export const regenerateChecklist = async (req, res) => {
   try {
-    // Check rate limit
-    const canRegenerateResult = await CollegeReadinessChecklist.canRegenerate(req.user.id);
+    // Check rate limit (skip for exempt test accounts)
+    const RATE_LIMIT_EXEMPT_EMAILS = ['23@mail.com'];
+    const user = await User.findById(req.user.id);
+    const isExemptFromRateLimit = user && RATE_LIMIT_EXEMPT_EMAILS.includes(user.email);
 
-    if (!canRegenerateResult.canRegenerate) {
-      return res.status(429).json({
-        success: false,
-        message: `You can only generate a new checklist once per week. Next available: ${canRegenerateResult.nextAvailableAt.toISOString()}`,
-        data: {
-          nextAvailableAt: canRegenerateResult.nextAvailableAt,
-          daysRemaining: canRegenerateResult.daysRemaining
-        }
-      });
+    if (!isExemptFromRateLimit) {
+      const canRegenerateResult = await CollegeReadinessChecklist.canRegenerate(req.user.id);
+
+      if (!canRegenerateResult.canRegenerate) {
+        return res.status(429).json({
+          success: false,
+          message: `You can only generate a new checklist once per week. Next available: ${canRegenerateResult.nextAvailableAt.toISOString()}`,
+          data: {
+            nextAvailableAt: canRegenerateResult.nextAvailableAt,
+            daysRemaining: canRegenerateResult.daysRemaining
+          }
+        });
+      }
     }
 
     // Mark old checklists as inactive
