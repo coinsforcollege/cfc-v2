@@ -237,7 +237,7 @@ function SelectionModal({
         <Box className="flex-1 justify-end bg-black/50">
           <Pressable onPress={onClose} style={{ flex: 1 }} />
           <Box
-            className={`rounded-t-3xl ${isDark ? 'bg-background-50' : 'bg-white'}`}
+            className={`rounded-t-3xl bg-background-0`}
             style={{
               maxHeight: '80%',
               paddingBottom: insets.bottom,
@@ -269,7 +269,7 @@ function SelectionModal({
               {/* Search */}
               {options.length > 10 && (
                 <Box className="px-4 py-3 border-b border-outline-100">
-                  <Box className="bg-background-50 rounded-xl px-4 py-2.5">
+                  <Box className="bg-background-0 rounded-xl px-4 py-2.5">
                     <TextInput
                       value={searchQuery}
                       onChangeText={setSearchQuery}
@@ -453,21 +453,21 @@ export default function EditProfileScreen() {
 
   if (loading) {
     return (
-      <Box className="flex-1 bg-background-50 items-center justify-center">
+      <Box className="flex-1 bg-background-0 items-center justify-center">
         <ActivityIndicator size="large" color="#6366f1" />
       </Box>
     );
   }
 
   return (
-    <Box className="flex-1 bg-background-50">
+    <Box className="flex-1 bg-background-0">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         {/* Sticky Header */}
         <Box
-          className="bg-background-50 border-b border-outline-100"
+          className="bg-background-0 border-b border-outline-100"
           style={{ paddingTop: topPadding, zIndex: 10 }}
         >
           <HStack className="px-4 py-3 items-center">

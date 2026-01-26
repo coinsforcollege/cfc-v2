@@ -10,6 +10,7 @@ import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { ChevronLeft } from './icons';
+import { UserAvatar } from './UserAvatar';
 
 const TABLET_BREAKPOINT = 768;
 const DEFAULT_TOP_INSET = Platform.OS === 'ios' ? 47 : 24;
@@ -22,29 +23,6 @@ interface ScreenContainerProps {
   showBackButton?: boolean;
 }
 
-function UserAvatar({ name }: { name: string }) {
-  const initials = name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <Pressable
-      onPress={() => router.push('/(app)/profile')}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <Box 
-        className="w-10 h-10 rounded-full bg-primary-500 items-center justify-center"
-      >
-        <Text className="text-sm font-semibold text-typography-0">
-          {initials || 'U'}
-        </Text>
-      </Box>
-    </Pressable>
-  );
-}
 
 export function ScreenContainer({ 
   children, 

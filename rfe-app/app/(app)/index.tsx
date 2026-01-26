@@ -9,6 +9,8 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { notificationsApi } from '@/src/api/notifications.api';
+import { studentApi } from '@/src/api/student.api';
+import { UserAvatar } from '@/components/navigation/UserAvatar';
 import {
   Bell,
   ShieldCheck,
@@ -57,7 +59,7 @@ function getGreeting() {
 }
 
 // Sticky header with top portion of gradient
-function StickyHeader({ user, headerHeight, unreadCount }: { user: any; headerHeight: number; unreadCount: number }) {
+function StickyHeader({ user, headerHeight, unreadCount, profilePicture }: { user: any; headerHeight: number; unreadCount: number; profilePicture?: string | null }) {
   const insets = useSafeAreaInsets();
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
   const firstName = user?.name?.split(' ')[0] || 'Scholar';
@@ -111,11 +113,7 @@ function StickyHeader({ user, headerHeight, unreadCount }: { user: any; headerHe
                     {firstName}
                   </Text>
                 </VStack>
-                <Box className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: '#f59e0b' }}>
-                  <Text className="text-white font-inter-bold text-base">
-                    {user?.name?.[0]?.toUpperCase() || 'S'}
-                  </Text>
-                </Box>
+                <UserAvatar name={user?.name || 'Scholar'} profilePicture={profilePicture} size={40} />
               </HStack>
             </Pressable>
 
@@ -423,6 +421,7 @@ export default function HomeScreen() {
   const topPadding = Platform.OS === 'ios' ? insets.top : Math.max(insets.top, 24);
   const headerHeight = topPadding + 60;
   const [unreadCount, setUnreadCount] = useState(0);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
@@ -436,16 +435,29 @@ export default function HomeScreen() {
     }
   }, [token]);
 
+  const fetchProfilePicture = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await studentApi.getProfile(token);
+      if (response.success) {
+        setProfilePicture(response.data.profilePicture || null);
+      }
+    } catch (error) {
+      console.error('Error fetching profile picture:', error);
+    }
+  }, [token]);
+
   useFocusEffect(
     useCallback(() => {
       fetchUnreadCount();
-    }, [fetchUnreadCount])
+      fetchProfilePicture();
+    }, [fetchUnreadCount, fetchProfilePicture])
   );
 
   return (
     <View style={{ flex: 1, backgroundColor: '#1e1b4b' }}>
       {/* Sticky Header */}
-      <StickyHeader user={user} headerHeight={headerHeight} unreadCount={unreadCount} />
+      <StickyHeader user={user} headerHeight={headerHeight} unreadCount={unreadCount} profilePicture={profilePicture} />
 
       {/* Scrollable Content */}
       <ScrollView

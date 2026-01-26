@@ -20,6 +20,8 @@ import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { UserAvatar } from '@/components/navigation/UserAvatar';
+import { studentApi } from '@/src/api/student.api';
 import { Search, ChevronLeft, X, Award } from '@/components/navigation/icons';
 import { OfferListSection } from '@/components/offers/OfferListSection';
 import { RecommendedOfferCard } from '@/components/offers/RecommendedOfferCard';
@@ -50,27 +52,6 @@ const TABS = [
 
 type TabKey = typeof TABS[number]['key'];
 
-function UserAvatar({ name }: { name: string }) {
-  const initials = name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <Pressable
-      onPress={() => router.push('/(app)/profile')}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <Box className="w-9 h-9 rounded-full bg-primary-500 items-center justify-center">
-        <Text className="text-xs font-inter-bold text-typography-0">
-          {initials || 'U'}
-        </Text>
-      </Box>
-    </Pressable>
-  );
-}
 
 // Format currency
 function formatCurrency(value: number, currency: string = 'USD'): string {
@@ -94,6 +75,7 @@ export default function OffersScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [totalScholarship, setTotalScholarship] = useState<number>(0);
   const [scholarshipCurrency, setScholarshipCurrency] = useState<string>('USD');
@@ -133,6 +115,22 @@ export default function OffersScreen() {
     } catch (err) {
       console.error('Failed to fetch scholarship total:', err);
     }
+  }, [token]);
+
+  // Fetch profile picture
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!token) return;
+      try {
+        const response = await studentApi.getProfile(token);
+        if (response.success) {
+          setProfilePicture(response.data.profilePicture || null);
+        }
+      } catch (error) {
+        console.error('Error fetching profile picture:', error);
+      }
+    };
+    fetchProfilePicture();
   }, [token]);
 
   // Auto-refresh when screen gains focus
@@ -267,7 +265,7 @@ export default function OffersScreen() {
                 </Box>
               )}
 
-              {!isDesktop && <UserAvatar name={user?.name || 'User'} />}
+              {!isDesktop && <UserAvatar name={user?.name || 'User'} profilePicture={profilePicture} size={36} />}
             </HStack>
           </Box>
 

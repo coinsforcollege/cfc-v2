@@ -19,6 +19,8 @@ import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { UserAvatar } from '@/components/navigation/UserAvatar';
+import { studentApi } from '@/src/api/student.api';
 import { ChevronLeft, Upload, Home, Search } from '@/components/navigation/icons';
 import {
   DocumentListSection,
@@ -45,27 +47,6 @@ const ICON_COLORS = {
   },
 };
 
-function UserAvatar({ name }: { name: string }) {
-  const initials = name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <Pressable
-      onPress={() => router.push('/(app)/profile')}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <Box className="w-9 h-9 rounded-full bg-primary-500 items-center justify-center">
-        <Text className="text-xs font-inter-bold text-typography-0">
-          {initials || 'U'}
-        </Text>
-      </Box>
-    </Pressable>
-  );
-}
 
 // Folder icon component for breadcrumb
 function FolderIcon({ size, color }: { size: number; color: string }) {
@@ -105,6 +86,7 @@ export default function DocumentsScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const isDesktop = width >= TABLET_BREAKPOINT;
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
 
@@ -127,10 +109,21 @@ export default function DocumentsScreen() {
 
   const topPadding = isDesktop ? 16 : Math.max(insets.top, Platform.OS === 'ios' ? 47 : 24);
 
-  // Fetch storage info
+  // Fetch storage info and profile picture
   useEffect(() => {
     if (token) {
       fetchStorageInfo();
+      const fetchProfilePicture = async () => {
+        try {
+          const response = await studentApi.getProfile(token);
+          if (response.success) {
+            setProfilePicture(response.data.profilePicture || null);
+          }
+        } catch (error) {
+          console.error('Error fetching profile picture:', error);
+        }
+      };
+      fetchProfilePicture();
     }
   }, [token, refreshTrigger]);
 
@@ -365,7 +358,7 @@ export default function DocumentsScreen() {
               </Box>
             </Box>
 
-            {!isDesktop && <UserAvatar name={user?.name || 'User'} />}
+            {!isDesktop && <UserAvatar name={user?.name || 'User'} profilePicture={profilePicture} size={36} />}
           </Box>
 
           {/* Search Bar */}

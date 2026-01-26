@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Pressable,
   TextInput,
@@ -16,6 +16,8 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { Search, ChevronLeft, X, Heart } from '@/components/navigation/icons';
 import { FeaturedReelCarousel } from '@/components/colleges/FeaturedReelCarousel';
 import { CollegeListSection } from '@/components/colleges/CollegeListSection';
+import { UserAvatar } from '@/components/navigation/UserAvatar';
+import { studentApi } from '@/src/api/student.api';
 
 const TABLET_BREAKPOINT = 768;
 
@@ -33,31 +35,11 @@ const ICON_COLORS = {
   },
 };
 
-function UserAvatar({ name }: { name: string }) {
-  const initials = name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <Pressable
-      onPress={() => router.push('/(app)/profile')}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <Box className="w-9 h-9 rounded-full bg-primary-500 items-center justify-center">
-        <Text className="text-xs font-inter-bold text-typography-0">
-          {initials || 'U'}
-        </Text>
-      </Box>
-    </Pressable>
-  );
-}
 
 export default function CollegesScreen() {
   const { width } = useWindowDimensions();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -76,6 +58,21 @@ export default function CollegesScreen() {
   const clearSearch = useCallback(() => {
     setSearchQuery('');
   }, []);
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!token) return;
+      try {
+        const response = await studentApi.getProfile(token);
+        if (response.success) {
+          setProfilePicture(response.data.profilePicture || null);
+        }
+      } catch (error) {
+        console.error('Error fetching profile picture:', error);
+      }
+    };
+    fetchProfilePicture();
+  }, [token]);
 
   const topPadding = isDesktop ? 16 : Math.max(insets.top, Platform.OS === 'ios' ? 47 : 24);
 
@@ -146,7 +143,7 @@ export default function CollegesScreen() {
                     Favorites
                   </Text>
                 </Pressable>
-                <UserAvatar name={user?.name || 'User'} />
+                <UserAvatar name={user?.name || 'User'} profilePicture={profilePicture} size={36} />
               </Box>
             )}
           </Box>

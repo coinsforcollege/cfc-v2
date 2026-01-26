@@ -18,6 +18,7 @@ import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { studentApi, StudentProfile } from '@/src/api/student.api';
 import config from '@/src/config';
@@ -144,11 +145,20 @@ function SettingsRow({
 }
 
 // Section Header
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({ title, onEdit }: { title: string; onEdit?: () => void }) {
   return (
-    <Text className="text-xs font-inter-bold uppercase tracking-widest text-typography-400 mb-2 ml-1">
-      {title}
-    </Text>
+    <HStack className="items-center justify-between mb-2">
+      <Text className="text-xs font-inter-bold uppercase tracking-widest text-typography-400 ml-1">
+        {title}
+      </Text>
+      {onEdit && (
+        <Pressable onPress={onEdit} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+          <Text className="text-primary-500 text-xs font-inter-bold uppercase tracking-widest mr-1">
+            Edit
+          </Text>
+        </Pressable>
+      )}
+    </HStack>
   );
 }
 
@@ -293,19 +303,11 @@ export default function ProfileScreen() {
     return `${baseUrl}${profile.profilePicture}`;
   };
 
-  if (loading) {
-    return (
-      <Box className="flex-1 bg-background-50 items-center justify-center">
-        <ActivityIndicator size="large" color="#6366f1" />
-      </Box>
-    );
-  }
-
   return (
-    <Box className="flex-1 bg-background-50">
+    <Box className="flex-1 bg-background-0">
       {/* Sticky Header */}
       <Box
-        className="bg-background-50 border-b border-outline-100"
+        className="bg-background-0 border-b border-outline-100"
         style={{ paddingTop: topPadding, zIndex: 10 }}
       >
         <HStack className="px-4 py-3 items-center">
@@ -336,117 +338,149 @@ export default function ProfileScreen() {
         {/* Profile Header Section */}
         <VStack className="items-center px-4 py-6">
           {/* Avatar */}
-          <Pressable
-            onPress={handleSelectProfilePicture}
-            style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-            disabled={uploadingImage}
-          >
-            <Box className="relative">
-              {getProfilePictureUrl() ? (
-                <Image
-                  source={{ uri: getProfilePictureUrl()! }}
-                  style={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 50,
-                    backgroundColor: '#e5e7eb',
-                  }}
-                />
-              ) : (
-                <Box className="w-[100px] h-[100px] rounded-full bg-primary-500 items-center justify-center">
-                  <Text className="text-typography-0 text-4xl font-inter-bold">
-                    {profile?.name?.charAt(0).toUpperCase() || 'S'}
-                  </Text>
-                </Box>
-              )}
-              <Box className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-background-0 border-2 border-background-50 items-center justify-center">
-                {uploadingImage ? (
-                  <ActivityIndicator size="small" color="#6366f1" />
+          {loading ? (
+            <Skeleton width={100} height={100} borderRadius={50} />
+          ) : (
+            <Pressable
+              onPress={handleSelectProfilePicture}
+              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+              disabled={uploadingImage}
+            >
+              <Box className="relative">
+                {getProfilePictureUrl() ? (
+                  <Image
+                    source={{ uri: getProfilePictureUrl()! }}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 50,
+                      backgroundColor: '#e5e7eb',
+                    }}
+                  />
                 ) : (
-                  <Camera size={16} color="#6366f1" strokeWidth={2} />
+                  <Box className="w-[100px] h-[100px] rounded-full bg-primary-500 items-center justify-center">
+                    <Text className="text-typography-0 text-4xl font-inter-bold">
+                      {profile?.name?.charAt(0).toUpperCase() || 'S'}
+                    </Text>
+                  </Box>
                 )}
+                <Box className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-background-0 border-2 border-background-50 items-center justify-center">
+                  {uploadingImage ? (
+                    <ActivityIndicator size="small" color="#6366f1" />
+                  ) : (
+                    <Camera size={16} color="#6366f1" strokeWidth={2} />
+                  )}
+                </Box>
               </Box>
-            </Box>
-          </Pressable>
+            </Pressable>
+          )}
 
           {/* Name */}
-          <Text className="text-2xl font-inter-bold text-typography-900 mt-3">
-            {profile?.name || 'Student'}
-          </Text>
+          {loading ? (
+            <Skeleton width={150} height={28} borderRadius={6} style={{ marginTop: 12 }} />
+          ) : (
+            <Text className="text-2xl font-inter-bold text-typography-900 mt-3">
+              {profile?.name || 'Student'}
+            </Text>
+          )}
 
           {/* Grade and School */}
-          <HStack className="items-center mt-1" space="sm">
-            {profile?.gradeLevel && (
-              <HStack className="items-center" space="xs">
-                <GraduationCap size={14} color={iconColors.secondary} />
-                <Text className="text-typography-500 text-sm font-inter-medium">
-                  Grade {profile.gradeLevel}
-                </Text>
-              </HStack>
-            )}
-            {profile?.gradeLevel && profile?.school?.name && (
-              <Text className="text-typography-400">|</Text>
-            )}
-            {profile?.school?.name && (
-              <HStack className="items-center" space="xs">
-                <School size={14} color={iconColors.secondary} />
-                <Text className="text-typography-500 text-sm font-inter-medium" numberOfLines={1}>
-                  {profile.school.name}
-                </Text>
-              </HStack>
-            )}
-          </HStack>
+          {loading ? (
+            <Skeleton width={200} height={16} borderRadius={4} style={{ marginTop: 8 }} />
+          ) : (
+            <HStack className="items-center mt-1" space="sm">
+              {profile?.gradeLevel && (
+                <HStack className="items-center" space="xs">
+                  <GraduationCap size={14} color={iconColors.secondary} />
+                  <Text className="text-typography-500 text-sm font-inter-medium">
+                    Grade {profile.gradeLevel}
+                  </Text>
+                </HStack>
+              )}
+              {profile?.gradeLevel && profile?.school?.name && (
+                <Text className="text-typography-400">|</Text>
+              )}
+              {profile?.school?.name && (
+                <HStack className="items-center" space="xs">
+                  <School size={14} color={iconColors.secondary} />
+                  <Text className="text-typography-500 text-sm font-inter-medium" numberOfLines={1}>
+                    {profile.school.name}
+                  </Text>
+                </HStack>
+              )}
+            </HStack>
+          )}
 
           {/* Location */}
-          {profile?.country && (
+          {loading ? (
+            <Skeleton width={120} height={16} borderRadius={4} style={{ marginTop: 4 }} />
+          ) : profile?.country ? (
             <HStack className="items-center mt-1" space="xs">
               <MapPin size={14} color={iconColors.secondary} />
               <Text className="text-typography-500 text-sm font-inter-medium">
                 {profile.country}
               </Text>
             </HStack>
-          )}
+          ) : null}
         </VStack>
 
         {/* Stats Grid - 4 in a row */}
         <Box className="px-4 mb-6">
           <Box className="flex-row">
-            {[
-              { label: 'Following', value: profile?.stats.followedCollegesCount || 0, color: '#6366f1', onPress: handleViewFavorites },
-              { label: 'Points', value: profile?.stats.scholarshipPoints || 0, color: '#f59e0b' },
-              { label: 'Offers', value: profile?.stats.offers.total || 0, color: '#10b981', onPress: () => router.push('/(app)/offers') },
-              { label: 'Readiness', value: `${profile?.stats.collegeReadinessScore || 0}/10`, color: '#8b5cf6' },
-            ].map((stat, index) => {
-              const cardWidth = (width - 32 - 24) / 4; // screen width - padding (16*2) - gaps (8*3) / 4 cards
-              return (
-                <Box
-                  key={index}
-                  style={{
-                    width: cardWidth,
-                    marginRight: index < 3 ? 8 : 0,
-                  }}
-                >
-                  <StatCard
-                    label={stat.label}
-                    value={stat.value}
-                    color={stat.color}
-                    onPress={stat.onPress}
-                  />
-                </Box>
-              );
-            })}
+            {loading ? (
+              [0, 1, 2, 3].map((index) => {
+                const cardWidth = (width - 32 - 24) / 4;
+                return (
+                  <Box
+                    key={index}
+                    style={{
+                      width: cardWidth,
+                      marginRight: index < 3 ? 8 : 0,
+                    }}
+                  >
+                    <Skeleton width="100%" height={70} borderRadius={12} />
+                  </Box>
+                );
+              })
+            ) : (
+              [
+                { label: 'Favorite\nColleges', value: profile?.stats.followedCollegesCount || 0, color: '#6366f1', onPress: handleViewFavorites },
+                { label: 'Scholarship\nPoints', value: profile?.stats.scholarshipPoints || 0, color: '#f59e0b' },
+                { label: 'Scholarship\nOffers', value: profile?.stats.offers.total || 0, color: '#10b981', onPress: () => router.push('/(app)/offers') },
+                { label: 'College\nReadiness', value: `${profile?.stats.collegeReadinessScore || 0}/10`, color: '#8b5cf6' },
+              ].map((stat, index) => {
+                const cardWidth = (width - 32 - 24) / 4;
+                return (
+                  <Box
+                    key={index}
+                    style={{
+                      width: cardWidth,
+                      marginRight: index < 3 ? 8 : 0,
+                    }}
+                  >
+                    <StatCard
+                      label={stat.label}
+                      value={stat.value}
+                      color={stat.color}
+                      onPress={stat.onPress}
+                    />
+                  </Box>
+                );
+              })
+            )}
           </Box>
         </Box>
 
         {/* Personal Info Section */}
         <Box className="px-4 mb-4">
-          <SectionHeader title="Personal Information" />
+          <SectionHeader title="Personal Information" onEdit={handleEditProfile} />
           <SectionContainer>
             <SettingsRow
               icon={User}
               label="Name"
               value={profile?.name}
-              onPress={handleEditProfile}
+              onPress={() => {}}
+              showChevron={false}
               iconColor="#6366f1"
             />
             <Divider />
@@ -454,7 +488,8 @@ export default function ProfileScreen() {
               icon={GraduationCap}
               label="Grade Level"
               value={profile?.gradeLevel ? `Grade ${profile.gradeLevel}` : 'Not set'}
-              onPress={handleEditProfile}
+              onPress={() => {}}
+              showChevron={false}
               iconColor="#f59e0b"
             />
             <Divider />
@@ -462,7 +497,8 @@ export default function ProfileScreen() {
               icon={School}
               label="School"
               value={profile?.school?.name || 'Not set'}
-              onPress={handleEditProfile}
+              onPress={() => {}}
+              showChevron={false}
               iconColor="#10b981"
             />
             <Divider />
@@ -470,7 +506,8 @@ export default function ProfileScreen() {
               icon={MapPin}
               label="Country"
               value={profile?.country || 'Not set'}
-              onPress={handleEditProfile}
+              onPress={() => {}}
+              showChevron={false}
               iconColor="#3b82f6"
             />
             <Divider />
@@ -482,7 +519,8 @@ export default function ProfileScreen() {
                   ? profile.desiredCollegeCountries.join(', ')
                   : 'Not set'
               }
-              onPress={handleEditProfile}
+              onPress={() => {}}
+              showChevron={false}
               iconColor="#8b5cf6"
             />
           </SectionContainer>

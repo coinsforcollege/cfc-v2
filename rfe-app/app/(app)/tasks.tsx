@@ -20,9 +20,11 @@ import { HStack } from '@/components/ui/hstack';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Search, ChevronLeft, X } from '@/components/navigation/icons';
+import { UserAvatar } from '@/components/navigation/UserAvatar';
 import { TaskListSection } from '@/components/tasks/TaskListSection';
 import { SubmissionListSection } from '@/components/tasks/SubmissionListSection';
 import { tasksApi, CategoryWithCount } from '@/src/api/tasks.api';
+import { studentApi } from '@/src/api/student.api';
 
 const TABLET_BREAKPOINT = 768;
 
@@ -49,31 +51,10 @@ const TABS = [
 
 type TabKey = typeof TABS[number]['key'];
 
-function UserAvatar({ name }: { name: string }) {
-  const initials = name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <Pressable
-      onPress={() => router.push('/(app)/profile')}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <Box className="w-9 h-9 rounded-full bg-primary-500 items-center justify-center">
-        <Text className="text-xs font-inter-bold text-typography-0">
-          {initials || 'U'}
-        </Text>
-      </Box>
-    </Pressable>
-  );
-}
 
 export default function TasksScreen() {
   const { width } = useWindowDimensions();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -85,6 +66,7 @@ export default function TasksScreen() {
   const [categories, setCategories] = useState<CategoryWithCount[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   // Refs for scroll sync
   const scrollViewRef = useRef<ScrollView>(null);
@@ -93,10 +75,22 @@ export default function TasksScreen() {
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
 
-  // Fetch categories on mount
+  // Fetch categories and profile picture on mount
   useEffect(() => {
     fetchCategories();
-  }, []);
+    const fetchProfilePicture = async () => {
+      if (!token) return;
+      try {
+        const response = await studentApi.getProfile(token);
+        if (response.success) {
+          setProfilePicture(response.data.profilePicture || null);
+        }
+      } catch (error) {
+        console.error('Error fetching profile picture:', error);
+      }
+    };
+    fetchProfilePicture();
+  }, [token]);
 
   const fetchCategories = async () => {
     try {
@@ -214,7 +208,7 @@ export default function TasksScreen() {
               </Box>
             </Box>
 
-            {!isDesktop && <UserAvatar name={user?.name || 'User'} />}
+            {!isDesktop && <UserAvatar name={user?.name || 'User'} profilePicture={profilePicture} size={36} />}
           </Box>
 
           {/* Search Bar */}
