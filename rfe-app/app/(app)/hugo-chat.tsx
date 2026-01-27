@@ -34,8 +34,7 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { hugoChatApi, ChatMessage, Suggestion } from '@/src/api/hugoChat.api';
 import { studentApi } from '@/src/api/student.api';
 import config from '@/src/config';
-import { ChevronLeft, Bot } from 'lucide-react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronLeft, Bot, Send } from 'lucide-react-native';
 
 const ICON_COLORS = {
   light: {
@@ -596,7 +595,7 @@ export default function HugoChatScreen() {
                 opacity: pressed ? 0.8 : 1,
               })}
             >
-              <Ionicons name="send" size={20} color="#4f46e5" />
+              <Send size={24} color="#4f46e5" style={{ transform: [{ rotate: '45deg' }] }} />
             </Pressable>
           </View>
         </Animated.View>

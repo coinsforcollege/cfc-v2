@@ -21,3 +21,6 @@ server/public/videos/submissions/*
 
 # Ignored Scripts
 server/scripts/
+rfe-app/.env
+.DS_Store
+*.apk
