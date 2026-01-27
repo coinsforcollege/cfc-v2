@@ -544,7 +544,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
             <Box className="flex-1 justify-end bg-black/50">
               <Box
                 className={`rounded-t-3xl ${isDark ? 'bg-background-50' : 'bg-white'}`}
-                style={{ paddingBottom: insets.bottom + 16, maxHeight: '70%' }}
+                style={{ paddingBottom: insets.bottom + 16, height: '70%' }}
               >
                 {/* Handle bar */}
                 <Box className="items-center pt-3 pb-2">
@@ -609,7 +609,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                 </VStack>
 
                 {/* Existing Documents */}
-                <Box className="px-5">
+                <Box className="px-5 flex-1">
                   {/* Breadcrumb / Back Navigation */}
                   <HStack className="items-center mb-3">
                     {folderPath.length > 1 && (
@@ -641,7 +641,7 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
                       </Text>
                     </Box>
                   ) : (
-                    <ScrollView showsVerticalScrollIndicator={false}>
+                    <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
                       <VStack space="sm">
                         {/* Folders first */}
                         {folders.map((folder) => (

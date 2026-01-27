@@ -24,3 +24,4 @@ server/scripts/
 rfe-app/.env
 .DS_Store
 *.apk
+*.aab
