@@ -37,5 +37,10 @@ export const authApi = {
 
   // Language preference
   updateLanguagePreference: (language) => apiClient.put('/auth/language', { language }),
+
+  // Public account deletion (no login required)
+  sendPublicAccountDeletionOTP: (data) => apiClient.post('/auth/public/account-deletion/send-otp', data),
+  verifyPublicAccountDeletionOTP: (data) => apiClient.post('/auth/public/account-deletion/verify-otp', data),
+  requestPublicAccountDeletion: (data) => apiClient.post('/auth/public/account-deletion/request', data),
 };
 

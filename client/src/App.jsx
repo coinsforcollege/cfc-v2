@@ -41,6 +41,7 @@ import DocsCategory from './pages/public/DocsCategory';
 import DocsArticle from './pages/public/DocsArticle';
 import DocsSearch from './pages/public/DocsSearch';
 import DocsFeatured from './pages/public/DocsFeatured';
+import DeleteAccount from './pages/public/DeleteAccount';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import UserDashboard from './pages/user/UserDashboard';
@@ -134,6 +135,9 @@ function App() {
           <Route path="college-admin-selection" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminSelection /></ProtectedRoute>} />
         </Route>
       </Route>
+      {/* Standalone public pages - no header/footer */}
+      <Route path="delete-account" element={<DeleteAccount />} />
+
       {/* Dashboard routes - no RootLayout (they have their own DashboardLayout) */}
       <Route path="user/dashboard" element={<ProtectedRoute allowedRoles={['user']}><Overview /></ProtectedRoute>} />
       <Route path="user/overview" element={<ProtectedRoute allowedRoles={['user']}><Overview /></ProtectedRoute>} />

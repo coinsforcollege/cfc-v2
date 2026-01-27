@@ -13,7 +13,8 @@ import {
   resetPassword,
   changeEmail,
   requestAccountDeletion,
-  cancelAccountDeletion
+  cancelAccountDeletion,
+  requestPublicAccountDeletion
 } from '../controllers/auth.controller.js';
 import {
   sendOTPForUser,
@@ -29,7 +30,9 @@ import {
   sendOTPForEmailChange,
   verifyOTPForEmailChange,
   sendOTPForAccountDeletion,
-  verifyOTPForAccountDeletion
+  verifyOTPForAccountDeletion,
+  sendOTPForPublicAccountDeletion,
+  verifyOTPForPublicAccountDeletion
 } from '../controllers/otp.controller.js';
 import { protect } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -60,6 +63,11 @@ router.post('/register/student', registerStudent);
 router.post('/register/college', upload.single('logoFile'), registerCollegeAdmin);
 router.post('/login', login);
 router.post('/reset-password', resetPassword);
+
+// Public account deletion routes (for web form - no login required)
+router.post('/public/account-deletion/send-otp', sendOTPForPublicAccountDeletion);
+router.post('/public/account-deletion/verify-otp', verifyOTPForPublicAccountDeletion);
+router.post('/public/account-deletion/request', requestPublicAccountDeletion);
 
 // Protected routes
 router.get('/me', protect, getMe);

@@ -1410,3 +1410,128 @@ export const cancelAccountDeletion = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Request account deletion (public - no login required)
+// @route   POST /api/auth/public/account-deletion/request
+// @access  Public
+export const requestPublicAccountDeletion = async (req, res, next) => {
+  try {
+    const { email, reason, verificationToken } = req.body;
+
+    // Validation
+    if (!email || !verificationToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and verification token'
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if already has pending deletion request
+    if (user.accountDeletionRequest?.status === 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'This account already has a pending deletion request'
+      });
+    }
+
+    // Verify token
+    let tokenData;
+    try {
+      tokenData = jwt.verify(verificationToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token. Please verify OTP again.'
+      });
+    }
+
+    // Verify token type
+    if (tokenData.type !== 'otp_verified' || tokenData.role !== 'public_account_deletion') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    if (tokenData.email !== email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token does not match email'
+      });
+    }
+
+    // Check if OTP was verified
+    const otpDoc = await OTPVerification.findOne({
+      email: email.toLowerCase(),
+      role: 'public_account_deletion',
+      isVerified: true
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification not found. Please verify OTP again.'
+      });
+    }
+
+    // Set account deletion request
+    user.accountDeletionRequest = {
+      requestedAt: new Date(),
+      status: 'pending',
+      reason: reason || null,
+      processedAt: null,
+      processedBy: null
+    };
+    await user.save();
+
+    // Clean up OTP
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'public_account_deletion' });
+
+    // Notify platform admins about the deletion request
+    const platformAdmins = await User.find({ role: 'platform_admin', isActive: true });
+    for (const admin of platformAdmins) {
+      await createNotification({
+        recipient: admin._id,
+        type: 'account_deletion_request',
+        title: 'Account Deletion Request',
+        message: `${user.name} (${user.email}) has requested account deletion via web form.${reason ? ` Reason: ${reason}` : ''}`,
+        data: {
+          userId: user._id,
+          userName: user.name,
+          userEmail: user.email,
+          userRole: user.role,
+          reason: reason || null,
+          source: 'web_form'
+        },
+        category: 'system',
+        priority: 'medium',
+        actionUrl: '/platform-admin/users'
+      });
+    }
+
+    // Send confirmation email to user
+    if (typeof sendAccountDeletionRequestEmail === 'function') {
+      await sendAccountDeletionRequestEmail(user.email, user.name);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deletion request submitted successfully. You will receive a confirmation email.',
+      data: {
+        status: 'pending',
+        requestedAt: user.accountDeletionRequest.requestedAt
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

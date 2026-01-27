@@ -45,7 +45,10 @@ const notificationSchema = new mongoose.Schema({
       'active_miners_spike',
       'new_ambassador_application',
       'profile_incomplete_reminder',
-      'token_preferences_reminder'
+      'token_preferences_reminder',
+
+      // Platform Admin notifications
+      'account_deletion_request'
     ],
     index: true
   },

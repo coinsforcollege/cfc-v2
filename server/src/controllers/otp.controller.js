@@ -1248,3 +1248,177 @@ export const verifyOTPForForgotPassword = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Send OTP for public account deletion (no login required)
+// @route   POST /api/auth/public/account-deletion/send-otp
+// @access  Public
+export const sendOTPForPublicAccountDeletion = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and password'
+      });
+    }
+
+    // Find user with password
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Verify password
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check if account is active
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'This account has been deactivated'
+      });
+    }
+
+    // Check if already has pending deletion request
+    if (user.accountDeletionRequest?.status === 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'This account already has a pending deletion request'
+      });
+    }
+
+    // Delete any existing OTP for this email and public_account_deletion role
+    await OTPVerification.deleteMany({ email: email.toLowerCase(), role: 'public_account_deletion' });
+
+    // Generate OTP
+    const otp = generateOTP();
+    console.log('OTP for public account deletion:', email.toLowerCase(), otp);
+
+    // Save OTP to database
+    const otpDoc = await OTPVerification.create({
+      email: email.toLowerCase(),
+      otp,
+      role: 'public_account_deletion',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+    });
+
+    // Send OTP email
+    const emailResult = await sendOTPEmail(email, user.name, otp);
+
+    if (!emailResult.success) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification code sent to your email',
+      data: {
+        email: email.toLowerCase(),
+        expiresIn: 600
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP for public account deletion
+// @route   POST /api/auth/public/account-deletion/verify-otp
+// @access  Public
+export const verifyOTPForPublicAccountDeletion = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Validation
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and OTP'
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Find OTP document
+    const otpDoc = await OTPVerification.findOne({
+      email: email.toLowerCase(),
+      role: 'public_account_deletion',
+      isVerified: false
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP not found or already verified. Please request a new OTP.'
+      });
+    }
+
+    // Check if expired
+    if (otpDoc.isExpired()) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired. Please request a new one.'
+      });
+    }
+
+    // Check attempts
+    if (otpDoc.attempts >= 5) {
+      await OTPVerification.findByIdAndDelete(otpDoc._id);
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum verification attempts exceeded. Please request a new OTP.'
+      });
+    }
+
+    // Verify OTP
+    if (otpDoc.otp !== otp) {
+      await otpDoc.incrementAttempts();
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP. Please try again.',
+        attemptsRemaining: 5 - (otpDoc.attempts + 1)
+      });
+    }
+
+    // Mark as verified
+    otpDoc.isVerified = true;
+    await otpDoc.save();
+
+    // Generate verification token
+    const verificationToken = generateVerificationToken(email.toLowerCase(), 'public_account_deletion');
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully',
+      data: {
+        verificationToken,
+        email: email.toLowerCase()
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
