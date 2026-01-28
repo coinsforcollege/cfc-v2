@@ -206,7 +206,7 @@ export default function VerifyOTPScreen() {
                       }`}
                     >
                       <InputField
-                        ref={(ref: TextInput | null) => (inputRefs.current[index] = ref)}
+                        ref={(ref) => (inputRefs.current[index] = ref as TextInput | null)}
                         value={digit}
                         onChangeText={(v) => handleOtpChange(v, index)}
                         onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
@@ -228,7 +228,7 @@ export default function VerifyOTPScreen() {
                 disabled={isLoading || otp.join('').length !== 6}
               >
                 {isLoading && <ButtonSpinner color="white" />}
-                <ButtonText className="text-typography-0 font-semibold text-base tracking-wide">
+                <ButtonText className="text-typography-0 font-semibold text-base">
                   {isLoading ? 'Verifying...' : 'Verify'}
                 </ButtonText>
               </Button>

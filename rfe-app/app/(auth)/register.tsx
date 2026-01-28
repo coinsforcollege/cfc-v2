@@ -11,6 +11,8 @@ import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { Pressable } from '@/components/ui/pressable';
 import { authApi } from '@/src/api/auth';
+import { CountryCodePicker } from '@/components/ui/CountryCodePicker';
+import { CountryCode, DEFAULT_COUNTRY } from '@/src/constants/countryCodes';
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
@@ -21,6 +23,7 @@ export default function RegisterScreen() {
     password: '',
     confirmPassword: '',
   });
+  const [selectedCountry, setSelectedCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,10 +77,13 @@ export default function RegisterScreen() {
 
     setIsLoading(true);
     try {
+      // Combine country dial code with phone number
+      const fullPhone = `${selectedCountry.dialCode}${formData.phone.trim().replace(/^0+/, '')}`;
+
       const result = await authApi.sendOTPForStudent({
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        phone: formData.phone.trim(),
+        phone: fullPhone,
         password: formData.password,
       });
 
@@ -87,7 +93,7 @@ export default function RegisterScreen() {
           params: {
             email: formData.email.trim().toLowerCase(),
             name: formData.name.trim(),
-            phone: formData.phone.trim(),
+            phone: fullPhone,
             password: formData.password,
             flow: 'registration',
           },
@@ -187,15 +193,21 @@ export default function RegisterScreen() {
                   <Text className="text-typography-900 text-sm font-semibold tracking-wide">
                     Phone number
                   </Text>
-                  <Input size="xl" variant="outline" className="border-2 border-outline-300 bg-background-0 rounded-none">
-                    <InputField
-                      placeholder="+1 234 567 8900"
-                      value={formData.phone}
-                      onChangeText={(v) => updateField('phone', v)}
-                      keyboardType="phone-pad"
-                      className="text-typography-900"
+                  <HStack>
+                    <CountryCodePicker
+                      selectedCountry={selectedCountry}
+                      onSelect={setSelectedCountry}
                     />
-                  </Input>
+                    <Input size="xl" variant="outline" className="border-2 border-l-0 border-outline-300 bg-background-0 rounded-none flex-1">
+                      <InputField
+                        placeholder="234 567 8900"
+                        value={formData.phone}
+                        onChangeText={(v) => updateField('phone', v)}
+                        keyboardType="phone-pad"
+                        className="text-typography-900"
+                      />
+                    </Input>
+                  </HStack>
                 </VStack>
 
                 {/* Divider */}
