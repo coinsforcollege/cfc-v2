@@ -247,12 +247,6 @@ export default function DocumentsScreen() {
         {
           text: 'Photos/Videos',
           onPress: async () => {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-              Alert.alert('Permission Required', 'Please grant photo library access to upload files.');
-              return;
-            }
-
             const result = await ImagePicker.launchImageLibraryAsync({
               mediaTypes: ImagePicker.MediaTypeOptions.All,
               allowsMultipleSelection: true,

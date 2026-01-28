@@ -171,12 +171,6 @@ export function AcceptOfferSheet({ visible, onClose, offer, onAcceptSuccess }: A
   }, []);
 
   const handleUploadImage = useCallback(async (requiredDocId: string) => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please grant photo library access to upload images.');
-      return;
-    }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: false,
