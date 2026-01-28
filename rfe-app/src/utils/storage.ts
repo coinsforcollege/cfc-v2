@@ -4,6 +4,7 @@ const KEYS = {
   AUTH_TOKEN: '@rfe_auth_token',
   USER_DATA: '@rfe_user_data',
   SCHOLARSHIP_TIER: '@rfe_scholarship_tier',
+  HAS_SEEN_ONBOARDING: '@rfe_has_seen_onboarding',
 };
 
 export const storage = {
@@ -69,6 +70,23 @@ export const storage = {
       await AsyncStorage.setItem(KEYS.SCHOLARSHIP_TIER, tier);
     } catch (error) {
       console.error('Error saving scholarship tier:', error);
+    }
+  },
+
+  async hasSeenOnboarding(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.HAS_SEEN_ONBOARDING);
+      return value === 'true';
+    } catch {
+      return false;
+    }
+  },
+
+  async setOnboardingComplete(): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.HAS_SEEN_ONBOARDING, 'true');
+    } catch (error) {
+      console.error('Error saving onboarding status:', error);
     }
   },
 };
