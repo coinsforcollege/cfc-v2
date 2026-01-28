@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -6,10 +6,9 @@ import Animated, {
   withTiming,
   withSequence,
   Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 
-// Import all SVG icons
+// Import all 10 SVG icons from the folder
 import AbacusIcon from '@/assets/images/icons/onboarding-feature-icons/abacus-book-education-learning-school-study-svgrepo-com.svg';
 import AvatarIcon from '@/assets/images/icons/onboarding-feature-icons/avatar-card-education-svgrepo-com.svg';
 import DialogIcon from '@/assets/images/icons/onboarding-feature-icons/dialogflow-svgrepo-com.svg';
@@ -21,7 +20,8 @@ import PosterIcon from '@/assets/images/icons/onboarding-feature-icons/poster-le
 import TaskListIcon from '@/assets/images/icons/onboarding-feature-icons/task-list-svgrepo-com.svg';
 import TravelIcon from '@/assets/images/icons/onboarding-feature-icons/travel-holiday-vacation-14-svgrepo-com.svg';
 
-const allIcons = [
+// All 10 icons array
+const ALL_ICONS = [
   AbacusIcon,
   AvatarIcon,
   DialogIcon,
@@ -35,43 +35,51 @@ const allIcons = [
 ];
 
 const ICON_SIZE = 50;
-const GAP = 24;
+const GAP = 32;
 const CHANGE_INTERVAL = 1000;
-const FADE_DURATION = 200;
+const FADE_DURATION = 300;
 
 interface IconSlotProps {
   iconIndex: number;
-  isChanging: boolean;
-  onFadeOutComplete: () => void;
+  changeKey: number;
 }
 
-function IconSlot({ iconIndex, isChanging, onFadeOutComplete }: IconSlotProps) {
+function IconSlot({ iconIndex, changeKey }: IconSlotProps) {
   const opacity = useSharedValue(1);
+  const scale = useSharedValue(1);
 
   useEffect(() => {
-    if (isChanging) {
-      opacity.value = withSequence(
-        withTiming(0, { duration: FADE_DURATION, easing: Easing.out(Easing.ease) }),
-        withTiming(1, { duration: FADE_DURATION, easing: Easing.in(Easing.ease) })
-      );
-
-      // Notify parent when fade out is complete (halfway through animation)
-      const timeout = setTimeout(() => {
-        onFadeOutComplete();
-      }, FADE_DURATION);
-
-      return () => clearTimeout(timeout);
+    if (changeKey > 0) {
+      // Smooth fade and scale transition
+      opacity.value = 0;
+      scale.value = 0.8;
+      opacity.value = withTiming(1, {
+        duration: FADE_DURATION,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      });
+      scale.value = withTiming(1, {
+        duration: FADE_DURATION,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      });
     }
-  }, [isChanging]);
+  }, [changeKey]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
+    transform: [{ scale: scale.value }],
   }));
 
-  const IconComponent = allIcons[iconIndex];
+  const IconComponent = ALL_ICONS[iconIndex];
 
   if (!IconComponent) {
-    return null;
+    return (
+      <View
+        style={{
+          width: ICON_SIZE,
+          height: ICON_SIZE,
+        }}
+      />
+    );
   }
 
   return (
@@ -79,8 +87,8 @@ function IconSlot({ iconIndex, isChanging, onFadeOutComplete }: IconSlotProps) {
       style={[
         animatedStyle,
         {
-          width: ICON_SIZE + GAP,
-          height: ICON_SIZE + GAP,
+          width: ICON_SIZE,
+          height: ICON_SIZE,
           alignItems: 'center',
           justifyContent: 'center',
         },
@@ -92,54 +100,49 @@ function IconSlot({ iconIndex, isChanging, onFadeOutComplete }: IconSlotProps) {
 }
 
 export default function CyclingIcons() {
-  // Initial state: 6 slots with different icons
-  const [slotIcons, setSlotIcons] = useState([0, 1, 2, 3, 4, 5]);
-  const [changingSlot, setChangingSlot] = useState<number | null>(null);
-  const pendingIconRef = useRef<number | null>(null);
+  // 6 slots showing icons by index, plus a change counter for each slot
+  const [slots, setSlots] = useState([
+    { iconIndex: 0, changeKey: 0 },
+    { iconIndex: 1, changeKey: 0 },
+    { iconIndex: 2, changeKey: 0 },
+    { iconIndex: 3, changeKey: 0 },
+    { iconIndex: 4, changeKey: 0 },
+    { iconIndex: 5, changeKey: 0 },
+  ]);
 
-  const getRandomNewIcon = useCallback((currentIcons: number[]) => {
-    // Get icons not currently displayed
-    const availableIcons = allIcons
+  const getRandomNewIcon = useCallback((currentSlots: typeof slots, slotToChange: number) => {
+    // Get all icon indices currently displayed
+    const currentIcons = currentSlots.map(s => s.iconIndex);
+
+    // Get available icons (not currently displayed)
+    const availableIcons = ALL_ICONS
       .map((_, i) => i)
       .filter((i) => !currentIcons.includes(i));
 
     if (availableIcons.length === 0) {
-      // All icons are displayed, just pick any random one
-      return Math.floor(Math.random() * allIcons.length);
+      // Fallback: pick any icon different from current slot
+      const currentIcon = currentSlots[slotToChange].iconIndex;
+      const otherIcons = ALL_ICONS.map((_, i) => i).filter(i => i !== currentIcon);
+      return otherIcons[Math.floor(Math.random() * otherIcons.length)];
     }
 
     return availableIcons[Math.floor(Math.random() * availableIcons.length)];
   }, []);
 
-  const handleFadeOutComplete = useCallback((slotIndex: number) => {
-    if (pendingIconRef.current !== null) {
-      setSlotIcons((prev) => {
-        const newIcons = [...prev];
-        newIcons[slotIndex] = pendingIconRef.current!;
-        return newIcons;
-      });
-      pendingIconRef.current = null;
-    }
-
-    // Reset changing state after full animation
-    setTimeout(() => {
-      setChangingSlot(null);
-    }, FADE_DURATION);
-  }, []);
-
   useEffect(() => {
     const interval = setInterval(() => {
-      // Pick random slot to change
+      // Pick a random slot to change (0-5)
       const randomSlot = Math.floor(Math.random() * 6);
 
-      setSlotIcons((currentIcons) => {
-        // Pick new icon for this slot
-        const newIcon = getRandomNewIcon(currentIcons);
-        pendingIconRef.current = newIcon;
-        return currentIcons;
+      setSlots((currentSlots) => {
+        const newIcon = getRandomNewIcon(currentSlots, randomSlot);
+        const newSlots = [...currentSlots];
+        newSlots[randomSlot] = {
+          iconIndex: newIcon,
+          changeKey: currentSlots[randomSlot].changeKey + 1,
+        };
+        return newSlots;
       });
-
-      setChangingSlot(randomSlot);
     }, CHANGE_INTERVAL);
 
     return () => clearInterval(interval);
@@ -152,16 +155,15 @@ export default function CyclingIcons() {
           flexDirection: 'row',
           flexWrap: 'wrap',
           justifyContent: 'center',
-          width: (ICON_SIZE + GAP) * 3,
+          width: (ICON_SIZE * 3) + (GAP * 2),
           gap: GAP,
         }}
       >
-        {slotIcons.map((iconIndex, slotIndex) => (
+        {slots.map((slot, index) => (
           <IconSlot
-            key={slotIndex}
-            iconIndex={iconIndex}
-            isChanging={changingSlot === slotIndex}
-            onFadeOutComplete={() => handleFadeOutComplete(slotIndex)}
+            key={index}
+            iconIndex={slot.iconIndex}
+            changeKey={slot.changeKey}
           />
         ))}
       </View>

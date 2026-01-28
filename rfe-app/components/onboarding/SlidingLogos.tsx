@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Image } from 'react-native';
+import { View, Image, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,9 +12,10 @@ import Animated, {
 // Import SVG as component
 import Sydney from '@/assets/images/icons/onbaording-college-logos/the-university-of-sydney-3.svg';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const LOGO_HEIGHT = 50;
 const LOGO_MARGIN = 16;
-const ANIMATION_DURATION = 15000;
+const ANIMATION_DURATION = 25000;
 
 // All logos (14 total: 5+5+4)
 const allLogos = [
@@ -53,16 +54,10 @@ interface SlidingRowProps {
 function SlidingRow({ logos, direction }: SlidingRowProps) {
   const translateX = useSharedValue(0);
 
-  // Estimate width per logo (height * aspect ratio + margin)
   const logoWidth = LOGO_HEIGHT * 2.5 + LOGO_MARGIN;
   const setWidth = logos.length * logoWidth;
 
   useEffect(() => {
-    // Start position for right-moving rows
-    if (direction === 'right') {
-      translateX.value = -setWidth;
-    }
-
     const targetX = direction === 'left' ? -setWidth : 0;
     const startX = direction === 'left' ? 0 : -setWidth;
 
@@ -76,9 +71,7 @@ function SlidingRow({ logos, direction }: SlidingRowProps) {
       false
     );
 
-    return () => {
-      cancelAnimation(translateX);
-    };
+    return () => cancelAnimation(translateX);
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -111,19 +104,15 @@ function SlidingRow({ logos, direction }: SlidingRowProps) {
     );
   };
 
-  // Render enough sets to fill screen and allow seamless loop
   const setsNeeded = Math.ceil(400 / (logos.length * logoWidth)) + 2;
   const sets = Array.from({ length: Math.max(setsNeeded, 4) }, (_, i) => i);
 
   return (
-    <View className="overflow-hidden" style={{ height: LOGO_HEIGHT + 10 }}>
+    <View style={{ height: LOGO_HEIGHT + 10, overflow: 'hidden' }}>
       <Animated.View
         style={[
           animatedStyle,
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-          },
+          { flexDirection: 'row', alignItems: 'center' },
         ]}
       >
         {sets.map((setIndex) =>
@@ -135,11 +124,17 @@ function SlidingRow({ logos, direction }: SlidingRowProps) {
 }
 
 export default function SlidingLogos() {
+  const totalHeight = (LOGO_HEIGHT + 10) * 3 + 16 * 2; // 3 rows + 2 gaps
+
   return (
-    <View className="gap-4">
-      <SlidingRow logos={row1Logos} direction="left" />
-      <SlidingRow logos={row2Logos} direction="right" />
-      <SlidingRow logos={row3Logos} direction="left" />
+    <View style={{ width: SCREEN_WIDTH }}>
+      {/* Rows */}
+      <View style={{ gap: 16 }}>
+        <SlidingRow logos={row1Logos} direction="left" />
+        <SlidingRow logos={row2Logos} direction="right" />
+        <SlidingRow logos={row3Logos} direction="left" />
+      </View>
+
     </View>
   );
 }

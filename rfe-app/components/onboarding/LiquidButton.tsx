@@ -30,9 +30,8 @@ export default function LiquidButton({ onPress, progress, label }: LiquidButtonP
     };
   });
 
-  // Determine text color based on fill level
-  const isFullyFilled = progress >= 1;
-  const textColor = isFullyFilled ? 'text-white' : 'text-primary-500';
+  // Determine text color based on fill level (white when more than half filled)
+  const textColor = progress > 0.5 ? 'text-white' : 'text-primary-500';
 
   return (
     <Pressable
