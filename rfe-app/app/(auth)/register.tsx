@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
@@ -12,6 +13,7 @@ import { Pressable } from '@/components/ui/pressable';
 import { authApi } from '@/src/api/auth';
 
 export default function RegisterScreen() {
+  const insets = useSafeAreaInsets();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -103,38 +105,50 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-        <Box className="flex-1 bg-background-0">
+        <Box className="flex-1 bg-background-0" style={{ paddingTop: insets.top }}>
           {/* Top accent bar */}
           <Box className="h-2 bg-primary-600" />
-          
-          <Box className="flex-1 px-6 pt-12 pb-8">
-            <VStack className="w-full max-w-[400px] self-center" space="3xl">
-              {/* Header - Swiss left-aligned */}
-              <VStack space="lg">
+
+          <Box className="flex-1 px-6 pt-6" style={{ paddingBottom: insets.bottom + 16 }}>
+            <VStack className="w-full max-w-[400px] self-center flex-1 justify-between">
+              <VStack space="3xl">
+                {/* Branding */}
+                <HStack space="md" className="items-center">
+                  <Image
+                    source={require('@/assets/icon.png')}
+                    style={{ width: 48, height: 48, borderRadius: 12 }}
+                  />
+                  <VStack>
+                    <Text className="text-typography-950 text-lg font-bold">
+                      Rewards For Education
+                    </Text>
+                    <Text className="text-typography-500 text-xs">
+                      Student Portal
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                {/* Header */}
                 <HStack className="justify-between items-center">
-                  <Text className="text-typography-500 text-sm font-medium tracking-widest uppercase">
-                    New Account
-                  </Text>
+                  <Heading size="4xl" className="text-typography-950 font-bold">
+                    Register
+                  </Heading>
                   <Box className="bg-primary-100 px-3 py-1">
                     <Text className="text-primary-700 text-xs font-bold tracking-wide">
                       Step 1/2
                     </Text>
                   </Box>
                 </HStack>
-                <Heading size="4xl" className="text-typography-950 font-bold">
-                  Register
-                </Heading>
-              </VStack>
 
-              {/* Error */}
-              {error && (
-                <Box className="border-l-4 border-l-error-600 bg-error-50 p-4">
-                  <Text className="text-typography-900 text-sm">{error}</Text>
-                </Box>
-              )}
+                {/* Error */}
+                {error && (
+                  <Box className="border-l-4 border-l-error-600 bg-error-50 p-4">
+                    <Text className="text-typography-900 text-sm">{error}</Text>
+                  </Box>
+                )}
 
-              {/* Form */}
-              <VStack space="2xl">
+                {/* Form */}
+                <VStack space="2xl">
                 {/* Name */}
                 <VStack space="sm">
                   <Text className="text-typography-900 text-sm font-semibold tracking-wide">
@@ -187,42 +201,47 @@ export default function RegisterScreen() {
                 {/* Divider */}
                 <Box className="h-px bg-outline-200" />
 
-                {/* Password */}
-                <VStack space="sm">
-                  <Text className="text-typography-900 text-sm font-semibold tracking-wide">
-                    Password
-                  </Text>
-                  <Input size="xl" variant="outline" className="border-2 border-outline-300 bg-background-0 rounded-none">
-                    <InputField
-                      placeholder="Min. 6 characters"
-                      value={formData.password}
-                      onChangeText={(v) => updateField('password', v)}
-                      secureTextEntry={!showPassword}
-                      className="text-typography-900"
-                    />
-                    <InputSlot className="pr-4" onPress={() => setShowPassword(!showPassword)}>
-                      <Text className="text-primary-600 text-sm font-semibold">
-                        {showPassword ? 'Hide' : 'Show'}
-                      </Text>
-                    </InputSlot>
-                  </Input>
-                </VStack>
+                {/* Password fields in same row */}
+                <HStack space="md">
+                  {/* Password */}
+                  <VStack space="sm" className="flex-1">
+                    <Text className="text-typography-900 text-sm font-semibold tracking-wide">
+                      Password
+                    </Text>
+                    <Input size="xl" variant="outline" className="border-2 border-outline-300 bg-background-0 rounded-none">
+                      <InputField
+                        placeholder="Min. 6 chars"
+                        value={formData.password}
+                        onChangeText={(v) => updateField('password', v)}
+                        secureTextEntry={!showPassword}
+                        className="text-typography-900"
+                      />
+                    </Input>
+                  </VStack>
 
-                {/* Confirm Password */}
-                <VStack space="sm">
-                  <Text className="text-typography-900 text-sm font-semibold tracking-wide">
-                    Confirm password
+                  {/* Confirm Password */}
+                  <VStack space="sm" className="flex-1">
+                    <Text className="text-typography-900 text-sm font-semibold tracking-wide">
+                      Confirm
+                    </Text>
+                    <Input size="xl" variant="outline" className="border-2 border-outline-300 bg-background-0 rounded-none">
+                      <InputField
+                        placeholder="Re-enter"
+                        value={formData.confirmPassword}
+                        onChangeText={(v) => updateField('confirmPassword', v)}
+                        secureTextEntry={!showPassword}
+                        className="text-typography-900"
+                      />
+                    </Input>
+                  </VStack>
+                </HStack>
+
+                {/* Show/Hide password toggle */}
+                <Pressable onPress={() => setShowPassword(!showPassword)} className="self-start">
+                  <Text className="text-primary-600 text-sm font-semibold">
+                    {showPassword ? 'Hide passwords' : 'Show passwords'}
                   </Text>
-                  <Input size="xl" variant="outline" className="border-2 border-outline-300 bg-background-0 rounded-none">
-                    <InputField
-                      placeholder="Re-enter password"
-                      value={formData.confirmPassword}
-                      onChangeText={(v) => updateField('confirmPassword', v)}
-                      secureTextEntry={!showPassword}
-                      className="text-typography-900"
-                    />
-                  </Input>
-                </VStack>
+                </Pressable>
 
                 {/* Register Button */}
                 <Button
@@ -237,10 +256,11 @@ export default function RegisterScreen() {
                     {isLoading ? 'Sending code...' : 'Continue'}
                   </ButtonText>
                 </Button>
+                </VStack>
               </VStack>
 
               {/* Bottom section */}
-              <VStack space="lg">
+              <VStack space="lg" className="pt-8">
                 {/* Divider */}
                 <Box className="h-px bg-outline-200" />
                 

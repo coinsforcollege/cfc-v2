@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { Platform } from 'react-native';
+import { Platform, StatusBar, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import '@/global.css';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Thin': require('@/assets/fonts/Inter-Thin.otf'),
     'Inter-ExtraLight': require('@/assets/fonts/Inter-ExtraLight.otf'),
@@ -46,6 +47,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'transparent' }}>
+      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
       <SafeAreaProvider>
         <KeyboardProvider>
           <GluestackUIProvider mode="system">

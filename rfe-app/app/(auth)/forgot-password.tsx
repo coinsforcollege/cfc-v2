@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Linking } from 'react-native';
+import { KeyboardAvoidingView, Platform, Linking, Image, ScrollView } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
@@ -13,6 +14,7 @@ import { authApi } from '@/src/api/auth';
 import config from '@/src/config';
 
 export default function ForgotPasswordScreen() {
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,28 +63,42 @@ export default function ForgotPasswordScreen() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-      <Box className="flex-1 bg-background-0">
-        {/* Top accent bar */}
-        <Box className="h-2 bg-primary-600" />
-        
-        <Box className="flex-1 px-6 pt-12 pb-8">
-          <VStack className="w-full max-w-[400px] self-center flex-1 justify-between">
-            <VStack space="3xl">
-              {/* Header - Swiss left-aligned */}
-              <VStack space="lg">
-                <HStack className="justify-between items-center">
-                  <Text className="text-typography-500 text-sm font-medium tracking-widest uppercase">
-                    Account Recovery
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <Box className="flex-1 bg-background-0" style={{ paddingTop: insets.top }}>
+          {/* Top accent bar */}
+          <Box className="h-2 bg-primary-600" />
+
+          <Box className="flex-1 px-6 pt-6" style={{ paddingBottom: insets.bottom + 16 }}>
+            <VStack className="w-full max-w-[400px] self-center flex-1 justify-between">
+              <VStack space="3xl">
+              {/* Branding */}
+              <HStack space="md" className="items-center">
+                <Image
+                  source={require('@/assets/icon.png')}
+                  style={{ width: 48, height: 48, borderRadius: 12 }}
+                />
+                <VStack>
+                  <Text className="text-typography-950 text-lg font-bold">
+                    Rewards For Education
                   </Text>
+                  <Text className="text-typography-500 text-xs">
+                    Student Portal
+                  </Text>
+                </VStack>
+              </HStack>
+
+              {/* Header */}
+              <VStack space="sm">
+                <HStack className="justify-between items-center">
+                  <Heading size="4xl" className="text-typography-950 font-bold">
+                    Reset password
+                  </Heading>
                   <Box className="bg-primary-100 px-3 py-1">
                     <Text className="text-primary-700 text-xs font-bold tracking-wide">
                       Step 1
                     </Text>
                   </Box>
                 </HStack>
-                <Heading size="4xl" className="text-typography-950 font-bold">
-                  Reset password
-                </Heading>
                 <Text className="text-typography-600 text-base">
                   Enter your email to receive a verification code.
                 </Text>
@@ -145,22 +161,23 @@ export default function ForgotPasswordScreen() {
                   </ButtonText>
                 </Button>
               </VStack>
-            </VStack>
+              </VStack>
 
-            {/* Bottom section */}
-            <VStack space="lg" className="pt-8">
-              <Box className="h-px bg-outline-200" />
-              
-              <HStack className="justify-between items-center">
-                <Text className="text-typography-600 text-sm">Remember your password?</Text>
-                <Pressable onPress={() => router.push('/(auth)/login')} className="py-2">
-                  <Text className="text-primary-600 font-semibold text-sm">Sign in</Text>
-                </Pressable>
-              </HStack>
+              {/* Bottom section */}
+              <VStack space="lg" className="pt-8">
+                <Box className="h-px bg-outline-200" />
+
+                <HStack className="justify-between items-center">
+                  <Text className="text-typography-600 text-sm">Remember your password?</Text>
+                  <Pressable onPress={() => router.push('/(auth)/login')} className="py-2">
+                    <Text className="text-primary-600 font-semibold text-sm">Sign in</Text>
+                  </Pressable>
+                </HStack>
+              </VStack>
             </VStack>
-          </VStack>
+          </Box>
         </Box>
-      </Box>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

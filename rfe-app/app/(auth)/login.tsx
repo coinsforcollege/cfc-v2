@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { ScrollView, KeyboardAvoidingView, Platform, Linking } from 'react-native';
+import { ScrollView, KeyboardAvoidingView, Platform, Linking, Image } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
@@ -15,6 +16,7 @@ import { useRecaptcha } from '@/src/hooks/useRecaptcha';
 import config from '@/src/config';
 
 export default function LoginScreen() {
+  const insets = useSafeAreaInsets();
   const { login } = useAuth();
   const { executeRecaptcha, isLoaded, isRequired } = useRecaptcha();
 
@@ -76,22 +78,33 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-        <Box className="flex-1 bg-background-0">
+        <Box className="flex-1 bg-background-0" style={{ paddingTop: insets.top }}>
           {/* Top accent bar */}
           <Box className="h-2 bg-primary-600" />
-          
-          <Box className="flex-1 px-6 pt-16 pb-16">
+
+          <Box className="flex-1 px-6 pt-6" style={{ paddingBottom: insets.bottom + 16 }}>
             <VStack className="w-full max-w-[400px] self-center flex-1 justify-between">
               <VStack space="3xl">
-                {/* Header - Swiss left-aligned */}
-                <VStack space="lg">
-                  <Text className="text-typography-500 text-sm font-medium tracking-widest uppercase">
-                    Student Portal
-                  </Text>
-                  <Heading size="4xl" className="text-typography-950 font-bold">
-                    Sign in
-                  </Heading>
-                </VStack>
+                {/* Branding */}
+                <HStack space="md" className="items-center">
+                  <Image
+                    source={require('@/assets/icon.png')}
+                    style={{ width: 48, height: 48, borderRadius: 12 }}
+                  />
+                  <VStack>
+                    <Text className="text-typography-950 text-lg font-bold">
+                      Rewards For Education
+                    </Text>
+                    <Text className="text-typography-500 text-xs">
+                      Student Portal
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                {/* Header */}
+                <Heading size="4xl" className="text-typography-950 font-bold">
+                  Sign in
+                </Heading>
 
                 {/* Non-student alert */}
                 {showNonStudentAlert && (
