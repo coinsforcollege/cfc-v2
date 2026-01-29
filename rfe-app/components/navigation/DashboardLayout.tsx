@@ -14,10 +14,8 @@ const TABLET_BREAKPOINT = 768;
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { width } = useWindowDimensions();
   
-  // On web, also check for actual viewport width
-  const isDesktop = Platform.OS === 'web' 
-    ? width >= TABLET_BREAKPOINT 
-    : width >= TABLET_BREAKPOINT;
+  // Only use desktop layout on web, not native iOS/Android
+  const isDesktop = Platform.OS === 'web' && width >= TABLET_BREAKPOINT;
 
   if (isDesktop) {
     // Desktop layout: Sidebar + Content
@@ -41,5 +39,5 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
 export function useIsDesktop(): boolean {
   const { width } = useWindowDimensions();
-  return width >= TABLET_BREAKPOINT;
+  return Platform.OS === 'web' && width >= TABLET_BREAKPOINT;
 }

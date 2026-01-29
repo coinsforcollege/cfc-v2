@@ -123,7 +123,7 @@ export default function OfferDetailScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const isDesktop = width >= TABLET_BREAKPOINT;
+  const isDesktop = Platform.OS === 'web' && width >= TABLET_BREAKPOINT;
 
   const { token } = useAuth();
 

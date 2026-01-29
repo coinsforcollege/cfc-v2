@@ -146,7 +146,7 @@ export default function CollegeDetailScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const isDesktop = width >= TABLET_BREAKPOINT;
+  const isDesktop = Platform.OS === 'web' && width >= TABLET_BREAKPOINT;
 
   const [college, setCollege] = useState<College | null>(null);
   const [loading, setLoading] = useState(true);

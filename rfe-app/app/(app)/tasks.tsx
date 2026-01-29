@@ -60,7 +60,7 @@ export default function TasksScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const isDesktop = width >= TABLET_BREAKPOINT;
+  const isDesktop = Platform.OS === 'web' && width >= TABLET_BREAKPOINT;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);

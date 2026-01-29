@@ -210,19 +210,16 @@ function ActionButton({ item }: { item: any }) {
   return (
     <Pressable
       onPress={() => router.push(item.href as any)}
-      className="items-center md:w-[48%] md:h-[48%] active:scale-[0.96] active:opacity-90 transition-transform duration-200"
+      className="items-center active:scale-[0.96] active:opacity-90 transition-transform duration-200"
     >
       <Box
-        className="w-14 h-14 md:w-full md:h-full mb-1.5 items-center justify-center rounded-2xl bg-primary-600"
+        className="w-14 h-14 mb-1.5 items-center justify-center rounded-2xl bg-primary-600"
         style={Platform.OS === 'web' ? {} : { borderRadius: 14 }}
       >
         <IconComponent size={24} color="#FFFFFF" strokeWidth={1} />
-        <Text className="hidden md:flex text-white text-[10px] font-inter-bold uppercase tracking-wider text-center mt-1">
-          {item.label}
-        </Text>
       </Box>
 
-      <Text className="md:hidden text-typography-600 text-xs font-inter-bold tracking-tight text-center">
+      <Text className="text-typography-600 text-xs font-inter-bold tracking-tight text-center">
         {item.label}
       </Text>
     </Pressable>
@@ -239,7 +236,7 @@ function ActionGrid() {
   ];
 
   return (
-    <View className="mb-8 flex-row justify-between items-start md:px-0 md:my-2 md:flex-wrap md:w-[220px] md:h-[220px] md:content-between">
+    <View className="mb-8 flex-row justify-between items-start">
       {actions.map((item, index) => (
         <ActionButton key={index} item={item} />
       ))}

@@ -34,7 +34,7 @@ export function ScreenContainer({
   const { width } = useWindowDimensions();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const isDesktop = width >= TABLET_BREAKPOINT;
+  const isDesktop = Platform.OS === 'web' && width >= TABLET_BREAKPOINT;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   

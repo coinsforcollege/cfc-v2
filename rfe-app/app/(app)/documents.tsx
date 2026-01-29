@@ -86,7 +86,7 @@ export default function DocumentsScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const isDesktop = width >= TABLET_BREAKPOINT;
+  const isDesktop = Platform.OS === 'web' && width >= TABLET_BREAKPOINT;
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   const iconColors = isDark ? ICON_COLORS.dark : ICON_COLORS.light;
