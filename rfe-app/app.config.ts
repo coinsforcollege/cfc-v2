@@ -18,6 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.CoinsForCollege',
+    buildNumber: '7',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
@@ -29,6 +30,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: 'com.coins.education',
     googleServicesFile: './google-services.json',
+    versionCode: 2,
   },
   web: {
     bundler: 'metro',
