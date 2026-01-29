@@ -30,7 +30,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: 'com.coins.education',
     googleServicesFile: './google-services.json',
-    versionCode: 3,
+    versionCode: 4,
   },
   web: {
     bundler: 'metro',
