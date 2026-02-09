@@ -49,8 +49,11 @@ import { useMiningWebSocket } from '../../hooks/useMiningWebSocket';
 import { useToast } from '../../contexts/ToastContext';
 import { userApi } from '../../api/user.api';
 import { miningApi } from '../../api/mining.api';
+import { bridgeApi } from '../../api/bridge.api';
 
 import DashboardLayout from '../../layouts/DashboardLayout';
+import MiningManagedBanner from '../../components/bridge/MiningManagedBanner';
+import MigrationCountdownBanner from '../../components/bridge/MigrationCountdownBanner';
 import ShareDialog from '../../components/ShareDialog';
 import GuidedTour, { SuccessDialog } from '../../components/GuidedTour';
 import { useTour } from '../../contexts/TourContext';
@@ -79,6 +82,7 @@ const MyColleges = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [collegeToDelete, setCollegeToDelete] = useState(null);
   const [deleteConfirmChecked, setDeleteConfirmChecked] = useState(false);
+  const [bridgeStatus, setBridgeStatus] = useState(null);
 
   const fetchDashboard = async () => {
     try {
@@ -123,7 +127,22 @@ const MyColleges = () => {
     }
 
     fetchDashboard();
+
+    bridgeApi.getStatus().then(res => {
+      if (res.success) setBridgeStatus(res.data);
+    }).catch(() => {});
   }, [user, navigate]);
+
+  const handleConnectExchange = useCallback(async () => {
+    try {
+      const response = await bridgeApi.initiateLink();
+      if (response.success && response.data?.authorizeUrl) {
+        window.location.href = response.data.authorizeUrl;
+      }
+    } catch (err) {
+      showToast(err.message || 'Failed to initiate connection', 'error');
+    }
+  }, [showToast]);
 
   // Initialize miningStatus from API data to avoid race condition with WebSocket
   // This ensures correct button state is shown immediately on page load
@@ -374,6 +393,21 @@ const MyColleges = () => {
           </Box>
         </Box>
 
+        <MigrationCountdownBanner
+          bridgeStatus={bridgeStatus}
+          onConnectClick={handleConnectExchange}
+          onMigrateClick={() => navigate('/user/dashboard?scrollTo=migrate')}
+        />
+
+        {bridgeStatus?.migrated ? (
+          <>
+            <MiningManagedBanner />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+              Your colleges and balances have been transferred. After the cutoff date, mining will be permanently removed from Coins for College.
+            </Typography>
+          </>
+        ) : (
+        <>
         {/* Active Colleges Header */}
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.875rem', sm: '1.25rem' } }}>
@@ -1023,7 +1057,8 @@ const MyColleges = () => {
           })}
         </Box>
 
-
+        </>
+        )}
 
         {/* Delete Confirmation Dialog */}
         <Dialog

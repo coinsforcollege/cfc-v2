@@ -52,6 +52,7 @@ import Community from './pages/user/Community';
 import Ambassador from './pages/user/Ambassador';
 import UserSettings from './pages/user/Settings';
 import BuildOnCollegen from './pages/user/BuildOnCollegen';
+import BridgeCallback from './pages/user/BridgeCallback';
 import CollegeAdminDashboard from './pages/collegeAdmin/CollegeAdminDashboard';
 import CollegeAdminOverview from './pages/collegeAdmin/Overview';
 import CollegeAdminCommunity from './pages/collegeAdmin/Community';
@@ -147,6 +148,7 @@ function App() {
       <Route path="user/referrals" element={<ProtectedRoute allowedRoles={['user']}><Community /></ProtectedRoute>} />
       <Route path="user/ambassador" element={<ProtectedRoute allowedRoles={['user']}><Ambassador /></ProtectedRoute>} />
       <Route path="user/settings" element={<ProtectedRoute allowedRoles={['user']}><UserSettings /></ProtectedRoute>} />
+      <Route path="user/bridge" element={<BridgeCallback />} />
       <Route path="user/build-on-collegen" element={<BuildOnCollegen />} />
       <Route path="college-admin/dashboard" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOverview /></ProtectedRoute>} />
       <Route path="college-admin/overview" element={<ProtectedRoute allowedRoles={['college_admin']}><CollegeAdminOverview /></ProtectedRoute>} />

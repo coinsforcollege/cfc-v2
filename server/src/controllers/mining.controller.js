@@ -2,17 +2,35 @@ import MiningSession from '../models/Mining.js';
 import Wallet from '../models/Wallet.js';
 import User from '../models/User.js';
 import College from '../models/College.js';
+import BridgeLink from '../models/BridgeLink.js';
 import { broadcastMiningUpdate } from '../websocket/miningSocket.js';
 import { createNotification, checkTokenMilestone, checkAdminTokenMilestone, notifyAdminAboutTokenMilestone } from '../services/notification.service.js';
 import { REFERRAL_LIMIT_PER_COLLEGE, getCappedReferralCount, calculateReferralBonus } from '../utils/referrals.js';
-
 // @desc    Start mining for a college
 // @route   POST /api/mining/start/:collegeId
 // @access  Private (User only)
 export const startMining = async (req, res, next) => {
   try {
+    // Check mining cutoff date
+    const cutoffDate = process.env.MINING_CUTOFF_DATE;
+    if (cutoffDate && new Date() > new Date(cutoffDate)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Mining has moved to Intuition Exchange. Please use the exchange for all mining operations.'
+      });
+    }
+
     const { collegeId } = req.params;
     const userId = req.user.id;
+
+    // Block mining for migrated users
+    const bridgeLink = await BridgeLink.findOne({ user: userId, status: 'migrated' });
+    if (bridgeLink) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been migrated to Intuition Exchange. Please continue mining there.'
+      });
+    }
 
     // First, auto-stop any expired sessions for this user
     const now = new Date();
@@ -181,6 +199,7 @@ export const startMining = async (req, res, next) => {
 
     // Broadcast mining update via WebSocket
     await broadcastMiningUpdate(userId);
+
   } catch (error) {
     next(error);
   }
@@ -191,8 +210,26 @@ export const startMining = async (req, res, next) => {
 // @access  Private (User only)
 export const startAllMining = async (req, res, next) => {
   try {
+    // Check mining cutoff date
+    const cutoffDate = process.env.MINING_CUTOFF_DATE;
+    if (cutoffDate && new Date() > new Date(cutoffDate)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Mining has moved to Intuition Exchange. Please use the exchange for all mining operations.'
+      });
+    }
+
     const userId = req.user.id;
     const now = new Date();
+
+    // Block mining for migrated users
+    const bridgeLink = await BridgeLink.findOne({ user: userId, status: 'migrated' });
+    if (bridgeLink) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been migrated to Intuition Exchange. Please continue mining there.'
+      });
+    }
 
     // Get user's mining colleges
     const user = await User.findById(userId);
@@ -311,6 +348,7 @@ export const startAllMining = async (req, res, next) => {
 
     if (startedCount > 0) {
       await broadcastMiningUpdate(userId);
+
     }
 
   } catch (error) {
@@ -484,6 +522,7 @@ export const stopMining = async (req, res, next) => {
 
     // Broadcast mining update via WebSocket
     await broadcastMiningUpdate(userId);
+
   } catch (error) {
     next(error);
   }
@@ -711,6 +750,7 @@ export const autoStopExpiredSessions = async (req, res, next) => {
       }
 
       stoppedCount++;
+
     }
 
     res.status(200).json({
@@ -852,6 +892,7 @@ export const stopAllMining = async (req, res, next) => {
 
     if (stoppedCount > 0) {
       await broadcastMiningUpdate(userId);
+
     }
 
   } catch (error) {

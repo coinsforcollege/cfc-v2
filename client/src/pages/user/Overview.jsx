@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { useNavigate, useSearchParams, Link } from 'react-router';
 import {
   Box,
   Typography,
@@ -43,9 +43,15 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 import GuidedTour, { WelcomeDialog } from '../../components/GuidedTour';
 import { useTour } from '../../contexts/TourContext';
 import { useTranslation } from 'react-i18next';
+import ExchangeConnectionCard from '../../components/bridge/ExchangeConnectionCard';
+import MigrationSection from '../../components/bridge/MigrationSection';
+import MigrationCountdownBanner from '../../components/bridge/MigrationCountdownBanner';
+import MiningManagedBanner from '../../components/bridge/MiningManagedBanner';
+import { bridgeApi } from '../../api/bridge.api';
 
 const Overview = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery('(max-width:1200px)');
   const { user } = useAuth();
@@ -58,7 +64,9 @@ const Overview = () => {
   const [error, setError] = useState('');
   const [miningStatus, setMiningStatus] = useState({});
   const [actionLoading, setActionLoading] = useState('');
+  const [bridgeStatus, setBridgeStatus] = useState(null);
   const isInitialLoadRef = useRef(true);
+  const migrationSectionRef = useRef(null);
 
   const fetchDashboard = async () => {
     try {
@@ -111,6 +119,27 @@ const Overview = () => {
       setActionLoading('');
     }
   }, [t, showToast]);
+
+  const handleBridgeStatusChange = useCallback((status) => {
+    setBridgeStatus(status);
+  }, []);
+
+  const handleMigrateClick = useCallback(() => {
+    if (migrationSectionRef.current) {
+      migrationSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
+  const handleConnectExchange = useCallback(async () => {
+    try {
+      const response = await bridgeApi.initiateLink();
+      if (response.success && response.data?.authorizeUrl) {
+        window.location.href = response.data.authorizeUrl;
+      }
+    } catch (err) {
+      showToast(err.message || 'Failed to initiate connection', 'error');
+    }
+  }, [showToast]);
 
   const handleToggleAllMining = useCallback(async () => {
     try {
@@ -249,6 +278,15 @@ const Overview = () => {
     );
   }, [miningStatus]);
 
+  // Scroll to migration section when navigated with ?scrollTo=migrate
+  useEffect(() => {
+    if (searchParams.get('scrollTo') === 'migrate' && !loading && bridgeStatus?.linked) {
+      setTimeout(() => {
+        migrationSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 500);
+    }
+  }, [searchParams, loading, bridgeStatus]);
+
   if (loading) {
     return (
       <DashboardLayout stats={{}}>
@@ -287,6 +325,23 @@ const Overview = () => {
             {dashboard?.user.college?.name || t('user.noCollegeAssigned')}
           </Typography>
         </Box>
+
+        {bridgeStatus?.migrated ? (
+          <>
+            {/* Post-migration: replace entire dashboard with managed banner */}
+            <MiningManagedBanner />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+              After the cutoff date, mining will be permanently removed from Coins for College.
+            </Typography>
+          </>
+        ) : (
+        <>
+        {/* Migration Countdown Banner */}
+        <MigrationCountdownBanner
+          bridgeStatus={bridgeStatus}
+          onConnectClick={handleConnectExchange}
+          onMigrateClick={handleMigrateClick}
+        />
 
         {/* Summary Cards */}
         <Box sx={{
@@ -811,8 +866,38 @@ const Overview = () => {
             </CardContent>
           </Card>
 
-          
+
         </Box>
+
+        {/* Intuition Exchange Bridge Section */}
+        <Box sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 2,
+          mb: 3
+        }}>
+          {/* Exchange Connection Card */}
+          <Box sx={{ flex: { xs: '100%', md: 'calc(50% - 8px)' } }}>
+            <ExchangeConnectionCard onStatusChange={handleBridgeStatusChange} />
+          </Box>
+
+          {/* Migration Section - only when connected */}
+          {bridgeStatus && (bridgeStatus.linked || bridgeStatus.migrated) && (
+            <Box ref={migrationSectionRef} sx={{ flex: { xs: '100%', md: 'calc(50% - 8px)' } }}>
+              <MigrationSection
+                wallets={filteredWallets}
+                bridgeStatus={bridgeStatus}
+                onMigrationComplete={() => {
+                  setBridgeStatus(prev => ({ ...prev, migrated: true, linked: false }));
+                  fetchDashboard();
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+
+        </>
+        )}
 
       </Box>
 
