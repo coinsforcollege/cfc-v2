@@ -6,7 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'rfe-app',
   version: '3.0.0',
   orientation: 'portrait',
-  icon: './assets/icon.png',
+  icon: './assets/app-icon.png',
   scheme: 'rfe',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
@@ -25,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/adaptive-icon.png',
+      foregroundImage: './assets/app-icon.png',
       backgroundColor: '#ffffff',
     },
     package: 'com.coins.education',
@@ -35,15 +35,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     bundler: 'metro',
     output: 'single',
-    favicon: './assets/favicon.png',
+    favicon: './assets/notification-icon.png',
   },
   plugins: [
     'expo-router',
     [
       'expo-notifications',
       {
-        icon: './assets/adaptive-icon.png',
-        color: '#6366f1',
+        icon: './assets/notification-icon.png',
+        color: '#662499',
       },
     ],
   ],
