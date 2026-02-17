@@ -54,7 +54,10 @@ app.use('/videos', express.static(path.join(__dirname, '../public/videos')));
 const defaultAllowed = [
   'https://coinsforcollege.org',
   'https://www.coinsforcollege.org',
-  'https://cfc-v2.onrender.com'
+  'https://cfc-v2.onrender.com',
+  'https://collegenz-marketing.onrender.com',
+  'https://collegenz.com',
+  'https://www.collegenz.com'
 ];
 
 // 2. Add the configured CLIENT_URL from .env
