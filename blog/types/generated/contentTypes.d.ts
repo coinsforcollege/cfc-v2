@@ -430,6 +430,48 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAccessRequestAccessRequest
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'access_requests';
+  info: {
+    description: 'Testnet access form submissions';
+    displayName: 'Access Request';
+    pluralName: 'access-requests';
+    singularName: 'access-request';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    additionalNotes: Schema.Attribute.Text;
+    blockchainExperience: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    fullName: Schema.Attribute.String & Schema.Attribute.Required;
+    ipAddress: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::access-request.access-request'
+    > &
+      Schema.Attribute.Private;
+    organization: Schema.Attribute.String;
+    preferredLanguages: Schema.Attribute.String;
+    projectDescription: Schema.Attribute.Text;
+    projectStage: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    rails: Schema.Attribute.String;
+    referralSource: Schema.Attribute.String;
+    reviewed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    role: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiAnnouncementAnnouncement
   extends Struct.CollectionTypeSchema {
   collectionName: 'announcements';
@@ -1360,6 +1402,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::access-request.access-request': ApiAccessRequestAccessRequest;
       'api::announcement.announcement': ApiAnnouncementAnnouncement;
       'api::author.author': ApiAuthorAuthor;
       'api::blog-post.blog-post': ApiBlogPostBlogPost;

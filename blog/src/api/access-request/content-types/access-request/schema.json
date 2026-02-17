@@ -1,0 +1,59 @@
+{
+  "kind": "collectionType",
+  "collectionName": "access_requests",
+  "info": {
+    "singularName": "access-request",
+    "pluralName": "access-requests",
+    "displayName": "Access Request",
+    "description": "Testnet access form submissions"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "fullName": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "role": {
+      "type": "string",
+      "required": true
+    },
+    "organization": {
+      "type": "string"
+    },
+    "projectDescription": {
+      "type": "text"
+    },
+    "rails": {
+      "type": "string"
+    },
+    "projectStage": {
+      "type": "string"
+    },
+    "blockchainExperience": {
+      "type": "string"
+    },
+    "preferredLanguages": {
+      "type": "string"
+    },
+    "referralSource": {
+      "type": "string"
+    },
+    "additionalNotes": {
+      "type": "text"
+    },
+    "ipAddress": {
+      "type": "string"
+    },
+    "reviewed": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
