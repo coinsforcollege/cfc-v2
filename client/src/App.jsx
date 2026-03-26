@@ -36,6 +36,7 @@ import BlogList from './pages/public/BlogList';
 import BlogPost from './pages/public/BlogPost';
 import Contact from './pages/Contact';
 import CollegeCoins from './pages/public/CollegeCoins';
+import WingsScholarship from './pages/public/WingsScholarship';
 import DocsHome from './pages/public/DocsHome';
 import DocsCategory from './pages/public/DocsCategory';
 import DocsArticle from './pages/public/DocsArticle';
@@ -117,6 +118,7 @@ function App() {
         <Route path="blog" element={<BlogList />} />
         <Route path="blog/:slug" element={<BlogPost />} />
         <Route path="college-coins" element={<CollegeCoins />} />
+        <Route path="wings-scholarship" element={<WingsScholarship />} />
         <Route path="docs" element={<DocsHome />} />
         <Route path="docs/search" element={<DocsSearch />} />
         <Route path="docs/featured" element={<DocsFeatured />} />

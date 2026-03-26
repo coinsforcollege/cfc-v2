@@ -414,33 +414,57 @@ const HeroSection = () => {
                 )}
               </Stack>
 
-              {globalStats && (
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    px: 3,
-                    py: 2,
-                    backgroundColor: 'rgba(155, 214, 195, 0.15)',
-                    borderRadius: '50px',
-                    border: '1px solid rgba(155, 214, 195, 0.3)',
-                    backdropFilter: 'blur(10px)',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: '#9bd6c3',
-                    }}
-                  />
-                  <Typography sx={{ color: '#059669', fontSize: '1rem', fontWeight: 500 }}>
-                    {t('hero.miningSessionsActive', { count: globalStats.global.activeMiningSessions.toLocaleString() })}
-                  </Typography>
+              <Box
+                component="a"
+                href="/wings-scholarship"
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 3,
+                  py: 1.5,
+                  background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+                  borderRadius: '50px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  textDecoration: 'none',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 20px rgba(14, 165, 233, 0.35)',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent)',
+                    animation: 'glassShine 3s ease-in-out infinite',
+                  },
+                  '@keyframes glassShine': {
+                    '0%': { left: '-100%' },
+                    '50%': { left: '100%' },
+                    '100%': { left: '100%' },
+                  },
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #0284c7 0%, #0891b2 100%)',
+                    boxShadow: '0 6px 24px rgba(14, 165, 233, 0.45)',
+                    transform: 'translateY(-1px)',
+                  },
+                }}
+              >
+                <Typography sx={{
+                  color: '#ffffff',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                }}>
+                  CFC Wings Scholarship Program 2026
+                </Typography>
+                <Box component="span" sx={{ color: '#ffffff', fontSize: '0.85rem', display: 'flex' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </Box>
-              )}
+              </Box>
             </motion.div>
         </Box>
         

@@ -151,7 +151,10 @@
       "Bash(__NEW_LINE_0b7e96603cabeac3__ curl -s -X GET \"http://192.168.0.16:4000/api/hugo-chat/suggestions\" -H \"Authorization: Bearer $TOKEN\")",
       "Bash(__NEW_LINE_f2579f5b6257110f__ curl -s -X GET \"http://192.168.0.16:4000/api/hugo-chat/suggestions\" -H \"Authorization: Bearer $TOKEN\")",
       "Bash(__NEW_LINE_80d4182c045a5f20__ curl -s -X POST \"http://192.168.0.16:4000/api/hugo-chat\" -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"message\"\":\"\"Hello! What can you help me with?\"\"}')",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "WebFetch(domain:application.jntataendowment.org)",
+      "WebFetch(domain:www.buddy4study.com)",
+      "WebFetch(domain:events.coinsforcollege.org)"
     ],
     "deny": [],
     "ask": []

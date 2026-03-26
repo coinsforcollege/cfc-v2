@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useLocation } from 'react-router';
 import { AppBar, Button, Box, Dialog, DialogTitle, DialogContent, IconButton, Typography, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
 import { Close as CloseIcon, Menu as MenuIcon, School as SchoolIcon, Business as BusinessIcon } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,12 +8,17 @@ import LanguageToggle from '../LanguageToggle';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const [popupOpen, setPopupOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const darkHeroPages = ['/wings-scholarship'];
+  const isDarkHero = darkHeroPages.includes(location.pathname);
+  const navColor = isDarkHero && !scrolled ? '#e2e8f0' : '#111827';
+  const navHoverColor = isDarkHero && !scrolled ? '#ffffff' : '#0EA5E9';
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -75,22 +80,22 @@ const Header = () => {
         sx={{
           height: '64px',
           zIndex: 1000,
-          background: scrolled 
-            ? 'rgba(250, 250, 252, 0.1)' 
-            : 'rgba(250, 250, 252, 0.05)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: scrolled 
-            ? '1px solid rgba(0, 0, 0, 0.08)' 
+          background: scrolled
+            ? 'rgba(250, 250, 252, 0.1)'
+            : isDarkHero ? 'transparent' : 'rgba(250, 250, 252, 0.05)',
+          backdropFilter: scrolled ? 'blur(20px)' : isDarkHero ? 'none' : 'blur(20px)',
+          WebkitBackdropFilter: scrolled ? 'blur(20px)' : isDarkHero ? 'none' : 'blur(20px)',
+          borderBottom: scrolled
+            ? '1px solid rgba(0, 0, 0, 0.08)'
             : 'none',
-          boxShadow: scrolled 
-            ? '0 4px 20px rgba(0, 0, 0, 0.1)' 
+          boxShadow: scrolled
+            ? '0 4px 20px rgba(0, 0, 0, 0.1)'
             : 'none',
           transition: 'all 0.3s ease-in-out',
         }}
       >
         <Box sx={{ 
-          maxWidth: '1200px', 
+          maxWidth: '1536px',
           margin: '0 auto',
           height: '100%',
           width: '100%',
@@ -127,12 +132,12 @@ const Header = () => {
                 to="/college-coins"
                 style={{
                   textDecoration: 'none',
-                  color: '#111827',
+                  color: navColor,
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
-                onMouseLeave={(e) => e.target.style.color = '#111827'}
+                onMouseEnter={(e) => e.target.style.color = navHoverColor}
+                onMouseLeave={(e) => e.target.style.color = navColor}
               >
                 {t('header.collegeCoins')}
               </Link>
@@ -140,12 +145,12 @@ const Header = () => {
                 to="/how-it-works/colleges"
                 style={{
                   textDecoration: 'none',
-                  color: '#111827',
+                  color: navColor,
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
-                onMouseLeave={(e) => e.target.style.color = '#111827'}
+                onMouseEnter={(e) => e.target.style.color = navHoverColor}
+                onMouseLeave={(e) => e.target.style.color = navColor}
               >
                 {t('header.howItWorks')}
               </Link>
@@ -153,12 +158,12 @@ const Header = () => {
                 to="/colleges"
                 style={{
                   textDecoration: 'none',
-                  color: '#111827',
+                  color: navColor,
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
-                onMouseLeave={(e) => e.target.style.color = '#111827'}
+                onMouseEnter={(e) => e.target.style.color = navHoverColor}
+                onMouseLeave={(e) => e.target.style.color = navColor}
               >
                 {t('header.colleges')}
               </Link>
@@ -166,12 +171,12 @@ const Header = () => {
                 to="/blog"
                 style={{
                   textDecoration: 'none',
-                  color: '#111827',
+                  color: navColor,
                   fontSize: '0.95rem',
                   transition: 'color 0.3s ease',
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#0EA5E9'}
-                onMouseLeave={(e) => e.target.style.color = '#111827'}
+                onMouseEnter={(e) => e.target.style.color = navHoverColor}
+                onMouseLeave={(e) => e.target.style.color = navColor}
               >
                 {t('header.updates')}
               </Link>
@@ -270,7 +275,7 @@ const Header = () => {
           {isMobile && (
             <IconButton
               onClick={toggleMobileMenu}
-              sx={{ color: '#111827' }}
+              sx={{ color: navColor }}
             >
               <MenuIcon />
             </IconButton>
