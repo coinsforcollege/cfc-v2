@@ -42,9 +42,9 @@ const WingsScholarship = () => {
         title="CFC Wings Scholarship Program 2026"
         description="Apply for up to 100% scholarship to study abroad. 100 scholarships across USA, UK, Canada, Australia, Germany, and Singapore. Register for the CFC Education Fair to begin your application."
         url="https://coinsforcollege.org/wings-scholarship"
-        image="https://coinsforcollege.org/og-scholarship.png"
-        ogImage="https://coinsforcollege.org/og-scholarship.png"
-        twitterImage="https://coinsforcollege.org/og-scholarship.png"
+        image="https://coinsforcollege.org/og-scholarship.jpg"
+        ogImage="https://coinsforcollege.org/og-scholarship.jpg"
+        twitterImage="https://coinsforcollege.org/og-scholarship.jpg"
         imageWidth="1200"
         imageHeight="630"
       />

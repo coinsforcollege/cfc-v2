@@ -16,7 +16,7 @@ const pageMeta = {
   '/wings-scholarship': {
     title: 'CFC Wings Scholarship Program 2026 | Coins For College',
     description: 'Apply for up to 100% scholarship to study abroad. 100 scholarships across USA, UK, Canada, Australia, Germany, and Singapore. Register for the CFC Education Fair to begin your application.',
-    image: `${SITE_URL}/og-scholarship.png`,
+    image: `${SITE_URL}/og-scholarship.jpg`,
     url: `${SITE_URL}/wings-scholarship`,
   },
   '/college-coins': {
