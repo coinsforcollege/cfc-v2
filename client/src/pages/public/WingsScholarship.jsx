@@ -52,92 +52,79 @@ const WingsScholarship = () => {
       {/* ============================================================ */}
       {/* SECTION 1: HERO - Text Left, Image Right */}
       {/* ============================================================ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 lg:h-screen lg:min-h-[700px]">
-        {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-sky-500/15 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl" />
+      <section
+        className="relative overflow-hidden lg:h-screen lg:min-h-[700px]"
+        style={{
+          backgroundImage: 'url(/images/hero-scholarship.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/25" />
 
-        <div className="container mx-auto px-4 py-16 md:py-24 lg:py-0 lg:h-full lg:flex lg:items-center">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
-            {/* Left: Text */}
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7 }}
-            >
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sky-300 text-sm font-semibold border border-sky-400/20 shadow-sm mb-6">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762z" /></svg>
-                Applications Open for 2026
-              </span>
+        <div className="relative z-10 container mx-auto px-4 py-16 md:py-24 lg:py-0 lg:h-full lg:flex lg:items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="max-w-2xl"
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sky-300 text-sm font-semibold border border-sky-400/20 shadow-sm mb-6">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762z" /></svg>
+              Applications Open for 2026
+            </span>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-                CFC Wings{' '}
-                <span className="bg-gradient-to-r from-sky-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Scholarship
-                </span>{' '}
-                Program 2026
-              </h1>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+              CFC Wings{' '}
+              <span className="bg-gradient-to-r from-sky-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Scholarship
+              </span>{' '}
+              Program 2026
+            </h1>
 
-              <p className="text-lg md:text-xl text-slate-300 mb-8 leading-relaxed max-w-xl">
-                Up to 100% scholarship for 100 exceptional students to study at world-class universities across 6 countries. Your wings to a global education start here.
-              </p>
+            <p className="text-lg md:text-xl text-slate-300 mb-8 leading-relaxed">
+              Up to 100% scholarship for 100 exceptional students to study at world-class universities across 6 countries. Your wings to a global education start here.
+            </p>
 
-              <div className="flex flex-wrap gap-4 mb-10">
-                <a
-                  href={EVENT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-full font-bold text-lg hover:from-sky-400 hover:to-blue-500 transition-all shadow-lg shadow-blue-500/25 inline-flex items-center gap-2"
-                >
-                  Register Now
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                </a>
-                <a
-                  href="#eligibility"
-                  className="px-8 py-4 bg-white/10 text-white rounded-full font-semibold text-lg border border-white/20 hover:bg-white/20 transition-all inline-flex items-center gap-2"
-                >
-                  Check Eligibility
-                </a>
+            <div className="flex flex-wrap gap-4 mb-10">
+              <a
+                href={EVENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-full font-bold text-lg hover:from-sky-400 hover:to-blue-500 transition-all shadow-lg shadow-blue-500/25 inline-flex items-center gap-2"
+              >
+                Register Now
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </a>
+              <a
+                href="#eligibility"
+                className="px-8 py-4 bg-white/10 text-white rounded-full font-semibold text-lg border border-white/20 hover:bg-white/20 transition-all inline-flex items-center gap-2"
+              >
+                Check Eligibility
+              </a>
+            </div>
+
+            {/* Quick stats row */}
+            <div className="flex flex-wrap gap-6 md:gap-10">
+              <div>
+                <div className="text-3xl font-bold text-white">100</div>
+                <div className="text-sm text-slate-300">Scholarships</div>
               </div>
-
-              {/* Quick stats row */}
-              <div className="flex flex-wrap gap-6 md:gap-10">
-                <div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-sky-400 to-blue-400 bg-clip-text text-transparent">100</div>
-                  <div className="text-sm text-slate-400">Scholarships</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent">6</div>
-                  <div className="text-sm text-slate-400">Countries</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">100%</div>
-                  <div className="text-sm text-slate-400">Max Coverage</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">30%</div>
-                  <div className="text-sm text-slate-400">Female Reserved</div>
-                </div>
+              <div>
+                <div className="text-3xl font-bold text-white">6</div>
+                <div className="text-sm text-slate-300">Countries</div>
               </div>
-            </motion.div>
-
-            {/* Right: Image */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative flex items-center justify-center h-full"
-            >
-              <div className="relative w-full h-full flex items-center">
-                <img
-                  src="/images/scholarship-offer-child.svg"
-                  alt="CFC Wings Scholarship"
-                  className="relative w-full h-auto object-contain"
-                />
+              <div>
+                <div className="text-3xl font-bold text-white">100%</div>
+                <div className="text-sm text-slate-300">Max Coverage</div>
               </div>
-            </motion.div>
-          </div>
+              <div>
+                <div className="text-3xl font-bold text-white">30%</div>
+                <div className="text-sm text-slate-300">Female Reserved</div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

@@ -61,7 +61,7 @@ function injectMeta(html, meta) {
 app.use(express.static(DIST, { index: false }));
 
 // All other routes: serve index.html with injected meta
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   const meta = pageMeta[req.path];
   const html = injectMeta(indexHtml, meta);
   res.setHeader('Content-Type', 'text/html');
