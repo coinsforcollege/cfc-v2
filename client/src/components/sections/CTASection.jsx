@@ -148,7 +148,8 @@ const CTASection = () => {
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button
-                      onClick={() => navigate('/auth/register/user')}
+                      component="a"
+                      href="/wings-scholarship"
                       variant="outlined"
                       size="large"
                       sx={{
@@ -168,7 +169,7 @@ const CTASection = () => {
                         },
                       }}
                     >
-                      {t('hero.startMining')}
+                      Apply for Scholarship
                     </Button>
                   </motion.div>
                 </>

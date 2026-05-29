@@ -1078,8 +1078,8 @@
     "unreadNotifications": "You have unread notifications"
   },
   "home": {
-    "heroTitle": "Mine Your College's Future",
-    "heroSubtitle": "Join the revolution in campus economics. Earn tokens while supporting your college's digital transformation.",
+    "heroTitle": "Build Your Digital Scholarship",
+    "heroSubtitle": "Join the revolution in campus economics. Earn blockchain-backed scholarship points while supporting your college's digital transformation.",
     "getStarted": "Get Started",
     "learnMore": "Learn More",
     "howItWorksTitle": "How It Works",
@@ -1094,8 +1094,8 @@
     "statistics": "Platform Statistics",
     "recentActivity": "Recent Activity",
     "collegeCoinsSection": {
-      "title": "College Coins",
-      "description": "Transform your scholarship program with branded digital coins that students can earn, trade, and use. Create a thriving campus economy that attracts top talent and boosts enrollment.",
+      "title": "Digital Scholarships",
+      "description": "Transform your financial aid program with branded digital scholarships that students can earn, track, and use. Create a thriving campus economy that attracts top talent and boosts enrollment.",
       "perfectFor": "Perfect for:",
       "perfectForList": [
         "Universities seeking student engagement",
@@ -1106,11 +1106,11 @@
       "features": {
         "attractStudents": {
           "title": "Attract Top Students",
-          "desc": "Scholarship coins that increase enrollment and student engagement"
+          "desc": "Digital scholarships that increase enrollment and student engagement"
         },
         "tradeable": {
-          "title": "Tradeable on InTuition",
-          "desc": "Students can trade coins for USD, USDC, or other college coins"
+          "title": "Redeemable Value",
+          "desc": "Students can redeem points for educational expenses or USD"
         },
         "blockchain": {
           "title": "Blockchain-Backed",
@@ -1118,7 +1118,7 @@
         },
         "instantDistribution": {
           "title": "Instant Distribution",
-          "desc": "Award coins in real-time for achievements and milestones"
+          "desc": "Award scholarship points in real-time for achievements and milestones"
         }
       }
     }
@@ -1275,15 +1275,15 @@
   },
   "infrastructure": {
     "forColleges": "For Colleges",
-    "title": "Complete Token Infrastructure",
-    "subtitle": "Launch your college token with enterprise-grade blockchain infrastructure",
-    "description": "We handle the complex blockchain infrastructure so you can focus on your community. From smart contracts to token economics, everything is ready to deploy.",
-    "tokenConfiguration": "Token Configuration",
-    "tokenConfigurationDesc": "Customize your token name, symbol, and economics",
-    "miningAllocation": "Mining Allocation",
+    "title": "Complete Scholarship Infrastructure",
+    "subtitle": "Launch your digital scholarship program with enterprise-grade blockchain infrastructure",
+    "description": "We handle the complex blockchain infrastructure so you can focus on your community. From smart contracts to economic modeling, everything is ready to deploy.",
+    "tokenConfiguration": "Scholarship Configuration",
+    "tokenConfigurationDesc": "Customize your program name, symbol, and economics",
+    "miningAllocation": "Distribution Allocation",
     "miningAllocationDesc": "Set distribution rates and vesting schedules",
     "utilityDesign": "Utility Design",
-    "utilityDesignDesc": "Define how tokens are used in your ecosystem",
+    "utilityDesignDesc": "Define how points are used in your ecosystem",
     "daoStructure": "DAO Structure",
     "daoStructureDesc": "Configure governance and voting mechanisms",
     "auditedSmartContracts": "Audited Smart Contracts",
@@ -1292,13 +1292,13 @@
     "interoperabilityLayerDesc": "Cross-chain compatibility and bridges",
     "apiIntegrations": "API Integrations",
     "apiIntegrationsDesc": "Connect with existing campus systems",
-    "tokenomicsModeling": "Tokenomics Modeling",
+    "tokenomicsModeling": "Economic Modeling",
     "tokenomicsModelingDesc": "Data-driven economic projections",
     "whatYouControl": "What You Control",
     "whatYouControlDesc": "Your college owns and configures these core elements",
     "whatWeDeliver": "What We Deliver",
     "whatWeDeliverDesc": "Enterprise-grade infrastructure deployed for you",
-    "ctaTitle": "Ready to Launch Your Token?",
+    "ctaTitle": "Ready to Launch Your Program?",
     "ctaDescription": "Join leading institutions building their digital economies on CollegenZ"
   },
   "fundraising": {

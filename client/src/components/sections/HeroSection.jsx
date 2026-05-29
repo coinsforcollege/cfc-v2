@@ -81,17 +81,17 @@ const HeroSection = () => {
     if (stats.topColleges?.byMiners?.[0]) {
       const top = stats.topColleges.byMiners[0];
       activityList.push({
-        text: t('hero.earlySupporters', { college: top.name, count: top.stats.totalMiners.toLocaleString() }),
+        text: t('hero.earlySupporters', { college: `${top.name} (unaffiliated)`, count: top.stats.totalMiners.toLocaleString() }),
         type: 'supporters',
-        college: top.name
+        college: `${top.name} (unaffiliated)`
       });
     }
 
     if (stats.recentColleges?.[0]) {
       activityList.push({
-        text: t('hero.joinedWaitlist', { college: stats.recentColleges[0].name }),
+        text: t('hero.joinedWaitlist', { college: `${stats.recentColleges[0].name} (unaffiliated)` }),
         type: 'waitlist',
-        college: stats.recentColleges[0].name
+        college: `${stats.recentColleges[0].name} (unaffiliated)`
       });
     }
 
@@ -106,9 +106,9 @@ const HeroSection = () => {
     if (stats.topColleges?.byTokens?.[0]) {
       const top = stats.topColleges.byTokens[0];
       activityList.push({
-        text: t('hero.tokensMined', { college: top.name, tokens: Math.round(top.stats.totalTokensMined).toLocaleString() }),
+        text: t('hero.tokensMined', { college: `${top.name} (unaffiliated)`, tokens: Math.round(top.stats.totalTokensMined).toLocaleString() }),
         type: 'tokens',
-        college: top.name
+        college: `${top.name} (unaffiliated)`
       });
     }
 
@@ -123,9 +123,9 @@ const HeroSection = () => {
     if (stats.topColleges?.byMiners?.[1]) {
       const second = stats.topColleges.byMiners[1];
       activityList.push({
-        text: t('hero.reachingSupporters', { college: second.name, count: second.stats.totalMiners.toLocaleString() }),
+        text: t('hero.reachingSupporters', { college: `${second.name} (unaffiliated)`, count: second.stats.totalMiners.toLocaleString() }),
         type: 'milestone',
-        college: second.name
+        college: `${second.name} (unaffiliated)`
       });
     }
 
@@ -140,9 +140,9 @@ const HeroSection = () => {
     if (stats.topColleges?.byTokens?.[1]) {
       const second = stats.topColleges.byTokens[1];
       activityList.push({
-        text: t('hero.tokensDistributed', { college: second.name, tokens: Math.round(second.stats.totalTokensMined).toLocaleString() }),
+        text: t('hero.tokensDistributed', { college: `${second.name} (unaffiliated)`, tokens: Math.round(second.stats.totalTokensMined).toLocaleString() }),
         type: 'distribution',
-        college: second.name
+        college: `${second.name} (unaffiliated)`
       });
     }
 
@@ -349,7 +349,8 @@ const HeroSection = () => {
               <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
-                    onClick={() => navigate(getDashboardPath())}
+                    component="a"
+                    href="/wings-scholarship"
                     variant="contained"
                     size="large"
                     sx={{
@@ -368,10 +369,10 @@ const HeroSection = () => {
                     }}
                   >
                     <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.9, lineHeight: 1 }}>
-                      {user ? (user.role === 'user' ? t('hero.continue') : t('hero.goTo')) : t('hero.community')}
+                      Apply Now
                     </Box>
                     <Box sx={{ lineHeight: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      {user ? (user.role === 'user' ? t('hero.mining') : t('header.dashboard')) : t('hero.startMining')}
+                      CFC Wings Scholarship
                       <ArrowForward sx={{ fontSize: '1rem' }} />
                     </Box>
                   </Button>
@@ -413,58 +414,6 @@ const HeroSection = () => {
                   </motion.div>
                 )}
               </Stack>
-
-              <Box
-                component="a"
-                href="/wings-scholarship"
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  px: 3,
-                  py: 1.5,
-                  background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
-                  borderRadius: '50px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  textDecoration: 'none',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 20px rgba(14, 165, 233, 0.35)',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: '-100%',
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent)',
-                    animation: 'glassShine 3s ease-in-out infinite',
-                  },
-                  '@keyframes glassShine': {
-                    '0%': { left: '-100%' },
-                    '50%': { left: '100%' },
-                    '100%': { left: '100%' },
-                  },
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #0284c7 0%, #0891b2 100%)',
-                    boxShadow: '0 6px 24px rgba(14, 165, 233, 0.45)',
-                    transform: 'translateY(-1px)',
-                  },
-                }}
-              >
-                <Typography sx={{
-                  color: '#ffffff',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                }}>
-                  CFC Wings Scholarship Program 2026
-                </Typography>
-                <Box component="span" sx={{ color: '#ffffff', fontSize: '0.85rem', display: 'flex' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </Box>
-              </Box>
             </motion.div>
         </Box>
         
