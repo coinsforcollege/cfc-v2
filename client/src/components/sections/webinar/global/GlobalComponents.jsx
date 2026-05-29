@@ -45,7 +45,7 @@ export const GlobalHero = () => (
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="#" variant="contained" size="large" sx={{
+              <Button href="https://events.coinsforcollege.org/events/2030-india-enrollment-opportunity" target="_blank" rel="noopener noreferrer" variant="contained" size="large" sx={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                 color: '#ffffff', px: 4, py: 2, fontSize: '1.125rem', fontWeight: 600,
                 textTransform: 'none', borderRadius: '12px', boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)'

@@ -56,7 +56,9 @@ const WebinarCTA = ({ headline, subline, buttonText, microcopy }) => {
           
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: 'inline-block' }}>
             <Button
-              href="#"
+              href="https://events.coinsforcollege.org/events/2030-india-enrollment-opportunity"
+              target="_blank"
+              rel="noopener noreferrer"
               variant="contained"
               size="large"
               sx={{

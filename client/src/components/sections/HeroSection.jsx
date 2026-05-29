@@ -346,11 +346,41 @@ const HeroSection = () => {
                 . {t('hero.weeksNotMonths')}
               </Typography>
 
-              <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4, alignItems: 'center' }}>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
-                    component="a"
-                    href="/wings-scholarship"
+                    component={Link}
+                    to="/webinar"
+                    variant="contained"
+                    size="large"
+                    sx={{
+                      background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+                      color: '#ffffff',
+                      px: 4,
+                      py: 2,
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)',
+                      flexDirection: 'column',
+                      gap: 0,
+                      alignItems: 'flex-start'
+                    }}
+                  >
+                    <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.9, lineHeight: 1 }}>
+                      Live Briefing
+                    </Box>
+                    <Box sx={{ lineHeight: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      Enrollment 2030
+                      <ArrowForward sx={{ fontSize: '1rem' }} />
+                    </Box>
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    component={Link}
+                    to="/wings-scholarship"
                     variant="contained"
                     size="large"
                     sx={{
@@ -382,38 +412,27 @@ const HeroSection = () => {
                     <Button
                       component={Link}
                       to="/auth/register/college"
-                      variant="outlined"
+                      variant="text"
                       size="large"
                       sx={{
-                      color: '#8b5cf6',
-                      borderColor: '#8b5cf6',
-                        px: 4,
+                        color: '#718096',
+                        px: 2,
                         py: 2,
-                        fontSize: '1.125rem',
+                        fontSize: '1rem',
                         fontWeight: 600,
                         textTransform: 'none',
-                        borderRadius: '12px',
-                        backdropFilter: 'blur(10px)',
-                        backgroundColor: 'rgba(139, 92, 246, 0.08)',
-                        flexDirection: 'column',
-                        gap: 0,
-                        alignItems: 'flex-start',
                         '&:hover': {
-                          borderColor: '#7c3aed',
-                          backgroundColor: 'rgba(139, 92, 246, 0.12)',
+                          color: '#4a5568',
+                          backgroundColor: 'transparent',
+                          textDecoration: 'underline'
                         },
                       }}
                     >
-                      <Box sx={{ fontSize: '0.75rem', fontWeight: 500, opacity: 0.8, lineHeight: 1 }}>
-                        {t('hero.colleges')}
-                      </Box>
-                      <Box sx={{ lineHeight: 1 }}>
-                        {t('hero.joinWaitlist')}
-                      </Box>
+                      {t('hero.colleges')}: {t('hero.joinWaitlist')}
                     </Button>
                   </motion.div>
                 )}
-              </Stack>
+              </Box>
             </motion.div>
         </Box>
         
