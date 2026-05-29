@@ -42,6 +42,7 @@ import DocsCategory from './pages/public/DocsCategory';
 import DocsArticle from './pages/public/DocsArticle';
 import DocsSearch from './pages/public/DocsSearch';
 import DocsFeatured from './pages/public/DocsFeatured';
+import Webinar from './pages/public/Webinar';
 import DeleteAccount from './pages/public/DeleteAccount';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -114,6 +115,7 @@ function App() {
         <Route path="terms" element={<TermsOfService />} />
         <Route path="colleges" element={<CollegeBrowse />} />
         <Route path="colleges/:id" element={<CollegeView />} />
+        <Route path="webinar" element={<Webinar />} />
         <Route path="network" element={<NetworkMap />} />
         <Route path="blog" element={<BlogList />} />
         <Route path="blog/:slug" element={<BlogPost />} />
