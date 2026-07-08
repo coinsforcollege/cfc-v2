@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router';
 import { Helmet } from 'react-helmet-async';
+import SEO from '../../components/common/SEO';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -362,12 +363,12 @@ export default function JoshuaBio() {
 
   return (
     <>
+      <SEO 
+        title="Joshua Samuel — Founder & CEO" 
+        description="Meet Joshua Samuel, visionary entrepreneur and founder of Coins for College, Rewards for Education, CollegenZ, and InTuition Exchange."
+        image="/images/joshua-bio/portrait.png"
+      />
       <Helmet>
-        <title>Joshua Samuel — Founder & CEO | Coins For College</title>
-        <meta
-          name="description"
-          content="Meet Joshua Samuel, visionary entrepreneur and founder of Coins for College, Rewards for Education, CollegenZ, and InTuition Exchange."
-        />
         <link
           href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap"
           rel="stylesheet"
