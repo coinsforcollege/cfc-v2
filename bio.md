@@ -1,0 +1,9 @@
+Joshua Samuel is a visionary entrepreneur, sought-after speaker, and founder and CEO of Coins for College, Rewards for Education, CollegenZ, and Intuition Exchange.
+
+Joshua's thesis is simple but far-reaching: the entire world is going digital, and blockchain is the infrastructure that will carry it there. He believes every industry, every sector, and every company, will eventually have its own coin, and that realizing this future requires three things working in concert: a real-world utility or use case that gives the coin meaning, a company to build the blockchain that powers it, and an exchange where those coins can be traded.
+
+Joshua is putting this thesis into practice in education first. Coins for College and Rewards for Education give the sector its utility, turning everyday actions, saving, learning, giving, into real progress toward college funding. CollegenZ is the layer-two blockchain built to power it, the network on which college coins are created. Intuition Exchange provides the trading infrastructure that lets those coins move and hold value. Together, the four companies form a working blueprint for how any industry can transition onto the blockchain.
+
+Joshua's vision extends well beyond education. He sees the same coin-utility-exchange model taking hold across sectors in the years ahead, and he's built his companies to prove the model works, starting with the one closest to his heart: helping students get to college.
+
+As a speaker, Joshua brings this thesis to audiences across the blockchain, fintech, and education spaces, making the case for a future where digital assets are woven into the fabric of every industry.

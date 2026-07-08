@@ -44,6 +44,7 @@ import DocsSearch from './pages/public/DocsSearch';
 import DocsFeatured from './pages/public/DocsFeatured';
 import Webinar from './pages/public/Webinar';
 import DeleteAccount from './pages/public/DeleteAccount';
+import JoshuaBio from './pages/public/JoshuaBio';
 import NotFound from './pages/errors/NotFound';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import UserDashboard from './pages/user/UserDashboard';
@@ -142,6 +143,7 @@ function App() {
       </Route>
       {/* Standalone public pages - no header/footer */}
       <Route path="delete-account" element={<DeleteAccount />} />
+      <Route path="joshua-samuel" element={<JoshuaBio />} />
 
       {/* Dashboard routes - no RootLayout (they have their own DashboardLayout) */}
       <Route path="user/dashboard" element={<ProtectedRoute allowedRoles={['user']}><Overview /></ProtectedRoute>} />
