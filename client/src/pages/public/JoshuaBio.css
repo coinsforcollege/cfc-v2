@@ -37,6 +37,7 @@
   height: 100%;
   object-fit: cover;
   opacity: 0.3;
+  transition: opacity 0.5s ease;
 }
 
 .bio-sidebar__sound {

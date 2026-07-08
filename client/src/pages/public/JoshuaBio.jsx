@@ -112,6 +112,7 @@ function DesktopVideoSidebar({ videoRef, isMuted, onToggleMute }) {
         muted={isMuted}
         playsInline
         className="bio-sidebar__video"
+        style={{ opacity: isMuted ? 0.3 : 1 }}
       />
       <SoundToggle isMuted={isMuted} onToggle={onToggleMute} className="bio-sidebar__sound" />
     </aside>
@@ -260,26 +261,18 @@ function BioContent() {
       <div className="bio-narrative">
         <p className="bio-text">
           His thesis is simple but far-reaching: every industry, every sector, and every
-          company will eventually have its own coin — and realizing this future requires three
+          company will eventually have its own coin. Realizing this future requires three
           things working in concert. A real-world utility that gives the coin meaning. A
           blockchain company to power it. And an exchange where those coins can be traded.
         </p>
 
         <p className="bio-text">
-          He's putting this thesis into practice in education first. Coins for College and
-          Rewards for Education give the sector its utility, turning everyday actions —
-          saving, learning, giving — into real progress toward college funding. CollegenZ is
-          the layer-two blockchain built to power it, the network on which College Coins are
-          created. InTuition Exchange provides the trading infrastructure that lets those
-          coins move and hold value. Together, the four companies form a working blueprint
-          for how any industry can transition onto the blockchain.
+          Joshua is putting this thesis into practice in education first. Coins for College and Rewards for Education give the sector its utility, turning everyday actions, saving, learning, giving, into real progress toward college funding. CollegenZ is the layer-two blockchain built to power it, the network on which college coins are created. Intuition Exchange provides the trading infrastructure that lets those coins move and hold value. Together, the four companies form a working blueprint for how any industry can transition onto the blockchain.
+
         </p>
 
         <p className="bio-text">
-          But the vision extends well beyond education. The same coin-utility-exchange model
-          will take hold across sectors in the years ahead, and these companies exist to
-          prove it works — starting with the one closest to his heart: helping students get
-          to college.
+          He sees the same coin-utility-exchange model taking hold across sectors in the years ahead, and he's built his companies to prove the model works, starting with the one closest to his heart: helping students get to college.
         </p>
       </div>
 
@@ -298,7 +291,8 @@ function BioContent() {
       <section className="bio-ecosystem">
         <h2 className="bio-ecosystem__heading">The Ecosystem</h2>
         <p className="bio-ecosystem__subtext">
-          Four companies, one blueprint — built to prove that any industry can transition onto the blockchain.
+          Four step process that takes an industry from traditional models to a fully
+          blockchain-based ecosystem.
         </p>
         <div className="bio-ecosystem__grid">
           {BUSINESSES.map((biz) => (
@@ -311,7 +305,7 @@ function BioContent() {
       <section className="bio-speaker">
         <p className="bio-text">
           As a speaker, he brings this thesis to audiences across the blockchain, fintech,
-          and education spaces — making the case for a future where digital assets are woven
+          and education spaces making the case for a future where digital assets are woven
           into the fabric of every industry.
         </p>
       </section>
