@@ -25,6 +25,12 @@ const pageMeta = {
     image: `${SITE_URL}/og_college_coin.jpg`,
     url: `${SITE_URL}/college-coins`,
   },
+  '/joshua-samuel': {
+    title: 'Joshua Samuel — Founder & CEO | Coins For College',
+    description: 'Every industry will eventually have its own coin. Meet Joshua Samuel, the founder putting this thesis into practice through Coins for College, CollegenZ, and InTuition Exchange.',
+    image: `${SITE_URL}/og-joshua.jpg`,
+    url: `${SITE_URL}/joshua-samuel`,
+  },
 };
 
 function injectMeta(html, meta) {
