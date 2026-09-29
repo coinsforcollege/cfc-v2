@@ -1786,13 +1786,13 @@ export const bulkImportPreview = async (req, res, next) => {
       });
     }
 
-    const { country, mode } = req.body;
+    const { country: bodyCountry, mode } = req.body;
 
-    // Validate required fields
-    if (!country || !mode) {
+    // Validate required fields (country may come from the CSV Country column instead)
+    if (!mode) {
       return res.status(400).json({
         success: false,
-        message: 'Country and import mode are required'
+        message: 'Import mode is required'
       });
     }
 
@@ -1849,19 +1849,69 @@ export const bulkImportPreview = async (req, res, next) => {
         continue;
       }
 
-      // Parse address
-      const addressComponents = parseAddress(row.Address, country);
+      // Country: per-row column wins, form body is the fallback
+      const rowCountry = row.Country && row.Country.trim() ? row.Country.trim() : bodyCountry;
+
+      if (!rowCountry) {
+        errors.push({
+          csvRow,
+          data: row,
+          reason: 'Missing required field: Country (add a Country column or send country in the form body)'
+        });
+        continue;
+      }
+
+      // Warnings array for this row
+      const warnings = [];
+
+      // Parse address (used for city/state when the CSV has no explicit columns)
+      const addressComponents = parseAddress(row.Address, rowCountry);
+
+      // Explicit City/State columns take precedence over the address parser
+      const csvCity = row.City ? row.City.trim() : '';
+      const csvState = row.State ? row.State.trim() : '';
+      const city = csvCity || addressComponents.city;
+      const state = csvState || addressComponents.state;
+
+      // Type must match the College enum
+      const validTypes = ['University', 'College', 'Institute', 'School', 'Other'];
+      const csvType = row.Type ? row.Type.trim() : '';
+      let type = 'University'; // Default
+      if (csvType) {
+        const matchedType = validTypes.find(t => t.toLowerCase() === csvType.toLowerCase());
+        if (matchedType) {
+          type = matchedType;
+        } else {
+          warnings.push(`Unknown Type "${csvType}" - defaulted to University`);
+        }
+      }
+
+      // Established year must be a sane number
+      let establishedYear = null;
+      if (row.EstablishedYear) {
+        const parsedYear = parseInt(row.EstablishedYear, 10);
+        if (!isNaN(parsedYear) && parsedYear >= 1000 && parsedYear <= 2100) {
+          establishedYear = parsedYear;
+        } else {
+          warnings.push(`Invalid EstablishedYear "${row.EstablishedYear}" - ignored`);
+        }
+      }
 
       // Map CSV data to college schema
       const collegeData = {
         name: row.Name.trim(),
-        country,
-        state: addressComponents.state,
-        city: addressComponents.city,
+        shortName: row.ShortName ? row.ShortName.trim() : '',
+        country: rowCountry,
+        state,
+        city,
         address: addressComponents.address,
         zipCode: addressComponents.zipCode,
         website: row.Website ? row.Website.trim() : '',
-        type: 'University', // Default
+        email: row.Email ? row.Email.trim() : '',
+        phone: row.Phone ? row.Phone.trim() : '',
+        logo: row.Logo ? row.Logo.trim() : null,
+        establishedYear,
+        type,
         status: 'Unaffiliated',
         baseRate: 0.25,
         referralBonusRate: 0.1,
@@ -1889,17 +1939,16 @@ export const bulkImportPreview = async (req, res, next) => {
         collegeData.studentLife.housing.available = housing === 'yes';
       }
 
-      // Warnings array for this row
-      const warnings = [];
-      if (!addressComponents.city || !addressComponents.state) {
-        warnings.push('Address parse failed - stored as-is');
+      // Location fallback note
+      if (!city || !state) {
+        warnings.push('City/State not resolved - check the Address column or add City/State columns');
       }
 
       // Check for duplicates
       const existing = await College.findOne({
         name: { $regex: new RegExp(`^${collegeData.name}$`, 'i') },
         state: collegeData.state || undefined,
-        country: country
+        country: rowCountry
       });
 
       if (existing) {
@@ -2019,7 +2068,7 @@ export const bulkImportPreview = async (req, res, next) => {
     // Send response
     res.status(200).json({
       success: true,
-      country,
+      country: bodyCountry || null,
       mode,
       summary: {
         totalInCSV: results.length,

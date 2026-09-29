@@ -86,8 +86,11 @@ const parseUKAddress = (addressString) => {
 // Country-specific parsers
 export const addressParsers = {
   USA: parseUSAAddress,
+  'United States': parseUSAAddress,
+  'United States of America': parseUSAAddress,
   Canada: parseCanadaAddress,
   UK: parseUKAddress,
+  'United Kingdom': parseUKAddress,
   // Add more countries as needed
 };
 
